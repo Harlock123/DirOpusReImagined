@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="812" d:DesignHeight="312"
+             x:Class="DirOpusReImagined.TAIDataGrid">
+	<StackPanel>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="12"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="12"/>
+			</Grid.ColumnDefinitions>
+			<Canvas Name="TheCanvas" 
+					Background="Cornsilk" 
+					Width="800" Height="300"
+					Grid.Row="0"
+					Grid.Column="0"
+					ClipToBounds="true">
+				<Canvas.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="Option 1" Click="Option1_Click"/>
+						<MenuItem Header="Option 2" Click="Option2_Click"/>
+						<!-- Add more menu items as needed -->
+					</ContextMenu>
+				</Canvas.ContextMenu>
+			</Canvas>
+			<ScrollBar Name="TheVerticleScrollBar" 
+					   Orientation="Vertical"
+					   Grid.Row="0"
+					   Grid.Column="1"
+					   Minimum="0"
+					   Maximum="100"
+					   Value="0"
+					   ViewportSize="10"
+					   Visibility="Visible"
+					   />
+			<ScrollBar Name="TheHorizontalScrollBar"
+					   Orientation="Horizontal"
+					   Grid.Row="1"
+					   Grid.Column="0"
+					   Minimum="0"
+					   Maximum="100"
+					   Value="0"
+					   ViewportSize="10"
+					   Visibility="Visible"
+					   />
+		</Grid>
+		<!-- 
+		<Canvas Name="TheCanvas" Background="Cornsilk" Width="800" Height="300">
+		</Canvas>
+		-->
+
+		
+	</StackPanel>
+</UserControl>
