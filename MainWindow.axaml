@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DirOpusReImagined.MainWindow"
         Title="DirOpusReImagined">
-	<Grid >
+	<Grid Name="MainWindowGridContainer" >
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="0.45*"/>
 			<ColumnDefinition Width="0.1*"/>
@@ -16,6 +16,7 @@
 			<RowDefinition Height="22"/>
 			<RowDefinition Height="0.7*"/>
 			<RowDefinition Height="0.2*"/>
+			<RowDefinition Height="0.1*" />
 		</Grid.RowDefinitions>
 
 		<!-- The content of your columns goes here. 
@@ -30,7 +31,7 @@
 		
 		
 
-		<TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" Text="The Button Panel will be here"/>
+		<TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="2" Text="The Button Panel will be here"/>
 
 
 	</Grid>
