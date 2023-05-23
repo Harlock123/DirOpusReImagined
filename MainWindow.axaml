@@ -27,7 +27,7 @@
 				<ColumnDefinition Width="0.9*"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="LPBackButton" Grid.Column="0" Grid.Row="0" Content="&lt;=" />
-			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="C:/"/>
+			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
 		</Grid>
 		<TextBlock Grid.Column="1" Grid.Row="1" Text="Column 2 "/>
 		<Grid Grid.Column="2" Grid.Row="0" >
@@ -36,7 +36,7 @@
 				<ColumnDefinition Width="0.9*"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="RPBackButton" Grid.Column="0" Grid.Row="0" Content="&lt;=" />
-			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text="C:/"/>
+			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
 		</Grid>
 		
 		

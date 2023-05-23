@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,9 @@ namespace DirOpusReImagined
 
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
+            RPBackButton.Click += RPBackButton_Click;
+            LPBackButton.Click += LPBackButton_Click;
+
             LPgrid.GridFontSize = 16;
             RPgrid.GridFontSize = 16;
             LPgrid.GridHeaderFontSize = 16;
@@ -29,9 +33,76 @@ namespace DirOpusReImagined
             LPgrid.GridTitle = "Left Panel";
             RPgrid.GridTitle = "Right Panel";
 
+            LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
+            RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;
+
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
+        }
+
+        private void LPBackButton_Click(object? sender, RoutedEventArgs e)
+        {
+            string[] arr = LPpath.Text.Split(@"\");
+
+            string newpath = "";
+
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                newpath += arr[i] + @"\";
+            }
+
+            if (newpath.EndsWith(@"\") && newpath.Length > 3)
+            {
+                newpath = newpath.Substring(0, newpath.Length - 1);
+            }
+
+            LPpath.Text = newpath;
+            
+            PopulateFilePanel(LPgrid, LPpath.Text);
+
+        }
+
+        private void RPBackButton_Click(object? sender, RoutedEventArgs e)
+        {
+            string[] arr = RPpath.Text.Split(@"\");
+
+            string newpath = "";
+
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                newpath += arr[i] + @"\";
+            }
+
+            if (newpath.EndsWith(@"\") && newpath.Length > 3)
+            {
+                newpath = newpath.Substring(0, newpath.Length - 1);
+            }
+
+            RPpath.Text = newpath;
+
+            PopulateFilePanel(RPgrid, RPpath.Text);
+        }
+
+        private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
+        {
+            var it = e.ItemUnderMouse as AFileEntry;
+            if (it.IsDirectory)
+            {
+                RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\",@"\");
+                PopulateFilePanel(RPgrid, RPpath.Text);
+            }
+        }
+
+        private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
+        {
+            var it = e.ItemUnderMouse as AFileEntry;
+            if (it.IsDirectory)
+            {
+                LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\",@"\");
+                PopulateFilePanel(LPgrid, LPpath.Text);
+            }
+
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
@@ -63,10 +134,21 @@ namespace DirOpusReImagined
                     continue;
                 }
 
-                var ds = di.GetDirectories().GetUpperBound(0);
-                var fs = di.GetFiles().GetUpperBound(0);
+                try
+                {
+                    var ds = di.GetDirectories().GetUpperBound(0);
+                    var fs = di.GetFiles().GetUpperBound(0);
 
-                FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
+                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    continue;
+                }
+                //var ds = di.GetDirectories().GetUpperBound(0);
+                //var fs = di.GetFiles().GetUpperBound(0);
+
+                //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
             }
 
             var files = System.IO.Directory.EnumerateFiles(PATHNAME);
