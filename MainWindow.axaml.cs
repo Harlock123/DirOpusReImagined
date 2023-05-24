@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+//using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -59,6 +59,8 @@ namespace DirOpusReImagined
             RPgrid.JustifyColumns.Add(3);
             RPgrid.JustifyColumns.Add(4);
 
+            LPpath.Text = GetRootDirectoryPath();
+            RPpath.Text = GetRootDirectoryPath();
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
@@ -76,21 +78,58 @@ namespace DirOpusReImagined
 
         private void LPBackButton_Click(object? sender, RoutedEventArgs e)
         {
-            string[] arr = LPpath.Text.Split(@"\");
-
-            string newpath = "";
-
-            for (int i = 0; i < arr.Length - 1; i++)
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                newpath += arr[i] + @"\";
+                string[] arr = LPpath.Text.Split(@"\");
+
+                string newpath = "";
+
+                for (int i = 0; i < arr.Length - 1; i++)
+                {
+                    newpath += arr[i] + @"\";
+                }
+
+                if (newpath.EndsWith(@"\") && newpath.Length > 3)
+                {
+                    newpath = newpath.Substring(0, newpath.Length - 1);
+                }
+
+                LPpath.Text = newpath;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                string[] arr = LPpath.Text.Split(@"/");
+
+                string newpath = "";
+
+                for (int i = 0; i < arr.Length - 1; i++)
+                {
+                    newpath += arr[i] + @"/";
+                }
+
+                if (newpath.EndsWith(@"/") && newpath.Length > 1)
+                {
+                    newpath = newpath.Substring(0, newpath.Length - 1);
+                }
+                LPpath.Text = newpath;
+
             }
 
-            if (newpath.EndsWith(@"\") && newpath.Length > 3)
-            {
-                newpath = newpath.Substring(0, newpath.Length - 1);
-            }
+            //string[] arr = LPpath.Text.Split(@"\");
 
-            LPpath.Text = newpath;
+            //string newpath = "";
+
+            //for (int i = 0; i < arr.Length - 1; i++)
+            //{
+            //    newpath += arr[i] + @"\";
+            //}
+
+            //if (newpath.EndsWith(@"\") && newpath.Length > 3)
+            //{
+            //    newpath = newpath.Substring(0, newpath.Length - 1);
+            //}
+
+            //LPpath.Text = newpath;
             
             PopulateFilePanel(LPgrid, LPpath.Text);
 
@@ -98,21 +137,42 @@ namespace DirOpusReImagined
 
         private void RPBackButton_Click(object? sender, RoutedEventArgs e)
         {
-            string[] arr = RPpath.Text.Split(@"\");
-
-            string newpath = "";
-
-            for (int i = 0; i < arr.Length - 1; i++)
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                newpath += arr[i] + @"\";
-            }
+                string[] arr = RPpath.Text.Split(@"\");
 
-            if (newpath.EndsWith(@"\") && newpath.Length > 3)
+                string newpath = "";
+
+                for (int i = 0; i < arr.Length - 1; i++)
+                {
+                    newpath += arr[i] + @"\";
+                }
+
+                if (newpath.EndsWith(@"\") && newpath.Length > 3)
+                {
+                    newpath = newpath.Substring(0, newpath.Length - 1);
+                }
+
+                RPpath.Text = newpath;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                newpath = newpath.Substring(0, newpath.Length - 1);
-            }
+                string[] arr = RPpath.Text.Split(@"/");
 
-            RPpath.Text = newpath;
+                string newpath = "";
+
+                for (int i = 0; i < arr.Length - 1; i++)
+                {
+                    newpath += arr[i] + @"/";
+                }
+
+                if (newpath.EndsWith(@"/") && newpath.Length > 1)
+                {
+                    newpath = newpath.Substring(0, newpath.Length - 1);
+                }
+
+                RPpath.Text = newpath;
+            }
 
             PopulateFilePanel(RPgrid, RPpath.Text);
         }
@@ -120,22 +180,47 @@ namespace DirOpusReImagined
         private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
-            if (it.Typ)
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\",@"\");
-                PopulateFilePanel(RPgrid, RPpath.Text);
+                if (it.Typ)
+                {
+                    RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                    PopulateFilePanel(RPgrid, RPpath.Text);
+                }
             }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                if (it.Typ)
+                {
+                    RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
+                    PopulateFilePanel(RPgrid, RPpath.Text);
+                }
+                                
+            }
+                        
         }
 
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
-            if (it.Typ)
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\",@"\");
-                PopulateFilePanel(LPgrid, LPpath.Text);
+                if (it.Typ)
+                {
+                    LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                    PopulateFilePanel(LPgrid, LPpath.Text);
+                }
             }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                if (it.Typ)
+                {
+                    LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
+                    PopulateFilePanel(LPgrid, LPpath.Text);
+                }
 
+            }
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
@@ -199,25 +284,20 @@ namespace DirOpusReImagined
             ThePanel.SuspendRendering = false;
         }
 
-        private string ConvertNumberToReadableString(long number)
+        private string GetRootDirectoryPath()
         {
-            const int scale = 1024;
+            string rootDirectoryPath = "";
 
-            string[] orders = new string[] { "K", "M", "G" };
-            long max = (long)Math.Pow(scale, orders.Length + 1);
-
-            if (number < scale)
-                return number.ToString();
-
-            int order = 0;
-            while (number >= max)
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                order++;
-                number /= scale;
+                rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                rootDirectoryPath = Directory.GetDirectoryRoot("/");
             }
 
-            double result = number / (double)scale;
-            return string.Format("{0:0.##}{1}", result, orders[order]);
+            return rootDirectoryPath;
         }
 
     }
