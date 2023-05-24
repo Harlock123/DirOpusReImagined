@@ -122,6 +122,8 @@ namespace DirOpusReImagined
 
             var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
 
+            ThePanel.SuspendRendering = true;
+
             ThePanel.Items.Clear();
             List<Object> FileList = new List<Object>();
 
@@ -160,6 +162,8 @@ namespace DirOpusReImagined
             }
 
             ThePanel.Items = FileList.OfType<object>().ToList(); 
+
+            ThePanel.SuspendRendering = false;
         }
     }
 
