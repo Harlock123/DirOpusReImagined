@@ -781,8 +781,6 @@ namespace DirOpusReImagined
                                             TheText == "YES" ||
                                             TheText == "NO")
                                         {
-                                            
-
                                             // Create an image control.
                                             var image = new Image();
 
@@ -799,7 +797,6 @@ namespace DirOpusReImagined
                                                 image.Height = this.rowHeights[rowidx];
                                             }
 
-                                            
                                             // Set the position of the image on the canvas.
                                             Canvas.SetLeft(image, left + 2 - this.GridXShift);
                                             Canvas.SetTop(image, top + 1);
