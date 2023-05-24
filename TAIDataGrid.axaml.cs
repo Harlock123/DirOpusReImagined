@@ -478,7 +478,7 @@ namespace DirOpusReImagined
 
         #region Public Methods
 
-        async public void ReRender()
+        public void ReRender()
         {
             try
             {
