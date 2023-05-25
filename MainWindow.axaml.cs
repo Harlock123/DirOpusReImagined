@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -188,6 +189,57 @@ namespace DirOpusReImagined
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
                     PopulateFilePanel(RPgrid, RPpath.Text);
                 }
+                else
+                {
+                    // its an actual file so can we execute it?
+
+                    if (it.Name.ToUpper().EndsWith(".EXE") ||
+                        it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".PNG") ||
+                        it.Name.ToUpper().EndsWith(".GIF") ||
+                        it.Name.ToUpper().EndsWith(".BMP") ||
+                        it.Name.ToUpper().EndsWith(".ICO") ||
+                        it.Name.ToUpper().EndsWith(".TXT") ||
+                        it.Name.ToUpper().EndsWith(".PDF") ||
+                        it.Name.ToUpper().EndsWith(".DOC") ||
+                        it.Name.ToUpper().EndsWith(".DOCX") ||
+                        it.Name.ToUpper().EndsWith(".XLS") ||
+                        it.Name.ToUpper().EndsWith(".XLSX") ||
+                        it.Name.ToUpper().EndsWith(".PPT") ||
+                        it.Name.ToUpper().EndsWith(".PPTX") ||
+                        it.Name.ToUpper().EndsWith(".MP3") ||
+                        it.Name.ToUpper().EndsWith(".MP4") ||
+                        it.Name.ToUpper().EndsWith(".WAV") ||
+                        it.Name.ToUpper().EndsWith(".AVI") ||
+                        it.Name.ToUpper().EndsWith(".WMV") ||
+                        it.Name.ToUpper().EndsWith(".WMA") ||
+                        it.Name.ToUpper().EndsWith(".MPEG") ||
+                        it.Name.ToUpper().EndsWith(".MPEG4") ||
+                        it.Name.ToUpper().EndsWith(".MKV") ||
+                        it.Name.ToUpper().EndsWith(".MOV") ||
+                        it.Name.ToUpper().EndsWith(".FLV") ||
+                        it.Name.ToUpper().EndsWith(".ZIP") ||
+                        it.Name.ToUpper().EndsWith(".RAR") ||
+                        it.Name.ToUpper().EndsWith(".7Z") ||
+                        it.Name.ToUpper().EndsWith(".GZ") ||
+                        it.Name.ToUpper().EndsWith(".TAR") ||
+                        it.Name.ToUpper().EndsWith(".ISO") ||
+                        it.Name.ToUpper().EndsWith(".IMG"))
+                    {
+                        // we can execute it
+
+                        string thingtoexecute = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = thingtoexecute,
+                            UseShellExecute = true,
+                        });
+
+                        //Process.Start((RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
+                    }
+
+                }
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
@@ -196,7 +248,58 @@ namespace DirOpusReImagined
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     PopulateFilePanel(RPgrid, RPpath.Text);
                 }
-                                
+                else
+                {
+                    // its an actual file so can we execute it?
+
+                    if (it.Name.ToUpper().EndsWith(".EXE") ||
+                        it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".PNG") ||
+                        it.Name.ToUpper().EndsWith(".GIF") ||
+                        it.Name.ToUpper().EndsWith(".BMP") ||
+                        it.Name.ToUpper().EndsWith(".ICO") ||
+                        it.Name.ToUpper().EndsWith(".TXT") ||
+                        it.Name.ToUpper().EndsWith(".PDF") ||
+                        it.Name.ToUpper().EndsWith(".DOC") ||
+                        it.Name.ToUpper().EndsWith(".DOCX") ||
+                        it.Name.ToUpper().EndsWith(".XLS") ||
+                        it.Name.ToUpper().EndsWith(".XLSX") ||
+                        it.Name.ToUpper().EndsWith(".PPT") ||
+                        it.Name.ToUpper().EndsWith(".PPTX") ||
+                        it.Name.ToUpper().EndsWith(".MP3") ||
+                        it.Name.ToUpper().EndsWith(".MP4") ||
+                        it.Name.ToUpper().EndsWith(".WAV") ||
+                        it.Name.ToUpper().EndsWith(".AVI") ||
+                        it.Name.ToUpper().EndsWith(".WMV") ||
+                        it.Name.ToUpper().EndsWith(".WMA") ||
+                        it.Name.ToUpper().EndsWith(".MPEG") ||
+                        it.Name.ToUpper().EndsWith(".MPEG4") ||
+                        it.Name.ToUpper().EndsWith(".MKV") ||
+                        it.Name.ToUpper().EndsWith(".MOV") ||
+                        it.Name.ToUpper().EndsWith(".FLV") ||
+                        it.Name.ToUpper().EndsWith(".ZIP") ||
+                        it.Name.ToUpper().EndsWith(".RAR") ||
+                        it.Name.ToUpper().EndsWith(".7Z") ||
+                        it.Name.ToUpper().EndsWith(".GZ") ||
+                        it.Name.ToUpper().EndsWith(".TAR") ||
+                        it.Name.ToUpper().EndsWith(".ISO") ||
+                        it.Name.ToUpper().EndsWith(".IMG"))
+                    {
+                        // we can execute it
+
+                        string thingtoexecute = (RPpath.Text + "/" + it.Name);
+
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = thingtoexecute,
+                            UseShellExecute = true,
+                        });
+
+                        //Process.Start(RPpath.Text + "/" + it.Name);
+                    }
+
+                }
+
             }
                         
         }
@@ -208,8 +311,61 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
+                    // Its A folder so gets go into it
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
                     PopulateFilePanel(LPgrid, LPpath.Text);
+                }
+                else
+                {
+                    // its an actual file so can we execute it?
+
+                    if (it.Name.ToUpper().EndsWith(".EXE") ||
+                        it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".PNG") ||
+                        it.Name.ToUpper().EndsWith(".GIF") ||
+                        it.Name.ToUpper().EndsWith(".BMP") ||
+                        it.Name.ToUpper().EndsWith(".ICO") ||
+                        it.Name.ToUpper().EndsWith(".TXT") ||
+                        it.Name.ToUpper().EndsWith(".PDF") ||
+                        it.Name.ToUpper().EndsWith(".DOC") ||
+                        it.Name.ToUpper().EndsWith(".DOCX") ||
+                        it.Name.ToUpper().EndsWith(".XLS") ||
+                        it.Name.ToUpper().EndsWith(".XLSX") ||
+                        it.Name.ToUpper().EndsWith(".PPT") ||
+                        it.Name.ToUpper().EndsWith(".PPTX") ||
+                        it.Name.ToUpper().EndsWith(".MP3") ||
+                        it.Name.ToUpper().EndsWith(".MP4") ||
+                        it.Name.ToUpper().EndsWith(".WAV") ||
+                        it.Name.ToUpper().EndsWith(".AVI") ||
+                        it.Name.ToUpper().EndsWith(".WMV") ||
+                        it.Name.ToUpper().EndsWith(".WMA") ||
+                        it.Name.ToUpper().EndsWith(".MPEG") ||
+                        it.Name.ToUpper().EndsWith(".MPEG4") ||
+                        it.Name.ToUpper().EndsWith(".MKV") ||
+                        it.Name.ToUpper().EndsWith(".MOV") ||
+                        it.Name.ToUpper().EndsWith(".FLV") ||
+                        it.Name.ToUpper().EndsWith(".ZIP") ||
+                        it.Name.ToUpper().EndsWith(".RAR") ||
+                        it.Name.ToUpper().EndsWith(".7Z") ||
+                        it.Name.ToUpper().EndsWith(".GZ") ||
+                        it.Name.ToUpper().EndsWith(".TAR") ||
+                        it.Name.ToUpper().EndsWith(".ISO") ||
+                        it.Name.ToUpper().EndsWith(".IMG"))
+                    {
+                        // we can execute it
+
+                        string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = thingtoexecute,
+                            UseShellExecute = true,
+                        });
+
+
+                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\",@"\"));
+                    }
+                    
                 }
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -218,6 +374,55 @@ namespace DirOpusReImagined
                 {
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     PopulateFilePanel(LPgrid, LPpath.Text);
+                }
+                else
+                {
+                    if (it.Name.ToUpper().EndsWith(".EXE") ||
+                        it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".PNG") ||
+                        it.Name.ToUpper().EndsWith(".GIF") ||
+                        it.Name.ToUpper().EndsWith(".BMP") ||
+                        it.Name.ToUpper().EndsWith(".ICO") ||
+                        it.Name.ToUpper().EndsWith(".TXT") ||
+                        it.Name.ToUpper().EndsWith(".PDF") ||
+                        it.Name.ToUpper().EndsWith(".DOC") ||
+                        it.Name.ToUpper().EndsWith(".DOCX") ||
+                        it.Name.ToUpper().EndsWith(".XLS") ||
+                        it.Name.ToUpper().EndsWith(".XLSX") ||
+                        it.Name.ToUpper().EndsWith(".PPT") ||
+                        it.Name.ToUpper().EndsWith(".PPTX") ||
+                        it.Name.ToUpper().EndsWith(".MP3") ||
+                        it.Name.ToUpper().EndsWith(".MP4") ||
+                        it.Name.ToUpper().EndsWith(".WAV") ||
+                        it.Name.ToUpper().EndsWith(".AVI") ||
+                        it.Name.ToUpper().EndsWith(".WMV") ||
+                        it.Name.ToUpper().EndsWith(".WMA") ||
+                        it.Name.ToUpper().EndsWith(".MPEG") ||
+                        it.Name.ToUpper().EndsWith(".MPEG4") ||
+                        it.Name.ToUpper().EndsWith(".MKV") ||
+                        it.Name.ToUpper().EndsWith(".MOV") ||
+                        it.Name.ToUpper().EndsWith(".FLV") ||
+                        it.Name.ToUpper().EndsWith(".ZIP") ||
+                        it.Name.ToUpper().EndsWith(".RAR") ||
+                        it.Name.ToUpper().EndsWith(".7Z") ||
+                        it.Name.ToUpper().EndsWith(".GZ") ||
+                        it.Name.ToUpper().EndsWith(".TAR") ||
+                        it.Name.ToUpper().EndsWith(".ISO") ||
+                        it.Name.ToUpper().EndsWith(".IMG"))
+                    {
+                        // we can execute it
+
+                        string thingtoexecute = (LPpath.Text + "/" + it.Name);
+
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = thingtoexecute,
+                            UseShellExecute = true,
+                        });
+
+                        //Process.Start(LPpath.Text + "/" + it.Name);
+                    }
+
                 }
 
             }
@@ -295,6 +500,7 @@ namespace DirOpusReImagined
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
                 rootDirectoryPath = Directory.GetDirectoryRoot("/");
+                
             }
 
             return rootDirectoryPath;
