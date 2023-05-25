@@ -453,14 +453,15 @@ namespace DirOpusReImagined
             foreach (string dir in Directories)
             {
                 DirectoryInfo di = new DirectoryInfo(dir);
-
-                if (di.Attributes.HasFlag(FileAttributes.System))
-                {
-                    continue;
-                }
-
                 try
                 {
+
+                    if (di.Attributes.HasFlag(FileAttributes.System))
+                    {
+                        continue;
+                    }
+
+                
                     var ds = di.GetDirectories().GetUpperBound(0);
                     var fs = di.GetFiles().GetUpperBound(0);
 
@@ -468,7 +469,15 @@ namespace DirOpusReImagined
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    continue;
+                    
+                    try
+                    {                    
+                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0));
+                    }
+                    catch
+                    {
+
+                    }
                 }
                 //var ds = di.GetDirectories().GetUpperBound(0);
                 //var fs = di.GetFiles().GetUpperBound(0);
@@ -480,8 +489,15 @@ namespace DirOpusReImagined
 
             foreach (string file in files)
             {
-                FileInfo fi = new FileInfo(file);
-                FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false));
+                try
+                {
+                    FileInfo fi = new FileInfo(file);
+                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false));
+                }
+                catch
+                {
+                    
+                }
             }
 
             ThePanel.Items = FileList.OfType<object>().ToList(); 
