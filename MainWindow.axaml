@@ -20,6 +20,36 @@
 			<RowDefinition Height="0.1*" />
 		</Grid.RowDefinitions>
 
+		<StackPanel Orientation="Vertical"
+					VerticalAlignment="Center"
+					Grid.Column="1"
+					Grid.Row="1">
+
+			<Button Name="CopyRightButton"
+					Grid.Column="1"
+					Grid.Row="1"
+					HorizontalAlignment="Stretch"
+					Content="copy ---&gt;"></Button>
+			<Button Name="CopyLeftButton"
+						Grid.Column="1"
+						Grid.Row="1"
+						HorizontalAlignment="Stretch"
+						Content="&lt;--- copy    "></Button>
+
+			<Button Name="MoveRightButton"
+					Grid.Column="1"
+					Grid.Row="1"
+					HorizontalAlignment="Stretch"
+					Content="move  ---&gt;"></Button>
+			<Button Name="MoveLeftButton"
+						Grid.Column="1"
+						Grid.Row="1"
+						HorizontalAlignment="Stretch"
+						Content="&lt;--- move"></Button>
+			
+		</StackPanel>
+		
+
 		<!-- The content of your columns goes here. 
              Remember to specify Grid.Column="0", Grid.Column="1", etc. -->
 		<Grid Grid.Column="0" Grid.Row="0" >
@@ -30,7 +60,7 @@
 			<Button Name="LPBackButton" Grid.Column="0" Grid.Row="0" Content="&lt;=" />
 			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
 		</Grid>
-		<TextBlock Grid.Column="1" Grid.Row="1" Text="Column 2 "/>
+		
 		<Grid Grid.Column="2" Grid.Row="0" >
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="auto"/>
