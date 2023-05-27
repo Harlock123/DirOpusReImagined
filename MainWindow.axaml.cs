@@ -36,6 +36,12 @@ namespace DirOpusReImagined
             I2.Width = LPBackButton.Width + 8;
             I2.Height = LPBackButton.Height + 8;
 
+            CopyLeftButton.Click += CopyLeftButton_Click;
+            CopyRightButton.Click += CopyRightButton_Click;
+
+            MoveLeftButton.Click += MoveLeftButton_Click;  
+            MoveRightButton.Click += MoveRightButton_Click;
+
             RPBackButton.Content = I1;
             LPBackButton.Content = I2;
 
@@ -65,6 +71,146 @@ namespace DirOpusReImagined
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
+        }
+
+        private void MoveRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void MoveLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void CopyRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (LPgrid.SelectedItems.Count > 0)
+            {
+                string spath = LPpath.Text.Replace(@"\\",@"\");
+                string tpath = RPpath.Text.Replace(@"\\", @"\");
+
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    if (!spath.EndsWith(@"\"))
+                    {
+                        spath += @"\";
+
+                    }
+
+                    if (!tpath.EndsWith(@"\"))
+                    {
+                        tpath += @"\";
+
+                    }
+                }
+                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+                {
+                    if (!spath.EndsWith(@"/"))
+                    {
+                        spath += @"/";
+
+                    }
+                    if (!tpath.EndsWith(@"/"))
+                    {
+                        tpath += @"/";
+
+                    }
+                }
+
+                List<object> Sellist = LPgrid.SelectedItems;
+
+                foreach (AFileEntry item in Sellist)
+                {
+                    if (item.Typ)
+                    {
+                        string FullPath = spath + item.Name;
+                        
+                        FileUtility.CopyDirectoryToFolder(FullPath, tpath);
+
+                        RefreshRPGrid();
+                    }
+                    else
+                    {
+                        string FullPath = spath + item.Name;
+
+                        FileUtility.CopyFileToFolder(FullPath, tpath);
+
+                        RefreshRPGrid();
+
+                    }
+                    //Console.WriteLine(item);
+                }
+            }
+            else
+            {
+                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
+            }
+        }
+
+        private void CopyLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (RPgrid.SelectedItems.Count > 0)
+            {
+                string spath = RPpath.Text.Replace(@"\\", @"\");
+                string tpath = LPpath.Text.Replace(@"\\", @"\");
+
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    if (!spath.EndsWith(@"\"))
+                    {
+                        spath += @"\";
+
+                    }
+
+                    if (!tpath.EndsWith(@"\"))
+                    {
+                        tpath += @"\";
+
+                    }
+                }
+                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+                {
+                    if (!spath.EndsWith(@"/"))
+                    {
+                        spath += @"/";
+
+                    }
+                    if (!tpath.EndsWith(@"/"))
+                    {
+                        tpath += @"/";
+
+                    }
+                }
+
+                List<object> Sellist = RPgrid.SelectedItems;
+
+                foreach (AFileEntry item in Sellist)
+                {
+                    if (item.Typ)
+                    {
+                        string FullPath = spath + item.Name;
+
+                        FileUtility.CopyDirectoryToFolder(FullPath, tpath);
+
+                        RefreshLPGrid();
+                    }
+                    else
+                    {
+                        string FullPath = spath + item.Name;
+
+                        FileUtility.CopyFileToFolder(FullPath, tpath);
+
+                        RefreshLPGrid();
+
+                    }
+                    //Console.WriteLine(item);
+                }
+            }
+            else
+            {
+                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
+            }
         }
 
         private Bitmap LoadImage(string base64)
@@ -438,6 +584,16 @@ namespace DirOpusReImagined
             LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16);
             RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16 );
         }
+
+        private void RefreshLPGrid ()
+        {
+              PopulateFilePanel(LPgrid, LPpath.Text);
+        }
+
+        private void RefreshRPGrid()
+        {
+            PopulateFilePanel(RPgrid, RPpath.Text);
+        }   
 
         private void PopulateFilePanel(TAIDataGrid ThePanel, string PATHNAME)
         {
