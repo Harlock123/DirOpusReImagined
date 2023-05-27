@@ -740,7 +740,7 @@ namespace DirOpusReImagined
         public bool Typ { get; set; }
         public string Name { get; set; }
         public string FileSize { get; set; }
-        public string Directrories { get; set; }   
+        public string Dirs { get; set; }   
         public string Files { get; set; }  
                 public string Flags { get; set; }   
 
@@ -760,7 +760,7 @@ namespace DirOpusReImagined
             //FileSize = filesize;
             Typ = isdirectory;
             
-            Directrories = "";
+            Dirs = "";
             Files = "";
             Flags = "";
         }
@@ -781,7 +781,7 @@ namespace DirOpusReImagined
             //FileSize = filesize;
             Typ = isdirectory;
 
-            Directrories = "";
+            Dirs = "";
             Files = "";
             Flags = flags;
         }
@@ -802,11 +802,11 @@ namespace DirOpusReImagined
             Typ = isdirectory;
             if(directories > 0)
             {
-                  Directrories = directories.ToString();
+                  Dirs = directories.ToString();
             }
             else
             {
-                Directrories = "";
+                Dirs = "";
             }
             
             //Directrories = directories;
