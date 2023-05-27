@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using static System.Net.WebRequestMethods;
 
 namespace DirOpusReImagined
 {
@@ -625,18 +626,19 @@ namespace DirOpusReImagined
                         continue;
                     }
 
-                
-                    var ds = di.GetDirectories().GetUpperBound(0);
-                    var fs = di.GetFiles().GetUpperBound(0);
+                    string flags = GetAbbreviatedAttributes(di.Attributes);
+                                        
+                    var ds = di.GetDirectories().GetUpperBound(0) + 1;
+                    var fs = di.GetFiles().GetUpperBound(0) + 1;
 
-                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs));
+                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
                 }
                 catch (UnauthorizedAccessException)
                 {
                     
                     try
                     {                    
-                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0));
+                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
                     }
                     catch
                     {
@@ -656,7 +658,12 @@ namespace DirOpusReImagined
                 try
                 {
                     FileInfo fi = new FileInfo(file);
-                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false));
+
+                    FileAttributes fa = System.IO.File.GetAttributes(fi.FullName);
+
+                    string flags = GetAbbreviatedAttributes(fa);
+
+                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags));
                 }
                 catch
                 {
@@ -686,6 +693,46 @@ namespace DirOpusReImagined
             return rootDirectoryPath;
         }
 
+        private string GetAbbreviatedAttributes(FileAttributes attributes)
+        {
+            string abbreviatedAttributes = string.Empty;
+
+            if ((attributes & FileAttributes.ReadOnly) != 0)
+                abbreviatedAttributes += "RO ";
+            if ((attributes & FileAttributes.Hidden) != 0)
+                abbreviatedAttributes += "H ";
+            if ((attributes & FileAttributes.System) != 0)
+                abbreviatedAttributes += "S ";
+            if ((attributes & FileAttributes.Directory) != 0)
+                abbreviatedAttributes += "D ";
+            if ((attributes & FileAttributes.Archive) != 0)
+                abbreviatedAttributes += "A ";
+            if ((attributes & FileAttributes.Device) != 0)
+                abbreviatedAttributes += "DEV ";
+            if ((attributes & FileAttributes.Normal) != 0)
+                abbreviatedAttributes += "N ";
+            if ((attributes & FileAttributes.Temporary) != 0)
+                abbreviatedAttributes += "T ";
+            if ((attributes & FileAttributes.SparseFile) != 0)
+                abbreviatedAttributes += "SF ";
+            if ((attributes & FileAttributes.ReparsePoint) != 0)
+                abbreviatedAttributes += "RP ";
+            if ((attributes & FileAttributes.Compressed) != 0)
+                abbreviatedAttributes += "C ";
+            if ((attributes & FileAttributes.Offline) != 0)
+                abbreviatedAttributes += "O ";
+            if ((attributes & FileAttributes.NotContentIndexed) != 0)
+                abbreviatedAttributes += "NCI ";
+            if ((attributes & FileAttributes.Encrypted) != 0)
+                abbreviatedAttributes += "E ";
+            if ((attributes & FileAttributes.IntegrityStream) != 0)
+                abbreviatedAttributes += "IS ";
+            if ((attributes & FileAttributes.NoScrubData) != 0)
+                abbreviatedAttributes += "NSD ";
+
+            return abbreviatedAttributes.Trim();
+        }
+
     }
 
     public class AFileEntry
@@ -695,6 +742,7 @@ namespace DirOpusReImagined
         public string FileSize { get; set; }
         public string Directrories { get; set; }   
         public string Files { get; set; }  
+                public string Flags { get; set; }   
 
         public AFileEntry(string name, int filesize, bool isdirectory)
         {
@@ -714,9 +762,31 @@ namespace DirOpusReImagined
             
             Directrories = "";
             Files = "";
+            Flags = "";
         }
 
-        public AFileEntry(string name, int filesize, bool isdirectory, int directories, int files)
+        public AFileEntry(string name, int filesize, bool isdirectory, string flags)
+        {
+            Name = name;
+
+            if (filesize > 0)
+            {
+                FileSize = ConvertNumberToReadableString(filesize);
+            }
+            else
+            {
+                FileSize = "";
+            }
+
+            //FileSize = filesize;
+            Typ = isdirectory;
+
+            Directrories = "";
+            Files = "";
+            Flags = flags;
+        }
+
+        public AFileEntry(string name, int filesize, bool isdirectory, int directories, int files, string flags)
         {
             Name = name;
             if (filesize > 0)
@@ -749,6 +819,8 @@ namespace DirOpusReImagined
             {
                 Files = "";         
             }
+
+            Flags = flags;
             
             //Files = files;
         }
