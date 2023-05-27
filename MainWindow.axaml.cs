@@ -126,7 +126,11 @@ namespace DirOpusReImagined
                     {
                         string FullPath = spath + item.Name;
                         
-                        FileUtility.CopyDirectoryToFolder(FullPath, tpath);
+                        string NewPath = tpath + item.Name;
+
+                        Directory.CreateDirectory(NewPath);
+
+                        FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
 
                         RefreshRPGrid();
                     }
@@ -191,7 +195,11 @@ namespace DirOpusReImagined
                     {
                         string FullPath = spath + item.Name;
 
-                        FileUtility.CopyDirectoryToFolder(FullPath, tpath);
+                        string NewPath = tpath + item.Name;
+
+                        Directory.CreateDirectory(NewPath);
+
+                        FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
 
                         RefreshLPGrid();
                     }
