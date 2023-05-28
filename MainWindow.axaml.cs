@@ -1,14 +1,21 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
+using YamlDotNet.Serialization;
 using static System.Net.WebRequestMethods;
+using Bitmap = Avalonia.Media.Imaging.Bitmap;
+using Color = Avalonia.Media.Color;
+using Image = Avalonia.Controls.Image;
 
 namespace DirOpusReImagined
 {
@@ -22,6 +29,10 @@ namespace DirOpusReImagined
         public MainWindow()
         {
             InitializeComponent();
+
+            // Apply The Settings if possible
+
+            ApplyButtonSettingsFromXml("Configuration.xml", this);
 
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
@@ -791,6 +802,56 @@ namespace DirOpusReImagined
             return abbreviatedAttributes.Trim();
         }
 
+        private void ApplyButtonSettings(string yamlFilePath, Window window)
+        {
+            
+        }
+
+        public void ApplyButtonSettingsFromXml(string xmlFilePath, Window window)
+        {
+            try
+            {
+                // Load XML file
+                XDocument xmlDoc = XDocument.Load(xmlFilePath);
+
+                // Query XML for button settings
+                var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
+                                         select new ButtonSettings
+                                         {
+                                             Name = btn.Element("Name").Value,
+                                             Content = btn.Element("Content").Value,
+                                             Background = btn.Element("Background").Value,
+                                             Foreground = btn.Element("Foreground").Value
+                                         };
+
+                // Apply settings to each button
+                foreach (var buttonSettings in buttonSettingsList)
+                {
+                    // Find the grid where the buttons exist
+                    var grid = (Grid)window.FindControl<Control>("ButtonGrid");
+                    
+                    // Find the button by its name
+                    var button = (Button)grid.FindControl<Control>(buttonSettings.Name);
+
+                    // If the button is found, apply the settings
+                    if (button != null)
+                    {
+                        button.Content = buttonSettings.Content;
+
+                        // Parse color and apply background
+                        var converter = new ColorConverter();
+                        var color = Color.Parse(buttonSettings.Background);
+                        button.Background = new SolidColorBrush(color);
+                        var color2 = Color.Parse(buttonSettings.Foreground); 
+                        button.Foreground = new SolidColorBrush(color2);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unexpected error: " + ex.Message);
+            }
+        }
     }
 
     public class AFileEntry
@@ -903,4 +964,14 @@ namespace DirOpusReImagined
             return string.Format("{0:0.##}{1}", result, orders[order]);
         }
     }
+
+    public class ButtonSettings
+    {
+        public string Name { get; set; }
+        public string Content { get; set; }
+        public string Background { get; set; }
+        public string Foreground { get; set; }
+    }
+
+    
 }

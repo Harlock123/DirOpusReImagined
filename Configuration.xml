@@ -1,0 +1,14 @@
+﻿<Buttons>
+	<Button>
+		<Name>LPButton1</Name>
+		<Content>Click Me</Content>
+		<Background>Red</Background>
+		<Foreground>Black</Foreground>
+	</Button>
+	<Button>
+		<Name>LPButton2</Name>
+		<Content>Press Me</Content>
+		<Background>Blue</Background>
+		<Foreground>White</Foreground>
+	</Button>
+</Buttons>
