@@ -699,36 +699,94 @@ namespace DirOpusReImagined
 
             if ((attributes & FileAttributes.ReadOnly) != 0)
                 abbreviatedAttributes += "RO ";
+            else
+                abbreviatedAttributes += "RW ";
             if ((attributes & FileAttributes.Hidden) != 0)
                 abbreviatedAttributes += "H ";
+            else
+                abbreviatedAttributes += "V ";
             if ((attributes & FileAttributes.System) != 0)
                 abbreviatedAttributes += "S ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Directory) != 0)
                 abbreviatedAttributes += "D ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Archive) != 0)
                 abbreviatedAttributes += "A ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Device) != 0)
                 abbreviatedAttributes += "DEV ";
+            else
+            {
+                abbreviatedAttributes += "    ";
+            }
             if ((attributes & FileAttributes.Normal) != 0)
                 abbreviatedAttributes += "N ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Temporary) != 0)
                 abbreviatedAttributes += "T ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.SparseFile) != 0)
                 abbreviatedAttributes += "SF ";
+            else
+            {
+                abbreviatedAttributes += "   ";
+            }
             if ((attributes & FileAttributes.ReparsePoint) != 0)
                 abbreviatedAttributes += "RP ";
+            else
+            {
+                abbreviatedAttributes += "   ";
+            }
             if ((attributes & FileAttributes.Compressed) != 0)
                 abbreviatedAttributes += "C ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Offline) != 0)
                 abbreviatedAttributes += "O ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.NotContentIndexed) != 0)
                 abbreviatedAttributes += "NCI ";
+            else
+            {
+                
+                abbreviatedAttributes += "  ";
+            }
             if ((attributes & FileAttributes.Encrypted) != 0)
                 abbreviatedAttributes += "E ";
+            else
+            { abbreviatedAttributes += "  "; }
             if ((attributes & FileAttributes.IntegrityStream) != 0)
                 abbreviatedAttributes += "IS ";
+            else
+            { abbreviatedAttributes += "  "; }
             if ((attributes & FileAttributes.NoScrubData) != 0)
                 abbreviatedAttributes += "NSD ";
+            else
+            {
+                
+                abbreviatedAttributes += "   ";
+            }
 
             return abbreviatedAttributes.Trim();
         }
