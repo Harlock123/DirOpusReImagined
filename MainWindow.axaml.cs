@@ -836,14 +836,28 @@ namespace DirOpusReImagined
                     // If the button is found, apply the settings
                     if (button != null)
                     {
-                        button.Content = buttonSettings.Content;
+                        if (!string.IsNullOrEmpty(buttonSettings.Content))
+                        {
+                            button.Content = buttonSettings.Content;
+                        }
 
                         // Parse color and apply background
                         var converter = new ColorConverter();
-                        var color = Color.Parse(buttonSettings.Background);
-                        button.Background = new SolidColorBrush(color);
-                        var color2 = Color.Parse(buttonSettings.Foreground); 
-                        button.Foreground = new SolidColorBrush(color2);
+
+                        if (!string.IsNullOrEmpty(buttonSettings.Background))
+                        {
+                            // Parse color and apply background
+                            var color = Color.Parse(buttonSettings.Background);
+                            button.Background = new SolidColorBrush(color);
+                        }
+
+                        if (!string.IsNullOrEmpty(buttonSettings.Foreground))
+                        {
+                            // Parse color and apply background
+                            var color = Color.Parse(buttonSettings.Foreground);
+                            button.Foreground = new SolidColorBrush(color);
+                        }
+                                                
                     }
                 }
             }
