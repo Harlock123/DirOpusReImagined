@@ -619,7 +619,11 @@ namespace DirOpusReImagined
         {
             //LPgrid.PopulateGrid(PATHNAME);
 
-            var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
+            //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
+
+            var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             ThePanel.SuspendRendering = true;
 
@@ -662,7 +666,9 @@ namespace DirOpusReImagined
                 //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
             }
 
-            var files = System.IO.Directory.EnumerateFiles(PATHNAME);
+            var files = System.IO.Directory.EnumerateFiles(PATHNAME)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList(); ;
 
             foreach (string file in files)
             {
