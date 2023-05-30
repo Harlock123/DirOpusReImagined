@@ -818,10 +818,12 @@ namespace DirOpusReImagined
                 var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
                                          select new ButtonSettings
                                          {
-                                             Name = btn.Element("Name").Value,
-                                             Content = btn.Element("Content").Value,
-                                             Background = btn.Element("Background").Value,
-                                             Foreground = btn.Element("Foreground").Value
+                                             Name = (string)btn.Element("Name"),
+                                             Content = (string)btn.Element("Content"),
+                                             Background = (string)btn.Element("Background"),
+                                             Foreground = (string)btn.Element("Foreground"),
+                                             HorizontalAlignment = (string)btn.Element("HorizontalAlignment"),
+                                             VerticalAlignment = (string)btn.Element("VerticalAlignment")
                                          };
 
                 // Apply settings to each button
@@ -833,31 +835,75 @@ namespace DirOpusReImagined
                     // Find the button by its name
                     var button = (Button)grid.FindControl<Control>(buttonSettings.Name);
 
-                    // If the button is found, apply the settings
+                    // Check if the button control exists
                     if (button != null)
                     {
+                        // Check if the Content property is not null or empty
                         if (!string.IsNullOrEmpty(buttonSettings.Content))
                         {
+                            // Set the button's Content property
                             button.Content = buttonSettings.Content;
                         }
 
-                        // Parse color and apply background
-                        var converter = new ColorConverter();
-
+                        // Check if the Background property is not null or empty
                         if (!string.IsNullOrEmpty(buttonSettings.Background))
                         {
-                            // Parse color and apply background
+                            // Parse the color from the string
                             var color = Color.Parse(buttonSettings.Background);
+                            // Set the button's Background property
                             button.Background = new SolidColorBrush(color);
                         }
 
+                        // Check if the Foreground property is not null or empty
                         if (!string.IsNullOrEmpty(buttonSettings.Foreground))
                         {
-                            // Parse color and apply background
+                            // Parse the color from the string
                             var color = Color.Parse(buttonSettings.Foreground);
+                            // Set the button's Foreground property
                             button.Foreground = new SolidColorBrush(color);
+                              
+                            button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
                         }
-                                                
+
+                        // Check if the HorizontalAlignment property is not null or empty
+                        if (!string.IsNullOrEmpty(buttonSettings.HorizontalAlignment))
+                        {
+                            // Depending on the value of the property, set the button's HorizontalAlignment
+                            switch (buttonSettings.HorizontalAlignment.ToUpper())
+                            {
+                                case "LEFT":
+                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+                                    break;
+                                case "CENTER":
+                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                                    break;
+                                case "RIGHT":
+                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // Check if the VerticalAlignment property is not null or empty
+                        if (!string.IsNullOrEmpty(buttonSettings.VerticalAlignment))
+                        {
+                            // Depending on the value of the property, set the button's VerticalAlignment
+                            switch (buttonSettings.VerticalAlignment.ToUpper())
+                            {
+                                case "TOP":
+                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                                    break;
+                                case "CENTER":
+                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center;
+                                    break;
+                                case "BOTTOM":
+                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -985,6 +1031,10 @@ namespace DirOpusReImagined
         public string Content { get; set; }
         public string Background { get; set; }
         public string Foreground { get; set; }
+        public string HorizontalAlignment { get; set; }
+        public string VerticalAlignment { get; set; }
+        public string Margin { get; set; }
+
     }
 
     

@@ -4,6 +4,8 @@
 		<Content>Click Me</Content>
 		<Background>Red</Background>
 		<Foreground>Black</Foreground>
+		<HorizontalAlignment>Center</HorizontalAlignment>
+		<VeriticalAlignment>Center</VeriticalAlignment>
 	</Button>
 	<Button>
 		<Name>LPButton2</Name>
