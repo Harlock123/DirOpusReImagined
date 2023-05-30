@@ -862,7 +862,7 @@ namespace DirOpusReImagined
                             // Set the button's Foreground property
                             button.Foreground = new SolidColorBrush(color);
                               
-                            button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+                            //button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
                         }
 
                         // Check if the HorizontalAlignment property is not null or empty
