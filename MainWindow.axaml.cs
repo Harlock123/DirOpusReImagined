@@ -71,6 +71,9 @@ namespace DirOpusReImagined
             LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
             RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;
 
+            LPgrid.GridItemClick += LPgrid_GridItemClick;
+            RPgrid.GridItemClick += RPgrid_GridItemClick;
+
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
             LPgrid.JustifyColumns.Add(4);
@@ -83,6 +86,22 @@ namespace DirOpusReImagined
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
+        }
+
+        private void RPgrid_GridItemClick(object? sender, GridHoverItem e)
+        {
+            // If there are any selected items in the Left Grid Deselect them
+
+            LPgrid.SelectedItems.Clear();
+            LPgrid.ReRender();
+        }
+
+        private void LPgrid_GridItemClick(object? sender, GridHoverItem e)
+        {
+            // If there are any selected items in the Right Grid Deselect them
+
+            RPgrid.SelectedItems.Clear();
+            RPgrid.ReRender();
         }
 
         private void MoveRightButton_Click(object? sender, RoutedEventArgs e)
@@ -621,6 +640,7 @@ namespace DirOpusReImagined
 
             //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
 
+            // using linq to sort the directories by name alphabetically
             var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -666,6 +686,7 @@ namespace DirOpusReImagined
                 //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
             }
 
+            // Using Linq to sort the files alphabetically
             var files = System.IO.Directory.EnumerateFiles(PATHNAME)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList(); ;
@@ -807,12 +828,7 @@ namespace DirOpusReImagined
 
             return abbreviatedAttributes.Trim();
         }
-
-        private void ApplyButtonSettings(string yamlFilePath, Window window)
-        {
-            
-        }
-
+                
         public void ApplyButtonSettingsFromXml(string xmlFilePath, Window window)
         {
             try
