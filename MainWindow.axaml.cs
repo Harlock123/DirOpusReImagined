@@ -845,7 +845,8 @@ namespace DirOpusReImagined
                                              Background = (string)btn.Element("Background"),
                                              Foreground = (string)btn.Element("Foreground"),
                                              HorizontalAlignment = (string)btn.Element("HorizontalAlignment"),
-                                             VerticalAlignment = (string)btn.Element("VerticalAlignment")
+                                             VerticalAlignment = (string)btn.Element("VerticalAlignment"),
+                                             Margin = (string)btn.Element("Margin")
                                          };
 
                 // Apply settings to each button
@@ -925,6 +926,15 @@ namespace DirOpusReImagined
                                 default:
                                     break;
                             }
+                        }
+                    
+                        // Check if the Margin property is not null or empty
+                        if (!string.IsNullOrEmpty(buttonSettings.Margin))
+                        {
+                            // Parse the margin from the string
+                            var margin = Avalonia.Thickness.Parse(buttonSettings.Margin);
+                            // Set the button's Margin property
+                            button.Margin = margin;
                         }
                     }
                 }

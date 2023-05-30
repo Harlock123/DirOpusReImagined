@@ -6,6 +6,7 @@
 		<Foreground>Black</Foreground>
 		<HorizontalAlignment>Center</HorizontalAlignment>
 		<VeriticalAlignment>Center</VeriticalAlignment>
+		<Margin>10,2,10,2</Margin>
 	</Button>
 	<Button>
 		<Name>LPButton2</Name>
