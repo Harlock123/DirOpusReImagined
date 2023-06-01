@@ -48,6 +48,8 @@ namespace DirOpusReImagined
             I2.Width = LPBackButton.Width + 8;
             I2.Height = LPBackButton.Height + 8;
 
+            SwapButton.Click += SwapButton_Click;
+
             CopyLeftButton.Click += CopyLeftButton_Click;
             CopyRightButton.Click += CopyRightButton_Click;
 
@@ -86,6 +88,18 @@ namespace DirOpusReImagined
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
+        }
+
+        private void SwapButton_Click(object? sender, RoutedEventArgs e)
+        {
+            var p1 = LPpath.Text;
+            var p2 = RPpath.Text;
+
+            LPpath.Text = p2; 
+            RPpath.Text = p1;
+
+            RefreshLPGrid();
+            RefreshRPGrid();
         }
 
         private void RPgrid_GridItemClick(object? sender, GridHoverItem e)

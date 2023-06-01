@@ -22,6 +22,15 @@
 
 		<StackPanel Orientation="Vertical"
 					VerticalAlignment="Center"
+					HorizontalAlignment="Center"
+					Grid.Column="1"
+					Grid.Row="0" >
+			<Button Name="SwapButton" Content="&lt;- Swap -&gt;"/>
+		</StackPanel>
+		
+		<StackPanel Orientation="Vertical"
+					VerticalAlignment="Center"
+					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="1">
 
