@@ -973,7 +973,24 @@ namespace DirOpusReImagined
             this.Height = height + 12;
             this.ReRender();
         }
-                
+
+        public string GetFirstSelectedFolder()
+        {
+            string result = "";
+
+            foreach(AFileEntry item in SelectedItems)
+            {
+                //var item = i.ItemUnderMouse as AFileEntry;
+
+                if ( item.Typ)
+                {
+                    result = item.Name;
+                    break;
+                }
+            }
+
+            return result;
+        }
 
         #endregion
 
@@ -2134,6 +2151,117 @@ namespace DirOpusReImagined
                 + @"N2z5oxt0iRuCxoS+V1qjB33YSnh+bTH7L6r4JtUrCcTJAAAAAElFTkSuQmCC";
 
             }
+        }
+    }
+
+    public class AFileEntry
+    {
+        public bool Typ { get; set; }
+        public string Name { get; set; }
+        public string FileSize { get; set; }
+        public string Dirs { get; set; }
+        public string Files { get; set; }
+        public string Flags { get; set; }
+
+        public AFileEntry(string name, int filesize, bool isdirectory)
+        {
+            Name = name;
+
+            if (filesize > 0)
+            {
+                FileSize = ConvertNumberToReadableString(filesize);
+            }
+            else
+            {
+                FileSize = "";
+            }
+
+            //FileSize = filesize;
+            Typ = isdirectory;
+
+            Dirs = "";
+            Files = "";
+            Flags = "";
+        }
+
+        public AFileEntry(string name, int filesize, bool isdirectory, string flags)
+        {
+            Name = name;
+
+            if (filesize > 0)
+            {
+                FileSize = ConvertNumberToReadableString(filesize);
+            }
+            else
+            {
+                FileSize = "";
+            }
+
+            //FileSize = filesize;
+            Typ = isdirectory;
+
+            Dirs = "";
+            Files = "";
+            Flags = flags;
+        }
+
+        public AFileEntry(string name, int filesize, bool isdirectory, int directories, int files, string flags)
+        {
+            Name = name;
+            if (filesize > 0)
+            {
+                FileSize = ConvertNumberToReadableString(filesize);
+            }
+            else
+            {
+                FileSize = "";
+            }
+
+            //FileSize = filesize;
+            Typ = isdirectory;
+            if (directories > 0)
+            {
+                Dirs = directories.ToString();
+            }
+            else
+            {
+                Dirs = "";
+            }
+
+            //Directrories = directories;
+
+            if (files > 0)
+            {
+                Files = files.ToString();
+            }
+            else
+            {
+                Files = "";
+            }
+
+            Flags = flags;
+
+            //Files = files;
+        }
+
+        public string ConvertNumberToReadableString(long number)
+        {
+            const int scale = 1024;
+
+            string[] orders = new string[] { "b", "Kb", "Mb", "Gb" };
+
+            if (number < scale)
+                return number.ToString() + "b";
+
+            int order = 0;
+            while (number >= scale)
+            {
+                order++;
+                number /= scale;
+            }
+
+            double result = number;
+            return string.Format("{0:0.##}{1}", result, orders[order]);
         }
     }
 }

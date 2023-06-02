@@ -26,6 +26,8 @@ namespace DirOpusReImagined
         private Avalonia.Rect RRB = new Avalonia.Rect();
         private Avalonia.Size OrigSize = new Avalonia.Size();
 
+        private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -88,6 +90,140 @@ namespace DirOpusReImagined
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
+
+            // wire up button click events for the lower panel buttons
+
+            LPButton1.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton2.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton3.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton4.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton5.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton6.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton7.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton8.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton9.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton10.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton11.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton12.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton13.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton14.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton15.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton16.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton17.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton18.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton19.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton20.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton21.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton22.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton23.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton24.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton25.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton26.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton27.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton28.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton29.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton30.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton31.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton32.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton33.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
+            LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+        }
+
+        private void Handle_Lower_Panel_Button_Clicks(object? sender, RoutedEventArgs e)
+        {
+            // This will handle all the lower panel button clicks
+            if (sender is null)
+            {
+                return;
+            }
+
+            Button B = (Button)sender;
+
+            string nm = B.Name;
+
+            foreach (ButtonEntry item in TheButtons)
+            {
+                if (item.Bname.ToUpper() == nm.ToUpper())
+                {
+                    // We have a winner - do the action
+
+                    string newaction = ParseTheAction(item.Bcontent);
+
+                    string[] strings = newaction.Split(' ',StringSplitOptions.RemoveEmptyEntries);
+
+                    if (strings.Length > 1)
+                    {
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = strings[0],
+                            Arguments = strings[1],
+                            UseShellExecute = true
+                        });
+
+                    }
+                    else
+                    {
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = strings[0],
+                            UseShellExecute = true
+                        });
+
+                    }
+
+                   
+
+                }
+            }
+
+
+        }
+
+        private string ParseTheAction(string bcontent)
+        {
+            // this will attermpt to parse the bcontent string and
+            // return the action to be performed
+
+            if (bcontent.Contains("%FIRSTDIR%"))
+            {
+                // we are looking for the first folder selected in
+                // either the right or left panel
+
+                string PTH = "";
+
+                if ( LPgrid.GetFirstSelectedFolder() != "")
+                {
+                    // the left grid has a folder selected
+
+                    PTH = MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder();
+
+                    string ret = bcontent.Replace("%FIRSTDIR%", PTH);
+
+                    return ret;
+
+                }
+                else if (RPgrid.GetFirstSelectedFolder() != "")
+                {
+                    // the right grid has a folder selected
+
+                    PTH = MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder();
+
+                    string ret = bcontent.Replace("%FIRSTDIR%", PTH);
+
+                    return ret;
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    return bcontent;
+                }
+            }
+
+            return bcontent;
         }
 
         private void SwapButton_Click(object? sender, RoutedEventArgs e)
@@ -188,6 +324,33 @@ namespace DirOpusReImagined
             }
 
             RefreshLPGrid();
+        }
+
+        private string MakePathEnvSafe(string path)
+        {
+            string result = path.Replace(@"\\", @"\");
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                if (!result.EndsWith(@"\"))
+                {
+                    result += @"\";
+
+                }
+                               
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                if (!result.EndsWith(@"/"))
+                {
+                    result += @"/";
+
+                }
+                
+            }
+
+            return result;
+
         }
 
         private void MoveLeftButton_Click(object? sender, RoutedEventArgs e)
@@ -981,6 +1144,10 @@ namespace DirOpusReImagined
         {
             try
             {
+                // Clear The Button Entries out first
+
+                TheButtons.Clear();
+
                 // Load XML file
                 XDocument xmlDoc = XDocument.Load(xmlFilePath);
 
@@ -994,7 +1161,8 @@ namespace DirOpusReImagined
                                              Foreground = (string)btn.Element("Foreground"),
                                              HorizontalAlignment = (string)btn.Element("HorizontalAlignment"),
                                              VerticalAlignment = (string)btn.Element("VerticalAlignment"),
-                                             Margin = (string)btn.Element("Margin")
+                                             Margin = (string)btn.Element("Margin"),
+                                             Action = (string)btn.Element("Action")
                                          };
 
                 // Apply settings to each button
@@ -1084,6 +1252,23 @@ namespace DirOpusReImagined
                             // Set the button's Margin property
                             button.Margin = margin;
                         }
+                    
+                        // Check if the Action property is not null or empty
+                        if (!string.IsNullOrEmpty(buttonSettings.Action))
+                        {
+                            // Get the defined action for this button
+                            var action = buttonSettings.Action;
+                            // Get the actual buttons name so it can be sought
+                            // on the handler for the button click
+                            var buttonName = buttonSettings.Name;
+
+                            // Create a new button entry
+                            var buttonEntry = new ButtonEntry(buttonName, action);
+
+                            // Add the button entry to the list of buttons
+                            TheButtons.Add(buttonEntry);
+                            
+                        }
                     }
                 }
             }
@@ -1094,114 +1279,15 @@ namespace DirOpusReImagined
         }
     }
 
-    public class AFileEntry
+    public class ButtonEntry
     {
-        public bool Typ { get; set; }
-        public string Name { get; set; }
-        public string FileSize { get; set; }
-        public string Dirs { get; set; }   
-        public string Files { get; set; }  
-                public string Flags { get; set; }   
+        public string Bname { get; set; }
+        public string Bcontent { get; set; }
 
-        public AFileEntry(string name, int filesize, bool isdirectory)
+        public ButtonEntry(string name, string content)
         {
-            Name = name;
-            
-            if (filesize > 0)
-            {
-                FileSize = ConvertNumberToReadableString( filesize );
-            }
-            else
-            {
-                FileSize = "";
-            }   
-            
-            //FileSize = filesize;
-            Typ = isdirectory;
-            
-            Dirs = "";
-            Files = "";
-            Flags = "";
-        }
-
-        public AFileEntry(string name, int filesize, bool isdirectory, string flags)
-        {
-            Name = name;
-
-            if (filesize > 0)
-            {
-                FileSize = ConvertNumberToReadableString(filesize);
-            }
-            else
-            {
-                FileSize = "";
-            }
-
-            //FileSize = filesize;
-            Typ = isdirectory;
-
-            Dirs = "";
-            Files = "";
-            Flags = flags;
-        }
-
-        public AFileEntry(string name, int filesize, bool isdirectory, int directories, int files, string flags)
-        {
-            Name = name;
-            if (filesize > 0)
-            {
-                FileSize = ConvertNumberToReadableString(filesize);
-            }
-            else
-            {
-                FileSize = "";
-            }
-
-            //FileSize = filesize;
-            Typ = isdirectory;
-            if(directories > 0)
-            {
-                  Dirs = directories.ToString();
-            }
-            else
-            {
-                Dirs = "";
-            }
-            
-            //Directrories = directories;
-            
-            if (files > 0)
-            {
-                  Files = files.ToString();
-            }
-            else
-            {
-                Files = "";         
-            }
-
-            Flags = flags;
-            
-            //Files = files;
-        }
-
-        public string ConvertNumberToReadableString(long number)
-        {
-            const int scale = 1024;
-
-            string[] orders = new string[] { "b", "Kb", "Mb", "Gb" };
-
-            if (number < scale)
-                return number.ToString() + "b";
-
-            int order = 0;
-            while (number >= scale)
-            {
-                order++;
-                number /= scale;
-            }
-
-            double result = number;
-            return string.Format("{0:0.##}{1}", result, orders[order]);
+            Bname = name;
+            Bcontent = content;
         }
     }
 
@@ -1214,6 +1300,7 @@ namespace DirOpusReImagined
         public string HorizontalAlignment { get; set; }
         public string VerticalAlignment { get; set; }
         public string Margin { get; set; }
+        public string Action { get; set; }
 
     }
 

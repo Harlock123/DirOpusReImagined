@@ -1,12 +1,13 @@
 ﻿<Buttons>
 	<Button>
 		<Name>LPButton1</Name>
-		<Content>Click Me</Content>
+		<Content>VSCODE here</Content>
 		<Background>Red</Background>
 		<Foreground>Black</Foreground>
 		<HorizontalAlignment>Center</HorizontalAlignment>
 		<VeriticalAlignment>Center</VeriticalAlignment>
-		<Margin>10,2,10,2</Margin>
+		<Margin>2,2,2,2</Margin>
+		<Action>code %FIRSTDIR%</Action>
 	</Button>
 	<Button>
 		<Name>LPButton2</Name>
