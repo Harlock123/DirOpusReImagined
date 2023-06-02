@@ -7,7 +7,8 @@
 		<HorizontalAlignment>Center</HorizontalAlignment>
 		<VeriticalAlignment>Center</VeriticalAlignment>
 		<Margin>2,2,2,2</Margin>
-		<Action>code %FIRSTDIR%</Action>
+		<Action>C:\Program Files\Microsoft VS Code\bin\code.cmd</Action>
+		<Args>%FD%</Args>	
 	</Button>
 	<Button>
 		<Name>LPButton2</Name>

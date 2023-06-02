@@ -9,6 +9,11 @@
   <ItemGroup>
     <None Remove=".gitignore" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\net7.0\Configuration.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <TrimmerRootDescriptor Include="Roots.xml" />

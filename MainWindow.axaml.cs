@@ -149,31 +149,15 @@ namespace DirOpusReImagined
                 {
                     // We have a winner - do the action
 
-                    string newaction = ParseTheAction(item.Bcontent);
+                    string newaction = ParseTheArgs(item.Bargs);
 
-                    string[] strings = newaction.Split(' ',StringSplitOptions.RemoveEmptyEntries);
-
-                    if (strings.Length > 1)
+                    Process.Start(new ProcessStartInfo()
                     {
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = strings[0],
-                            Arguments = strings[1],
-                            UseShellExecute = true
-                        });
-
-                    }
-                    else
-                    {
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = strings[0],
-                            UseShellExecute = true
-                        });
-
-                    }
-
-                   
+                        FileName = item.Bcontent,
+                        Arguments = newaction,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
 
                 }
             }
@@ -181,12 +165,12 @@ namespace DirOpusReImagined
 
         }
 
-        private string ParseTheAction(string bcontent)
+        private string ParseTheArgs(string bcontent)
         {
             // this will attermpt to parse the bcontent string and
             // return the action to be performed
 
-            if (bcontent.Contains("%FIRSTDIR%"))
+            if (bcontent.Contains("%FD%"))
             {
                 // we are looking for the first folder selected in
                 // either the right or left panel
@@ -199,7 +183,7 @@ namespace DirOpusReImagined
 
                     PTH = MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder();
 
-                    string ret = bcontent.Replace("%FIRSTDIR%", PTH);
+                    string ret = bcontent.Replace("%FD%", PTH);
 
                     return ret;
 
@@ -210,7 +194,7 @@ namespace DirOpusReImagined
 
                     PTH = MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder();
 
-                    string ret = bcontent.Replace("%FIRSTDIR%", PTH);
+                    string ret = bcontent.Replace("%FD%", PTH);
 
                     return ret;
                 }
@@ -1162,7 +1146,8 @@ namespace DirOpusReImagined
                                              HorizontalAlignment = (string)btn.Element("HorizontalAlignment"),
                                              VerticalAlignment = (string)btn.Element("VerticalAlignment"),
                                              Margin = (string)btn.Element("Margin"),
-                                             Action = (string)btn.Element("Action")
+                                             Action = (string)btn.Element("Action"),
+                                             Args = (string)btn.Element("Args")
                                          };
 
                 // Apply settings to each button
@@ -1262,8 +1247,10 @@ namespace DirOpusReImagined
                             // on the handler for the button click
                             var buttonName = buttonSettings.Name;
 
+                            var buttonArgs = buttonSettings.Args;
+
                             // Create a new button entry
-                            var buttonEntry = new ButtonEntry(buttonName, action);
+                            var buttonEntry = new ButtonEntry(buttonName, action, buttonArgs);
 
                             // Add the button entry to the list of buttons
                             TheButtons.Add(buttonEntry);
@@ -1283,11 +1270,13 @@ namespace DirOpusReImagined
     {
         public string Bname { get; set; }
         public string Bcontent { get; set; }
+        public string Bargs { get; set; }
 
-        public ButtonEntry(string name, string content)
+        public ButtonEntry(string name, string content, string bargs)
         {
             Bname = name;
             Bcontent = content;
+            Bargs = bargs;
         }
     }
 
@@ -1301,6 +1290,7 @@ namespace DirOpusReImagined
         public string VerticalAlignment { get; set; }
         public string Margin { get; set; }
         public string Action { get; set; }
+        public string Args { get; set; }
 
     }
 
