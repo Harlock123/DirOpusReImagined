@@ -1271,6 +1271,8 @@ namespace DirOpusReImagined
         public string Bname { get; set; }
         public string Bcontent { get; set; }
         public string Bargs { get; set; }
+        public bool ShellExecute { get; set; }
+
 
         public ButtonEntry(string name, string content, string bargs)
         {
