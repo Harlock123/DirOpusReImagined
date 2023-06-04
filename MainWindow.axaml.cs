@@ -219,6 +219,48 @@ namespace DirOpusReImagined
                 }
             }
 
+            if (bcontent.Contains("%AF%"))
+            {
+                string PTH = "";
+
+                if (LPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach(AFileEntry af in LPgrid.GetListOfSelectedFiles())
+                    {                         
+                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + " ";
+                    }
+
+                    string ret = bcontent.Replace("%AF%", PTH);
+
+                    return ret;
+
+                }
+                else if (RPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
+                    {
+                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + " ";
+                    }
+
+                    string ret = bcontent.Replace("%AF%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    return bcontent;
+                }
+
+            }
+
             return bcontent;
         }
 

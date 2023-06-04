@@ -14,8 +14,10 @@
 	</Button>
 	<Button>
 		<Name>LPButton2</Name>
-		<Content>Press Me</Content>
-		<Background>Blue</Background>
-		<Foreground>White</Foreground>
+		<Content>VSCODE All Files</Content>
+		<Action>code</Action>
+		<Args>%AF%</Args>
+		<Shell>True</Shell>
+		<Window>True</Window>
 	</Button>
 </Buttons>

@@ -992,6 +992,23 @@ namespace DirOpusReImagined
             return result;
         }
 
+        public List<AFileEntry> GetListOfSelectedFiles()
+        {
+            List<AFileEntry> result = new List<AFileEntry>();
+
+            foreach (AFileEntry item in SelectedItems)
+            {
+                //var item = i.ItemUnderMouse as AFileEntry;
+
+                if (!item.Typ)
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
         #endregion
 
         #region Private methods
