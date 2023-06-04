@@ -151,13 +151,25 @@ namespace DirOpusReImagined
 
                     string newaction = ParseTheArgs(item.Bargs);
 
-                    Process.Start(new ProcessStartInfo()
+
+                    try
                     {
-                        FileName = item.Bcontent,
-                        Arguments = newaction,
-                        UseShellExecute = item.ShellExecute,
-                        CreateNoWindow = item.ShowWindow
-                    });
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = item.Bcontent,
+                            Arguments = newaction,
+                            UseShellExecute = item.ShellExecute,
+                            CreateNoWindow = item.ShowWindow
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        ProgressWindow PW = new ProgressWindow();
+
+                        PW.MessageText.Text = "Error: " + ex.Message;
+
+                        PW.ShowDialog(this);
+                    }
 
                 }
             }
