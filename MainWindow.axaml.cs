@@ -155,8 +155,8 @@ namespace DirOpusReImagined
                     {
                         FileName = item.Bcontent,
                         Arguments = newaction,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
+                        UseShellExecute = item.ShellExecute,
+                        CreateNoWindow = item.ShowWindow
                     });
 
                 }
@@ -1147,7 +1147,9 @@ namespace DirOpusReImagined
                                              VerticalAlignment = (string)btn.Element("VerticalAlignment"),
                                              Margin = (string)btn.Element("Margin"),
                                              Action = (string)btn.Element("Action"),
-                                             Args = (string)btn.Element("Args")
+                                             Args = (string)btn.Element("Args"),
+                                             ShellExecute = (string)btn.Element("Shell"),
+                                             ShowWindow = (string)btn.Element("Window")
                                          };
 
                 // Apply settings to each button
@@ -1246,11 +1248,21 @@ namespace DirOpusReImagined
                             // Get the actual buttons name so it can be sought
                             // on the handler for the button click
                             var buttonName = buttonSettings.Name;
-
+                                                        
                             var buttonArgs = buttonSettings.Args;
 
                             // Create a new button entry
                             var buttonEntry = new ButtonEntry(buttonName, action, buttonArgs);
+
+                            if (!string.IsNullOrEmpty(buttonSettings.ShellExecute))
+                            {
+                                buttonEntry.ShellExecute = bool.Parse(buttonSettings.ShellExecute);
+                            }
+
+                            if (!string.IsNullOrEmpty(buttonSettings.ShowWindow))
+                            {
+                                buttonEntry.ShowWindow = bool.Parse(buttonSettings.ShowWindow);
+                            }
 
                             // Add the button entry to the list of buttons
                             TheButtons.Add(buttonEntry);
@@ -1272,13 +1284,58 @@ namespace DirOpusReImagined
         public string Bcontent { get; set; }
         public string Bargs { get; set; }
         public bool ShellExecute { get; set; }
-
-
+        public bool ShowWindow { get; set; }
+        
         public ButtonEntry(string name, string content, string bargs)
         {
             Bname = name;
             Bcontent = content;
             Bargs = bargs;
+            ShellExecute = true;
+            ShowWindow = false;
+        }
+
+        public ButtonEntry(string name, string content, string bargs,string sexecute)
+        {
+            Bname = name;
+            Bcontent = content;
+            Bargs = bargs;
+            if (sexecute.ToUpper() == "FALSE")
+            {
+                ShellExecute = false;
+            }
+            else
+            {
+                ShellExecute = true;
+            }
+            //ShellExecute = true;
+
+            ShowWindow = false;
+        }
+
+        public ButtonEntry(string name, string content, string bargs, string sexecute, string swin)
+        {
+            Bname = name;
+            Bcontent = content;
+            Bargs = bargs;
+            if (sexecute.ToUpper() == "FALSE")
+            {
+                ShellExecute = false;
+            }
+            else
+            {
+                ShellExecute = true;
+            }
+            //ShellExecute = true;
+            if (swin.ToUpper() == "TRUE")
+            {
+                ShowWindow = true;
+            }
+            else
+            {
+                ShowWindow = false;
+            }
+            //ShowWindow = false;
         }
     }
 
@@ -1293,6 +1350,8 @@ namespace DirOpusReImagined
         public string Margin { get; set; }
         public string Action { get; set; }
         public string Args { get; set; }
+        public string ShellExecute { get; set;}
+        public string ShowWindow { get; set; }
 
     }
 
