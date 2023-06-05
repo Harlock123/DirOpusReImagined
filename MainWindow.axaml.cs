@@ -151,16 +151,40 @@ namespace DirOpusReImagined
 
                     string newaction = ParseTheArgs(item.Bargs);
 
-
                     try
                     {
-                        Process.Start(new ProcessStartInfo()
+                        if (newaction.Contains(","))
                         {
-                            FileName = item.Bcontent,
-                            Arguments = newaction,
-                            UseShellExecute = item.ShellExecute,
-                            CreateNoWindow = item.ShowWindow
-                        });
+                            // we have comma seperated arguments so
+                            // we need to split them up and pass them
+                            // to the process start info one at a time
+                            // with Process.Waitforexit() in between
+
+                            string[] args = newaction.Split(',',StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach(string arg in args)
+                            {
+                                Process.Start(new ProcessStartInfo()
+                                {
+                                    FileName = item.Bcontent,
+                                    Arguments = arg,
+                                    UseShellExecute = item.ShellExecute,
+                                    CreateNoWindow = item.ShowWindow
+                                }).WaitForExit();
+                            }
+                        }
+                        else
+                        {
+                            Process.Start(new ProcessStartInfo()
+                            {
+                                FileName = item.Bcontent,
+                                Arguments = newaction,
+                                UseShellExecute = item.ShellExecute,
+                                CreateNoWindow = item.ShowWindow
+                            });
+                        }
+
+                        
                     }
                     catch (Exception ex)
                     {
@@ -247,6 +271,48 @@ namespace DirOpusReImagined
                     }
 
                     string ret = bcontent.Replace("%AF%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    return bcontent;
+                }
+
+            }
+
+            if (bcontent.Contains("%LAF%"))
+            {
+                string PTH = "";
+
+                if (LPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
+                    {
+                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + ",";
+                    }
+
+                    string ret = bcontent.Replace("%LAF%", PTH);
+
+                    return ret;
+
+                }
+                else if (RPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
+                    {
+                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + ",";
+                    }
+
+                    string ret = bcontent.Replace("%LAF%", PTH);
 
                     return ret;
 

@@ -20,4 +20,12 @@
 		<Shell>True</Shell>
 		<Window>True</Window>
 	</Button>
+	<Button>
+		<Name>LPButton3</Name>
+		<Content>NotePad all seq</Content>
+		<Action>notepad.exe</Action>
+		<Args>%LAF%</Args>
+		<Shell>False</Shell>
+		<Window>False</Window>
+	</Button>
 </Buttons>
