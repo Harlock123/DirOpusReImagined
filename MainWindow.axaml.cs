@@ -327,6 +327,47 @@ namespace DirOpusReImagined
 
             }
 
+            if (bcontent.Contains("%F1%") && bcontent.Contains("%F2%"))
+            {
+                string PTH = "";
+
+                if (LPgrid.GetListOfSelectedFiles().Count > 1)
+                {
+                    // the left grid has some files selected
+
+                    List<AFileEntry> thelist = LPgrid.GetListOfSelectedFiles();
+
+                    PTH = MakePathEnvSafe(LPpath.Text) + thelist[0].Name + " " + MakePathEnvSafe(LPpath.Text) + thelist[1].Name;
+
+                    string ret = bcontent.Replace("%F1%", PTH).Replace("%F2%","");
+
+                    return ret;
+
+                }
+                else if (RPgrid.GetListOfSelectedFiles().Count > 1)
+                {
+                    // the right grid has some files selected
+
+                    List<AFileEntry> thelist = RPgrid.GetListOfSelectedFiles();
+
+                    PTH = MakePathEnvSafe(RPpath.Text) + thelist[0].Name + " " + MakePathEnvSafe(RPpath.Text) + thelist[1].Name;
+
+                    string ret = bcontent.Replace("%F1%", PTH).Replace("%F2%", "");
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    return bcontent;
+                }
+
+            }
+
+
             return bcontent;
         }
 
