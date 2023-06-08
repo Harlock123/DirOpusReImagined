@@ -33,6 +33,22 @@
 					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="1">
+			<Label Name="LPLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
+
+			<Button Name="ClearRightButton"
+					Grid.Column="1"
+					Grid.Row="1"
+					HorizontalAlignment="Stretch"
+					Content="clear ---&gt;"></Button>
+
+			<Button Name="ClearLeftButton"
+					Grid.Column="1"
+					Grid.Row="1"
+					HorizontalAlignment="Stretch"
+					Content="&lt;--- clear"></Button>
+
+			<Label Name="LPLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
+
 
 			<Button Name="CopyRightButton"
 					Grid.Column="1"

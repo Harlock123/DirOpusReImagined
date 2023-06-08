@@ -32,7 +32,7 @@
 		<Name>LPButton4</Name>
 		<Content>Code Diff</Content>
 		<Action>code</Action>
-		<Args>--diff %F1% %F2%</Args>
+		<Args>--diff %LF1% %RF1%</Args>
 		<Shell>True</Shell>
 		<Window>False</Window>
 	</Button>

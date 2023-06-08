@@ -52,6 +52,9 @@ namespace DirOpusReImagined
 
             SwapButton.Click += SwapButton_Click;
 
+            ClearLeftButton.Click += ClearLeftButton_Click;
+            ClearRightButton.Click += ClearRightButton_Click;
+
             CopyLeftButton.Click += CopyLeftButton_Click;
             CopyRightButton.Click += CopyRightButton_Click;
 
@@ -129,6 +132,18 @@ namespace DirOpusReImagined
             LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+        }
+
+        private void ClearRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            RPgrid.SelectedItems.Clear();
+            RPgrid.ReRender();
+        }
+
+        private void ClearLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            LPgrid.SelectedItems.Clear();
+            LPgrid.ReRender();
         }
 
         private void Handle_Lower_Panel_Button_Clicks(object? sender, RoutedEventArgs e)
@@ -327,36 +342,25 @@ namespace DirOpusReImagined
 
             }
 
-            if (bcontent.Contains("%F1%") && bcontent.Contains("%F2%"))
+            if (bcontent.Contains("%LF1%") && bcontent.Contains("%RF1%"))
             {
                 string PTH = "";
 
-                if (LPgrid.GetListOfSelectedFiles().Count > 1)
+                if (LPgrid.GetListOfSelectedFiles().Count > 0 &&
+                    RPgrid.GetListOfSelectedFiles().Count > 0)
                 {
                     // the left grid has some files selected
 
-                    List<AFileEntry> thelist = LPgrid.GetListOfSelectedFiles();
+                    List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
+                    List<AFileEntry> thelistb = RPgrid.GetListOfSelectedFiles();
 
-                    PTH = MakePathEnvSafe(LPpath.Text) + thelist[0].Name + " " + MakePathEnvSafe(LPpath.Text) + thelist[1].Name;
+                    PTH = MakePathEnvSafe(LPpath.Text) + thelista[0].Name + " " + MakePathEnvSafe(RPpath.Text) + thelistb[0].Name;
 
-                    string ret = bcontent.Replace("%F1%", PTH).Replace("%F2%","");
-
-                    return ret;
-
-                }
-                else if (RPgrid.GetListOfSelectedFiles().Count > 1)
-                {
-                    // the right grid has some files selected
-
-                    List<AFileEntry> thelist = RPgrid.GetListOfSelectedFiles();
-
-                    PTH = MakePathEnvSafe(RPpath.Text) + thelist[0].Name + " " + MakePathEnvSafe(RPpath.Text) + thelist[1].Name;
-
-                    string ret = bcontent.Replace("%F1%", PTH).Replace("%F2%", "");
+                    string ret = bcontent.Replace("%LF1%", PTH).Replace("%RF1%","");
 
                     return ret;
 
-                }
+                }                
                 else
                 {
                     // neither grid has a folder selected
@@ -387,16 +391,16 @@ namespace DirOpusReImagined
         {
             // If there are any selected items in the Left Grid Deselect them
 
-            LPgrid.SelectedItems.Clear();
-            LPgrid.ReRender();
+            //LPgrid.SelectedItems.Clear();
+            //LPgrid.ReRender();
         }
 
         private void LPgrid_GridItemClick(object? sender, GridHoverItem e)
         {
             // If there are any selected items in the Right Grid Deselect them
 
-            RPgrid.SelectedItems.Clear();
-            RPgrid.ReRender();
+            //RPgrid.SelectedItems.Clear();
+            //RPgrid.ReRender();
         }
 
         private void MoveRightButton_Click(object? sender, RoutedEventArgs e)
