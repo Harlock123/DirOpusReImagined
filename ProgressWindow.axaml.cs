@@ -8,5 +8,12 @@ namespace DirOpusReImagined
         {
             InitializeComponent();
         }
+
+        public ProgressWindow(string title, string message)
+        {
+            InitializeComponent();
+            Title = title;
+            MessageText.Text = message;
+        }
     }
 }

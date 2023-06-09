@@ -166,48 +166,52 @@ namespace DirOpusReImagined
 
                     string newaction = ParseTheArgs(item.Bargs);
 
-                    try
+                    if (newaction != "%ERROR%")
                     {
-                        if (newaction.Contains(","))
+
+                        try
                         {
-                            // we have comma seperated arguments so
-                            // we need to split them up and pass them
-                            // to the process start info one at a time
-                            // with Process.Waitforexit() in between
+                            if (newaction.Contains(","))
+                            {
+                                // we have comma seperated arguments so
+                                // we need to split them up and pass them
+                                // to the process start info one at a time
+                                // with Process.Waitforexit() in between
 
-                            string[] args = newaction.Split(',',StringSplitOptions.RemoveEmptyEntries);
+                                string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
-                            foreach(string arg in args)
+                                foreach (string arg in args)
+                                {
+                                    Process.Start(new ProcessStartInfo()
+                                    {
+                                        FileName = item.Bcontent,
+                                        Arguments = arg,
+                                        UseShellExecute = item.ShellExecute,
+                                        CreateNoWindow = item.ShowWindow
+                                    }).WaitForExit();
+                                }
+                            }
+                            else
                             {
                                 Process.Start(new ProcessStartInfo()
                                 {
                                     FileName = item.Bcontent,
-                                    Arguments = arg,
+                                    Arguments = newaction,
                                     UseShellExecute = item.ShellExecute,
                                     CreateNoWindow = item.ShowWindow
-                                }).WaitForExit();
+                                });
                             }
+
+
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Process.Start(new ProcessStartInfo()
-                            {
-                                FileName = item.Bcontent,
-                                Arguments = newaction,
-                                UseShellExecute = item.ShellExecute,
-                                CreateNoWindow = item.ShowWindow
-                            });
+                            ProgressWindow PW = new ProgressWindow();
+
+                            PW.MessageText.Text = "Error: " + ex.Message;
+
+                            PW.ShowDialog(this);
                         }
-
-                        
-                    }
-                    catch (Exception ex)
-                    {
-                        ProgressWindow PW = new ProgressWindow();
-
-                        PW.MessageText.Text = "Error: " + ex.Message;
-
-                        PW.ShowDialog(this);
                     }
 
                 }
@@ -253,8 +257,15 @@ namespace DirOpusReImagined
                 {
                     // neither grid has a folder selected
                     // do nothing
+                    ProgressWindow PW =
+                    new ProgressWindow("Error",
+                    "You have to have at least one Folder selected in either Pane");
 
-                    return bcontent;
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
                 }
             }
 
@@ -294,8 +305,15 @@ namespace DirOpusReImagined
                 {
                     // neither grid has a folder selected
                     // do nothing
+                    ProgressWindow PW =
+                    new ProgressWindow("Error",
+                    "You have to have at least one file selected in either pane");
 
-                    return bcontent;
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
                 }
 
             }
@@ -337,7 +355,16 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    return bcontent;
+
+                    ProgressWindow PW = 
+                        new ProgressWindow("Error", 
+                        "You have to have at least one file selected in either pane");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
                 }
 
             }
@@ -366,7 +393,13 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    return bcontent;
+                    ProgressWindow PW = new ProgressWindow("Error","You have to have a file selected in each panel");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
                 }
 
             }
