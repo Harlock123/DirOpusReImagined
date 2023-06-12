@@ -24,7 +24,7 @@ user defined functions from a file called `Configuration.xml` in the same folder
 A Sample of this flike is shown below
 
 ```
-{
+
 <Buttons>
 	<Button>
 		<Name>LPButton1</Name>
@@ -64,7 +64,7 @@ A Sample of this flike is shown below
 		<Window>False</Window>
 	</Button>
 </Buttons>
-}
+
 ```
 
 It is a work in progress.
