@@ -1213,12 +1213,13 @@ namespace DirOpusReImagined
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                rootDirectoryPath = Directory.GetDirectoryRoot("/");
-                
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
 
             return rootDirectoryPath;
