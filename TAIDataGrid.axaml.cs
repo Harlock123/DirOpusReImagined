@@ -2176,9 +2176,12 @@ namespace DirOpusReImagined
         public bool Typ { get; set; }
         public string Name { get; set; }
         public string FileSize { get; set; }
+        public string FileDate { get; set; }
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
+
+        
 
         public AFileEntry(string name, int filesize, bool isdirectory)
         {
@@ -2195,6 +2198,8 @@ namespace DirOpusReImagined
 
             //FileSize = filesize;
             Typ = isdirectory;
+            
+            FileDate = "";
 
             Dirs = "";
             Files = "";
@@ -2217,6 +2222,31 @@ namespace DirOpusReImagined
             //FileSize = filesize;
             Typ = isdirectory;
 
+            FileDate = "";
+
+            Dirs = "";
+            Files = "";
+            Flags = flags;
+        }
+
+        public AFileEntry(string name, int filesize, bool isdirectory, string flags, string FileTimeString)
+        {
+            Name = name;
+
+            if (filesize > 0)
+            {
+                FileSize = ConvertNumberToReadableString(filesize);
+            }
+            else
+            {
+                FileSize = "";
+            }
+
+            //FileSize = filesize;
+            Typ = isdirectory;
+
+            FileDate = FileTimeString;
+
             Dirs = "";
             Files = "";
             Flags = flags;
@@ -2236,6 +2266,9 @@ namespace DirOpusReImagined
 
             //FileSize = filesize;
             Typ = isdirectory;
+
+            FileDate = "";
+
             if (directories > 0)
             {
                 Dirs = directories.ToString();

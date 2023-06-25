@@ -1194,7 +1194,9 @@ namespace DirOpusReImagined
 
                     string flags = GetAbbreviatedAttributes(fa);
 
-                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags));
+                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString(); 
+
+                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
                 }
                 catch
                 {
