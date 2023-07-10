@@ -7,7 +7,7 @@
 		<HorizontalAlignment>Center</HorizontalAlignment>
 		<VeriticalAlignment>Center</VeriticalAlignment>
 		<Margin>2,2,2,2</Margin>
-		<Action>C:\Program Files\Microsoft VS Code\bin\code.cmd</Action>
+		<Action>code</Action>
 		<Args>%FD%</Args>
 		<Shell>True</Shell>
 		<Window>True</Window>

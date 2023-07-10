@@ -873,6 +873,7 @@ namespace DirOpusReImagined
 
                     if (it.Name.ToUpper().EndsWith(".EXE") ||
                         it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".JPEG") ||
                         it.Name.ToUpper().EndsWith(".PNG") ||
                         it.Name.ToUpper().EndsWith(".GIF") ||
                         it.Name.ToUpper().EndsWith(".BMP") ||
@@ -932,6 +933,7 @@ namespace DirOpusReImagined
 
                     if (it.Name.ToUpper().EndsWith(".EXE") ||
                         it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".JPEG") ||
                         it.Name.ToUpper().EndsWith(".PNG") ||
                         it.Name.ToUpper().EndsWith(".GIF") ||
                         it.Name.ToUpper().EndsWith(".BMP") ||
@@ -999,6 +1001,7 @@ namespace DirOpusReImagined
 
                     if (it.Name.ToUpper().EndsWith(".EXE") ||
                         it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".JPEG") ||
                         it.Name.ToUpper().EndsWith(".PNG") ||
                         it.Name.ToUpper().EndsWith(".GIF") ||
                         it.Name.ToUpper().EndsWith(".BMP") ||
@@ -1057,6 +1060,7 @@ namespace DirOpusReImagined
                 {
                     if (it.Name.ToUpper().EndsWith(".EXE") ||
                         it.Name.ToUpper().EndsWith(".JPG") ||
+                        it.Name.ToUpper().EndsWith(".JPEG") ||
                         it.Name.ToUpper().EndsWith(".PNG") ||
                         it.Name.ToUpper().EndsWith(".GIF") ||
                         it.Name.ToUpper().EndsWith(".BMP") ||
