@@ -1,39 +1,56 @@
-﻿<Buttons>
-	<Button>
-		<Name>LPButton1</Name>
-		<Content>VSCODE here</Content>
-		<Background>Red</Background>
-		<Foreground>Black</Foreground>
-		<HorizontalAlignment>Center</HorizontalAlignment>
-		<VeriticalAlignment>Center</VeriticalAlignment>
-		<Margin>2,2,2,2</Margin>
-		<Action>code</Action>
-		<Args>%FD%</Args>
-		<Shell>True</Shell>
-		<Window>True</Window>
-	</Button>
-	<Button>
-		<Name>LPButton2</Name>
-		<Content>VSCODE All Files</Content>
-		<Action>code</Action>
-		<Args>%AF%</Args>
-		<Shell>True</Shell>
-		<Window>True</Window>
-	</Button>
-	<Button>
-		<Name>LPButton3</Name>
-		<Content>NotePad all seq</Content>
-		<Action>notepad.exe</Action>
-		<Args>%LAF%</Args>
-		<Shell>False</Shell>
-		<Window>False</Window>
-	</Button>
-	<Button>
-		<Name>LPButton4</Name>
-		<Content>Code Diff</Content>
-		<Action>code</Action>
-		<Args>--diff %LF1% %RF1%</Args>
-		<Shell>True</Shell>
-		<Window>False</Window>
-	</Button>
-</Buttons>
+﻿<Settings>
+	<Buttons>
+		<Button>
+			<Name>LPButton1</Name>
+			<Content>VSCODE here</Content>
+			<Background>Red</Background>
+			<Foreground>Black</Foreground>
+			<HorizontalAlignment>Center</HorizontalAlignment>
+			<VeriticalAlignment>Center</VeriticalAlignment>
+			<Margin>2,2,2,2</Margin>
+			<Action>code</Action>
+			<Args>%FD%</Args>
+			<Shell>True</Shell>
+			<Window>True</Window>
+		</Button>
+		<Button>
+			<Name>LPButton2</Name>
+			<Content>VSCODE All Files</Content>
+			<Action>code</Action>
+			<Args>%AF%</Args>
+			<Shell>True</Shell>
+			<Window>True</Window>
+		</Button>
+		<Button>
+			<Name>LPButton3</Name>
+			<Content>NotePad all seq</Content>
+			<Action>notepad.exe</Action>
+			<Args>%LAF%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+		</Button>
+		<Button>
+			<Name>LPButton4</Name>
+			<Content>Code Diff</Content>
+			<Action>code</Action>
+			<Args>--diff %LF1% %RF1%</Args>
+			<Shell>True</Shell>
+			<Window>False</Window>
+		</Button>
+	</Buttons>
+	
+	<Executable>
+		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,PNG,DOC,DOCx,XLS,SLSX,PPT,PPTX,PDF,ZIP,RAR,7Z</Extensions>
+	</Executable>
+	
+	<LeftGrid>
+		<FontSize>10</FontSize>
+		<HeaderFontSize>12</HeaderFontSize>
+	</LeftGrid>
+	
+	<RightGrid>
+		<FontSize>10</FontSize>
+		<HeaderFontSize>12</HeaderFontSize>
+	</RightGrid>
+
+</Settings>

@@ -26,6 +26,8 @@ namespace DirOpusReImagined
         private Avalonia.Rect RRB = new Avalonia.Rect();
         private Avalonia.Size OrigSize = new Avalonia.Size();
 
+        private List<string> ExecutableStuff = new List<string>();
+
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
 
         public MainWindow()
@@ -67,10 +69,10 @@ namespace DirOpusReImagined
             RPBackButton.Click += RPBackButton_Click;
             LPBackButton.Click += LPBackButton_Click;
 
-            LPgrid.GridFontSize = 16;
-            RPgrid.GridFontSize = 16;
-            LPgrid.GridHeaderFontSize = 16;
-            RPgrid.GridHeaderFontSize = 16;
+            //LPgrid.GridFontSize = 12;
+            //RPgrid.GridFontSize = 12;
+            //LPgrid.GridHeaderFontSize = 16;
+            //RPgrid.GridHeaderFontSize = 16;
 
             LPgrid.GridTitle = "Left Panel";
             RPgrid.GridTitle = "Right Panel";
@@ -1339,7 +1341,88 @@ namespace DirOpusReImagined
 
                 // Load XML file
                 XDocument xmlDoc = XDocument.Load(xmlFilePath);
+                
+                // Find the <Extensions> element
+                XElement extensionsElement = xmlDoc.Descendants("Extensions").FirstOrDefault();
 
+                if (extensionsElement != null)
+                {
+                    ExecutableStuff = new List<string>();
+                    
+                    // Get the string value inside the <Extensions> element
+                    string extensionsString = extensionsElement.Value;
+
+                    // Split the string into an array if needed
+                    string[] extensionsArray = extensionsString.Split(',');
+
+                    // Print or use the string or array as needed
+                    Console.WriteLine("Extensions String: " + extensionsString);
+                    //Console.WriteLine("Extensions Array: ");
+                    foreach (string extension in extensionsArray)
+                    {
+                        ExecutableStuff.Add(extension);
+                    }
+                }
+
+                // Find the <FontSize> element inside <LeftGrid>
+                XElement leftGridFontSizeElement = xmlDoc.Descendants("LeftGrid")
+                    .Elements("FontSize")
+                    .FirstOrDefault();
+                
+                XElement leftGridHeaderFontSizeElement = xmlDoc.Descendants("LeftGrid")
+                    .Elements("HeaderFontSize")
+                    .FirstOrDefault();
+
+                if (leftGridFontSizeElement != null)
+                {
+                    // Get the font size value from <LeftGrid>
+                    LPgrid.GridFontSize = int.Parse(leftGridFontSizeElement.Value);
+                }
+                else
+                {
+                    LPgrid.GridFontSize = 12;
+                }
+                
+                if (leftGridHeaderFontSizeElement != null)
+                {
+                    // Get the font size value from <LeftGrid>
+                    LPgrid.GridHeaderFontSize = int.Parse(leftGridHeaderFontSizeElement.Value);
+                }
+                else
+                {
+                    LPgrid.GridHeaderFontSize = 14;
+                }
+
+                // Find the <FontSize> element inside <RightGrid>
+                XElement rightGridFontSizeElement = xmlDoc.Descendants("RightGrid")
+                    .Elements("FontSize")
+                    .FirstOrDefault();
+                
+                XElement rightGridHeaderFontSizeElement = xmlDoc.Descendants("RightGrid")
+                    .Elements("HeaderFontSize")
+                    .FirstOrDefault();
+
+                if (rightGridFontSizeElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    RPgrid.GridFontSize = int.Parse(rightGridFontSizeElement.Value);
+                }
+                else
+                {
+                    RPgrid.GridFontSize = 12;
+                }
+                
+                if (rightGridHeaderFontSizeElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    RPgrid.GridHeaderFontSize = int.Parse(rightGridHeaderFontSizeElement.Value);
+                }
+                else
+                {
+                    RPgrid.GridHeaderFontSize = 14;
+                }
+                
+                
                 // Query XML for button settings
                 var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
                                          select new ButtonSettings
@@ -1357,6 +1440,7 @@ namespace DirOpusReImagined
                                              ShowWindow = (string)btn.Element("Window")
                                          };
 
+                
                 // Apply settings to each button
                 foreach (var buttonSettings in buttonSettingsList)
                 {
@@ -1475,6 +1559,8 @@ namespace DirOpusReImagined
                         }
                     }
                 }
+                
+                
             }
             catch (Exception ex)
             {
