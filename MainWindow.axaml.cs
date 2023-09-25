@@ -216,6 +216,8 @@ namespace DirOpusReImagined
                         }
                     }
 
+                    break;
+
                 }
             }
 
