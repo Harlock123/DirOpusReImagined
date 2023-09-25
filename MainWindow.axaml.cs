@@ -75,8 +75,8 @@ namespace DirOpusReImagined
             //LPgrid.GridHeaderFontSize = 16;
             //RPgrid.GridHeaderFontSize = 16;
 
-            LPgrid.GridTitle = "Left Panel";
-            RPgrid.GridTitle = "Right Panel";
+            //LPgrid.GridTitle = "Left Panel";
+            //RPgrid.GridTitle = "Right Panel";
 
             LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
             RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;
@@ -876,39 +876,7 @@ namespace DirOpusReImagined
                 {
                     // its an actual file so can we execute it?
 
-                    if (it.Name.ToUpper().EndsWith(".EXE") ||
-                        it.Name.ToUpper().EndsWith(".JPG") ||
-                        it.Name.ToUpper().EndsWith(".JPEG") ||
-                        it.Name.ToUpper().EndsWith(".PNG") ||
-                        it.Name.ToUpper().EndsWith(".GIF") ||
-                        it.Name.ToUpper().EndsWith(".BMP") ||
-                        it.Name.ToUpper().EndsWith(".ICO") ||
-                        it.Name.ToUpper().EndsWith(".TXT") ||
-                        it.Name.ToUpper().EndsWith(".PDF") ||
-                        it.Name.ToUpper().EndsWith(".DOC") ||
-                        it.Name.ToUpper().EndsWith(".DOCX") ||
-                        it.Name.ToUpper().EndsWith(".XLS") ||
-                        it.Name.ToUpper().EndsWith(".XLSX") ||
-                        it.Name.ToUpper().EndsWith(".PPT") ||
-                        it.Name.ToUpper().EndsWith(".PPTX") ||
-                        it.Name.ToUpper().EndsWith(".MP3") ||
-                        it.Name.ToUpper().EndsWith(".MP4") ||
-                        it.Name.ToUpper().EndsWith(".WAV") ||
-                        it.Name.ToUpper().EndsWith(".AVI") ||
-                        it.Name.ToUpper().EndsWith(".WMV") ||
-                        it.Name.ToUpper().EndsWith(".WMA") ||
-                        it.Name.ToUpper().EndsWith(".MPEG") ||
-                        it.Name.ToUpper().EndsWith(".MPEG4") ||
-                        it.Name.ToUpper().EndsWith(".MKV") ||
-                        it.Name.ToUpper().EndsWith(".MOV") ||
-                        it.Name.ToUpper().EndsWith(".FLV") ||
-                        it.Name.ToUpper().EndsWith(".ZIP") ||
-                        it.Name.ToUpper().EndsWith(".RAR") ||
-                        it.Name.ToUpper().EndsWith(".7Z") ||
-                        it.Name.ToUpper().EndsWith(".GZ") ||
-                        it.Name.ToUpper().EndsWith(".TAR") ||
-                        it.Name.ToUpper().EndsWith(".ISO") ||
-                        it.Name.ToUpper().EndsWith(".IMG"))
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -922,7 +890,7 @@ namespace DirOpusReImagined
 
                         //Process.Start((RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
-
+                    
                 }
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -936,39 +904,7 @@ namespace DirOpusReImagined
                 {
                     // its an actual file so can we execute it?
 
-                    if (it.Name.ToUpper().EndsWith(".EXE") ||
-                        it.Name.ToUpper().EndsWith(".JPG") ||
-                        it.Name.ToUpper().EndsWith(".JPEG") ||
-                        it.Name.ToUpper().EndsWith(".PNG") ||
-                        it.Name.ToUpper().EndsWith(".GIF") ||
-                        it.Name.ToUpper().EndsWith(".BMP") ||
-                        it.Name.ToUpper().EndsWith(".ICO") ||
-                        it.Name.ToUpper().EndsWith(".TXT") ||
-                        it.Name.ToUpper().EndsWith(".PDF") ||
-                        it.Name.ToUpper().EndsWith(".DOC") ||
-                        it.Name.ToUpper().EndsWith(".DOCX") ||
-                        it.Name.ToUpper().EndsWith(".XLS") ||
-                        it.Name.ToUpper().EndsWith(".XLSX") ||
-                        it.Name.ToUpper().EndsWith(".PPT") ||
-                        it.Name.ToUpper().EndsWith(".PPTX") ||
-                        it.Name.ToUpper().EndsWith(".MP3") ||
-                        it.Name.ToUpper().EndsWith(".MP4") ||
-                        it.Name.ToUpper().EndsWith(".WAV") ||
-                        it.Name.ToUpper().EndsWith(".AVI") ||
-                        it.Name.ToUpper().EndsWith(".WMV") ||
-                        it.Name.ToUpper().EndsWith(".WMA") ||
-                        it.Name.ToUpper().EndsWith(".MPEG") ||
-                        it.Name.ToUpper().EndsWith(".MPEG4") ||
-                        it.Name.ToUpper().EndsWith(".MKV") ||
-                        it.Name.ToUpper().EndsWith(".MOV") ||
-                        it.Name.ToUpper().EndsWith(".FLV") ||
-                        it.Name.ToUpper().EndsWith(".ZIP") ||
-                        it.Name.ToUpper().EndsWith(".RAR") ||
-                        it.Name.ToUpper().EndsWith(".7Z") ||
-                        it.Name.ToUpper().EndsWith(".GZ") ||
-                        it.Name.ToUpper().EndsWith(".TAR") ||
-                        it.Name.ToUpper().EndsWith(".ISO") ||
-                        it.Name.ToUpper().EndsWith(".IMG"))
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -988,7 +924,7 @@ namespace DirOpusReImagined
             }
                         
         }
-
+                
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
@@ -1004,39 +940,7 @@ namespace DirOpusReImagined
                 {
                     // its an actual file so can we execute it?
 
-                    if (it.Name.ToUpper().EndsWith(".EXE") ||
-                        it.Name.ToUpper().EndsWith(".JPG") ||
-                        it.Name.ToUpper().EndsWith(".JPEG") ||
-                        it.Name.ToUpper().EndsWith(".PNG") ||
-                        it.Name.ToUpper().EndsWith(".GIF") ||
-                        it.Name.ToUpper().EndsWith(".BMP") ||
-                        it.Name.ToUpper().EndsWith(".ICO") ||
-                        it.Name.ToUpper().EndsWith(".TXT") ||
-                        it.Name.ToUpper().EndsWith(".PDF") ||
-                        it.Name.ToUpper().EndsWith(".DOC") ||
-                        it.Name.ToUpper().EndsWith(".DOCX") ||
-                        it.Name.ToUpper().EndsWith(".XLS") ||
-                        it.Name.ToUpper().EndsWith(".XLSX") ||
-                        it.Name.ToUpper().EndsWith(".PPT") ||
-                        it.Name.ToUpper().EndsWith(".PPTX") ||
-                        it.Name.ToUpper().EndsWith(".MP3") ||
-                        it.Name.ToUpper().EndsWith(".MP4") ||
-                        it.Name.ToUpper().EndsWith(".WAV") ||
-                        it.Name.ToUpper().EndsWith(".AVI") ||
-                        it.Name.ToUpper().EndsWith(".WMV") ||
-                        it.Name.ToUpper().EndsWith(".WMA") ||
-                        it.Name.ToUpper().EndsWith(".MPEG") ||
-                        it.Name.ToUpper().EndsWith(".MPEG4") ||
-                        it.Name.ToUpper().EndsWith(".MKV") ||
-                        it.Name.ToUpper().EndsWith(".MOV") ||
-                        it.Name.ToUpper().EndsWith(".FLV") ||
-                        it.Name.ToUpper().EndsWith(".ZIP") ||
-                        it.Name.ToUpper().EndsWith(".RAR") ||
-                        it.Name.ToUpper().EndsWith(".7Z") ||
-                        it.Name.ToUpper().EndsWith(".GZ") ||
-                        it.Name.ToUpper().EndsWith(".TAR") ||
-                        it.Name.ToUpper().EndsWith(".ISO") ||
-                        it.Name.ToUpper().EndsWith(".IMG"))
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -1063,39 +967,7 @@ namespace DirOpusReImagined
                 }
                 else
                 {
-                    if (it.Name.ToUpper().EndsWith(".EXE") ||
-                        it.Name.ToUpper().EndsWith(".JPG") ||
-                        it.Name.ToUpper().EndsWith(".JPEG") ||
-                        it.Name.ToUpper().EndsWith(".PNG") ||
-                        it.Name.ToUpper().EndsWith(".GIF") ||
-                        it.Name.ToUpper().EndsWith(".BMP") ||
-                        it.Name.ToUpper().EndsWith(".ICO") ||
-                        it.Name.ToUpper().EndsWith(".TXT") ||
-                        it.Name.ToUpper().EndsWith(".PDF") ||
-                        it.Name.ToUpper().EndsWith(".DOC") ||
-                        it.Name.ToUpper().EndsWith(".DOCX") ||
-                        it.Name.ToUpper().EndsWith(".XLS") ||
-                        it.Name.ToUpper().EndsWith(".XLSX") ||
-                        it.Name.ToUpper().EndsWith(".PPT") ||
-                        it.Name.ToUpper().EndsWith(".PPTX") ||
-                        it.Name.ToUpper().EndsWith(".MP3") ||
-                        it.Name.ToUpper().EndsWith(".MP4") ||
-                        it.Name.ToUpper().EndsWith(".WAV") ||
-                        it.Name.ToUpper().EndsWith(".AVI") ||
-                        it.Name.ToUpper().EndsWith(".WMV") ||
-                        it.Name.ToUpper().EndsWith(".WMA") ||
-                        it.Name.ToUpper().EndsWith(".MPEG") ||
-                        it.Name.ToUpper().EndsWith(".MPEG4") ||
-                        it.Name.ToUpper().EndsWith(".MKV") ||
-                        it.Name.ToUpper().EndsWith(".MOV") ||
-                        it.Name.ToUpper().EndsWith(".FLV") ||
-                        it.Name.ToUpper().EndsWith(".ZIP") ||
-                        it.Name.ToUpper().EndsWith(".RAR") ||
-                        it.Name.ToUpper().EndsWith(".7Z") ||
-                        it.Name.ToUpper().EndsWith(".GZ") ||
-                        it.Name.ToUpper().EndsWith(".TAR") ||
-                        it.Name.ToUpper().EndsWith(".ISO") ||
-                        it.Name.ToUpper().EndsWith(".IMG"))
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -1113,6 +985,22 @@ namespace DirOpusReImagined
                 }
 
             }
+        }
+
+        private bool FileExtensionIsExecutable(string v)
+        {
+            bool result = false;
+
+            foreach (string s in ExecutableStuff)
+            {
+                if (v.ToUpper().EndsWith(s))
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            return result;
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
@@ -1380,6 +1268,10 @@ namespace DirOpusReImagined
                     .Elements("HeaderFontSize")
                     .FirstOrDefault();
 
+                XElement leftGridTitleElement = xmlDoc.Descendants("LeftGrid")
+                    .Elements("Title")
+                    .FirstOrDefault();
+
                 if (leftGridFontSizeElement != null)
                 {
                     // Get the font size value from <LeftGrid>
@@ -1400,6 +1292,16 @@ namespace DirOpusReImagined
                     LPgrid.GridHeaderFontSize = 14;
                 }
 
+                if (leftGridTitleElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    LPgrid.GridTitle = leftGridTitleElement.Value;
+                }
+                else
+                {
+                    RPgrid.GridTitle = "Right Panel";
+                }
+
                 // Find the <FontSize> element inside <RightGrid>
                 XElement rightGridFontSizeElement = xmlDoc.Descendants("RightGrid")
                     .Elements("FontSize")
@@ -1407,6 +1309,10 @@ namespace DirOpusReImagined
                 
                 XElement rightGridHeaderFontSizeElement = xmlDoc.Descendants("RightGrid")
                     .Elements("HeaderFontSize")
+                    .FirstOrDefault();
+
+                XElement rightGridTitleElement = xmlDoc.Descendants("RightGrid")
+                    .Elements("Title")
                     .FirstOrDefault();
 
                 if (rightGridFontSizeElement != null)
@@ -1428,8 +1334,19 @@ namespace DirOpusReImagined
                 {
                     RPgrid.GridHeaderFontSize = 14;
                 }
-                
-                
+
+                if (rightGridTitleElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    RPgrid.GridTitle = rightGridTitleElement.Value;
+                }
+                else
+                {
+                    RPgrid.GridTitle = "Right Panel";
+                }
+
+
+
                 // Query XML for button settings
                 var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
                                          select new ButtonSettings

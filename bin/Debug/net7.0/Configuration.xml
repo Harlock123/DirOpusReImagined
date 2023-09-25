@@ -41,17 +41,21 @@
 	
 	<Executable>
 		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
-		PNG,DOC,DOCx,XLS,SLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4</Extensions>
+		PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
+		AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
+		CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
 	</Executable>
 	
 	<LeftGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
+		<Title>LEFTGrid</Title>
 	</LeftGrid>
 	
 	<RightGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
+		<Title>RIGHTGrid</Title>
 	</RightGrid>
 
 </Settings>
