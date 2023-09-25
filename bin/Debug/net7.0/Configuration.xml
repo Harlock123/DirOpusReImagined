@@ -40,17 +40,18 @@
 	</Buttons>
 	
 	<Executable>
-		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,PNG,DOC,DOCx,XLS,SLSX,PPT,PPTX,PDF,ZIP,RAR,7Z</Extensions>
+		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
+		PNG,DOC,DOCx,XLS,SLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4</Extensions>
 	</Executable>
 	
 	<LeftGrid>
-		<FontSize>10</FontSize>
-		<HeaderFontSize>12</HeaderFontSize>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
 	</LeftGrid>
 	
 	<RightGrid>
-		<FontSize>10</FontSize>
-		<HeaderFontSize>12</HeaderFontSize>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
 	</RightGrid>
 
 </Settings>

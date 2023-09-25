@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using YamlDotNet.Serialization;
 using static System.Net.WebRequestMethods;
@@ -1350,16 +1351,20 @@ namespace DirOpusReImagined
                 if (extensionsElement != null)
                 {
                     ExecutableStuff = new List<string>();
-                    
+                    string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
                     // Get the string value inside the <Extensions> element
-                    string extensionsString = extensionsElement.Value;
-
+                    string extensionsString = Regex.Replace(extensionsElement.Value, pattern, "");
+                    
                     // Split the string into an array if needed
                     string[] extensionsArray = extensionsString.Split(',');
 
                     // Print or use the string or array as needed
                     Console.WriteLine("Extensions String: " + extensionsString);
                     //Console.WriteLine("Extensions Array: ");
+
+                    //string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
+                    //string cleanedString = Regex.Replace(input, pattern, "");
+
                     foreach (string extension in extensionsArray)
                     {
                         ExecutableStuff.Add(extension);
