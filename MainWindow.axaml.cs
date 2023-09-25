@@ -1272,6 +1272,10 @@ namespace DirOpusReImagined
                     .Elements("Title")
                     .FirstOrDefault();
 
+                XElement leftGridTitleFontSizeElement = xmlDoc.Descendants("LeftGrid")
+                   .Elements("TitleFontSize")
+                   .FirstOrDefault();
+
                 if (leftGridFontSizeElement != null)
                 {
                     // Get the font size value from <LeftGrid>
@@ -1302,6 +1306,16 @@ namespace DirOpusReImagined
                     RPgrid.GridTitle = "Right Panel";
                 }
 
+                if (leftGridTitleFontSizeElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    LPgrid.GridTitleFontSize = int.Parse(leftGridTitleFontSizeElement.Value);
+                }
+                else
+                {
+                    LPgrid.GridTitleFontSize = 16;
+                }
+
                 // Find the <FontSize> element inside <RightGrid>
                 XElement rightGridFontSizeElement = xmlDoc.Descendants("RightGrid")
                     .Elements("FontSize")
@@ -1315,6 +1329,10 @@ namespace DirOpusReImagined
                     .Elements("Title")
                     .FirstOrDefault();
 
+                XElement rightGridTitleFontSizeElement = xmlDoc.Descendants("RightGrid")
+                   .Elements("TitleFontSize")
+                   .FirstOrDefault();
+
                 if (rightGridFontSizeElement != null)
                 {
                     // Get the font size value from <RightGrid>
@@ -1323,6 +1341,7 @@ namespace DirOpusReImagined
                 else
                 {
                     RPgrid.GridFontSize = 12;
+                    
                 }
                 
                 if (rightGridHeaderFontSizeElement != null)
@@ -1343,6 +1362,16 @@ namespace DirOpusReImagined
                 else
                 {
                     RPgrid.GridTitle = "Right Panel";
+                }
+
+                if (rightGridTitleFontSizeElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    RPgrid.GridTitleFontSize = int.Parse(rightGridTitleFontSizeElement.Value);
+                }
+                else
+                {
+                    RPgrid.GridTitleFontSize = 16;
                 }
 
 

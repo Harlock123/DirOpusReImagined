@@ -50,12 +50,14 @@
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
 		<Title>LEFTGrid</Title>
+		<TitleFontSize>20</TitleFontSize>
 	</LeftGrid>
 	
 	<RightGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
 		<Title>RIGHTGrid</Title>
+		<TitleFontSize>20</TitleFontSize>
 	</RightGrid>
 
 </Settings>

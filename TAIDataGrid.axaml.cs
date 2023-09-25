@@ -2180,9 +2180,7 @@ namespace DirOpusReImagined
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
-
         
-
         public AFileEntry(string name, int filesize, bool isdirectory)
         {
             Name = name;
