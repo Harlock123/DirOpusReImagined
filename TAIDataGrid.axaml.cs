@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using System;
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
@@ -99,7 +100,7 @@ namespace DirOpusReImagined
         private List<int> justifyColumns = new List<int>();
 
         private List<int> truncateColumns = new List<int>();
-        
+        private int truncateColumnLength = 30;
         #endregion
 
         #region Constructor
@@ -144,6 +145,7 @@ namespace DirOpusReImagined
         #region Properties
 
         // this is the title of the grid
+        [DefaultValue("The Grid Control for Avalonia")]
         public string GridTitle
         {
             get { return gridTitle; }
@@ -155,6 +157,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid title
+        [DefaultValue(20)]
         public int GridTitleFontSize
         {
             get { return gridTitleFontSize; }
@@ -166,6 +169,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid headers (column names)
+        [DefaultValue(14)]
         public int GridHeaderFontSize
         {
             get { return gridheaderFontSize; }
@@ -177,6 +181,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid contents
+        [DefaultValue(12)]
         public int GridFontSize
         {
             get { return gridFontSize; }
@@ -188,6 +193,7 @@ namespace DirOpusReImagined
         }
 
         // this is the height of the grid title in pixels
+        [DefaultValue(10)]
         public int GridTitleHeight
         {
             get { return gridTitleHeight; }
@@ -199,6 +205,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush used to render the Grid Background
+        [DefaultValue("Cornsilk")]
         public IBrush GridBackground
         {
             get { return gridBackground; }
@@ -210,6 +217,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grid title font
+        [DefaultValue("White")]
         public IBrush GridTitleBrush
         {
             get { return gridTitleBrush; }
@@ -221,6 +229,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grids title background
+        [DefaultValue("Blue")]
         public IBrush GridTitleBackground
         {
             get { return gridTitleBackground; }
@@ -232,6 +241,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grids headers (column names)
+        [DefaultValue("DarkBlue")]
         public IBrush GridHeaderBrush
         {
             get { return gridHeaderBrush; }
@@ -243,6 +253,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to fill the grid header
+        [DefaultValue("Cyan")]
         public IBrush GridHeaderBackground
         {
             get { return gridHeaderBackground; }
@@ -254,6 +265,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to outline the grid cells
+        [DefaultValue("Black")]
         public IBrush GridCellOutline
         {
             get { return gridCellOutline; }
@@ -265,6 +277,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to fill the grid cells
+        [DefaultValue("Wheat")]
         public IBrush GridCellBrush
         {
             get { return gridCellBrush; }
@@ -276,6 +289,7 @@ namespace DirOpusReImagined
         }
 
         // Hovering over a cell will highlight its background with this brush
+        [DefaultValue("LightBlue")]
         public IBrush GridCellHighlightBrush
         {
             get { return gridCellHighlightBrush; }
@@ -287,6 +301,7 @@ namespace DirOpusReImagined
         }
 
         // Hovering over a cell will highlight its content with this brush
+        [DefaultValue("Black")]
         public IBrush GridCellHighlightContentBrush
         {
             get { return gridCellHighlightContentBrush; }
@@ -298,6 +313,7 @@ namespace DirOpusReImagined
         }
 
         // SelectedItems in the grid will be highlighted with this brush
+        [DefaultValue("AliceBlue")]
         public IBrush GridSelectedItemBrush
         {
             get { return gridSelectedItemBrush; }
@@ -309,6 +325,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid title
+        [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTitleTypeface
         {
             get { return gridTitleTypeface; }
@@ -320,6 +337,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid contents
+        [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTypeface
         {
             get { return gridTypeface; }
@@ -331,6 +349,7 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid header
+        [DefaultValue("Arial, 14, Normal, Normal")]
         public Typeface GridHeaderTypeface
         {
             get { return gridHeaderTypeface; }
@@ -342,6 +361,7 @@ namespace DirOpusReImagined
         }
 
         // This is the data that will be displayed in the grid
+        [DefaultValue(null)]
         public List<object> Items
         {
             get { return items; }
@@ -362,6 +382,7 @@ namespace DirOpusReImagined
         }
 
         // This is the data that will be displayed in the grid as selected rows
+        [DefaultValue(null)]
         public List<object> SelectedItems 
         {   
             get { return selecteditems; }
@@ -370,9 +391,10 @@ namespace DirOpusReImagined
                 selecteditems = value;
                 this.ReRender();
             }
-        } 
+        }
 
         // Flag to enable or disable rendering the grid
+        [DefaultValue(false)]
         public bool SuspendRendering
         {
             get { return suspendRendering; }
@@ -384,6 +406,7 @@ namespace DirOpusReImagined
         }
 
         // Flag to enable or disable autosizing the cells to the contents
+        [DefaultValue(true)]
         public bool AutosizeCellsToContents
         {
             get { return autosizeCellsToContents; }
@@ -395,6 +418,7 @@ namespace DirOpusReImagined
         }
 
         // The width of the grid in Pixels
+        [DefaultValue(800)]
         public int GridWidth
         {
             get { return gridWidth; }
@@ -406,6 +430,7 @@ namespace DirOpusReImagined
         }
 
         // The height of the grid in Pixels
+        [DefaultValue(300)]
         public int GridHeight
         {
             get { return gridHeight; }
@@ -417,6 +442,7 @@ namespace DirOpusReImagined
         }
 
         // Boolean to Show or Hide Crosshairs on hovering over a cell
+        [DefaultValue(true)]
         public bool ShowCrossHairs
         {
             get { return showCrossHairs; }
@@ -428,6 +454,7 @@ namespace DirOpusReImagined
         }
 
         // Boolean to Show or Hide A set of self contained test objects in the grid
+        [DefaultValue(false)]
         public bool PopulateWithTestData
         {
             get { return populateWithTestData; }
@@ -450,6 +477,7 @@ namespace DirOpusReImagined
         }
 
         // An accelerator for Mouse Wheel scrolling Operations
+        [DefaultValue(3)]
         public int ScrollMultiplier
         {
             get { return scrollMultiplier; }
@@ -461,6 +489,7 @@ namespace DirOpusReImagined
         }
 
         // The current row under the mouse
+        [DefaultValue(0)]
         public int CurMouseRow
         {
             get { return curMouseRow; }
@@ -472,6 +501,7 @@ namespace DirOpusReImagined
         }
 
         // The current column under the mouse   
+        [DefaultValue(0)]
         public int CurMouseCol
         {
             get { return curMouseCol; }
@@ -482,6 +512,8 @@ namespace DirOpusReImagined
             }
         }
 
+        // list of columns that will need to be right justified
+        [DefaultValue(null)]
         public List<int> JustifyColumns
         {
             get { return justifyColumns; }
@@ -491,13 +523,28 @@ namespace DirOpusReImagined
                 this.ReRender();
             }
         }
-        
+
+        // list of columns that will need to be truncated at truncatecolumnlength
+        [DefaultValue(null)]
         public List<int> TruncateColumns
         {
             get { return truncateColumns; }
             set
             {
                 truncateColumns = value;
+                this.ReRender();
+            }
+        }
+
+        // The number of characters that columns that are being truncated
+        // will be truncated at
+        [DefaultValue(30)]
+        public int TruncateColumnLength
+        {
+            get { return truncateColumnLength; }
+            set
+            {
+                truncateColumnLength = value;
                 this.ReRender();
             }
         }
@@ -624,9 +671,9 @@ namespace DirOpusReImagined
 
                                     if (truncateColumns.Contains(idx))
                                     {
-                                        if (thestringtomeasure.Length > 30)
+                                        if (thestringtomeasure.Length > truncateColumnLength)
                                         {
-                                            thestringtomeasure = thestringtomeasure.Substring(0, 30) + "...";
+                                            thestringtomeasure = thestringtomeasure.Substring(0, truncateColumnLength ) + "...";
                                         }
                                             
                                     }
@@ -872,9 +919,9 @@ namespace DirOpusReImagined
                                             if (truncateColumns.Contains(idx))
                                             {
                                                 // here we need to truncate the string being rendered
-                                                if (thestringtoprint.Length > 30)
+                                                if (thestringtoprint.Length > truncateColumnLength )
                                                 {
-                                                    thestringtoprint = thestringtoprint.Substring(0, 30) + "...";
+                                                    thestringtoprint = thestringtoprint.Substring(0, truncateColumnLength) + "...";
                                                 }
                                                 
                                             }
