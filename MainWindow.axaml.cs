@@ -77,6 +77,9 @@ namespace DirOpusReImagined
 
             //LPgrid.GridTitle = "Left Panel";
             //RPgrid.GridTitle = "Right Panel";
+            
+            RPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
+            LPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
 
             LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
             RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;

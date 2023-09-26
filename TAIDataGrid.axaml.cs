@@ -98,6 +98,8 @@ namespace DirOpusReImagined
 
         private List<int> justifyColumns = new List<int>();
 
+        private List<int> truncateColumns = new List<int>();
+        
         #endregion
 
         #region Constructor
@@ -489,6 +491,16 @@ namespace DirOpusReImagined
                 this.ReRender();
             }
         }
+        
+        public List<int> TruncateColumns
+        {
+            get { return truncateColumns; }
+            set
+            {
+                truncateColumns = value;
+                this.ReRender();
+            }
+        }
 
         #endregion
 
@@ -608,8 +620,19 @@ namespace DirOpusReImagined
                                 {
                                     //property.GetValue(item)
 
+                                    string thestringtomeasure = property.GetValue(item)?.ToString() + "";
+
+                                    if (truncateColumns.Contains(idx))
+                                    {
+                                        if (thestringtomeasure.Length > 30)
+                                        {
+                                            thestringtomeasure = thestringtomeasure.Substring(0, 30) + "...";
+                                        }
+                                            
+                                    }
+                                    
                                     var formattedText =
-                                        new FormattedText(property.GetValue(item)?.ToString() + "",
+                                        new FormattedText(thestringtomeasure,
                                                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
                                                 this.gridTypeface, this.gridFontSize,
                                                 this.gridCellBrush);
@@ -831,7 +854,7 @@ namespace DirOpusReImagined
                                         {
 
                                             TextBlock ttb = new TextBlock();
-                                            ttb.Text = property.GetValue(item)?.ToString() + "";
+                                            //ttb.Text = property.GetValue(item)?.ToString() + "";
                                             ttb.FontSize = this.gridFontSize;
                                             ttb.Foreground = tcb;
                                             ttb.FontFamily = this.gridTypeface.FontFamily;
@@ -843,11 +866,25 @@ namespace DirOpusReImagined
                                             // to the right to give it a right justification
 
                                             int leftoffset = 2;
+                                            
+                                            string thestringtoprint = property.GetValue(item)?.ToString() + "";
+
+                                            if (truncateColumns.Contains(idx))
+                                            {
+                                                // here we need to truncate the string being rendered
+                                                if (thestringtoprint.Length > 30)
+                                                {
+                                                    thestringtoprint = thestringtoprint.Substring(0, 30) + "...";
+                                                }
+                                                
+                                            }
+
+                                            ttb.Text = thestringtoprint;
 
                                             if (JustifyColumns.Contains(idx))
                                             {
                                                 var theTextFormatted =
-                                                new FormattedText(property.GetValue(item)?.ToString() + "",
+                                                new FormattedText(thestringtoprint,
                                                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
                                                 this.gridTypeface, this.gridFontSize,
                                                 this.gridCellBrush);
