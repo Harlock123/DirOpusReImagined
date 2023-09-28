@@ -1,7 +1,7 @@
 # DirOpusReImagined
 
 This is a project to reimagine the Amiga file manager Directory Opus 4.12. 
-It is using the Avalonia FRamework so as to afford the ability to compile for Linux
+It is using the Avalonia Framework so as to afford the ability to compile for Linux
 and MacOS as well as Windows.
 
 The interface presents itself as two panels of files in a specified path.
