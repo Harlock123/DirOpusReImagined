@@ -83,6 +83,15 @@ The <Args> </Args> parameter can contain the following entries
 
 %LAF% - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
 
+%RF1% - Full Path of the file or folder selected in the Right Panel
+
+%LF1% - Full Path of the file or folder selected in the Left Panel
+
+%RPAF% - Full Path All Files in the Right Panel . Each argument is separated by a space
+
+%LPAF% - Full Path All Files in the Left Panel . Each argument is separated by a space
+
+
 
 
 ## Building
