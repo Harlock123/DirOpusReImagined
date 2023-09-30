@@ -31,6 +31,9 @@ namespace DirOpusReImagined
         private List<string> ExecutableStuff = new List<string>();
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
+        
+        private string StartRightPath = "";
+        private string StartLeftPath = "";
 
         public MainWindow()
         {
@@ -98,8 +101,9 @@ namespace DirOpusReImagined
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
 
-            LPpath.Text = GetRootDirectoryPath();
-            RPpath.Text = GetRootDirectoryPath();
+            // Now handled by settings
+            //LPpath.Text = GetRootDirectoryPath();
+            //RPpath.Text = GetRootDirectoryPath();
 
             PopulateFilePanel(LPgrid,LPpath.Text);
             PopulateFilePanel(RPgrid, RPpath.Text);
@@ -1440,6 +1444,10 @@ namespace DirOpusReImagined
                 XElement leftGridTitleFontSizeElement = xmlDoc.Descendants("LeftGrid")
                    .Elements("TitleFontSize")
                    .FirstOrDefault();
+                
+                XElement leftGridStartPathElement = xmlDoc.Descendants("LeftGrid")
+                    .Elements("StartPath")
+                    .FirstOrDefault();
 
                 if (leftGridFontSizeElement != null)
                 {
@@ -1480,6 +1488,17 @@ namespace DirOpusReImagined
                 {
                     LPgrid.GridTitleFontSize = 16;
                 }
+                
+                if (leftGridStartPathElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    LPpath.Text = leftGridStartPathElement.Value;
+                    StartLeftPath = LPpath.Text;
+                }
+                else
+                {
+                    LPpath.Text = GetRootDirectoryPath();
+                }
 
                 // Find the <FontSize> element inside <RightGrid>
                 XElement rightGridFontSizeElement = xmlDoc.Descendants("RightGrid")
@@ -1497,6 +1516,10 @@ namespace DirOpusReImagined
                 XElement rightGridTitleFontSizeElement = xmlDoc.Descendants("RightGrid")
                    .Elements("TitleFontSize")
                    .FirstOrDefault();
+                
+                XElement rightGridStartPathElement = xmlDoc.Descendants("RightGrid")
+                    .Elements("StartPath")
+                    .FirstOrDefault();
 
                 if (rightGridFontSizeElement != null)
                 {
@@ -1538,9 +1561,18 @@ namespace DirOpusReImagined
                 {
                     RPgrid.GridTitleFontSize = 16;
                 }
-
-
-
+                
+                if (rightGridStartPathElement != null)
+                {
+                    // Get the font size value from <RightGrid>
+                    RPpath.Text = rightGridStartPathElement.Value;
+                    StartRightPath = RPpath.Text;
+                }
+                else
+                {
+                    RPpath.Text = GetRootDirectoryPath();
+                }
+                
                 // Query XML for button settings
                 var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
                                          select new ButtonSettings

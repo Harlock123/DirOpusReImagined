@@ -51,6 +51,7 @@
 		<HeaderFontSize>16</HeaderFontSize>
 		<Title>LEFTGrid</Title>
 		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
 	</LeftGrid>
 	
 	<RightGrid>
@@ -58,6 +59,7 @@
 		<HeaderFontSize>16</HeaderFontSize>
 		<Title>RIGHTGrid</Title>
 		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
 	</RightGrid>
 
 </Settings>
