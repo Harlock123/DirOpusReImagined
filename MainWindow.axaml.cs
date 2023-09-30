@@ -484,6 +484,77 @@ namespace DirOpusReImagined
 
             }
             
+            // List of Files selected in the right panel
+            if (bcontent.Contains("%RPAF%"))
+            {
+                string PTH = "";
+
+                if (RPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
+                    {
+                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + ",";
+                    }
+
+                    string ret = bcontent.Replace("%RPAF%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    ProgressWindow PW = new ProgressWindow("Error", "You have to have at least one file selected in the right panel");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
+                }
+
+            }
+            
+            // List of files selected in the left panel
+            if (bcontent.Contains("%LPAF%"))
+            {
+                string PTH = "";
+
+                if (LPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
+                    {
+                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + ",";
+                    }
+
+                    string ret = bcontent.Replace("%LPAF%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    ProgressWindow PW = new ProgressWindow("Error", "You have to have at least one file selected in the left panel");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
+                }
+
+            }
+            
+            
             return bcontent;
         }
 
