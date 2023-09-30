@@ -21,7 +21,7 @@ There are a series of buttons below the panels that allow one to user defined
 functions. I first execution the application will read the definitions of these 
 user defined functions from a file called `Configuration.xml` in the same folder.
 
-A Sample of this flike is shown below
+A Sample of this file is shown below
 
 ```
 
@@ -72,6 +72,18 @@ It is a work in progress.
 Main Screen Interface
 
 ![Screenshot](https://github.com/Harlock123/DirOpusReImagined/blob/master/Images/MainScreen1.jpg)
+
+Arguments Parameters
+
+The <Args> </Args> parameter can contain the following entries
+
+%FD% - Full Path of the file or folder selected in the Left or Right Panel Left Panel is searched first
+
+%AF% - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
+
+%LAF% - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
+
+
 
 ## Building
 

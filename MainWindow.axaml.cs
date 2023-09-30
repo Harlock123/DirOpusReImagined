@@ -230,9 +230,10 @@ namespace DirOpusReImagined
 
         private string ParseTheArgs(string bcontent)
         {
-            // this will attermpt to parse the bcontent string and
+            // this will attempt to parse the bcontent string and
             // return the action to be performed
 
+            // Single folder selected in either panel
             if (bcontent.Contains("%FD%"))
             {
                 // we are looking for the first folder selected in
@@ -277,6 +278,7 @@ namespace DirOpusReImagined
                 }
             }
 
+            // Single file selected in either panel
             if (bcontent.Contains("%AF%"))
             {
                 string PTH = "";
@@ -326,6 +328,7 @@ namespace DirOpusReImagined
 
             }
 
+            // List of files Selected in either panel Left First
             if (bcontent.Contains("%LAF%"))
             {
                 string PTH = "";
@@ -377,6 +380,7 @@ namespace DirOpusReImagined
 
             }
 
+            // First file in the left panel and first file in the right panel Order is unimportant
             if (bcontent.Contains("%LF1%") && bcontent.Contains("%RF1%"))
             {
                 string PTH = "";
@@ -412,7 +416,74 @@ namespace DirOpusReImagined
 
             }
 
+            // First file in the left panel only
+            if (bcontent.Contains("%LF1%"))
+            {
+                string PTH = "";
 
+                if (LPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
+
+                    PTH = MakePathEnvSafe(LPpath.Text) + thelista[0].Name;
+
+                    string ret = bcontent.Replace("%LF1%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    ProgressWindow PW = new ProgressWindow("Error", "You have to have a file selected in the left panel");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
+                }
+
+            }
+
+            // First file in the right panel only
+            if (bcontent.Contains("%RF1%"))
+            {
+                string PTH = "";
+
+                if (RPgrid.GetListOfSelectedFiles().Count > 0)
+                {
+                    // the left grid has some files selected
+
+                    List<AFileEntry> thelista = RPgrid.GetListOfSelectedFiles();
+
+                    PTH = MakePathEnvSafe(RPpath.Text) + thelista[0].Name;
+
+                    string ret = bcontent.Replace("%RF1%", PTH);
+
+                    return ret;
+
+                }
+                else
+                {
+                    // neither grid has a folder selected
+                    // do nothing
+
+                    ProgressWindow PW = new ProgressWindow("Error", "You have to have a file selected in the right panel");
+
+                    PW.ShowDialog(this);
+
+                    //PW.Close();
+
+                    return "%ERROR%";
+                }
+
+            }
+            
             return bcontent;
         }
 
