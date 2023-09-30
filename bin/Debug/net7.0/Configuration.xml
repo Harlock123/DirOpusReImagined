@@ -46,6 +46,10 @@
 		CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
 	</Executable>
 	
+	<Images>
+		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+	</Images>
+	
 	<LeftGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>

@@ -29,11 +29,14 @@ namespace DirOpusReImagined
         private Avalonia.Size OrigSize = new Avalonia.Size();
 
         private List<string> ExecutableStuff = new List<string>();
+        private List<string> ImageStuff = new List<string>();
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
         
         private string StartRightPath = "";
         private string StartLeftPath = "";
+
+        private bool UseIntegratedImageViewer = true;
 
         public MainWindow()
         {
@@ -1109,7 +1112,16 @@ namespace DirOpusReImagined
                 {
                     // its an actual file so can we execute it?
 
-                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
+                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
+                    {
+                        string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+
+                        ImageViewer iv = new ImageViewer(thingtoexecute);
+
+                        iv.ShowDialog(this);
+
+                    }
+                    else if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -1136,6 +1148,16 @@ namespace DirOpusReImagined
                 }
                 else
                 {
+                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
+                    {
+                        string thingtoexecute = (LPpath.Text + "//" + it.Name).Replace(@"//", @"/");
+                        
+                        ImageViewer iv = new ImageViewer(thingtoexecute);
+
+                        iv.ShowDialog(this);
+
+                    }
+                    else 
                     if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
@@ -1154,6 +1176,22 @@ namespace DirOpusReImagined
                 }
 
             }
+        }
+
+        private bool FileExtensionIsImage(string v)
+        {
+            bool result = false;
+            
+            foreach (string s in ImageStuff)
+            {
+                if (v.ToUpper().EndsWith(s))
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            return result;
         }
 
         private bool FileExtensionIsExecutable(string v)
@@ -1428,6 +1466,32 @@ namespace DirOpusReImagined
                     }
                 }
 
+                // find the <Extensions> element in the <Images> element
+                XElement imagesElement = xmlDoc.Descendants("ImageExtensions").FirstOrDefault();
+                
+                if (imagesElement != null)
+                {
+                    ImageStuff = new List<string>();
+                    string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
+                    // Get the string value inside the <Extensions> element
+                    string extensionsString = Regex.Replace(imagesElement.Value, pattern, "");
+
+                    // Split the string into an array if needed
+                    string[] extensionsArray = extensionsString.Split(',');
+
+                    // Print or use the string or array as needed
+                    Console.WriteLine("Extensions String: " + extensionsString);
+                    //Console.WriteLine("Extensions Array: ");
+
+                    //string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
+                    //string cleanedString = Regex.Replace(input, pattern, "");
+
+                    foreach (string extension in extensionsArray)
+                    {
+                        ImageStuff.Add(extension);
+                    }
+                }
+                
                 // Find the <FontSize> element inside <LeftGrid>
                 XElement leftGridFontSizeElement = xmlDoc.Descendants("LeftGrid")
                     .Elements("FontSize")
