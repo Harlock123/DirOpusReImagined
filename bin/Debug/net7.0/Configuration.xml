@@ -49,7 +49,7 @@
 	<LeftGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
-		<Title>LEFTGrid</Title>
+		<Title>LEFT Grid</Title>
 		<TitleFontSize>20</TitleFontSize>
 		<StartPath>/</StartPath>
 	</LeftGrid>
@@ -57,7 +57,7 @@
 	<RightGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
-		<Title>RIGHTGrid</Title>
+		<Title>RIGHT Grid</Title>
 		<TitleFontSize>20</TitleFontSize>
 		<StartPath>/</StartPath>
 	</RightGrid>

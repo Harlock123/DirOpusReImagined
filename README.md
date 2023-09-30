@@ -24,46 +24,71 @@ user defined functions from a file called `Configuration.xml` in the same folder
 A Sample of this file is shown below
 
 ```
+<Settings>
+	<Buttons>
+		<Button>
+			<Name>LPButton1</Name>
+			<Content>VSCODE here</Content>
+			<Background>Red</Background>
+			<Foreground>Black</Foreground>
+			<HorizontalAlignment>Center</HorizontalAlignment>
+			<VeriticalAlignment>Center</VeriticalAlignment>
+			<Margin>2,2,2,2</Margin>
+			<Action>code</Action>
+			<Args>%FD%</Args>
+			<Shell>True</Shell>
+			<Window>True</Window>
+		</Button>
+		<Button>
+			<Name>LPButton2</Name>
+			<Content>VSCODE All Files</Content>
+			<Action>code</Action>
+			<Args>%AF%</Args>
+			<Shell>True</Shell>
+			<Window>True</Window>
+		</Button>
+		<Button>
+			<Name>LPButton3</Name>
+			<Content>NotePad all seq</Content>
+			<Action>notepad.exe</Action>
+			<Args>%LAF%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+		</Button>
+		<Button>
+			<Name>LPButton4</Name>
+			<Content>Code Diff</Content>
+			<Action>code</Action>
+			<Args>--diff %LF1% %RF1%</Args>
+			<Shell>True</Shell>
+			<Window>False</Window>
+		</Button>
+	</Buttons>
+	
+	<Executable>
+		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
+		PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
+		AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
+		CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
+	</Executable>
+	
+	<LeftGrid>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
+		<Title>LEFT Grid</Title>
+		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
+	</LeftGrid>
+	
+	<RightGrid>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
+		<Title>RIGHT Grid</Title>
+		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
+	</RightGrid>
 
-<Buttons>
-	<Button>
-		<Name>LPButton1</Name>
-		<Content>VSCODE here</Content>
-		<Background>Red</Background>
-		<Foreground>Black</Foreground>
-		<HorizontalAlignment>Center</HorizontalAlignment>
-		<VeriticalAlignment>Center</VeriticalAlignment>
-		<Margin>2,2,2,2</Margin>
-		<Action>C:\Program Files\Microsoft VS Code\bin\code.cmd</Action>
-		<Args>%FD%</Args>
-		<Shell>True</Shell>
-		<Window>True</Window>
-	</Button>
-	<Button>
-		<Name>LPButton2</Name>
-		<Content>VSCODE All Files</Content>
-		<Action>code</Action>
-		<Args>%AF%</Args>
-		<Shell>True</Shell>
-		<Window>True</Window>
-	</Button>
-	<Button>
-		<Name>LPButton3</Name>
-		<Content>NotePad all seq</Content>
-		<Action>notepad.exe</Action>
-		<Args>%LAF%</Args>
-		<Shell>False</Shell>
-		<Window>False</Window>
-	</Button>
-	<Button>
-		<Name>LPButton4</Name>
-		<Content>Code Diff</Content>
-		<Action>code</Action>
-		<Args>--diff %LF1% %RF1%</Args>
-		<Shell>True</Shell>
-		<Window>False</Window>
-	</Button>
-</Buttons>
+</Settings>
 
 ```
 
@@ -90,6 +115,33 @@ The <Args> </Args> parameter can contain the following entries
 %RPAF% - Full Path All Files in the Right Panel . Each argument is separated by a space
 
 %LPAF% - Full Path All Files in the Left Panel . Each argument is separated by a space
+
+The Action Parameter needs to be the actual command that you want to execute on clicking the button. 
+The Parsed ARGS from the above parameters will be appended to the command line.
+
+The Name Parameter is the name of the button. It is used to identify the button in the configuration file.
+There are 36 buttons available in the interface numbered 1 to 36. The buttons are numbered from left to right
+top to bottom. The first button is LPButton1 and the last button is LPButton36.
+
+The Content Parameter is the text that will appear on the button itself
+
+The Background Parameter is the background color of the button
+
+The Foreground Parameter is the foreground color of the button
+
+The HorizontalAlignment Parameter is the horizontal alignment of the text on the button
+Valid values are Left, Center, Right
+
+The VerticalAlignment Parameter is the vertical alignment of the text on the button
+Valid values are Top, Center, Bottom
+
+The Margin Parameter is the margin around the button. The values are in the order Left, Top, Right, Bottom
+
+The Shell Parameter is a boolean value that indicates whether the command should be executed in a shell or not
+valid values are True or False
+
+The Window Parameter is a boolean value that indicates whether the command should be executed in a new window or not
+valid values are True or False
 
 
 
