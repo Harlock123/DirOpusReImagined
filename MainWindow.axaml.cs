@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Avalonia.Input;
 using YamlDotNet.Serialization;
 using static System.Net.WebRequestMethods;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
@@ -93,6 +94,9 @@ namespace DirOpusReImagined
             RPgrid.JustifyColumns.Add(2);
             RPgrid.JustifyColumns.Add(3);
             RPgrid.JustifyColumns.Add(4);
+            
+            LPpath.KeyUp += LPpath_KeyUp;
+            RPpath.KeyUp += RPpath_KeyUp;
 
             LPpath.Text = GetRootDirectoryPath();
             RPpath.Text = GetRootDirectoryPath();
@@ -138,6 +142,22 @@ namespace DirOpusReImagined
             LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+        }
+
+        private void RPpath_KeyUp(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                PopulateFilePanel(RPgrid, RPpath.Text);
+            }
+        }
+
+        private void LPpath_KeyUp(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                PopulateFilePanel(LPgrid, LPpath.Text);
+            }
         }
 
         private void ClearRightButton_Click(object? sender, RoutedEventArgs e)
