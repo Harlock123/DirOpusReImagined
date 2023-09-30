@@ -100,47 +100,47 @@ Main Screen Interface
 
 Arguments Parameters
 
-The <Args> </Args> parameter can contain the following entries
+The `<Args> </Args>` parameter can contain the following entries
 
-%FD% - Full Path of the file or folder selected in the Left or Right Panel Left Panel is searched first
+`%FD%` - Full Path of the file or folder selected in the Left or Right Panel Left Panel is searched first
 
-%AF% - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
+`%AF%` - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
 
-%LAF% - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
+`%LAF%` - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
 
-%RF1% - Full Path of the file or folder selected in the Right Panel
+`%RF1%` - Full Path of the file or folder selected in the Right Panel
 
-%LF1% - Full Path of the file or folder selected in the Left Panel
+`%LF1%` - Full Path of the file or folder selected in the Left Panel
 
-%RPAF% - Full Path All Files in the Right Panel . Each argument is separated by a space
+`%RPAF%` - Full Path All Files in the Right Panel . Each argument is separated by a space
 
-%LPAF% - Full Path All Files in the Left Panel . Each argument is separated by a space
+`%LPAF%` - Full Path All Files in the Left Panel . Each argument is separated by a space
 
-The Action Parameter needs to be the actual command that you want to execute on clicking the button. 
+The `<Action></Action>` Parameter needs to be the actual command that you want to execute on clicking the button. 
 The Parsed ARGS from the above parameters will be appended to the command line.
 
-The Name Parameter is the name of the button. It is used to identify the button in the configuration file.
+The `<Name></Name>` Parameter is the name of the button. It is used to identify the button in the configuration file.
 There are 36 buttons available in the interface numbered 1 to 36. The buttons are numbered from left to right
 top to bottom. The first button is LPButton1 and the last button is LPButton36.
 
-The Content Parameter is the text that will appear on the button itself
+The `<Content></Content>` Parameter is the text that will appear on the button itself
 
-The Background Parameter is the background color of the button
+The `<Background></Background>` Parameter is the background color of the button
 
-The Foreground Parameter is the foreground color of the button
+The `<Foreground></Foreground>` Parameter is the foreground color of the button
 
-The HorizontalAlignment Parameter is the horizontal alignment of the text on the button
+The `<HorizontalAlignment></HorizontalAlignment>` Parameter is the horizontal alignment of the text on the button
 Valid values are Left, Center, Right
 
-The VerticalAlignment Parameter is the vertical alignment of the text on the button
+The `<VerticalAlignment></VerticalAlignment>` Parameter is the vertical alignment of the text on the button
 Valid values are Top, Center, Bottom
 
-The Margin Parameter is the margin around the button. The values are in the order Left, Top, Right, Bottom
+The `<Margin></Margin>` Parameter is the margin around the button. The values are in the order Left, Top, Right, Bottom
 
-The Shell Parameter is a boolean value that indicates whether the command should be executed in a shell or not
+The `<Shell></Shell>` Parameter is a boolean value that indicates whether the command should be executed in a shell or not
 valid values are True or False
 
-The Window Parameter is a boolean value that indicates whether the command should be executed in a new window or not
+The `<Window></Window>` Parameter is a boolean value that indicates whether the command should be executed in a new window or not
 valid values are True or False
 
 
@@ -149,5 +149,4 @@ valid values are True or False
 ## Building
 
 ### Prerequisites
-
 
