@@ -1471,6 +1471,8 @@ namespace DirOpusReImagined
                 // find the <Extensions> element in the <Images> element
                 XElement imagesElement = xmlDoc.Descendants("ImageExtensions").FirstOrDefault();
                 
+                XElement UseIntegratedImageViewerElement = xmlDoc.Descendants("UseIntegratedImageViewer").FirstOrDefault();
+                
                 if (imagesElement != null)
                 {
                     ImageStuff = new List<string>();
@@ -1492,6 +1494,15 @@ namespace DirOpusReImagined
                     {
                         ImageStuff.Add(extension);
                     }
+                }
+                
+                if (UseIntegratedImageViewerElement != null)
+                {
+                    UseIntegratedImageViewer = bool.Parse(UseIntegratedImageViewerElement.Value);
+                }
+                else
+                {
+                    UseIntegratedImageViewer = false;
                 }
                 
                 // Find the <FontSize> element inside <LeftGrid>

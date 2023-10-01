@@ -48,6 +48,7 @@
 	
 	<Images>
 		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+		<UseIntegratedImageViewer>False</UseIntegratedImageViewer>
 	</Images>
 	
 	<LeftGrid>
