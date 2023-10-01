@@ -691,9 +691,11 @@ namespace DirOpusReImagined
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
+                result = result.Replace(@"/", @"\");
+                
                 if (!result.EndsWith(@"\"))
                 {
-                    result += @"\";
+                    result += @"\\";
 
                 }
                                
