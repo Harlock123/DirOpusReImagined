@@ -1556,7 +1556,7 @@ namespace DirOpusReImagined
                 if (leftGridStartPathElement != null)
                 {
                     // Get the font size value from <RightGrid>
-                    LPpath.Text = leftGridStartPathElement.Value;
+                    LPpath.Text = MakePathEnvSafe(leftGridStartPathElement.Value);
                     StartLeftPath = LPpath.Text;
                 }
                 else
@@ -1629,7 +1629,7 @@ namespace DirOpusReImagined
                 if (rightGridStartPathElement != null)
                 {
                     // Get the font size value from <RightGrid>
-                    RPpath.Text = rightGridStartPathElement.Value;
+                    RPpath.Text = MakePathEnvSafe(rightGridStartPathElement.Value);
                     StartRightPath = RPpath.Text;
                 }
                 else
