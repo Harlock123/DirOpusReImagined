@@ -72,6 +72,10 @@ A Sample of this file is shown below
 		CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
 	</Executable>
 	
+	<Images>
+		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+	</Images>
+		
 	<LeftGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
@@ -102,19 +106,25 @@ Arguments Parameters
 
 The `<Args> </Args>` parameter can contain the following entries
 
-`%FD%` - Full Path of the file or folder selected in the Left or Right Panel Left Panel is searched first
+* Any text that you want to pass to the command line
 
-`%AF%` - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
+* `%FD%` - Full Path of the file or folder selected in the Left or Right Panel Left Panel is searched first
 
-`%LAF%` - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
+* `%AF%` - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
 
-`%RF1%` - Full Path of the file or folder selected in the Right Panel
+* `%LAF%` - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
 
-`%LF1%` - Full Path of the file or folder selected in the Left Panel
+* `%RF1%` - Full Path of the file selected in the Right Panel
 
-`%RPAF%` - Full Path All Files in the Right Panel . Each argument is separated by a space
+* `%LF1%` - Full Path of the file selected in the Left Panel
 
-`%LPAF%` - Full Path All Files in the Left Panel . Each argument is separated by a space
+    Note That the above two parameters are usable together in a buttons definition
+    To allow handing a file from each panel to a command. For example a diff command
+    as shown in the above example configuration file
+
+* `%RPAF%` - Full Path All Files in the Right Panel . Each argument is separated by a space
+
+* `%LPAF%` - Full Path All Files in the Left Panel . Each argument is separated by a space
 
 The `<Action></Action>` Parameter needs to be the actual command that you want to execute on clicking the button. 
 The Parsed ARGS from the above parameters will be appended to the command line.
