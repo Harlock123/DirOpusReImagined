@@ -61,6 +61,9 @@ namespace DirOpusReImagined
             I2.Source = B2;
             I2.Width = LPBackButton.Width + 8;
             I2.Height = LPBackButton.Height + 8;
+            
+            RPBackButton.Content = I1;
+            LPBackButton.Content = I2;
 
             SwapButton.Click += SwapButton_Click;
 
@@ -72,9 +75,6 @@ namespace DirOpusReImagined
 
             MoveLeftButton.Click += MoveLeftButton_Click;  
             MoveRightButton.Click += MoveRightButton_Click;
-
-            RPBackButton.Content = I1;
-            LPBackButton.Content = I2;
 
             RPBackButton.Click += RPBackButton_Click;
             LPBackButton.Click += LPBackButton_Click;
