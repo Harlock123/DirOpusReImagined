@@ -27,11 +27,14 @@
 					Grid.Row="0" >
 			<StackPanel Orientation="Horizontal" Spacing="2">
 				<Button Name="LeftToRightButton" Background="Goldenrod"
-				        Content="&gt;" />
+				        Content="&gt;"
+				        ToolTip.Tip="Clone the Left Panels path settings in the Right Panel" />
 				<Button Name="SwapButton" Background="Goldenrod"
-				        Content="&lt;&gt;"/>
+				        Content="&lt;&gt;"
+				        ToolTip.Tip="Exchange the Left Panels path setup with the Right Panel, and visa versa." />
 				<Button Name="RightToLeftButton" Background="Goldenrod"
-				        Content="&lt;" />
+				        Content="&lt;"
+				        ToolTip.Tip="Clone the Right Panels path setup in the Left Panel"/>
 			</StackPanel>
 		</StackPanel>
 		
