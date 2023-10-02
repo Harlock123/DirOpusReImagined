@@ -51,9 +51,13 @@ namespace DirOpusReImagined
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
             
             Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
+            Bitmap B3 = new Bitmap(@"Assets/Drives.png");
 
             Image I1 = new Image();
             Image I2 = new Image();
+            Image I3 = new Image();
+            Image I4 = new Image();
+            
             I1.Source = B2;
             I1.Width = RPBackButton.Width + 8;
             I1.Height = RPBackButton.Height+ 8;
@@ -62,8 +66,19 @@ namespace DirOpusReImagined
             I2.Width = LPBackButton.Width + 8;
             I2.Height = LPBackButton.Height + 8;
             
+            I3.Source = B3;
+            I3.Width = 28;
+            I3.Height = 28;
+            
+            I4.Source = B3;
+            I4.Width = 28;
+            I4.Height = 28;
+            
             RPBackButton.Content = I1;
             LPBackButton.Content = I2;
+            
+            LPDriveButton.Content = I3;
+            RPDriveButton.Content = I4;
 
             SwapButton.Click += SwapButton_Click;
 
