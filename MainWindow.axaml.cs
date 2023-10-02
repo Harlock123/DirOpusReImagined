@@ -52,11 +52,19 @@ namespace DirOpusReImagined
             
             Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
             Bitmap B3 = new Bitmap(@"Assets/Drives.png");
+            Bitmap B4 = new Bitmap(@"Assets/LeftArrow.png");
+            Bitmap B5 = new Bitmap(@"Assets/RightArrow.png");
+            Bitmap B6 = new Bitmap(@"Assets/LeftRightArrows.png");
 
             Image I1 = new Image();
             Image I2 = new Image();
             Image I3 = new Image();
             Image I4 = new Image();
+            Image I5 = new Image();
+            Image I6 = new Image();
+            Image I7 = new Image();
+            
+            
             
             I1.Source = B2;
             I1.Width = RPBackButton.Width + 8;
@@ -74,8 +82,25 @@ namespace DirOpusReImagined
             I4.Width = 28;
             I4.Height = 28;
             
+            I5.Source = B4;
+            I5.Width = 18;
+            I5.Height = 18;
+            
+            I6.Source = B5;
+            I6.Width = 18;
+            I6.Height= 18;
+            
+            I7.Source = B6;
+            I7.Width = 18;
+            I7.Height = 18;
+            
+            
             RPBackButton.Content = I1;
             LPBackButton.Content = I2;
+            
+            SwapButton.Content = I7;
+            LeftToRightButton.Content = I5;
+            RightToLeftButton.Content = I6;
             
             LPDriveButton.Content = I3;
             RPDriveButton.Content = I4;

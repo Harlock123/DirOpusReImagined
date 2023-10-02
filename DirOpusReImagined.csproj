@@ -41,5 +41,9 @@
 
   <ItemGroup>
     <Content Include="bin\Debug\net7.0\Assets\BackFolder.png" />
+    <Content Include="bin\Debug\net7.0\Assets\Drives.png" />
+    <Content Include="bin\Debug\net7.0\Assets\LeftArrow.png" />
+    <Content Include="bin\Debug\net7.0\Assets\LeftRightArrows.png" />
+    <Content Include="bin\Debug\net7.0\Assets\RightArrow.png" />
   </ItemGroup>
 </Project>
