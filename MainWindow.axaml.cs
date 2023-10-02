@@ -81,6 +81,8 @@ namespace DirOpusReImagined
             RPDriveButton.Content = I4;
 
             SwapButton.Click += SwapButton_Click;
+            LeftToRightButton.Click += LeftToRightButton_Click;
+            RightToLeftButton.Click += RightToLeftButton_Click;
 
             ClearLeftButton.Click += ClearLeftButton_Click;
             ClearRightButton.Click += ClearRightButton_Click;
@@ -166,6 +168,19 @@ namespace DirOpusReImagined
             LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+        }
+
+        private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            LPpath.Text = RPpath.Text;
+            PopulateFilePanel(LPgrid,LPpath.Text);
+        }
+
+        private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            RPpath.Text = LPpath.Text;
+            PopulateFilePanel(RPgrid, RPpath.Text);
+            
         }
 
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)

@@ -37,6 +37,14 @@
 			<Shell>True</Shell>
 			<Window>False</Window>
 		</Button>
+		<Button>
+			<Name>LPButton36</Name>
+			<Content>Shawns Mess</Content>
+			<Action>code</Action>
+			<Args>--diff %LF1% %RF1%</Args>
+			<Shell>True</Shell>
+			<Window>False</Window>
+		</Button>
 	</Buttons>
 	
 	<Executable>
