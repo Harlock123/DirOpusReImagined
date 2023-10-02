@@ -48,15 +48,17 @@ namespace DirOpusReImagined
 
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
-            Bitmap B1 = LoadImage(ImageStrings.BackButton);
+            //Bitmap B1 = LoadImage(ImageStrings.BackButton);
+            
+            Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
 
             Image I1 = new Image();
             Image I2 = new Image();
-            I1.Source = B1;
+            I1.Source = B2;
             I1.Width = RPBackButton.Width + 8;
             I1.Height = RPBackButton.Height+ 8;
 
-            I2.Source = B1;
+            I2.Source = B2;
             I2.Width = LPBackButton.Width + 8;
             I2.Height = LPBackButton.Height + 8;
 

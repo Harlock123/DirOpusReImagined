@@ -25,7 +25,8 @@
 					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="0" >
-			<Button Name="SwapButton" Content="&lt;- Swap -&gt;"/>
+			<Button Name="SwapButton" Background="Goldenrod"
+			        Content="&lt;- Swap -&gt;"/>
 		</StackPanel>
 		
 		<StackPanel Orientation="Vertical"
@@ -81,18 +82,24 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="LPBackButton" Grid.Column="0" Grid.Row="0" Content="&lt;=" />
 			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
+			<Button Name="LPDriveButton" Background="Goldenrod"
+			        Grid.Column="2" Grid.Row="0" Content="DRVs" />
 		</Grid>
 		
 		<Grid Grid.Column="2" Grid.Row="0" >
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="RPBackButton" Grid.Column="0" Grid.Row="0" Content="&lt;=" />
 			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
+			<Button Name="RPDriveButton" Background="Goldenrod" 
+			        Grid.Column="2" Grid.Row="0" Content="DRVs" />
 		</Grid>
 		
 		

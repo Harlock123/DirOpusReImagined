@@ -38,4 +38,8 @@
   <ItemGroup>
     <Folder Include="Images\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\net7.0\Assets\BackFolder.png" />
+  </ItemGroup>
 </Project>
