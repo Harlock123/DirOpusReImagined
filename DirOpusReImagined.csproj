@@ -8,6 +8,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove=".gitignore" />
+    <None Remove="Assets\BackFolder.png" />
+    <None Remove="Assets\Drives.png" />
+    <None Remove="Assets\LeftArrow.png" />
+    <None Remove="Assets\LeftRightArrows.png" />
+    <None Remove="Assets\RightArrow.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Debug\net7.0\Configuration.xml">
@@ -40,6 +45,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\BackFolder.png" />
+    <Content Include="Assets\Drives.png" />
+    <Content Include="Assets\LeftArrow.png" />
+    <Content Include="Assets\LeftRightArrows.png" />
+    <Content Include="Assets\RightArrow.png" />
     <Content Include="bin\Debug\net7.0\Assets\BackFolder.png" />
     <Content Include="bin\Debug\net7.0\Assets\Drives.png" />
     <Content Include="bin\Debug\net7.0\Assets\LeftArrow.png" />
