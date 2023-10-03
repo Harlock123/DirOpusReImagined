@@ -8,6 +8,12 @@
         Title="DirOpusReImagined"
 		Background="LightGray">
 	
+	<!-- Set the DataContext for the MainWindow to itself 
+	<Window.DataContext>
+		<cons:MainWindow />
+	</Window.DataContext>
+-->
+	
 	<Grid Name="MainWindowGridContainer" >
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="0.45*"/>
@@ -150,6 +156,8 @@
 			<Button Name="LPButton4" Grid.Column="3" Grid.Row="0" 
 					Content="Button 4" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
+					<!-- ToolTip.Tip = "{Binding LPBTT4}" -->
+			
 			<Button Name="LPButton5" Grid.Column="4" Grid.Row="0" 
 					Content="Button 5" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
