@@ -37,7 +37,51 @@ namespace DirOpusReImagined
         private string StartLeftPath = "";
 
         private bool UseIntegratedImageViewer = true;
+        
+        // Setup Local strings for the Buttons in the bottom panel
+        private string LPButton1TTIP = "";
+        private string LPButton2TTIP = "";
+        private string LPButton3TTIP = "";
+        private string LPButton4TTIP = "";
+        private string LPButton5TTIP = "";
+        private string LPButton6TTIP = "";
+        private string LPButton7TTIP = "";
+        private string LPButton8TTIP = "";
+        private string LPButton9TTIP = "";
+        private string LPButton10TTIP = "";
+        private string LPButton11TTIP = "";
+        private string LPButton12TTIP = "";
+        private string LPButton13TTIP = "";
+        private string LPButton14TTIP = "";
+        private string LPButton15TTIP = "";
+        private string LPButton16TTIP = "";
+        private string LPButton17TTIP = "";
+        private string LPButton18TTIP = "";
+        private string LPButton19TTIP = "";
+        private string LPButton20TTIP = "";
+        private string LPButton21TTIP = "";
+        private string LPButton22TTIP = "";
+        private string LPButton23TTIP = "";
+        private string LPButton24TTIP = "";
+        private string LPButton25TTIP = "";
+        private string LPButton26TTIP = "";
+        private string LPButton27TTIP = "";
+        private string LPButton28TTIP = "";
+        private string LPButton29TTIP = "";
+        private string LPButton30TTIP = "";
+        private string LPButton31TTIP = "";
+        private string LPButton32TTIP = "";
+        private string LPButton33TTIP = "";
+        private string LPButton34TTIP = "";
+        private string LPButton35TTIP = "";
+        private string LPButton36TTIP = "";
 
+        public string  LPBTT4
+        {
+            get { return LPButton4TTIP;}
+            set { LPButton4TTIP = value; }
+        }
+    
         public MainWindow()
         {
             InitializeComponent();
@@ -1721,7 +1765,8 @@ namespace DirOpusReImagined
                                              Action = (string)btn.Element("Action"),
                                              Args = (string)btn.Element("Args"),
                                              ShellExecute = (string)btn.Element("Shell"),
-                                             ShowWindow = (string)btn.Element("Window")
+                                             ShowWindow = (string)btn.Element("Window"),
+                                             ToolTip = (string)btn.Element("ToolTip")
                                          };
 
                 
@@ -1732,7 +1777,7 @@ namespace DirOpusReImagined
                     var grid = (Grid)window.FindControl<Control>("ButtonGrid");
                     
                     // Find the button by its name
-                    var button = (Button)grid.FindControl<Control>(buttonSettings.Name);
+                    Button button = (Button)grid.FindControl<Control>(buttonSettings.Name);
 
                     // Check if the button control exists
                     if (button != null)
@@ -1811,6 +1856,121 @@ namespace DirOpusReImagined
                             var margin = Avalonia.Thickness.Parse(buttonSettings.Margin);
                             // Set the button's Margin property
                             button.Margin = margin;
+                        }
+                        
+                        if (!string.IsNullOrEmpty(buttonSettings.ToolTip))
+                        {
+                            switch (buttonSettings.Name)
+                            {
+                                case "LPButton1":
+                                    LPButton1TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton2":
+                                    LPButton2TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton3":
+                                    LPButton3TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton4":
+                                    LPButton4TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton5":
+                                    LPButton5TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton6":
+                                    LPButton6TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton7":
+                                    LPButton7TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton8":
+                                    LPButton8TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton9":
+                                    LPButton9TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton10":
+                                    LPButton10TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton11":
+                                    LPButton11TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton12":
+                                    LPButton12TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton13":
+                                    LPButton13TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton14":
+                                    LPButton14TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton15":
+                                    LPButton15TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton16":
+                                    LPButton16TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton17":
+                                    LPButton17TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton18":
+                                    LPButton18TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton19":
+                                    LPButton19TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton20":
+                                    LPButton20TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton21":
+                                    LPButton21TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton22":
+                                    LPButton22TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton23":
+                                    LPButton23TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton24":
+                                    LPButton24TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton25":
+                                    LPButton25TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton26":
+                                    LPButton26TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton27":
+                                    LPButton27TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton28":
+                                    LPButton28TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton29":
+                                    LPButton29TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton30":
+                                    LPButton30TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton31":
+                                    LPButton31TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton32":
+                                    LPButton32TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton33":
+                                    LPButton33TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton34":
+                                    LPButton34TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton35":
+                                    LPButton35TTIP = buttonSettings.ToolTip;
+                                    break;
+                                case "LPButton36":
+                                    LPButton36TTIP = buttonSettings.ToolTip;
+                                    break;
+                            }
                         }
                     
                         // Check if the Action property is not null or empty
@@ -1927,6 +2087,8 @@ namespace DirOpusReImagined
         public string Args { get; set; }
         public string ShellExecute { get; set;}
         public string ShowWindow { get; set; }
+        
+        public string ToolTip { get; set; }
 
     }
 
