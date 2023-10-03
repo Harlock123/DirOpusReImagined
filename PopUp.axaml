@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="100"
+        x:Class="DirOpusReImagined.PopUp"
+        Title="PopUp"
+		Background="Cornsilk">
+	<TextBlock Name="TheText"
+			   Width="190"
+			   TextWrapping="Wrap"
+			   TextAlignment="Center"
+			   Text="This is a popup! Test to see how long a piece of text can be. This is only a test" 
+			   HorizontalAlignment="Center" 
+			   VerticalAlignment="Center"/>
+</Window>

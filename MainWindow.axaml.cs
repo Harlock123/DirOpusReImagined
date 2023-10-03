@@ -18,6 +18,9 @@ using static System.Net.WebRequestMethods;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
 using Image = Avalonia.Controls.Image;
+using Avalonia.Controls.Primitives;
+using Avalonia;
+using Avalonia.Controls.Primitives.PopupPositioning;
 
 namespace DirOpusReImagined
 {
@@ -237,6 +240,99 @@ namespace DirOpusReImagined
             LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+
+            LPButton1.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton2.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton3.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton4.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton5.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton6.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton7.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton8.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton9.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton10.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton11.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton12.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton13.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton14.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton15.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton16.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton17.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton18.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton19.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton20.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton21.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton22.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton23.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton24.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton25.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton26.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton27.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton28.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton29.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton30.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton31.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton32.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton33.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton34.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton35.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+            LPButton36.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
+
+
+        }
+
+        private void Handle_Lower_Panel_Button_PointerEntered(object? sender, PointerEventArgs e)
+        {
+            if (sender is null)
+            {
+                return;
+            }
+
+            Button B = (Button)sender;
+
+            string nm = B.Name;
+
+            foreach (ButtonEntry item in TheButtons)
+            {
+                if (item.Bname.ToUpper() == nm.ToUpper() && item.ToolTip!=null)
+                {
+                    // We have a winner - do the action
+
+                    var popup = new Popup
+                    {
+                        PlacementMode = PlacementMode.Pointer,
+                        PlacementTarget = (Button)sender,
+                        ZIndex = 9999,
+                        PlacementConstraintAdjustment = PopupPositionerConstraintAdjustment.FlipY,
+                        
+                        Child = new Border
+                        {
+                            Background = Avalonia.Media.Brushes.Cornsilk,
+                            Padding = new Thickness(8),
+                            Child = new TextBlock { Text = item.ToolTip }
+                        }
+                    };
+
+                    popup.Open();
+
+                    Avalonia.Threading.DispatcherTimer.Run(() =>
+                    {
+                        popup.Close();
+                        return false;
+                    }, TimeSpan.FromSeconds(2)); // adjust the delay as needed
+
+                    //var tt = new ToolTip();
+
+                    //tt.Content = item.ToolTip;
+
+                    //tt.IsVisible = true;
+
+                    //tt.PlacementMode = PlacementMode.Pointer;
+
+
+
+                }
+            }
         }
 
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
@@ -1860,117 +1956,120 @@ namespace DirOpusReImagined
                         
                         if (!string.IsNullOrEmpty(buttonSettings.ToolTip))
                         {
-                            switch (buttonSettings.Name)
-                            {
-                                case "LPButton1":
-                                    LPButton1TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton2":
-                                    LPButton2TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton3":
-                                    LPButton3TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton4":
-                                    LPButton4TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton5":
-                                    LPButton5TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton6":
-                                    LPButton6TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton7":
-                                    LPButton7TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton8":
-                                    LPButton8TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton9":
-                                    LPButton9TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton10":
-                                    LPButton10TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton11":
-                                    LPButton11TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton12":
-                                    LPButton12TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton13":
-                                    LPButton13TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton14":
-                                    LPButton14TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton15":
-                                    LPButton15TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton16":
-                                    LPButton16TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton17":
-                                    LPButton17TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton18":
-                                    LPButton18TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton19":
-                                    LPButton19TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton20":
-                                    LPButton20TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton21":
-                                    LPButton21TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton22":
-                                    LPButton22TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton23":
-                                    LPButton23TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton24":
-                                    LPButton24TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton25":
-                                    LPButton25TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton26":
-                                    LPButton26TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton27":
-                                    LPButton27TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton28":
-                                    LPButton28TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton29":
-                                    LPButton29TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton30":
-                                    LPButton30TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton31":
-                                    LPButton31TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton32":
-                                    LPButton32TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton33":
-                                    LPButton33TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton34":
-                                    LPButton34TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton35":
-                                    LPButton35TTIP = buttonSettings.ToolTip;
-                                    break;
-                                case "LPButton36":
-                                    LPButton36TTIP = buttonSettings.ToolTip;
-                                    break;
-                            }
+
+                            
+
+                            //switch (buttonSettings.Name)
+                            //{
+                            //    case "LPButton1":
+                            //        LPButton1TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton2":
+                            //        LPButton2TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton3":
+                            //        LPButton3TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton4":
+                            //        LPButton4TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton5":
+                            //        LPButton5TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton6":
+                            //        LPButton6TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton7":
+                            //        LPButton7TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton8":
+                            //        LPButton8TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton9":
+                            //        LPButton9TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton10":
+                            //        LPButton10TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton11":
+                            //        LPButton11TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton12":
+                            //        LPButton12TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton13":
+                            //        LPButton13TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton14":
+                            //        LPButton14TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton15":
+                            //        LPButton15TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton16":
+                            //        LPButton16TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton17":
+                            //        LPButton17TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton18":
+                            //        LPButton18TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton19":
+                            //        LPButton19TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton20":
+                            //        LPButton20TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton21":
+                            //        LPButton21TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton22":
+                            //        LPButton22TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton23":
+                            //        LPButton23TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton24":
+                            //        LPButton24TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton25":
+                            //        LPButton25TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton26":
+                            //        LPButton26TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton27":
+                            //        LPButton27TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton28":
+                            //        LPButton28TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton29":
+                            //        LPButton29TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton30":
+                            //        LPButton30TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton31":
+                            //        LPButton31TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton32":
+                            //        LPButton32TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton33":
+                            //        LPButton33TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton34":
+                            //        LPButton34TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton35":
+                            //        LPButton35TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //    case "LPButton36":
+                            //        LPButton36TTIP = buttonSettings.ToolTip;
+                            //        break;
+                            //}
                         }
                     
                         // Check if the Action property is not null or empty
@@ -1997,6 +2096,8 @@ namespace DirOpusReImagined
                                 buttonEntry.ShowWindow = bool.Parse(buttonSettings.ShowWindow);
                             }
 
+                            buttonEntry.ToolTip = buttonSettings.ToolTip;
+
                             // Add the button entry to the list of buttons
                             TheButtons.Add(buttonEntry);
                             
@@ -2020,6 +2121,7 @@ namespace DirOpusReImagined
         public string Bargs { get; set; }
         public bool ShellExecute { get; set; }
         public bool ShowWindow { get; set; }
+        public string ToolTip { get; set; }
         
         public ButtonEntry(string name, string content, string bargs)
         {
@@ -2028,6 +2130,7 @@ namespace DirOpusReImagined
             Bargs = bargs;
             ShellExecute = true;
             ShowWindow = false;
+            ToolTip = "";
         }
 
         public ButtonEntry(string name, string content, string bargs,string sexecute)
@@ -2046,6 +2149,7 @@ namespace DirOpusReImagined
             //ShellExecute = true;
 
             ShowWindow = false;
+            ToolTip = "";
         }
 
         public ButtonEntry(string name, string content, string bargs, string sexecute, string swin)
@@ -2071,6 +2175,33 @@ namespace DirOpusReImagined
                 ShowWindow = false;
             }
             //ShowWindow = false;
+            ToolTip = "";
+        }
+
+        public ButtonEntry(string name, string content, string bargs, string sexecute, string swin,string tooltip)
+        {
+            Bname = name;
+            Bcontent = content;
+            Bargs = bargs;
+            if (sexecute.ToUpper() == "FALSE")
+            {
+                ShellExecute = false;
+            }
+            else
+            {
+                ShellExecute = true;
+            }
+            //ShellExecute = true;
+            if (swin.ToUpper() == "TRUE")
+            {
+                ShowWindow = true;
+            }
+            else
+            {
+                ShowWindow = false;
+            }
+            //ShowWindow = false;
+            ToolTip = tooltip;
         }
     }
 
