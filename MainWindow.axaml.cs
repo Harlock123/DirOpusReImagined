@@ -41,50 +41,8 @@ namespace DirOpusReImagined
 
         private bool UseIntegratedImageViewer = true;
         
-        // Setup Local strings for the Buttons in the bottom panel
-        private string LPButton1TTIP = "";
-        private string LPButton2TTIP = "";
-        private string LPButton3TTIP = "";
-        private string LPButton4TTIP = "";
-        private string LPButton5TTIP = "";
-        private string LPButton6TTIP = "";
-        private string LPButton7TTIP = "";
-        private string LPButton8TTIP = "";
-        private string LPButton9TTIP = "";
-        private string LPButton10TTIP = "";
-        private string LPButton11TTIP = "";
-        private string LPButton12TTIP = "";
-        private string LPButton13TTIP = "";
-        private string LPButton14TTIP = "";
-        private string LPButton15TTIP = "";
-        private string LPButton16TTIP = "";
-        private string LPButton17TTIP = "";
-        private string LPButton18TTIP = "";
-        private string LPButton19TTIP = "";
-        private string LPButton20TTIP = "";
-        private string LPButton21TTIP = "";
-        private string LPButton22TTIP = "";
-        private string LPButton23TTIP = "";
-        private string LPButton24TTIP = "";
-        private string LPButton25TTIP = "";
-        private string LPButton26TTIP = "";
-        private string LPButton27TTIP = "";
-        private string LPButton28TTIP = "";
-        private string LPButton29TTIP = "";
-        private string LPButton30TTIP = "";
-        private string LPButton31TTIP = "";
-        private string LPButton32TTIP = "";
-        private string LPButton33TTIP = "";
-        private string LPButton34TTIP = "";
-        private string LPButton35TTIP = "";
-        private string LPButton36TTIP = "";
+        private string LastButtonPopupName = "";
 
-        public string  LPBTT4
-        {
-            get { return LPButton4TTIP;}
-            set { LPButton4TTIP = value; }
-        }
-    
         public MainWindow()
         {
             InitializeComponent();
@@ -278,7 +236,49 @@ namespace DirOpusReImagined
             LPButton35.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
             LPButton36.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
 
+            LPButton1.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton2.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton3.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton4.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton5.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton6.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton7.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton8.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton9.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton10.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton11.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton12.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton13.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton14.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton15.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton16.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton17.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton18.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton19.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton20.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton21.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton22.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton23.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton24.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton25.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton26.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton27.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton28.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton29.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton30.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton31.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton32.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton33.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton34.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton35.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+            LPButton36.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
 
+
+        }
+
+        private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
+        {
+            LastButtonPopupName = "";
         }
 
         private void Handle_Lower_Panel_Button_PointerEntered(object? sender, PointerEventArgs e)
@@ -294,42 +294,31 @@ namespace DirOpusReImagined
 
             foreach (ButtonEntry item in TheButtons)
             {
-                if (item.Bname.ToUpper() == nm.ToUpper() && item.ToolTip!=null)
+                if (item.Bname.ToUpper() == nm.ToUpper() && item.ToolTip!=null && LastButtonPopupName != B.Name)
                 {
                     // We have a winner - do the action
 
-                    var popup = new Popup
-                    {
-                        PlacementMode = PlacementMode.Pointer,
-                        PlacementTarget = (Button)sender,
-                        ZIndex = 9999,
-                        PlacementConstraintAdjustment = PopupPositionerConstraintAdjustment.FlipY,
-                        
-                        Child = new Border
-                        {
-                            Background = Avalonia.Media.Brushes.Cornsilk,
-                            Padding = new Thickness(8),
-                            Child = new TextBlock { Text = item.ToolTip }
-                        }
-                    };
+                    LastButtonPopupName = B.Name;
+                                        
+                    PopUp pop = new PopUp();
+                    pop.Title = B.Content.ToString();
 
-                    popup.Open();
+                    pop.SetText(item.ToolTip);
+
+                    var p = this.VisualRoot.PointToScreen(e.GetPosition(this));
+
+                    pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
+
+                    pop.Width = 240;
+                    pop.Height = 100;
+
+                    pop.Show();
 
                     Avalonia.Threading.DispatcherTimer.Run(() =>
                     {
-                        popup.Close();
+                        pop.Close();
                         return false;
-                    }, TimeSpan.FromSeconds(2)); // adjust the delay as needed
-
-                    //var tt = new ToolTip();
-
-                    //tt.Content = item.ToolTip;
-
-                    //tt.IsVisible = true;
-
-                    //tt.PlacementMode = PlacementMode.Pointer;
-
-
+                    }, TimeSpan.FromSeconds(3)); // adjust the delay as needed
 
                 }
             }

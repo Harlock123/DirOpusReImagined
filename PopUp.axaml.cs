@@ -8,5 +8,15 @@ namespace DirOpusReImagined
         {
             InitializeComponent();
         }
+
+        public void ClosePopUp()
+        {
+            Close();
+        }
+
+        public void SetText(string text)
+        {
+            TheText.Text = text;
+        }
     }
 }
