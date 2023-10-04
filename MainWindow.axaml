@@ -56,13 +56,16 @@
 					Grid.Column="1"
 					Grid.Row="1"
 					HorizontalAlignment="Stretch"
-					Content="clear ---&gt;"></Button>
+					Content="clear ---&gt;"
+					ToolTip.Tip="Clears the items selected in the right panel" >
+			</Button>
 
 			<Button Name="ClearLeftButton"
 					Grid.Column="1"
 					Grid.Row="1"
 					HorizontalAlignment="Stretch"
-					Content="&lt;--- clear"></Button>
+					Content="&lt;--- clear"
+					ToolTip.Tip="Clears the items selected in the left panel"></Button>
 
 			<Label Name="LPLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
 
@@ -71,23 +74,27 @@
 					Grid.Column="1"
 					Grid.Row="1"
 					HorizontalAlignment="Stretch"
-					Content="copy ---&gt;"></Button>
+					Content="copy ---&gt;"
+					ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
 			<Button Name="CopyLeftButton"
 						Grid.Column="1"
 						Grid.Row="1"
 						HorizontalAlignment="Stretch"
-						Content="&lt;--- copy    "></Button>
+						Content="&lt;--- copy    "
+						ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
 
 			<Button Name="MoveRightButton"
 					Grid.Column="1"
 					Grid.Row="1"
 					HorizontalAlignment="Stretch"
-					Content="move  ---&gt;"></Button>
+					Content="move  ---&gt;"
+					ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
 			<Button Name="MoveLeftButton"
 						Grid.Column="1"
 						Grid.Row="1"
 						HorizontalAlignment="Stretch"
-						Content="&lt;--- move"></Button>
+						Content="&lt;--- move"
+						ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
 			
 		</StackPanel>
 		
