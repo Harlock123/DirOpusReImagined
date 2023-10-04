@@ -312,7 +312,7 @@ namespace DirOpusReImagined
                     pop.Width = 240;
                     pop.Height = 100;
 
-                    pop.Show();
+                    pop.Show(); 
 
                     Avalonia.Threading.DispatcherTimer.Run(() =>
                     {
