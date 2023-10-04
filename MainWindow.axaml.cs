@@ -343,6 +343,45 @@ namespace DirOpusReImagined
                     }
 
                     break;
+                case "$DESKTOP":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetDesktopDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetDesktopDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
+                case "$DOCUMENTS":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetDocumentsDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetDocumentsDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
+                case "$PICTURES":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetPicturesDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetPicturesDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
             }
 
 
