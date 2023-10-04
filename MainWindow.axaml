@@ -50,6 +50,52 @@
 					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="1">
+			<StackPanel Name="TheDrivePresetsSp" Orientation="Vertical">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="0.5*"/>
+						<ColumnDefinition Width="0.5*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="0.2*"/>
+					</Grid.RowDefinitions>
+					<Button Name="DrivePreset1a" Grid.Column="0" Grid.Row="0" 
+							Content="&lt; Drv1" HorizontalAlignment="Left"
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset1b" Grid.Column="1" Grid.Row="0"
+					        Content="Drv1 &gt;" HorizontalAlignment="Right" 
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset2a" Grid.Column="0" Grid.Row="1"
+					        Content="Drive 3" HorizontalAlignment="Left"
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset2b" Grid.Column="1" Grid.Row="1"
+					        Content="Drive 4" HorizontalAlignment="Right"
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset3a" Grid.Column="0" Grid.Row="2"
+					        Content="Drive 5" HorizontalAlignment="Left"
+					        VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset3b" Grid.Column="1" Grid.Row="2"
+					        Content="Drive 6" HorizontalAlignment="Right"
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset4a" Grid.Column="0" Grid.Row="3"
+					        Content="Drive 7" HorizontalAlignment="Left"
+					        VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset4b" Grid.Column="1" Grid.Row="3"
+					        Content="Drive 8" HorizontalAlignment="Right"
+							VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset5a" Grid.Column="0" Grid.Row="4"
+					        Content="Drive 9" HorizontalAlignment="Left"
+					        VerticalAlignment="Stretch"/>
+					<Button Name="DrivePreset5b" Grid.Column="1" Grid.Row="4"
+					        Content="Drive 10" HorizontalAlignment="Right"
+							VerticalAlignment="Stretch"/>
+					
+					</Grid>
+			</StackPanel>
 			<Label Name="LPLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
 
 			<Button Name="ClearRightButton"

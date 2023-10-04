@@ -35,6 +35,7 @@ namespace DirOpusReImagined
         private List<string> ImageStuff = new List<string>();
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
+        private List<DriveButtonEntry> TheDriveButtons = new List<DriveButtonEntry>();
         
         private string StartRightPath = "";
         private string StartLeftPath = "";
@@ -162,6 +163,13 @@ namespace DirOpusReImagined
 
             // wire up button click events for the lower panel buttons
 
+            WireUpButtonHandlers();
+        }
+
+        private void WireUpButtonHandlers()
+        {
+            #region Click  Handlers
+
             LPButton1.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton2.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton3.Click += Handle_Lower_Panel_Button_Clicks;
@@ -198,6 +206,23 @@ namespace DirOpusReImagined
             LPButton34.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
+            
+            DrivePreset1a.Click += Handle_Drive_Button_Clicks;
+            DrivePreset1b.Click += Handle_Drive_Button_Clicks;
+            DrivePreset2a.Click += Handle_Drive_Button_Clicks;
+            DrivePreset2b.Click += Handle_Drive_Button_Clicks;
+            DrivePreset3a.Click += Handle_Drive_Button_Clicks;
+            DrivePreset3b.Click += Handle_Drive_Button_Clicks;
+            DrivePreset4a.Click += Handle_Drive_Button_Clicks;
+            DrivePreset4b.Click += Handle_Drive_Button_Clicks;
+            DrivePreset5a.Click += Handle_Drive_Button_Clicks;
+            DrivePreset5b.Click += Handle_Drive_Button_Clicks;
+            
+            
+
+            #endregion
+
+            #region Pointer Enter/Leave Handlers
 
             LPButton1.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
             LPButton2.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
@@ -272,6 +297,53 @@ namespace DirOpusReImagined
             LPButton34.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
             LPButton35.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
             LPButton36.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
+
+            #endregion
+        }
+
+        private void Handle_Drive_Button_Clicks(object? sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("made it here");
+            if (sender is null)
+            {
+                return;
+            }
+
+            Button bb = (Button)sender;
+            
+            string nm = bb.Name;
+
+            DriveButtonEntry dbe = (DriveButtonEntry)bb.Tag;
+
+            switch (dbe.Path.ToUpper())
+            {
+                case "$HOME":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetHomeDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetHomeDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
+                case "$ROOT":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetRootDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetRootDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
+            }
 
 
         }
@@ -1508,6 +1580,24 @@ namespace DirOpusReImagined
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                rootDirectoryPath = @"/";
+            }
+
+            return rootDirectoryPath;
+        }
+
+        private string GetHomeDirectoryPath()
+        {
+            string rootDirectoryPath = "";
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
                 rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -1518,7 +1608,61 @@ namespace DirOpusReImagined
 
             return rootDirectoryPath;
         }
+        
+        private string GetDesktopDirectoryPath()
+        {
+            string rootDirectoryPath = "";
 
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+
+            return rootDirectoryPath;
+        }
+        
+        private string GetDocumentsDirectoryPath()
+        {
+            string rootDirectoryPath = "";
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+
+            return rootDirectoryPath;
+        }
+        
+        private string GetPicturesDirectoryPath()
+        {
+            string rootDirectoryPath = "";
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.SystemDirectory);
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            }
+
+            return rootDirectoryPath;
+        }
+        
         private string GetAbbreviatedAttributes(FileAttributes attributes)
         {
             string abbreviatedAttributes = string.Empty;
@@ -1624,6 +1768,7 @@ namespace DirOpusReImagined
                 // Clear The Button Entries out first
 
                 TheButtons.Clear();
+                TheDriveButtons.Clear();
 
                 // Load XML file
                 XDocument xmlDoc = XDocument.Load(xmlFilePath);
@@ -1943,124 +2088,6 @@ namespace DirOpusReImagined
                             button.Margin = margin;
                         }
                         
-                        if (!string.IsNullOrEmpty(buttonSettings.ToolTip))
-                        {
-
-                            
-
-                            //switch (buttonSettings.Name)
-                            //{
-                            //    case "LPButton1":
-                            //        LPButton1TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton2":
-                            //        LPButton2TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton3":
-                            //        LPButton3TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton4":
-                            //        LPButton4TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton5":
-                            //        LPButton5TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton6":
-                            //        LPButton6TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton7":
-                            //        LPButton7TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton8":
-                            //        LPButton8TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton9":
-                            //        LPButton9TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton10":
-                            //        LPButton10TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton11":
-                            //        LPButton11TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton12":
-                            //        LPButton12TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton13":
-                            //        LPButton13TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton14":
-                            //        LPButton14TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton15":
-                            //        LPButton15TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton16":
-                            //        LPButton16TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton17":
-                            //        LPButton17TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton18":
-                            //        LPButton18TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton19":
-                            //        LPButton19TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton20":
-                            //        LPButton20TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton21":
-                            //        LPButton21TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton22":
-                            //        LPButton22TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton23":
-                            //        LPButton23TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton24":
-                            //        LPButton24TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton25":
-                            //        LPButton25TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton26":
-                            //        LPButton26TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton27":
-                            //        LPButton27TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton28":
-                            //        LPButton28TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton29":
-                            //        LPButton29TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton30":
-                            //        LPButton30TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton31":
-                            //        LPButton31TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton32":
-                            //        LPButton32TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton33":
-                            //        LPButton33TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton34":
-                            //        LPButton34TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton35":
-                            //        LPButton35TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //    case "LPButton36":
-                            //        LPButton36TTIP = buttonSettings.ToolTip;
-                            //        break;
-                            //}
-                        }
-                    
                         // Check if the Action property is not null or empty
                         if (!string.IsNullOrEmpty(buttonSettings.Action))
                         {
@@ -2094,6 +2121,95 @@ namespace DirOpusReImagined
                     }
                 }
                 
+                var driveSettingsList = from btn in xmlDoc.Descendants("DrivePreset")
+                                         select new DriveButtonEntry()
+                                         {
+                                             Order = (string)btn.Element("Order"),
+                                             Name = (string)btn.Element("Name"),
+                                             Path = (string)btn.Element("Path"),
+                                             Content = (string)btn.Element("Content"),
+                                             Background = (string)btn.Element("Background"),
+                                             Foreground = (string)btn.Element("Foreground"),
+                                             ToolTip = (string)btn.Element("ToolTip")
+                                         };
+
+                foreach (var thing in driveSettingsList)
+                {
+                    if (thing.Content == null)
+                    {
+                        thing.Content = thing.Name;
+                    }
+                    
+                    switch (thing.Order)
+                    {
+                        case "1":
+                            Button b1 = (Button)window.FindControl<Control>("DrivePreset1a");
+                            Button b2 = (Button)window.FindControl<Control>("DrivePreset1b");
+                            if (thing.Content != null)
+                            {
+                                b1.Content = "<-" + thing.Content.ToString();
+                                b2.Content = thing.Content.ToString() + "->";
+                            }
+
+                            b1.Tag = thing;
+                            b2.Tag = thing;
+
+                            break;
+                        case "2":
+                            Button b3 = (Button)window.FindControl<Control>("DrivePreset2a");
+                            Button b4 = (Button)window.FindControl<Control>("DrivePreset2b");
+                            if (thing.Content != null)
+                            {
+                                b3.Content = "<-" + thing.Content.ToString();
+                                b4.Content = thing.Content.ToString() + "->";
+                            }
+
+                            b3.Tag = thing;
+                            b4.Tag = thing;
+
+                            break;
+                        case "3":
+                            Button b5 = (Button)window.FindControl<Control>("DrivePreset3a");
+                            Button b6 = (Button)window.FindControl<Control>("DrivePreset3b");
+                            if (thing.Content != null)
+                            {
+                                b5.Content = "<-" + thing.Content.ToString();
+                                b6.Content = thing.Content.ToString() + "->";
+                            }
+
+                            b5.Tag = thing;
+                            b6.Tag = thing;
+
+                            break;
+                        case "4":
+                            Button b7 = (Button)window.FindControl<Control>("DrivePreset4a");
+                            Button b8 = (Button)window.FindControl<Control>("DrivePreset4b");
+                            if (thing.Content != null)
+                            {
+                                b7.Content = "<-" + thing.Content.ToString();
+                                b8.Content = thing.Content.ToString() + "->";
+                            }
+
+                            b7.Tag = thing;
+                            b8.Tag = thing;
+
+                            break;
+                        case "5":
+                            Button b9 = (Button)window.FindControl<Control>("DrivePreset5a");
+                            Button b10 = (Button)window.FindControl<Control>("DrivePreset5b");
+                            if (thing.Content != null)
+                            {
+                                b9.Content = "<-" + thing.Content.ToString();
+                                b10.Content = thing.Content.ToString() + "->";
+                            }
+
+                            b9.Tag = thing;
+                            b10.Tag = thing;
+
+                            break;
+                    }
+                }
+                
                 
             }
             catch (Exception ex)
@@ -2103,6 +2219,17 @@ namespace DirOpusReImagined
         }
     }
 
+    public class DriveButtonEntry
+    {
+        public string Order { get; set; }
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string Content { get; set; }
+        public string Background { get; set; }
+        public string Foreground { get; set; }
+        public string ToolTip { get; set; }
+    }
+    
     public class ButtonEntry
     {
         public string Bname { get; set; }
@@ -2207,7 +2334,6 @@ namespace DirOpusReImagined
         public string Args { get; set; }
         public string ShellExecute { get; set;}
         public string ShowWindow { get; set; }
-        
         public string ToolTip { get; set; }
 
     }
