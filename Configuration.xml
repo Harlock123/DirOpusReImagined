@@ -36,23 +36,64 @@
 			<Args>--diff %LF1% %RF1%</Args>
 			<Shell>True</Shell>
 			<Window>False</Window>
+			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 	</Buttons>
 
+	<DrivePresets>
+		<DrivePreset>
+			<Order>1</Order>
+			<Name>Home</Name>
+			<Path>$HOME</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>2</Order>
+			<Name>Root</Name>
+			<Path>$ROOT</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>3</Order>
+			<Name>DT</Name>
+			<Path>$DESKTOP</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>4</Order>
+			<Name>Docs</Name>
+			<Path>$DOCUMENTS</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>5</Order>
+			<Name>Pics</Name>
+			<Path>$PICTURES</Path>
+		</DrivePreset>
+	</DrivePresets>
+
 	<Executable>
-		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,PNG,DOC,DOCx,XLS,SLSX,PPT,PPTX,PDF,ZIP,RAR,7Z</Extensions>
+		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
+			PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
+			AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
+			CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
 	</Executable>
 
+	<Images>
+		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+		<UseIntegratedImageViewer>False</UseIntegratedImageViewer>
+	</Images>
+
 	<LeftGrid>
-		<FontSize>10</FontSize>
-		<HeaderFontSize>12</HeaderFontSize>
-		<Title>Left Panel</Title>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
+		<Title>LEFT Grid</Title>
+		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
 	</LeftGrid>
 
 	<RightGrid>
-		<FontSize>10</FontSize>
-		<HeaderFontSize>12</HeaderFontSize>
-		<Title>Right Panel</Title>
+		<FontSize>14</FontSize>
+		<HeaderFontSize>16</HeaderFontSize>
+		<Title>RIGHT Grid</Title>
+		<TitleFontSize>20</TitleFontSize>
+		<StartPath>/</StartPath>
 	</RightGrid>
 
 </Settings>
