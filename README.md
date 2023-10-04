@@ -101,7 +101,7 @@ It is a work in progress.
 
 Main Screen Interface
 
-![Screenshot](https://github.com/Harlock123/DirOpusReImagined/blob/master/Images/MainScreen1.jpg)
+![Screenshot](https://github.com/Harlock123/DirOpusReImagined/blob/master/Images/MainScreenMac.png)
 
 Arguments Parameters
 
