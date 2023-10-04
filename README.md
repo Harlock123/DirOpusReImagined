@@ -62,6 +62,7 @@ A Sample of this file is shown below
 			<Args>--diff %LF1% %RF1%</Args>
 			<Shell>True</Shell>
 			<Window>False</Window>
+			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 	</Buttons>
 	
@@ -153,6 +154,7 @@ valid values are True or False
 The `<Window></Window>` Parameter is a boolean value that indicates whether the command should be executed in a new window or not
 valid values are True or False
 
+The `<ToolTip></ToolTip>` Parameter is the text that will appear when the mouse hovers over the button for a few seconds
 
 
 
