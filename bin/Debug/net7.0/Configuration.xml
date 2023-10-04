@@ -38,8 +38,35 @@
 			<Window>False</Window>
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
-		
 	</Buttons>
+	
+	<DrivePresets>
+		<DrivePreset>
+			<Order>1</Order>
+			<Name>Home</Name>
+			<Path>$HOME</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>2</Order>
+			<Name>Root</Name>
+			<Path>$ROOT</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>3</Order>
+			<Name>DT</Name>
+			<Path>$DESKTOP</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>4</Order>
+			<Name>Docs</Name>
+			<Path>$DOCUMENTS</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>5</Order>
+			<Name>Pics</Name>
+			<Path>$PICTURES</Path>
+		</DrivePreset>
+	</DrivePresets>
 	
 	<Executable>
 		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
