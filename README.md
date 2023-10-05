@@ -89,8 +89,8 @@ A Sample of this file is shown below
 		</DrivePreset>
 		<DrivePreset>
 			<Order>5</Order>
-			<Name>Pics</Name>
-			<Path>$PICTURES</Path>
+			<Name>Vols</Name>
+			<Path>/Volumes</Path>
 		</DrivePreset>
 	</DrivePresets>
 

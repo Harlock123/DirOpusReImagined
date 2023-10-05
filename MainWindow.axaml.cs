@@ -382,6 +382,32 @@ namespace DirOpusReImagined
                     }
 
                     break;
+                case "$DOWNLOADS":
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = GetPicturesDirectoryPath();
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = GetPicturesDirectoryPath();
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
+                default:
+                    if (nm.EndsWith("a")) // Left
+                    {
+                        LPpath.Text = dbe.Path;
+                        PopulateFilePanel(LPgrid, LPpath.Text);
+                    }
+                    else // Right
+                    {
+                        RPpath.Text = dbe.Path;
+                        PopulateFilePanel(RPgrid, RPpath.Text);
+                    }
+
+                    break;
             }
 
 
@@ -1701,6 +1727,8 @@ namespace DirOpusReImagined
 
             return rootDirectoryPath;
         }
+        
+        
         
         private string GetAbbreviatedAttributes(FileAttributes attributes)
         {
