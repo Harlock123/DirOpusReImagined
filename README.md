@@ -65,18 +65,47 @@ A Sample of this file is shown below
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 	</Buttons>
-	
+
+	<DrivePresets>
+		<DrivePreset>
+			<Order>1</Order>
+			<Name>Home</Name>
+			<Path>$HOME</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>2</Order>
+			<Name>Root</Name>
+			<Path>$ROOT</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>3</Order>
+			<Name>DT</Name>
+			<Path>$DESKTOP</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>4</Order>
+			<Name>Docs</Name>
+			<Path>$DOCUMENTS</Path>
+		</DrivePreset>
+		<DrivePreset>
+			<Order>5</Order>
+			<Name>Pics</Name>
+			<Path>$PICTURES</Path>
+		</DrivePreset>
+	</DrivePresets>
+
 	<Executable>
 		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
-		PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
-		AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
-		CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
+			PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
+			AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
+			CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
 	</Executable>
-	
+
 	<Images>
 		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+		<UseIntegratedImageViewer>False</UseIntegratedImageViewer>
 	</Images>
-		
+
 	<LeftGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
@@ -84,7 +113,7 @@ A Sample of this file is shown below
 		<TitleFontSize>20</TitleFontSize>
 		<StartPath>/</StartPath>
 	</LeftGrid>
-	
+
 	<RightGrid>
 		<FontSize>14</FontSize>
 		<HeaderFontSize>16</HeaderFontSize>
@@ -157,6 +186,23 @@ valid values are True or False
 The `<ToolTip></ToolTip>` Parameter is the text that will appear when the mouse hovers over the button for a few seconds
 
 
+The configuration file contains a section called `<DrivePresets></DrivePresets>` that allows one to define a set of hardcoded 
+path specifications to be loaded into the LEFT and RIGHT panels. The buttons for this functionality are located in the 
+interface between the left and right panels. Set as block of 10 buttons seperated between each panel. 5 dedicated to the
+LEFT and 5 to the RIGHT panel. The panels button tuples are numbered from 1 to 5. The first button set at the top
+is number 1 and the bottom set is number 5.
+
+Each button is defined between a `<DrivePreset></DrivePreset>` tag. 
+The `<Order></Order>` tag is used to define the order of the button in the panel. 
+The `<Name></Name>` tag is used to define the text that will appear on the button.
+care should be taken to ensure that the text is not too long as it will be truncated if it does not fit on the button.
+The `<Path></Path>` Specifier is the path that will be loaded into the panel when the button is clicked.
+There are a number of special variables that can be used in the path specification.
+- $HOME - The users home directory
+- $ROOT - The root directory of the system (usually C:\ on Windows, / on Linux and MacOS)
+- $DESKTOP - The users desktop directory
+- $DOCUMENTS - The users documents directory
+- $PICTURES - The users pictures directory
 
 ## Building
 
