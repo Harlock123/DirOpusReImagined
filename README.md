@@ -192,11 +192,15 @@ interface between the left and right panels. Set as block of 10 buttons seperate
 LEFT and 5 to the RIGHT panel. The panels button tuples are numbered from 1 to 5. The first button set at the top
 is number 1 and the bottom set is number 5.
 
-Each button is defined between a `<DrivePreset></DrivePreset>` tag. 
-The `<Order></Order>` tag is used to define the order of the button in the panel. 
+Each button is defined between a `<DrivePreset></DrivePreset>` tag.
+
+The `<Order></Order>` tag is used to define the order of the button in the panel.
+
 The `<Name></Name>` tag is used to define the text that will appear on the button.
 care should be taken to ensure that the text is not too long as it will be truncated if it does not fit on the button.
+
 The `<Path></Path>` Specifier is the path that will be loaded into the panel when the button is clicked.
+
 There are a number of special variables that can be used in the path specification.
 - $HOME - The users home directory
 - $ROOT - The root directory of the system (usually C:\ on Windows, / on Linux and MacOS)
