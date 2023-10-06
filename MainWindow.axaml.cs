@@ -44,6 +44,8 @@ namespace DirOpusReImagined
         
         private string LastButtonPopupName = "";
 
+        private PopUp pop = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -415,6 +417,12 @@ namespace DirOpusReImagined
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
         {
+            if (pop != null && pop.IsVisible )
+            {
+                pop.Close();
+                pop = null;
+            }
+            
             LastButtonPopupName = "";
         }
 
@@ -437,7 +445,7 @@ namespace DirOpusReImagined
 
                     LastButtonPopupName = B.Name;
                                         
-                    PopUp pop = new PopUp();
+                    pop = new PopUp();
                     pop.Title = B.Content.ToString();
 
                     pop.SetText(item.ToolTip);
@@ -451,11 +459,11 @@ namespace DirOpusReImagined
 
                     pop.Show(); 
 
-                    Avalonia.Threading.DispatcherTimer.Run(() =>
-                    {
-                        pop.Close();
-                        return false;
-                    }, TimeSpan.FromSeconds(3)); // adjust the delay as needed
+                    //Avalonia.Threading.DispatcherTimer.Run(() =>
+                    //{
+                    //    pop.Close();
+                    //    return false;
+                    //}, TimeSpan.FromSeconds(3)); // adjust the delay as needed
 
                 }
             }
