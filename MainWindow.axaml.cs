@@ -173,6 +173,28 @@ namespace DirOpusReImagined
 
         private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            
+            bool fileselected = false;
+
+            if (LPgrid.SelectedItems.Count > 0)
+            {
+                foreach (AFileEntry af in LPgrid.SelectedItems)
+                {
+                    if (!af.Typ)
+                    {
+                        fileselected = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!fileselected)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MB.ShowDialog(this);
+                return;
+            }
+
             RenameFileInterface fi = new RenameFileInterface();
             fi.Width = 600;
             fi.Height = 180;
@@ -181,6 +203,27 @@ namespace DirOpusReImagined
 
         private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            bool fileselected = false;
+
+            if (RPgrid.SelectedItems.Count > 0)
+            {
+                foreach (AFileEntry af in RPgrid.SelectedItems)
+                {
+                    if (!af.Typ)
+                    {
+                        fileselected = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!fileselected)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MB.ShowDialog(this);
+                return;
+            }
+            
             RenameFileInterface fi = new RenameFileInterface();
             fi.Width = 600;
             fi.Height = 180;
