@@ -141,7 +141,19 @@
 						HorizontalAlignment="Stretch"
 						Content="&lt;--- move"
 						ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
-			
+			<Button Name="RenameRightButton"
+			        Grid.Column="1"
+			        Grid.Row="1"
+			        HorizontalAlignment="Stretch"
+			        Content="rename  ---&gt;"
+			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
+			<Button Name="RenameLeftButton"
+			        Grid.Column="1"
+			        Grid.Row="1"
+			        HorizontalAlignment="Stretch"
+			        Content="&lt;--- rename"
+			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
+
 		</StackPanel>
 		
 

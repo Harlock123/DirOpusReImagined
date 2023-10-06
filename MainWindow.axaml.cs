@@ -128,6 +128,9 @@ namespace DirOpusReImagined
 
             RPBackButton.Click += RPBackButton_Click;
             LPBackButton.Click += LPBackButton_Click;
+            
+            RenameRightButton.Click += RenameRightButton_Click;
+            RenameLeftButton.Click += RenameLeftButton_Click;
 
             //LPgrid.GridFontSize = 12;
             //RPgrid.GridFontSize = 12;
@@ -166,6 +169,22 @@ namespace DirOpusReImagined
             // wire up button click events for the lower panel buttons
 
             WireUpButtonHandlers();
+        }
+
+        private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            RenameFileInterface fi = new RenameFileInterface();
+            fi.Width = 600;
+            fi.Height = 180;
+            fi.ShowDialog(this);
+        }
+
+        private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            RenameFileInterface fi = new RenameFileInterface();
+            fi.Width = 600;
+            fi.Height = 180;
+            fi.ShowDialog(this);
         }
 
         private void WireUpButtonHandlers()
@@ -1736,8 +1755,6 @@ namespace DirOpusReImagined
             return rootDirectoryPath;
         }
         
-        
-        
         private string GetAbbreviatedAttributes(FileAttributes attributes)
         {
             string abbreviatedAttributes = string.Empty;
@@ -2087,6 +2104,9 @@ namespace DirOpusReImagined
                     // Check if the button control exists
                     if (button != null)
                     {
+                        // Save the buttonSettings object to the button's Tag property
+                        button.Tag = buttonSettings;
+                        
                         // Check if the Content property is not null or empty
                         if (!string.IsNullOrEmpty(buttonSettings.Content))
                         {
@@ -2292,8 +2312,9 @@ namespace DirOpusReImagined
                 Console.WriteLine("Unexpected error: " + ex.Message);
             }
         }
+        
     }
-
+    
     public class DriveButtonEntry
     {
         public string Order { get; set; }

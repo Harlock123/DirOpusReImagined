@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="180"
+        x:Class="DirOpusReImagined.RenameFileInterface"
+        Title="Rename Selected File(s)"
+        Background="Bisque">
+    <Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="PREFIX:" VerticalAlignment="Center" Margin="10"/>
+                <TextBox x:Name="PrefixTextBox" Width="100" Margin="5"/>
+            </StackPanel>
+           
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="BASENAME:" VerticalAlignment="Center" Margin="10"/>
+                <TextBox x:Name="BasenameTextBox" Width="350" Margin="5"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="SUFFIX:" VerticalAlignment="Center" Margin="10"/>
+                <TextBox x:Name="SuffixTextBox" Width="100" Margin="5"/>
+            </StackPanel>
+        </StackPanel>
+        
+        <TextBlock TextWrapping="Wrap" Margin="10" HorizontalAlignment="Center">
+            You can use the symbol of %ORD% to place the ordinal numeric of the file being renamed in the literal text of the resulting file name
+         </TextBlock>
+       
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
+            <Button x:Name="OKButton" Content="OK"  Margin="5"/>
+            <Button x:Name="CANCELButton" Content="Cancel"  Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>
