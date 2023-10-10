@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="812" d:DesignHeight="312"
-             x:Class="DirOpusReImagined.TAIDataGrid">
+             x:Class="DirOpusReImagined.TaiDataGrid">
 	<StackPanel>
 		<Grid>
 			<Grid.RowDefinitions>

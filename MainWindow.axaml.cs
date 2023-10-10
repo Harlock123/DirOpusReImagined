@@ -1,26 +1,18 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Avalonia.Input;
-using YamlDotNet.Serialization;
-using static System.Net.WebRequestMethods;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
 using Image = Avalonia.Controls.Image;
-using Avalonia.Controls.Primitives;
-using Avalonia;
-using Avalonia.Controls.Primitives.PopupPositioning;
 
 namespace DirOpusReImagined
 {
@@ -46,7 +38,7 @@ namespace DirOpusReImagined
         
         private string LastButtonPopupName = "";
 
-        private PopUp pop = null;
+        private PopUp pop;
 
         public MainWindow()
         {
@@ -514,7 +506,7 @@ namespace DirOpusReImagined
 
                     pop.SetText(item.ToolTip);
 
-                    var p = this.VisualRoot.PointToScreen(e.GetPosition(this));
+                    var p = VisualRoot.PointToScreen(e.GetPosition(this));
 
                     pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
 
@@ -1633,7 +1625,7 @@ namespace DirOpusReImagined
             PopulateFilePanel(RPgrid, RPpath.Text);
         }   
 
-        private void PopulateFilePanel(TAIDataGrid ThePanel, string PATHNAME)
+        private void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
         {
             //LPgrid.PopulateGrid(PATHNAME);
 
@@ -1644,7 +1636,7 @@ namespace DirOpusReImagined
             try
             {
                 
-                var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME)
+                var Directories = Directory.EnumerateDirectories(PATHNAME)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -1690,7 +1682,7 @@ namespace DirOpusReImagined
             }
 
             // Using Linq to sort the files alphabetically
-            var files = System.IO.Directory.EnumerateFiles(PATHNAME)
+            var files = Directory.EnumerateFiles(PATHNAME)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList(); ;
 
@@ -1700,7 +1692,7 @@ namespace DirOpusReImagined
                 {
                     FileInfo fi = new FileInfo(file);
 
-                    FileAttributes fa = System.IO.File.GetAttributes(fi.FullName);
+                    FileAttributes fa = File.GetAttributes(fi.FullName);
 
                     string flags = GetAbbreviatedAttributes(fa);
 

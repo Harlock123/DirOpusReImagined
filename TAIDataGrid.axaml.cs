@@ -6,138 +6,135 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Metadata;
 using Avalonia.Threading;
 using System;
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace DirOpusReImagined
 {
-    public partial class TAIDataGrid : UserControl
+    public partial class TaiDataGrid : UserControl
     {
         #region Private Variables
 
-        private string gridTitle = "The Grid Control for Avalonia";
-        private int gridTitleFontSize = 20;
-        private int gridTitleHeight = 10;
-        private int theLineLabelSize = 10;
-        private int theDataLabelSize = 10;
-        private IBrush gridBackground = Avalonia.Media.Brushes.Cornsilk;
-        private IBrush gridCellOutline = Avalonia.Media.Brushes.Black;
-        private IBrush gridCellContentBrush = Avalonia.Media.Brushes.Black;
-        private IBrush gridCellBrush = Avalonia.Media.Brushes.Wheat;
+        private string _gridTitle = "The Grid Control for Avalonia";
+        private int _gridTitleFontSize = 20;
+        private int _gridTitleHeight = 10;
+        private int _theLineLabelSize = 10;
+        private int _theDataLabelSize = 10;
+        private IBrush _gridBackground = Brushes.Cornsilk;
+        private IBrush _gridCellOutline = Brushes.Black;
+        private IBrush _gridCellContentBrush = Brushes.Black;
+        private IBrush _gridCellBrush = Brushes.Wheat;
 
-        private IBrush gridCellHighlightBrush = Avalonia.Media.Brushes.LightBlue;
-        private IBrush gridSelectedItemBrush = Avalonia.Media.Brushes.AliceBlue;
-        private IBrush gridCellHighlightContentBrush = Avalonia.Media.Brushes.Black;
+        private IBrush _gridCellHighlightBrush = Brushes.LightBlue;
+        private IBrush _gridSelectedItemBrush = Brushes.AliceBlue;
+        private IBrush _gridCellHighlightContentBrush = Brushes.Black;
 
-        private IBrush gridTitleBrush = Avalonia.Media.Brushes.White;
-        private IBrush gridHeaderBrush = Avalonia.Media.Brushes.DarkBlue;
-        private IBrush gridTitleBackground = Avalonia.Media.Brushes.Blue;
-        private IBrush gridHeaderBackground = Avalonia.Media.Brushes.Cyan;
-        private Typeface gridTitleTypeface = new Typeface("Arial", FontStyle.Normal, FontWeight.Bold);
-        private Typeface gridHeaderTypeface = new Typeface("Arial", FontStyle.Normal, FontWeight.Normal);
-        private Typeface gridTypeface = new Typeface("Arial", FontStyle.Normal, FontWeight.Normal);
-        private int gridheaderFontSize = 14;
-        private int gridFontSize = 12;
+        private IBrush _gridTitleBrush = Brushes.White;
+        private IBrush _gridHeaderBrush = Brushes.DarkBlue;
+        private IBrush _gridTitleBackground = Brushes.Blue;
+        private IBrush _gridHeaderBackground = Brushes.Cyan;
+        private Typeface _gridTitleTypeface = new Typeface("Arial", FontStyle.Normal, FontWeight.Bold);
+        private Typeface _gridHeaderTypeface = new Typeface("Arial");
+        private Typeface _gridTypeface = new Typeface("Arial");
+        private int _gridheaderFontSize = 14;
+        private int _gridFontSize = 12;
 
-        private bool showCrossHairs = true;
-        private IBrush crossHairBrush = Avalonia.Media.Brushes.Red;
+        private bool _showCrossHairs = true;
+        private IBrush _crossHairBrush = Brushes.Red;
 
-        private int gridWidth = 800;
-        private int gridHeight = 300;
+        private int _gridWidth = 800;
+        private int _gridHeight = 300;
 
-        private int GridXShift = 0;
-        private int GridYShift = 0;
+        private int _gridXShift;
+        private int _gridYShift;
 
-        private Point LastPosition = new Point();
+        private Point _lastPosition;
 
-        private int CurMouseX = 0;
-        private int CurMouseY = 0;
-        private int curMouseRow = 0;
-        private int curMouseCol = 0;
-        private bool MouseInControl = false;
-        private int scrollMultiplier = 3;
-        private bool suspendRendering = false;
-        private bool autosizeCellsToContents = true;
+        private int _curMouseX;
+        private int _curMouseY;
+        private int _curMouseRow;
+        private int _curMouseCol;
+        private bool _mouseInControl;
+        private int _scrollMultiplier = 3;
+        private bool _suspendRendering;
+        private bool _autosizeCellsToContents = true;
 
-        private bool populateWithTestData = false;
+        private bool _populateWithTestData;
 
-        private int gridHeaderAndTitleHeight = 0;
+        private int _gridHeaderAndTitleHeight;
 
 
-        private List<object> items = new List<object>();
-        private List<object> selecteditems = new List<object>();
+        private List<object> _items = new List<object>();
+        private List<object> _selecteditems = new List<object>();
 
-        private int[] colWidths;
-        private int[] rowHeights;
+        private int[] _colWidths;
+        private int[] _rowHeights;
 
-        private int gridRows = 0;
-        private int gridCols = 0;
+        private int _gridRows;
+        private int _gridCols;
 
-        private object ItemUnderMouse = null;
+        private object _itemUnderMouse = null;
 
-        private bool InDesignMode = false;
+        private bool _inDesignMode;
 
         public GridHoverItem TheItemUnderTheMouse = new GridHoverItem();
 
         private DispatcherTimer _doubleClickTimer;
         private int _clickCounter;
 
-        private Bitmap CheckMark = null;
-        private Bitmap RedX = null;
-        private Bitmap Folder = null;
-        private Bitmap File = null;
+        private Bitmap _checkMark;
+        private Bitmap _redX;
+        private Bitmap _folder;
+        private Bitmap _file;
 
-        private List<int> justifyColumns = new List<int>();
+        private List<int> _justifyColumns = new List<int>();
 
-        private List<int> truncateColumns = new List<int>();
-        private int truncateColumnLength = 30;
+        private List<int> _truncateColumns = new List<int>();
+        private int _truncateColumnLength = 30;
         #endregion
 
         #region Constructor
-        public TAIDataGrid()
+        public TaiDataGrid()
         {
             InitializeComponent();
 
-            InDesignMode = Design.IsDesignMode;
+            _inDesignMode = Design.IsDesignMode;
 
-            this.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
 
             TheHorizontalScrollBar.Scroll += TheHorizontalScrollBar_scroll;
             TheVerticleScrollBar.Scroll += TheVerticleScrollBar_Scroll;
 
-            this.PointerWheelChanged += OnPointerWheelChanged;
+            PointerWheelChanged += OnPointerWheelChanged;
 
-            this.PointerMoved += OnPointerMoved;
-            this.PointerEntered += OnPointerEntered;
-            this.PointerExited += OnPointerExited;
-            this.PointerPressed += OnPointerPressed;
-            this.PointerReleased += OnPointerReleased;
+            PointerMoved += OnPointerMoved;
+            PointerEntered += OnPointerEntered;
+            PointerExited += OnPointerExited;
+            PointerPressed += OnPointerPressed;
+            PointerReleased += OnPointerReleased;
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _doubleClickTimer.Tick += DoubleClickTimer_Tick;
 
-            this.CheckMark = LoadImage(ImageStrings.CheckMark);
-            this.RedX = LoadImage(ImageStrings.RedX);
-            this.Folder = LoadImage(ImageStrings.Folder);
-            this.File = LoadImage(ImageStrings.Afile);
+            _checkMark = LoadImage(ImageStrings.CheckMark);
+            _redX = LoadImage(ImageStrings.RedX);
+            _folder = LoadImage(ImageStrings.Folder);
+            _file = LoadImage(ImageStrings.Afile);
 
-            this.items.Clear();
+            _items.Clear();
 
 
-            if (populateWithTestData || this.InDesignMode)
-                PopulateTESTData();
+            if (_populateWithTestData || _inDesignMode)
+                PopulateTestData();
 
-            this.ReRender();
+            ReRender();
         }
 
         #endregion
@@ -148,11 +145,11 @@ namespace DirOpusReImagined
         [DefaultValue("The Grid Control for Avalonia")]
         public string GridTitle
         {
-            get { return gridTitle; }
+            get { return _gridTitle; }
             set
             {
-                gridTitle = value;
-                this.ReRender();
+                _gridTitle = value;
+                ReRender();
             }
         }
 
@@ -160,11 +157,11 @@ namespace DirOpusReImagined
         [DefaultValue(20)]
         public int GridTitleFontSize
         {
-            get { return gridTitleFontSize; }
+            get { return _gridTitleFontSize; }
             set
             {
-                gridTitleFontSize = value;
-                this.ReRender();
+                _gridTitleFontSize = value;
+                ReRender();
             }
         }
 
@@ -172,11 +169,11 @@ namespace DirOpusReImagined
         [DefaultValue(14)]
         public int GridHeaderFontSize
         {
-            get { return gridheaderFontSize; }
+            get { return _gridheaderFontSize; }
             set
             {
-                gridheaderFontSize = value;
-                this.ReRender();
+                _gridheaderFontSize = value;
+                ReRender();
             }
         }
 
@@ -184,11 +181,11 @@ namespace DirOpusReImagined
         [DefaultValue(12)]
         public int GridFontSize
         {
-            get { return gridFontSize; }
+            get { return _gridFontSize; }
             set
             {
-                gridFontSize = value;
-                this.ReRender();
+                _gridFontSize = value;
+                ReRender();
             }
         }
 
@@ -196,11 +193,11 @@ namespace DirOpusReImagined
         [DefaultValue(10)]
         public int GridTitleHeight
         {
-            get { return gridTitleHeight; }
+            get { return _gridTitleHeight; }
             set
             {
-                gridTitleHeight = value;
-                this.ReRender();
+                _gridTitleHeight = value;
+                ReRender();
             }
         }
 
@@ -208,11 +205,11 @@ namespace DirOpusReImagined
         [DefaultValue("Cornsilk")]
         public IBrush GridBackground
         {
-            get { return gridBackground; }
+            get { return _gridBackground; }
             set
             {
-                gridBackground = value;
-                this.ReRender();
+                _gridBackground = value;
+                ReRender();
             }
         }
 
@@ -220,11 +217,11 @@ namespace DirOpusReImagined
         [DefaultValue("White")]
         public IBrush GridTitleBrush
         {
-            get { return gridTitleBrush; }
+            get { return _gridTitleBrush; }
             set
             {
-                gridTitleBrush = value;
-                this.ReRender();
+                _gridTitleBrush = value;
+                ReRender();
             }
         }
 
@@ -232,11 +229,11 @@ namespace DirOpusReImagined
         [DefaultValue("Blue")]
         public IBrush GridTitleBackground
         {
-            get { return gridTitleBackground; }
+            get { return _gridTitleBackground; }
             set
             {
-                gridTitleBackground = value;
-                this.ReRender();
+                _gridTitleBackground = value;
+                ReRender();
             }
         }
 
@@ -244,11 +241,11 @@ namespace DirOpusReImagined
         [DefaultValue("DarkBlue")]
         public IBrush GridHeaderBrush
         {
-            get { return gridHeaderBrush; }
+            get { return _gridHeaderBrush; }
             set
             {
-                gridHeaderBrush = value;
-                this.ReRender();
+                _gridHeaderBrush = value;
+                ReRender();
             }
         }
 
@@ -256,11 +253,11 @@ namespace DirOpusReImagined
         [DefaultValue("Cyan")]
         public IBrush GridHeaderBackground
         {
-            get { return gridHeaderBackground; }
+            get { return _gridHeaderBackground; }
             set
             {
-                gridHeaderBackground = value;
-                this.ReRender();
+                _gridHeaderBackground = value;
+                ReRender();
             }
         }
 
@@ -268,11 +265,11 @@ namespace DirOpusReImagined
         [DefaultValue("Black")]
         public IBrush GridCellOutline
         {
-            get { return gridCellOutline; }
+            get { return _gridCellOutline; }
             set
             {
-                gridCellOutline = value;
-                this.ReRender();
+                _gridCellOutline = value;
+                ReRender();
             }
         }
 
@@ -280,11 +277,11 @@ namespace DirOpusReImagined
         [DefaultValue("Wheat")]
         public IBrush GridCellBrush
         {
-            get { return gridCellBrush; }
+            get { return _gridCellBrush; }
             set
             {
-                gridCellBrush = value;
-                this.ReRender();
+                _gridCellBrush = value;
+                ReRender();
             }
         }
 
@@ -292,11 +289,11 @@ namespace DirOpusReImagined
         [DefaultValue("LightBlue")]
         public IBrush GridCellHighlightBrush
         {
-            get { return gridCellHighlightBrush; }
+            get { return _gridCellHighlightBrush; }
             set
             {
                 GridCellHighlightBrush = value;
-                this.ReRender();
+                ReRender();
             }
         }
 
@@ -304,11 +301,11 @@ namespace DirOpusReImagined
         [DefaultValue("Black")]
         public IBrush GridCellHighlightContentBrush
         {
-            get { return gridCellHighlightContentBrush; }
+            get { return _gridCellHighlightContentBrush; }
             set
             {
-                gridCellHighlightContentBrush = value;
-                this.ReRender();
+                _gridCellHighlightContentBrush = value;
+                ReRender();
             }
         }
 
@@ -316,11 +313,11 @@ namespace DirOpusReImagined
         [DefaultValue("AliceBlue")]
         public IBrush GridSelectedItemBrush
         {
-            get { return gridSelectedItemBrush; }
+            get { return _gridSelectedItemBrush; }
             set
             {
-                gridSelectedItemBrush = value;
-                this.ReRender();
+                _gridSelectedItemBrush = value;
+                ReRender();
             }
         }
 
@@ -328,11 +325,11 @@ namespace DirOpusReImagined
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTitleTypeface
         {
-            get { return gridTitleTypeface; }
+            get { return _gridTitleTypeface; }
             set
             {
-                gridTitleTypeface = value;
-                this.ReRender();
+                _gridTitleTypeface = value;
+                ReRender();
             }
         }
 
@@ -340,11 +337,11 @@ namespace DirOpusReImagined
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTypeface
         {
-            get { return gridTypeface; }
+            get { return _gridTypeface; }
             set
             {
-                gridTypeface = value;
-                this.ReRender();
+                _gridTypeface = value;
+                ReRender();
             }
         }
 
@@ -352,11 +349,11 @@ namespace DirOpusReImagined
         [DefaultValue("Arial, 14, Normal, Normal")]
         public Typeface GridHeaderTypeface
         {
-            get { return gridHeaderTypeface; }
+            get { return _gridHeaderTypeface; }
             set
             {
-                gridHeaderTypeface = value;
-                this.ReRender();
+                _gridHeaderTypeface = value;
+                ReRender();
             }
         }
 
@@ -364,20 +361,20 @@ namespace DirOpusReImagined
         [DefaultValue(null)]
         public List<object> Items
         {
-            get { return items; }
+            get { return _items; }
             set
             {
                 SuspendRendering = true;
 
-                items = value;
-                selecteditems.Clear();
-                this.TheItemUnderTheMouse = new GridHoverItem();
-                this.GridXShift = 0;
-                this.GridYShift = 0;
+                _items = value;
+                _selecteditems.Clear();
+                TheItemUnderTheMouse = new GridHoverItem();
+                _gridXShift = 0;
+                _gridYShift = 0;
 
                 SuspendRendering = false;
 
-                this.ReRender();
+                ReRender();
             }
         }
 
@@ -385,11 +382,11 @@ namespace DirOpusReImagined
         [DefaultValue(null)]
         public List<object> SelectedItems 
         {   
-            get { return selecteditems; }
+            get { return _selecteditems; }
             set
             {
-                selecteditems = value;
-                this.ReRender();
+                _selecteditems = value;
+                ReRender();
             }
         }
 
@@ -397,11 +394,11 @@ namespace DirOpusReImagined
         [DefaultValue(false)]
         public bool SuspendRendering
         {
-            get { return suspendRendering; }
+            get { return _suspendRendering; }
             set
             {
-                suspendRendering = value;
-                this.ReRender();
+                _suspendRendering = value;
+                ReRender();
             }
         }
 
@@ -409,11 +406,11 @@ namespace DirOpusReImagined
         [DefaultValue(true)]
         public bool AutosizeCellsToContents
         {
-            get { return autosizeCellsToContents; }
+            get { return _autosizeCellsToContents; }
             set
             {
-                autosizeCellsToContents = value;
-                this.ReRender();
+                _autosizeCellsToContents = value;
+                ReRender();
             }
         }
 
@@ -421,11 +418,11 @@ namespace DirOpusReImagined
         [DefaultValue(800)]
         public int GridWidth
         {
-            get { return gridWidth; }
+            get { return _gridWidth; }
             set
             {
-                gridWidth = value;
-                this.ReRender();
+                _gridWidth = value;
+                ReRender();
             }
         }
 
@@ -433,11 +430,11 @@ namespace DirOpusReImagined
         [DefaultValue(300)]
         public int GridHeight
         {
-            get { return gridHeight; }
+            get { return _gridHeight; }
             set
             {
-                gridHeight = value;
-                this.ReRender();
+                _gridHeight = value;
+                ReRender();
             }
         }
 
@@ -445,11 +442,11 @@ namespace DirOpusReImagined
         [DefaultValue(true)]
         public bool ShowCrossHairs
         {
-            get { return showCrossHairs; }
+            get { return _showCrossHairs; }
             set
             {
-                showCrossHairs = value;
-                this.ReRender();
+                _showCrossHairs = value;
+                ReRender();
             }
         }
 
@@ -457,22 +454,22 @@ namespace DirOpusReImagined
         [DefaultValue(false)]
         public bool PopulateWithTestData
         {
-            get { return populateWithTestData; }
+            get { return _populateWithTestData; }
             set
             {
-                populateWithTestData = value;
+                _populateWithTestData = value;
 
-                if (populateWithTestData)
+                if (_populateWithTestData)
                 {
-                    PopulateTESTData();
+                    PopulateTestData();
 
                 }
                 else
                 {
-                    this.Items.Clear();
+                    Items.Clear();
                 }
 
-                this.ReRender();
+                ReRender();
             }
         }
 
@@ -480,11 +477,11 @@ namespace DirOpusReImagined
         [DefaultValue(3)]
         public int ScrollMultiplier
         {
-            get { return scrollMultiplier; }
+            get { return _scrollMultiplier; }
             set
             {
-                scrollMultiplier = value;
-                this.ReRender();
+                _scrollMultiplier = value;
+                ReRender();
             }
         }
 
@@ -492,10 +489,10 @@ namespace DirOpusReImagined
         [DefaultValue(0)]
         public int CurMouseRow
         {
-            get { return curMouseRow; }
+            get { return _curMouseRow; }
             set
             {
-                curMouseRow = value;
+                _curMouseRow = value;
                 //this.ReRender();
             }
         }
@@ -504,10 +501,10 @@ namespace DirOpusReImagined
         [DefaultValue(0)]
         public int CurMouseCol
         {
-            get { return curMouseCol; }
+            get { return _curMouseCol; }
             set
             {
-                curMouseCol = value;
+                _curMouseCol = value;
                 //this.ReRender();
             }
         }
@@ -516,11 +513,11 @@ namespace DirOpusReImagined
         [DefaultValue(null)]
         public List<int> JustifyColumns
         {
-            get { return justifyColumns; }
+            get { return _justifyColumns; }
             set
             {
-                justifyColumns = value;
-                this.ReRender();
+                _justifyColumns = value;
+                ReRender();
             }
         }
 
@@ -528,11 +525,11 @@ namespace DirOpusReImagined
         [DefaultValue(null)]
         public List<int> TruncateColumns
         {
-            get { return truncateColumns; }
+            get { return _truncateColumns; }
             set
             {
-                truncateColumns = value;
-                this.ReRender();
+                _truncateColumns = value;
+                ReRender();
             }
         }
 
@@ -541,11 +538,11 @@ namespace DirOpusReImagined
         [DefaultValue(30)]
         public int TruncateColumnLength
         {
-            get { return truncateColumnLength; }
+            get { return _truncateColumnLength; }
             set
             {
-                truncateColumnLength = value;
-                this.ReRender();
+                _truncateColumnLength = value;
+                ReRender();
             }
         }
 
@@ -558,57 +555,57 @@ namespace DirOpusReImagined
             try
             {
 
-                if (TheCanvas != null && !this.suspendRendering)
+                if (TheCanvas != null && !_suspendRendering)
                 {
                     // the canvas exists so lets render the grid
 
                     // clear the canvas
                     TheCanvas.Children.Clear();
 
-                    this.gridHeaderAndTitleHeight = 0;
+                    _gridHeaderAndTitleHeight = 0;
 
                     #region Render Title
 
-                    if (this.GridTitle != String.Empty)
+                    if (GridTitle != String.Empty)
                     {
                         var formattedText =
-                            new FormattedText(this.GridTitle, CultureInfo.CurrentCulture,
-                            FlowDirection.LeftToRight, this.GridTitleTypeface, this.GridTitleFontSize,
-                            this.GridTitleBrush);
+                            new FormattedText(GridTitle, CultureInfo.CurrentCulture,
+                            FlowDirection.LeftToRight, GridTitleTypeface, GridTitleFontSize,
+                            GridTitleBrush);
 
                         Rectangle rr = new Rectangle();
                         rr.Width = TheCanvas.Width;
                         //rr.Height = formattedText.Height;
 
-                        if (this.GridTitleHeight < formattedText.Height)
+                        if (GridTitleHeight < formattedText.Height)
                         {
                             rr.Height = formattedText.Height;
-                            this.gridTitleHeight = (int)formattedText.Height;
-                            this.gridHeaderAndTitleHeight = this.gridTitleHeight;
+                            _gridTitleHeight = (int)formattedText.Height;
+                            _gridHeaderAndTitleHeight = _gridTitleHeight;
                         }
                         else
                         {
-                            rr.Height = this.GridTitleHeight;
+                            rr.Height = GridTitleHeight;
 
-                            this.gridTitleHeight = (int)formattedText.Height;
+                            _gridTitleHeight = (int)formattedText.Height;
 
-                            this.gridHeaderAndTitleHeight = this.gridTitleHeight;
+                            _gridHeaderAndTitleHeight = _gridTitleHeight;
                         }
 
                         //this.gridHeaderAndTitleHeight = this.gridTitleHeight;
 
-                        rr.Fill = this.GridTitleBackground;
+                        rr.Fill = GridTitleBackground;
                         Canvas.SetLeft(rr, 0);
                         Canvas.SetTop(rr, 0);
                         TheCanvas.Children.Add(rr);
 
                         TextBlock ttb = new TextBlock();
-                        ttb.Text = this.GridTitle;
-                        ttb.FontSize = this.GridTitleFontSize;
-                        ttb.Foreground = this.GridTitleBrush;
-                        ttb.FontFamily = this.GridTitleTypeface.FontFamily;
-                        ttb.FontWeight = this.GridTitleTypeface.Weight;
-                        ttb.FontStyle = this.GridTitleTypeface.Style;
+                        ttb.Text = GridTitle;
+                        ttb.FontSize = GridTitleFontSize;
+                        ttb.Foreground = GridTitleBrush;
+                        ttb.FontFamily = GridTitleTypeface.FontFamily;
+                        ttb.FontWeight = GridTitleTypeface.Weight;
+                        ttb.FontStyle = GridTitleTypeface.Style;
                         Canvas.SetLeft(ttb, 0);
                         Canvas.SetTop(ttb, 0);
                         TheCanvas.Children.Add(ttb);
@@ -619,16 +616,16 @@ namespace DirOpusReImagined
 
                     #region FigureOut Cell Sizes
 
-                    this.rowHeights = new int[this.items.Count];
-                    this.gridRows = this.items.Count;
+                    _rowHeights = new int[_items.Count];
+                    _gridRows = _items.Count;
                     int row = 0;
 
-                    if (this.items.Count > 0)
+                    if (_items.Count > 0)
                     {
-                        List<PropertyInfoModel> schema = GetObjectSchema(this.items[0]);
+                        List<PropertyInfoModel> schema = GetObjectSchema(_items[0]);
 
-                        this.colWidths = new int[schema.Count];
-                        this.gridCols = schema.Count;
+                        _colWidths = new int[schema.Count];
+                        _gridCols = schema.Count;
                         int idx = 0;
                         //int tempval = 0;
 
@@ -637,11 +634,11 @@ namespace DirOpusReImagined
                             var formattedText =
                                 new FormattedText(property.Name, CultureInfo.CurrentCulture,
                                                            FlowDirection.LeftToRight,
-                                                           this.GridHeaderTypeface,
-                                                           this.GridHeaderFontSize,
-                                                           this.GridTitleBrush);
+                                                           GridHeaderTypeface,
+                                                           GridHeaderFontSize,
+                                                           GridTitleBrush);
 
-                            colWidths[idx] = (int)formattedText.Width + 10;
+                            _colWidths[idx] = (int)formattedText.Width + 10;
 
                             idx++;
                         }
@@ -650,13 +647,13 @@ namespace DirOpusReImagined
 
                         // we now have column widths, lets see if we need to autosize the cells
 
-                        if (this.AutosizeCellsToContents)
+                        if (AutosizeCellsToContents)
                         {
                             // we need to autosize the cells
 
                             var rowidx = 0;
 
-                            foreach (object item in this.items)
+                            foreach (object item in _items)
                             {
                                 idx = 0;
 
@@ -669,11 +666,11 @@ namespace DirOpusReImagined
 
                                     string thestringtomeasure = property.GetValue(item)?.ToString() + "";
 
-                                    if (truncateColumns.Contains(idx))
+                                    if (_truncateColumns.Contains(idx))
                                     {
-                                        if (thestringtomeasure.Length > truncateColumnLength)
+                                        if (thestringtomeasure.Length > _truncateColumnLength)
                                         {
-                                            thestringtomeasure = thestringtomeasure.Substring(0, truncateColumnLength ) + "...";
+                                            thestringtomeasure = thestringtomeasure.Substring(0, _truncateColumnLength ) + "...";
                                         }
                                             
                                     }
@@ -681,11 +678,11 @@ namespace DirOpusReImagined
                                     var formattedText =
                                         new FormattedText(thestringtomeasure,
                                                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                                                this.gridTypeface, this.gridFontSize,
-                                                this.gridCellBrush);
-                                    if (colWidths[idx] < formattedText.Width + 10)
+                                                _gridTypeface, _gridFontSize,
+                                                _gridCellBrush);
+                                    if (_colWidths[idx] < formattedText.Width + 10)
                                     {
-                                        colWidths[idx] = (int)formattedText.Width + 10;
+                                        _colWidths[idx] = (int)formattedText.Width + 10;
                                     }
 
                                     if ((int)formattedText.Height + 2 > tempval)
@@ -696,7 +693,7 @@ namespace DirOpusReImagined
                                     idx++;
                                 }
 
-                                this.rowHeights[rowidx] = tempval;
+                                _rowHeights[rowidx] = tempval;
                                 tempval = 0;
                                 rowidx++;
 
@@ -709,11 +706,11 @@ namespace DirOpusReImagined
 
                     #region Render Grid Header
 
-                    if (this.items.Count > 0)
+                    if (_items.Count > 0)
                     {
-                        List<PropertyInfoModel> schema = GetObjectSchema(this.items[0]);
+                        List<PropertyInfoModel> schema = GetObjectSchema(_items[0]);
                         int left = 0;
-                        int top = this.gridTitleHeight;
+                        int top = _gridTitleHeight;
                         int tempheight = 0;
 
 
@@ -724,9 +721,9 @@ namespace DirOpusReImagined
                             var formattedText =
                                 new FormattedText(property.Name, CultureInfo.CurrentCulture,
                                                            FlowDirection.LeftToRight,
-                                                           this.GridHeaderTypeface,
-                                                           this.GridHeaderFontSize,
-                                                           this.GridTitleBrush);
+                                                           GridHeaderTypeface,
+                                                           GridHeaderFontSize,
+                                                           GridTitleBrush);
 
                             // see if the height of the text is greater than the current height
                             // gathered for the header physical height on the grid
@@ -743,44 +740,44 @@ namespace DirOpusReImagined
                             }
 
                             Rectangle rr1 = new Rectangle();
-                            rr1.Width = this.colWidths[idx];
+                            rr1.Width = _colWidths[idx];
 
                             //this.colWidths[idx] = (int)rr1.Width;
 
                             rr1.Height = (int)formattedText.Height + 2;
-                            rr1.Fill = this.GridHeaderBackground;
+                            rr1.Fill = GridHeaderBackground;
                             //rr1.StrokeThickness = 1;
-                            Canvas.SetLeft(rr1, left - this.GridXShift);
+                            Canvas.SetLeft(rr1, left - _gridXShift);
                             Canvas.SetTop(rr1, top);
 
                             TheCanvas.Children.Add(rr1);
 
                             Rectangle rr = new Rectangle();
-                            rr.Width = this.colWidths[idx];//(int)formattedText.Width + 10;
+                            rr.Width = _colWidths[idx];//(int)formattedText.Width + 10;
                             rr.Height = (int)formattedText.Height + 2;
-                            rr.Stroke = this.gridCellOutline;
+                            rr.Stroke = _gridCellOutline;
                             rr.StrokeThickness = 1;
-                            Canvas.SetLeft(rr, left - this.GridXShift);
+                            Canvas.SetLeft(rr, left - _gridXShift);
                             Canvas.SetTop(rr, top);
 
                             TheCanvas.Children.Add(rr);
 
                             TextBlock ttb = new TextBlock();
                             ttb.Text = property.Name;
-                            ttb.FontSize = this.GridHeaderFontSize;
-                            ttb.Foreground = this.GridHeaderBrush;
-                            ttb.FontFamily = this.GridHeaderTypeface.FontFamily;
-                            ttb.FontWeight = this.GridHeaderTypeface.Weight;
-                            ttb.FontStyle = this.GridHeaderTypeface.Style;
-                            Canvas.SetLeft(ttb, left + 2 - this.GridXShift);
+                            ttb.FontSize = GridHeaderFontSize;
+                            ttb.Foreground = GridHeaderBrush;
+                            ttb.FontFamily = GridHeaderTypeface.FontFamily;
+                            ttb.FontWeight = GridHeaderTypeface.Weight;
+                            ttb.FontStyle = GridHeaderTypeface.Style;
+                            Canvas.SetLeft(ttb, left + 2 - _gridXShift);
                             Canvas.SetTop(ttb, top + 1);
                             TheCanvas.Children.Add(ttb);
-                            left += this.colWidths[idx];
+                            left += _colWidths[idx];
 
                             idx++;
                         }
 
-                        this.gridHeaderAndTitleHeight += tempheight;
+                        _gridHeaderAndTitleHeight += tempheight;
                     }
 
                     #endregion
@@ -791,36 +788,36 @@ namespace DirOpusReImagined
 
                     #region Render Grid Data Rows
 
-                    if (this.items.Count > 0)
+                    if (_items.Count > 0)
                     {
                         int left = 0;
-                        int top = this.gridHeaderAndTitleHeight;
+                        int top = _gridHeaderAndTitleHeight;
 
                         int idx = 0;
                         int rowidx = 0;
 
-                        foreach (object item in this.items)
+                        foreach (object item in _items)
                         {
 
-                            IBrush tbb = this.gridCellBrush;
-                            IBrush tcb = this.gridCellContentBrush;
+                            IBrush tbb = _gridCellBrush;
+                            IBrush tcb = _gridCellContentBrush;
 
-                            if (this.selecteditems.Contains(item))
+                            if (_selecteditems.Contains(item))
                             {
-                                tbb = this.gridSelectedItemBrush;
-                                tcb = this.gridCellHighlightContentBrush;
+                                tbb = _gridSelectedItemBrush;
+                                tcb = _gridCellHighlightContentBrush;
                             }
 
-                            if (rowidx == this.TheItemUnderTheMouse.rowID && this.MouseInControl)
+                            if (rowidx == TheItemUnderTheMouse.rowID && _mouseInControl)
                             {
-                                tbb = this.gridCellHighlightBrush;
-                                tcb = this.gridCellHighlightContentBrush;
+                                tbb = _gridCellHighlightBrush;
+                                tcb = _gridCellHighlightContentBrush;
                             }
 
                             idx = 0;
                             left = 0;
 
-                            if (rowidx < this.GridYShift)
+                            if (rowidx < _gridYShift)
                             {
                                 rowidx++;
                             }
@@ -834,64 +831,64 @@ namespace DirOpusReImagined
                                     var formattedText =
                                         new FormattedText(property.GetValue(item)?.ToString() + "",
                                                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                                                this.gridTypeface, this.gridFontSize,
-                                                this.gridCellBrush);
+                                                _gridTypeface, _gridFontSize,
+                                                _gridCellBrush);
 
                                     Rectangle rr = new Rectangle();
-                                    rr.Width = this.colWidths[idx];
-                                    rr.Height = this.rowHeights[rowidx];
+                                    rr.Width = _colWidths[idx];
+                                    rr.Height = _rowHeights[rowidx];
 
                                     rr.Fill = tbb;
 
                                     // Do our Grid Clipping Here
-                                    if ((left - this.GridXShift + rr.Width > 0) &&
+                                    if ((left - _gridXShift + rr.Width > 0) &&
                                         (top <= TheCanvas.Height) &&
-                                        (left - this.GridXShift <= TheCanvas.Width))
+                                        (left - _gridXShift <= TheCanvas.Width))
                                     {
 
-                                        Canvas.SetLeft(rr, left - this.GridXShift);
+                                        Canvas.SetLeft(rr, left - _gridXShift);
                                         Canvas.SetTop(rr, top);
 
                                         TheCanvas.Children.Add(rr);
 
 
                                         Rectangle rr1 = new Rectangle();
-                                        rr1.Width = this.colWidths[idx];
-                                        rr1.Height = this.rowHeights[rowidx];
-                                        rr1.Stroke = this.gridCellOutline;
+                                        rr1.Width = _colWidths[idx];
+                                        rr1.Height = _rowHeights[rowidx];
+                                        rr1.Stroke = _gridCellOutline;
                                         rr1.StrokeThickness = 1;
-                                        Canvas.SetLeft(rr1, left - this.GridXShift);
+                                        Canvas.SetLeft(rr1, left - _gridXShift);
                                         Canvas.SetTop(rr1, top);
 
                                         TheCanvas.Children.Add(rr1);
 
-                                        string TheText = (property.GetValue(item)?.ToString() + "").ToUpper().Trim();
+                                        string theText = (property.GetValue(item)?.ToString() + "").ToUpper().Trim();
 
-                                        if (TheText == "TRUE" ||
-                                            TheText == "FALSE" ||
-                                            TheText == "YES" ||
-                                            TheText == "NO")
+                                        if (theText == "TRUE" ||
+                                            theText == "FALSE" ||
+                                            theText == "YES" ||
+                                            theText == "NO")
                                         {
                                             // Create an image control.
                                             var image = new Image();
 
-                                            if (TheText == "TRUE" || TheText == "YES")
+                                            if (theText == "TRUE" || theText == "YES")
                                             {
-                                                image.Source = this.Folder;
-                                                image.Width = this.rowHeights[rowidx] - 2;
-                                                image.Height = this.rowHeights[rowidx] - 2;
+                                                image.Source = _folder;
+                                                image.Width = _rowHeights[rowidx] - 2;
+                                                image.Height = _rowHeights[rowidx] - 2;
                                             }
                                             else
                                             {
-                                                image.Source = this.File;
-                                                image.Width = this.rowHeights[rowidx] - 2;
-                                                image.Height = this.rowHeights[rowidx] - 2;
+                                                image.Source = _file;
+                                                image.Width = _rowHeights[rowidx] - 2;
+                                                image.Height = _rowHeights[rowidx] - 2;
                                             }
 
                                             // Set the position of the image on the canvas.
 
-                                            var leftoffset = (this.colWidths[idx] - this.rowHeights[rowidx]) / 2;
-                                            Canvas.SetLeft(image, left + leftoffset - this.GridXShift);
+                                            var leftoffset = (_colWidths[idx] - _rowHeights[rowidx]) / 2;
+                                            Canvas.SetLeft(image, left + leftoffset - _gridXShift);
                                             Canvas.SetTop(image, top + 1);
 
                                             // Add the image to the canvas.
@@ -902,11 +899,11 @@ namespace DirOpusReImagined
 
                                             TextBlock ttb = new TextBlock();
                                             //ttb.Text = property.GetValue(item)?.ToString() + "";
-                                            ttb.FontSize = this.gridFontSize;
+                                            ttb.FontSize = _gridFontSize;
                                             ttb.Foreground = tcb;
-                                            ttb.FontFamily = this.gridTypeface.FontFamily;
-                                            ttb.FontWeight = this.gridTypeface.Weight;
-                                            ttb.FontStyle = this.gridTypeface.Style;
+                                            ttb.FontFamily = _gridTypeface.FontFamily;
+                                            ttb.FontWeight = _gridTypeface.Weight;
+                                            ttb.FontStyle = _gridTypeface.Style;
 
                                             // Here we look for idx in JustifyColumns
                                             // if its there we might pad the strings placement
@@ -916,12 +913,12 @@ namespace DirOpusReImagined
                                             
                                             string thestringtoprint = property.GetValue(item)?.ToString() + "";
 
-                                            if (truncateColumns.Contains(idx))
+                                            if (_truncateColumns.Contains(idx))
                                             {
                                                 // here we need to truncate the string being rendered
-                                                if (thestringtoprint.Length > truncateColumnLength )
+                                                if (thestringtoprint.Length > _truncateColumnLength )
                                                 {
-                                                    thestringtoprint = thestringtoprint.Substring(0, truncateColumnLength) + "...";
+                                                    thestringtoprint = thestringtoprint.Substring(0, _truncateColumnLength) + "...";
                                                 }
                                                 
                                             }
@@ -933,26 +930,26 @@ namespace DirOpusReImagined
                                                 var theTextFormatted =
                                                 new FormattedText(thestringtoprint,
                                                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                                                this.gridTypeface, this.gridFontSize,
-                                                this.gridCellBrush);
+                                                _gridTypeface, _gridFontSize,
+                                                _gridCellBrush);
 
-                                                leftoffset = this.colWidths[idx] - (int)theTextFormatted.Width - 2;
+                                                leftoffset = _colWidths[idx] - (int)theTextFormatted.Width - 2;
                                             }
 
 
-                                            Canvas.SetLeft(ttb, left + leftoffset - this.GridXShift);
+                                            Canvas.SetLeft(ttb, left + leftoffset - _gridXShift);
                                             Canvas.SetTop(ttb, top + 1);
                                             TheCanvas.Children.Add(ttb);
                                             lastCellItemText = ttb.Text;
                                         }
                                     }
 
-                                    left += this.colWidths[idx];
+                                    left += _colWidths[idx];
 
                                     idx++;
                                 }
 
-                                top += this.rowHeights[rowidx];
+                                top += _rowHeights[rowidx];
                                 rowidx++;
                             }
 
@@ -965,8 +962,8 @@ namespace DirOpusReImagined
                     // Here we will only scroll whole rows by the setting
                     // the max value of the scrollbar to be the number of rows total in the grid
 
-                    this.TheVerticleScrollBar.Minimum = 0;
-                    this.TheVerticleScrollBar.Maximum = this.items.Count;
+                    TheVerticleScrollBar.Minimum = 0;
+                    TheVerticleScrollBar.Maximum = _items.Count;
 
                     //if (this.showCrossHairs)
                     //{
@@ -977,13 +974,13 @@ namespace DirOpusReImagined
 
                     int offsety = 0;
 
-                    for (int i = this.GridYShift; i < this.gridRows; i++)
+                    for (int i = _gridYShift; i < _gridRows; i++)
                     {
-                        offsety += this.rowHeights[i];
+                        offsety += _rowHeights[i];
 
-                        if (this.CurMouseY - this.gridHeaderAndTitleHeight < offsety)
+                        if (_curMouseY - _gridHeaderAndTitleHeight < offsety)
                         {
-                            this.TheItemUnderTheMouse.rowID = i;
+                            TheItemUnderTheMouse.rowID = i;
                             break;
                         }
                     }
@@ -991,34 +988,34 @@ namespace DirOpusReImagined
                     // Figure out the COLUMN we are on
 
                     offsety = 0;
-                    for (int i = 0; i < this.gridCols; i++)
+                    for (int i = 0; i < _gridCols; i++)
                     {
-                        offsety += this.colWidths[i];
+                        offsety += _colWidths[i];
 
 
-                        if (this.LastPosition.X + this.GridXShift < offsety)
+                        if (_lastPosition.X + _gridXShift < offsety)
                         {
-                            this.TheItemUnderTheMouse.colID = i;
-                            if (this.items.Count > 0)
-                                this.TheItemUnderTheMouse.ItemUnderMouse = this.items[this.TheItemUnderTheMouse.rowID];
+                            TheItemUnderTheMouse.colID = i;
+                            if (_items.Count > 0)
+                                TheItemUnderTheMouse.ItemUnderMouse = _items[TheItemUnderTheMouse.rowID];
                             break;
                         }
 
                     }
 
                     // figure out the value of whats being hovered over
-                    this.TheItemUnderTheMouse.cellContent = "";
+                    TheItemUnderTheMouse.cellContent = "";
 
-                    if (this.Items.Count > 0)
+                    if (Items.Count > 0)
                     {
 
-                        object theitem = this.TheItemUnderTheMouse.ItemUnderMouse;//this.items[this.TheItemUnderTheMouse.rowID];
+                        object theitem = TheItemUnderTheMouse.ItemUnderMouse;//this.items[this.TheItemUnderTheMouse.rowID];
                         int idx = 0;
-                        foreach (PropertyInfo property in this.Items[0].GetType().GetProperties())
+                        foreach (PropertyInfo property in Items[0].GetType().GetProperties())
                         {
-                            if (idx == this.TheItemUnderTheMouse.colID)
+                            if (idx == TheItemUnderTheMouse.colID)
                             {
-                                this.TheItemUnderTheMouse.cellContent = property.GetValue(this.Items[this.TheItemUnderTheMouse.rowID])?.ToString() + "";
+                                TheItemUnderTheMouse.cellContent = property.GetValue(Items[TheItemUnderTheMouse.rowID])?.ToString() + "";
                                 break;
                             }
                             idx++;
@@ -1026,7 +1023,7 @@ namespace DirOpusReImagined
                     }
 
 
-                    GridHover?.Invoke(this, this.TheItemUnderTheMouse);
+                    GridHover?.Invoke(this, TheItemUnderTheMouse);
                 }
                 
 
@@ -1039,23 +1036,23 @@ namespace DirOpusReImagined
 
         public void TestPopulate()
         {
-            PopulateTESTData();
+            PopulateTestData();
         }
 
         public void ClearTestPopulate()
         {
             TheCanvas.Children.Clear();
-            this.items.Clear();
-            this.ReRender();
+            _items.Clear();
+            ReRender();
         }
 
         public void SetGridSize(int width, int height)
         {
             TheCanvas.Width = width;
             TheCanvas.Height = height;
-            this.Width = width + 12;
-            this.Height = height + 12;
-            this.ReRender();
+            Width = width + 12;
+            Height = height + 12;
+            ReRender();
         }
 
         public string GetFirstSelectedFolder()
@@ -1097,10 +1094,10 @@ namespace DirOpusReImagined
 
         #region Private methods
 
-        private void PopulateTESTData()
+        private void PopulateTestData()
         {
             TheCanvas.Children.Clear();
-            this.items.Clear();
+            _items.Clear();
 
             for (int i = 0; i < 20; i++)
             {
@@ -1121,7 +1118,7 @@ namespace DirOpusReImagined
 
                 tt.CompletedAssignedBy = "Name Of Person " + i.ToString();
 
-                this.items.Add(tt);
+                _items.Add(tt);
             }
         }
 
@@ -1141,22 +1138,22 @@ namespace DirOpusReImagined
 
         private void RenderCrossHairs()
         {
-            if (this.CurMouseY >= TheCanvas.Height || this.CurMouseX >= TheCanvas.Width)
+            if (_curMouseY >= TheCanvas.Height || _curMouseX >= TheCanvas.Width)
                 return;
 
             Line l1 = new Line();
-            l1.Stroke = this.crossHairBrush;
+            l1.Stroke = _crossHairBrush;
             l1.StrokeThickness = 1;
-            l1.StartPoint = new Point(0, this.CurMouseY);
-            l1.EndPoint = new Point(TheCanvas.Width, this.CurMouseY);
+            l1.StartPoint = new Point(0, _curMouseY);
+            l1.EndPoint = new Point(TheCanvas.Width, _curMouseY);
 
             TheCanvas.Children.Add(l1);
 
             Line l2 = new Line();
-            l2.Stroke = this.crossHairBrush;
+            l2.Stroke = _crossHairBrush;
             l2.StrokeThickness = 1;
-            l2.StartPoint = new Point(this.CurMouseX, 0);
-            l2.EndPoint = new Point(this.CurMouseX, TheCanvas.Height);
+            l2.StartPoint = new Point(_curMouseX, 0);
+            l2.EndPoint = new Point(_curMouseX, TheCanvas.Height);
 
             TheCanvas.Children.Add(l2);
         }
@@ -1193,7 +1190,7 @@ namespace DirOpusReImagined
             {
                 // We are scrolling Horizontally
 
-                double d = TheHorizontalScrollBar.Value - (e.Delta.Y * this.scrollMultiplier);
+                double d = TheHorizontalScrollBar.Value - (e.Delta.Y * _scrollMultiplier);
                 if (d < 0)
                 {
                     d = 0;
@@ -1205,18 +1202,18 @@ namespace DirOpusReImagined
 
                 int maxposition = 0;
 
-                for (int i = 0; i < this.colWidths.Length; i++)
+                for (int i = 0; i < _colWidths.Length; i++)
                 {
-                    maxposition += this.colWidths[i];
+                    maxposition += _colWidths[i];
                 }
 
-                double Delta = (maxposition / 100) * d;
+                double delta = (maxposition / 100) * d;
 
-                GridXShift = (int)Delta;
+                _gridXShift = (int)delta;
 
                 TheHorizontalScrollBar.Value = d;
 
-                this.ReRender();
+                ReRender();
 
             }
             else
@@ -1229,16 +1226,16 @@ namespace DirOpusReImagined
                     if (e.Delta.Y > 0)
                     {
                         // Increase Font Size
-                        this.GridFontSize += 1;
-                        this.GridHeaderFontSize += 1;
-                        this.GridTitleFontSize += 1;
+                        GridFontSize += 1;
+                        GridHeaderFontSize += 1;
+                        GridTitleFontSize += 1;
                     }
                     else
                     {
                         // Decrease Font Size
-                        this.GridFontSize += -1;
-                        this.GridHeaderFontSize += -1;
-                        this.GridTitleFontSize += -1;
+                        GridFontSize += -1;
+                        GridHeaderFontSize += -1;
+                        GridTitleFontSize += -1;
                     }
 
                     ReRender();
@@ -1247,7 +1244,7 @@ namespace DirOpusReImagined
                 {
                     // We are scrolling Vertically
                     
-                    double d = TheVerticleScrollBar.Value - (e.Delta.Y * this.scrollMultiplier);
+                    double d = TheVerticleScrollBar.Value - (e.Delta.Y * _scrollMultiplier);
 
                     if (d < 0)
                     {
@@ -1260,10 +1257,10 @@ namespace DirOpusReImagined
 
                     TheVerticleScrollBar.Value = d;
 
-                    if (this.items.Count > 0)
+                    if (_items.Count > 0)
                     {
-                        this.GridYShift = (int)d;
-                        this.ReRender();
+                        _gridYShift = (int)d;
+                        ReRender();
                     }
                 }
             
@@ -1279,17 +1276,17 @@ namespace DirOpusReImagined
             // Get the current pointer position relative to the UserControl
             Point position = e.GetPosition(this);
 
-            this.LastPosition = position;
+            _lastPosition = position;
 
-            if (this.InDesignMode)
+            if (_inDesignMode)
             {
-                this.CurMouseX = (int)position.X;
-                this.CurMouseY = (int)position.Y;
+                _curMouseX = (int)position.X;
+                _curMouseY = (int)position.Y;
             }
             else
             {
-                this.CurMouseX = (int)position.X - (int)TheCanvas.Bounds.Left;
-                this.CurMouseY = (int)position.Y - (int)TheCanvas.Bounds.Top;
+                _curMouseX = (int)position.X - (int)TheCanvas.Bounds.Left;
+                _curMouseY = (int)position.Y - (int)TheCanvas.Bounds.Top;
             }
             //this.CurMouseX = (int)position.X;
             //this.CurMouseX = (int)position.X - (int)TheCanvas.Bounds.Left;
@@ -1297,9 +1294,9 @@ namespace DirOpusReImagined
             //this.CurMouseY = (int)position.Y - (int)TheCanvas.Bounds.Top;
 
 
-            if (this.showCrossHairs)
+            if (_showCrossHairs)
             {
-                this.ReRender();
+                ReRender();
             }
 
             e.Handled = true; // Mark the event as handled to prevent it from bubbling up
@@ -1348,31 +1345,31 @@ namespace DirOpusReImagined
             // Do something with this 411
 
             // We have a rowclicked event so fire it
-            if (this.TheItemUnderTheMouse.ItemUnderMouse != null)
+            if (TheItemUnderTheMouse.ItemUnderMouse != null)
             {
-                GridItemClick?.Invoke(this, this.TheItemUnderTheMouse);
+                GridItemClick?.Invoke(this, TheItemUnderTheMouse);
             }
 
             if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
             {
                 // We are CTRL clicking on items so multi select
-                if (this.selecteditems.Contains(this.TheItemUnderTheMouse.ItemUnderMouse))
+                if (_selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
                 {
                     // we are unselecting an item
-                    this.selecteditems.Remove(this.TheItemUnderTheMouse.ItemUnderMouse);    
+                    _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);    
                 }
                 else
                 {
                     // we are adding the item to the selection list
-                    this.selecteditems.Add(this.TheItemUnderTheMouse.ItemUnderMouse);
+                    _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
 
                 }
             }
             else
             {
                 // we are not CTRL clicking so single select
-                this.selecteditems.Clear(); 
-                this.selecteditems.Add(this.TheItemUnderTheMouse.ItemUnderMouse);   
+                _selecteditems.Clear(); 
+                _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
 
             }
             // Look to handle double click here
@@ -1422,8 +1419,8 @@ namespace DirOpusReImagined
         {
             //this.ShowCrossHairs = true;
 
-            this.MouseInControl = true;
-            this.ReRender();
+            _mouseInControl = true;
+            ReRender();
 
             e.Handled = true;
         }
@@ -1434,22 +1431,22 @@ namespace DirOpusReImagined
 
             //this.ReRender();
 
-            this.MouseInControl = false;
-            this.CurMouseX = -1;
-            this.CurMouseY = -1;
-            this.ReRender();
+            _mouseInControl = false;
+            _curMouseX = -1;
+            _curMouseY = -1;
+            ReRender();
 
             e.Handled = true;
         }
 
         private void TheVerticleScrollBar_Scroll(object? sender, ScrollEventArgs e)
         {
-            this.GridYShift = 0;
+            _gridYShift = 0;
 
-            if (this.items.Count > 0)
+            if (_items.Count > 0)
             {
-                this.GridYShift = (int)e.NewValue;
-                this.ReRender();
+                _gridYShift = (int)e.NewValue;
+                ReRender();
             }
 
             //throw new NotImplementedException();
@@ -1457,20 +1454,20 @@ namespace DirOpusReImagined
 
         private void TheHorizontalScrollBar_scroll(object? sender, ScrollEventArgs e)
         {
-            if (this.items.Count > 0)
+            if (_items.Count > 0)
             {
                 int maxposition = 0;
 
-                for (int i = 0; i < this.colWidths.Length; i++)
+                for (int i = 0; i < _colWidths.Length; i++)
                 {
-                    maxposition += this.colWidths[i];
+                    maxposition += _colWidths[i];
                 }
 
-                double Delta = (maxposition / 100) * e.NewValue;
+                double delta = (maxposition / 100) * e.NewValue;
 
-                GridXShift = (int)Delta;
+                _gridXShift = (int)delta;
 
-                this.ReRender();
+                ReRender();
             }
 
             //throw new NotImplementedException();

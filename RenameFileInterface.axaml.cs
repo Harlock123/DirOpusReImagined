@@ -1,14 +1,12 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 
 namespace DirOpusReImagined;
 
 public partial class RenameFileInterface : Window
 {
     
-    bool FrmCanceled = false;
+    bool FrmCanceled;
     
     public string NewName { get; set; }
     public string newprefix { get; set; }
