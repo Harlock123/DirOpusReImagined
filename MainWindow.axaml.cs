@@ -40,6 +40,8 @@ namespace DirOpusReImagined
         private string StartRightPath = "";
         private string StartLeftPath = "";
 
+        private string oldpath = "";
+
         private bool UseIntegratedImageViewer = true;
         
         private string LastButtonPopupName = "";
@@ -1436,6 +1438,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
+                    oldpath = RPpath.Text;
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
                     PopulateFilePanel(RPgrid, RPpath.Text);
                 }
@@ -1464,6 +1467,8 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
+                    oldpath = RPpath.Text;
+                    
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     PopulateFilePanel(RPgrid, RPpath.Text);
                 }
@@ -1500,6 +1505,7 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     // Its A folder so gets go into it
+                    oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
                     PopulateFilePanel(LPgrid, LPpath.Text);
                 }
@@ -1538,6 +1544,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
+                    oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     PopulateFilePanel(LPgrid, LPpath.Text);
                 }
@@ -1633,7 +1640,11 @@ namespace DirOpusReImagined
             //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
 
             // using linq to sort the directories by name alphabetically
-            var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME)
+            
+            try
+            {
+                
+                var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -1705,6 +1716,26 @@ namespace DirOpusReImagined
 
             ThePanel.Items = FileList.OfType<object>().ToList(); 
 
+
+            }
+            catch (Exception e)
+            {
+                MessageBox MB = new MessageBox(e.Message);
+
+                MB.ShowDialog(this);
+                
+                if (ThePanel.Name == "RPgrid")
+                {
+                    RPpath.Text = oldpath;
+                }
+                else
+                {
+                    LPpath.Text = oldpath;
+                }
+                
+            }
+            
+            
             ThePanel.SuspendRendering = false;
         }
 
