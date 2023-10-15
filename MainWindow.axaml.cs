@@ -968,6 +968,21 @@ namespace DirOpusReImagined
 
             }
             
+            if (bcontent.Contains("%LPATH%"))
+            {
+                string ret = bcontent.Replace("%LPATH%", MakePathEnvSafe(LPpath.Text));
+
+                return ret;
+            }
+            
+            if (bcontent.Contains("%RPATH%"))
+            {
+                string ret = bcontent.Replace("%RPATH%", MakePathEnvSafe(RPpath.Text));
+
+                return ret;
+            }   
+            
+            
             
             return bcontent;
         }

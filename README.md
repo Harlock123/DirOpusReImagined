@@ -64,6 +64,24 @@ A Sample of this file is shown below
 			<Window>False</Window>
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
+		<Button>
+			<Name>LPButton35</Name>
+			<Content>Terminal on Left</Content>
+			<Action>alacritty</Action>
+			<Args>--working-directory %LPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens an alacrittey terminal in the filder shown on the left panel</ToolTip>
+		</Button>
+		<Button>
+			<Name>LPButton36</Name>
+			<Content>Terminal on right</Content>
+			<Action>alacritty</Action>
+			<Args>--working-directory %RPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens an alacrittey terminal in the filder shown on the right panel</ToolTip>
+		</Button>
 	</Buttons>
 
 	<DrivePresets>
@@ -155,6 +173,12 @@ The `<Args> </Args>` parameter can contain the following entries
 * `%RPAF%` - Full Path All Files in the Right Panel . Each argument is separated by a space
 
 * `%LPAF%` - Full Path All Files in the Left Panel . Each argument is separated by a space
+
+* `%LPATH%` - Full Path of what is currently being shown in the LEFT Panel
+
+* `%RPATH%` - Full Path of what is currently being shown in the RIGHT Panel
+
+
 
 The `<Action></Action>` Parameter needs to be the actual command that you want to execute on clicking the button. 
 The Parsed ARGS from the above parameters will be appended to the command line.
