@@ -227,9 +227,14 @@ The `<Path></Path>` Specifier is the path that will be loaded into the panel whe
 
 There are a number of special variables that can be used in the path specification.
 - $HOME - The users home directory
-- $ROOT - The root directory of the system (usually C:\ on Windows, / on Linux and MacOS)
+- $ROOT - The root directory of the system 
+  - usually C:\ on Windows, / on Linux and MacOS
 - $DESKTOP - The users desktop directory
-- $DOCUMENTS - The users documents directory
+- $DOCUMENTS - The users documents directory 
+  - Note:
+       On Mac and Linux it will compare the folder returned by .Nets Environment.SpecialFolder
+       enumeration with the users HOME folder. If they are the same it will then search the
+       Home folder for a Documents, documents, DOCUMENTS folder and if found will return that.
 - $PICTURES - The users pictures directory
 
 ## Building
