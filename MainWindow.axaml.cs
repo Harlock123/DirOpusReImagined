@@ -1813,6 +1813,32 @@ namespace DirOpusReImagined
             {
                 //rootDirectoryPath = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
                 rootDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                
+                // If home = rootDir See if there is a documents folder in there
+                if (Home == rootDirectoryPath)
+                {
+                    if (Directory.Exists(Home + "/Documents"))
+                    {
+                        rootDirectoryPath = rootDirectoryPath + "/Documents";
+                    }
+                    else
+                    {
+                        if (Directory.Exists(Home + "/documents"))
+                        {
+                            rootDirectoryPath = rootDirectoryPath + "/documents";
+                        }
+                        else
+                        {
+                            if (Directory.Exists(Home + "/DOCUMENTS"))
+                            {
+                                rootDirectoryPath = rootDirectoryPath + "/DOCUMENTS";
+                            }
+                            
+                        }
+                    }
+                }
             }
 
             return rootDirectoryPath;

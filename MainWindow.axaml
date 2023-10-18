@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:cons="clr-namespace:DirOpusReImagined;assembly=DirOpusReImagined"
-        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="DirOpusReImagined.MainWindow"
         Title="DirOpusReImagined"
 		Background="LightGray">
@@ -101,7 +101,7 @@
 			<Button Name="ClearRightButton"
 					Grid.Column="1"
 					Grid.Row="1"
-					HorizontalAlignment="Stretch"
+					HorizontalAlignment="Center"
 					Content="clear ---&gt;"
 					ToolTip.Tip="Clears the items selected in the right panel" >
 			</Button>
@@ -109,7 +109,7 @@
 			<Button Name="ClearLeftButton"
 					Grid.Column="1"
 					Grid.Row="1"
-					HorizontalAlignment="Stretch"
+					HorizontalAlignment="Center"
 					Content="&lt;--- clear"
 					ToolTip.Tip="Clears the items selected in the left panel"></Button>
 
@@ -119,39 +119,39 @@
 			<Button Name="CopyRightButton"
 					Grid.Column="1"
 					Grid.Row="1"
-					HorizontalAlignment="Stretch"
+					HorizontalAlignment="Center"
 					Content="copy ---&gt;"
 					ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
 			<Button Name="CopyLeftButton"
 						Grid.Column="1"
 						Grid.Row="1"
-						HorizontalAlignment="Stretch"
-						Content="&lt;--- copy    "
+						HorizontalAlignment="Center"
+						Content="&lt;--- copy"
 						ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
 
 			<Button Name="MoveRightButton"
 					Grid.Column="1"
 					Grid.Row="1"
-					HorizontalAlignment="Stretch"
-					Content="move  ---&gt;"
+					HorizontalAlignment="Center"
+					Content="move---&gt;"
 					ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
 			<Button Name="MoveLeftButton"
 						Grid.Column="1"
 						Grid.Row="1"
-						HorizontalAlignment="Stretch"
-						Content="&lt;--- move"
+						HorizontalAlignment="Center"
+						Content="&lt;---move"
 						ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
 			<Button Name="RenameRightButton"
 			        Grid.Column="1"
 			        Grid.Row="1"
-			        HorizontalAlignment="Stretch"
+			        HorizontalAlignment="Center"
 			        Content="rename  ---&gt;"
 			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
 			<Button Name="RenameLeftButton"
 			        Grid.Column="1"
 			        Grid.Row="1"
-			        HorizontalAlignment="Stretch"
-			        Content="&lt;--- rename"
+			        HorizontalAlignment="Center"
+			        Content="&lt;---  rename"
 			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
 
 		</StackPanel>
