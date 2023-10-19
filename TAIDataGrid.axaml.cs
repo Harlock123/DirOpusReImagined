@@ -1348,6 +1348,7 @@ namespace DirOpusReImagined
             {
                 // Right mouse button was pressed
                 // Handle the right button click here
+                // Just bail here and pass it off to the context menu
 
                 return;
             }

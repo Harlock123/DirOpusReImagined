@@ -45,9 +45,25 @@ namespace DirOpusReImagined
             InitializeComponent();
 
             // Apply The Settings if possible
-
-            ApplyButtonSettingsFromXml("Configuration.xml", this);
-
+            // First Look where the app is running from for Configuration.xml
+            // Otherwise
+            // If the system is Linux/Unix Look for Config in ~/.config/dori/Configuration.xml
+            // If the system is MacOS Look in ~/Library/Application Support/dori/Configuration.xml
+            // If the system is Windowz Look in %APPDATA%\dori\Configuration.xml
+            // If the file is not found then use the default settings
+           
+            // See if Configuration.xml exists in the current directory
+            // if it does then use it
+            if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
+            {
+                ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
+            }
+            else
+            {
+                // Look in the alternate places here based on OS
+                
+            }
+            
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
