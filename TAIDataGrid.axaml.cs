@@ -1343,6 +1343,14 @@ namespace DirOpusReImagined
             // Get the current pointer position relative to the UserControl
             //Point position = e.GetPosition(this);
             // Do something with this 411
+            
+            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+            {
+                // Right mouse button was pressed
+                // Handle the right button click here
+
+                return;
+            }
 
             // We have a rowclicked event so fire it
             if (TheItemUnderTheMouse.ItemUnderMouse != null)
@@ -1483,12 +1491,22 @@ namespace DirOpusReImagined
 
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
-            // Implement the action for Option 1
+            this.GridFontSize += 1;
+            this.GridTitleFontSize += 1;
+            this.GridHeaderFontSize += 1;
+            
+            
+
         }
 
         private void Option2_Click(object sender, RoutedEventArgs e)
         {
             // Implement the action for Option 2
+            
+            this.GridFontSize += -1;
+            this.GridTitleFontSize += -1;
+            this.GridHeaderFontSize += -1;
+            
         }
 
         #endregion

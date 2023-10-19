@@ -22,8 +22,8 @@
 					ClipToBounds="true">
 				<Canvas.ContextMenu>
 					<ContextMenu>
-						<MenuItem Header="Option 1" Click="Option1_Click"/>
-						<MenuItem Header="Option 2" Click="Option2_Click"/>
+						<MenuItem Header="Fonts Larger" Click="Option1_Click"/>
+						<MenuItem Header="Fonts Smaller" Click="Option2_Click"/>
 						<!-- Add more menu items as needed -->
 					</ContextMenu>
 				</Canvas.ContextMenu>
