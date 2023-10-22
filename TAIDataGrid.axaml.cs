@@ -1090,6 +1090,36 @@ namespace DirOpusReImagined
             return result;
         }
 
+        public void SelectAllFilesOnly()
+        {
+            SelectedItems.Clear();
+
+            foreach (AFileEntry item in Items)
+            {
+                if (!item.Typ)
+                {
+                    SelectedItems.Add(item);
+                }
+            }
+
+            ReRender();
+        }
+        
+        public void SelectAllFoldersOnly()
+        {
+            SelectedItems.Clear();
+
+            foreach (AFileEntry item in Items)
+            {
+                if (item.Typ)
+                {
+                    SelectedItems.Add(item);
+                }
+            }
+
+            ReRender();
+        }
+        
         #endregion
 
         #region Private methods

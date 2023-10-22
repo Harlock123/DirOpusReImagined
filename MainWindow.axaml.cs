@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
@@ -18,7 +19,9 @@ namespace DirOpusReImagined
 {
     public partial class MainWindow : Window
     {
-
+        #region Local Variables
+        
+        
         private Avalonia.Rect LRB = new Avalonia.Rect();
         private Avalonia.Rect RRB = new Avalonia.Rect();
         private Avalonia.Size OrigSize = new Avalonia.Size();
@@ -39,7 +42,9 @@ namespace DirOpusReImagined
         private string LastButtonPopupName = "";
 
         private PopUp pop;
-
+        
+        #endregion
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -123,24 +128,7 @@ namespace DirOpusReImagined
             LPDriveButton.Content = I3;
             RPDriveButton.Content = I4;
 
-            SwapButton.Click += SwapButton_Click;
-            LeftToRightButton.Click += LeftToRightButton_Click;
-            RightToLeftButton.Click += RightToLeftButton_Click;
-
-            ClearLeftButton.Click += ClearLeftButton_Click;
-            ClearRightButton.Click += ClearRightButton_Click;
-
-            CopyLeftButton.Click += CopyLeftButton_Click;
-            CopyRightButton.Click += CopyRightButton_Click;
-
-            MoveLeftButton.Click += MoveLeftButton_Click;  
-            MoveRightButton.Click += MoveRightButton_Click;
-
-            RPBackButton.Click += RPBackButton_Click;
-            LPBackButton.Click += LPBackButton_Click;
             
-            RenameRightButton.Click += RenameRightButton_Click;
-            RenameLeftButton.Click += RenameLeftButton_Click;
 
             //LPgrid.GridFontSize = 12;
             //RPgrid.GridFontSize = 12;
@@ -208,7 +196,14 @@ namespace DirOpusReImagined
             RenameFileInterface fi = new RenameFileInterface();
             fi.Width = 600;
             fi.Height = 180;
-            fi.ShowDialog(this);
+            fi.Show(this);
+            
+            LoopAsync(fi);
+            
+            if (!fi.Canceled)
+            {
+                MessageBox MB = new MessageBox("Gonna Rename with Prefix:" + fi.newprefix + " and Suffix: " + fi.newsuffix + " and New Name: " + fi.NewName);
+            }
         }
 
         private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
@@ -233,16 +228,55 @@ namespace DirOpusReImagined
                 MB.ShowDialog(this);
                 return;
             }
-            
-            RenameFileInterface fi = new RenameFileInterface();
+
+            RenameFileInterface fi = new RenameFileInterface(RPgrid, RPpath.Text);
             fi.Width = 600;
             fi.Height = 180;
-            fi.ShowDialog(this);
+            fi.Show(this);
+
+            LoopAsync(fi);
+
+            if (!fi.Canceled)
+            {
+                MessageBox MB = new MessageBox("Gonna Rename with Prefix:" + fi.newprefix + " and Suffix: " + fi.newsuffix + " and New Name: " + fi.NewName);
+            }
+        }
+        
+        public async Task LoopAsync(RenameFileInterface fi)
+        {
+            while (fi.IsVisible) // This is the loop condition
+            {
+                // Your loop logic here
+
+                await Task.Delay(100); // This will yield control back to the UI for 100ms.
+            }
         }
 
         private void WireUpButtonHandlers()
         {
             #region Click  Handlers
+            
+            SwapButton.Click += SwapButton_Click;
+            LeftToRightButton.Click += LeftToRightButton_Click;
+            RightToLeftButton.Click += RightToLeftButton_Click;
+
+            AllRightButton.Click += AllRightButton_Click;
+            AllLeftButton.Click += AllLeftButton_Click;
+            
+            ClearLeftButton.Click += ClearLeftButton_Click;
+            ClearRightButton.Click += ClearRightButton_Click;
+
+            CopyLeftButton.Click += CopyLeftButton_Click;
+            CopyRightButton.Click += CopyRightButton_Click;
+
+            MoveLeftButton.Click += MoveLeftButton_Click;  
+            MoveRightButton.Click += MoveRightButton_Click;
+
+            RPBackButton.Click += RPBackButton_Click;
+            LPBackButton.Click += LPBackButton_Click;
+            
+            RenameRightButton.Click += RenameRightButton_Click;
+            RenameLeftButton.Click += RenameLeftButton_Click;
 
             LPButton1.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton2.Click += Handle_Lower_Panel_Button_Clicks;
@@ -373,6 +407,16 @@ namespace DirOpusReImagined
             LPButton36.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
 
             #endregion
+        }
+
+        private void AllLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            LPgrid.SelectAllFilesOnly();
+        }
+
+        private void AllRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            RPgrid.SelectAllFilesOnly();
         }
 
         private void Handle_Drive_Button_Clicks(object? sender, RoutedEventArgs e)

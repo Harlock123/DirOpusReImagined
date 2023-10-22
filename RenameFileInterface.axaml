@@ -25,8 +25,12 @@
             </StackPanel>
         </StackPanel>
         
-        <TextBlock TextWrapping="Wrap" Margin="10" HorizontalAlignment="Center">
-            You can use the symbol of %ORD% to place the ordinal numeric of the file being renamed in the literal text of the resulting file name
+        <TextBlock TextWrapping="Wrap" Margin="2" HorizontalAlignment="Center">
+            <Run Text="You can use the symbol of" />
+            <Run Text="%ORD%" FontWeight="Bold"/>
+            <Run Text="to place the ordinal numeric of the file being renamed in the literal text of the resulting file name. Placing a " />
+            <Run Text="%NAME%" FontWeight="Bold"/>
+            <Run Text="in the pattern will place its original name (minus the extension) in the resulting file name."/> 
          </TextBlock>
        
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">

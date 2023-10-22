@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DirOpusReImagined
 {
@@ -109,5 +111,259 @@ namespace DirOpusReImagined
             }
         }
 
+        public static void RenameFile(string oldFilePath, string newFilePath)
+        {
+            try
+            {
+                // Verify that the source file exists
+                if (!File.Exists(oldFilePath))
+                {
+                    throw new FileNotFoundException("The source file does not exist.", oldFilePath);
+                    // we need to handle this a little better
+                }
+
+                // Rename the file using File.Move
+                File.Move(oldFilePath, newFilePath);
+
+                Console.WriteLine($"File renamed from '{oldFilePath}' to '{newFilePath}'");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error renaming the file: {ex.Message}");
+            }
+        }
+
+        public static string MakePathENVSafe(string path)
+        {
+            string result = path.Replace(@"\\", @"\"); // get rid of double backslashes
+            
+            // now for some environmental stuff
+            
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                if (!result.EndsWith(@"\"))
+                {
+                    result += @"\";
+
+                }
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                if (!result.EndsWith(@"/"))
+                {
+                    result += @"/";
+
+                }
+                
+            }
+
+            return result;
+
+        }
+
+        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
+        {
+            //LPgrid.PopulateGrid(PATHNAME);
+
+            //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
+
+            // using linq to sort the directories by name alphabetically
+            
+            try
+            {
+                
+                var Directories = Directory.EnumerateDirectories(PATHNAME)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            ThePanel.SuspendRendering = true;
+
+            ThePanel.Items.Clear();
+            List<Object> FileList = new List<Object>();
+
+            foreach (string dir in Directories)
+            {
+                DirectoryInfo di = new DirectoryInfo(dir);
+                try
+                {
+
+                    if (di.Attributes.HasFlag(FileAttributes.System))
+                    {
+                        continue;
+                    }
+
+                    string flags = GetAbbreviatedAttributes(di.Attributes);
+                                        
+                    var ds = di.GetDirectories().GetUpperBound(0) + 1;
+                    var fs = di.GetFiles().GetUpperBound(0) + 1;
+
+                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    
+                    try
+                    {                    
+                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                //var ds = di.GetDirectories().GetUpperBound(0);
+                //var fs = di.GetFiles().GetUpperBound(0);
+
+                //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
+            }
+
+            // Using Linq to sort the files alphabetically
+            var files = Directory.EnumerateFiles(PATHNAME)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList(); ;
+
+            foreach (string file in files)
+            {
+                try
+                {
+                    FileInfo fi = new FileInfo(file);
+
+                    FileAttributes fa = File.GetAttributes(fi.FullName);
+
+                    string flags = GetAbbreviatedAttributes(fa);
+
+                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString(); 
+
+                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                }
+                catch
+                {
+                    
+                }
+            }
+
+            ThePanel.Items = FileList.OfType<object>().ToList(); 
+
+
+            }
+            catch (Exception e)
+            {
+                MessageBox MB = new MessageBox(e.Message);
+
+                MB.ShowDialog(null);
+                
+                // if (ThePanel.Name == "RPgrid")
+                // {
+                //     RPpath.Text = oldpath;
+                // }
+                // else
+                // {
+                //     LPpath.Text = oldpath;
+                // }
+                
+            }
+            
+            
+            ThePanel.SuspendRendering = false;
+        }
+        
+        private static string GetAbbreviatedAttributes(FileAttributes attributes)
+        {
+            string abbreviatedAttributes = string.Empty;
+
+            if ((attributes & FileAttributes.ReadOnly) != 0)
+                abbreviatedAttributes += "RO ";
+            else
+                abbreviatedAttributes += "RW ";
+            if ((attributes & FileAttributes.Hidden) != 0)
+                abbreviatedAttributes += "H ";
+            else
+                abbreviatedAttributes += "V ";
+            if ((attributes & FileAttributes.System) != 0)
+                abbreviatedAttributes += "S ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Directory) != 0)
+                abbreviatedAttributes += "D ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Archive) != 0)
+                abbreviatedAttributes += "A ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Device) != 0)
+                abbreviatedAttributes += "DEV ";
+            else
+            {
+                abbreviatedAttributes += "    ";
+            }
+            if ((attributes & FileAttributes.Normal) != 0)
+                abbreviatedAttributes += "N ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Temporary) != 0)
+                abbreviatedAttributes += "T ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.SparseFile) != 0)
+                abbreviatedAttributes += "SF ";
+            else
+            {
+                abbreviatedAttributes += "   ";
+            }
+            if ((attributes & FileAttributes.ReparsePoint) != 0)
+                abbreviatedAttributes += "RP ";
+            else
+            {
+                abbreviatedAttributes += "   ";
+            }
+            if ((attributes & FileAttributes.Compressed) != 0)
+                abbreviatedAttributes += "C ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Offline) != 0)
+                abbreviatedAttributes += "O ";
+            else
+            {
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.NotContentIndexed) != 0)
+                abbreviatedAttributes += "NCI ";
+            else
+            {
+                
+                abbreviatedAttributes += "  ";
+            }
+            if ((attributes & FileAttributes.Encrypted) != 0)
+                abbreviatedAttributes += "E ";
+            else
+            { abbreviatedAttributes += "  "; }
+            if ((attributes & FileAttributes.IntegrityStream) != 0)
+                abbreviatedAttributes += "IS ";
+            else
+            { abbreviatedAttributes += "  "; }
+            if ((attributes & FileAttributes.NoScrubData) != 0)
+                abbreviatedAttributes += "NSD ";
+            else
+            {
+                
+                abbreviatedAttributes += "   ";
+            }
+
+            return abbreviatedAttributes.Trim();
+        }
+        
     }
 }
