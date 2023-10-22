@@ -161,8 +161,11 @@ namespace DirOpusReImagined
             //LPpath.Text = GetRootDirectoryPath();
             //RPpath.Text = GetRootDirectoryPath();
 
-            PopulateFilePanel(LPgrid,LPpath.Text);
-            PopulateFilePanel(RPgrid, RPpath.Text);
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            
+            //PopulateFilePanel(LPgrid,LPpath.Text);
+            //PopulateFilePanel(RPgrid, RPpath.Text);
 
             // wire up button click events for the lower panel buttons
 
@@ -439,12 +442,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetHomeDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetHomeDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -452,12 +455,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetRootDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetRootDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -465,12 +468,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetDesktopDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetDesktopDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -478,12 +481,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetDocumentsDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetDocumentsDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -491,12 +494,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetPicturesDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetPicturesDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -504,12 +507,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetPicturesDirectoryPath();
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = GetPicturesDirectoryPath();
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -517,12 +520,12 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = dbe.Path;
-                        PopulateFilePanel(LPgrid, LPpath.Text);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                     }
                     else // Right
                     {
                         RPpath.Text = dbe.Path;
-                        PopulateFilePanel(RPgrid, RPpath.Text);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                     }
 
                     break;
@@ -588,13 +591,13 @@ namespace DirOpusReImagined
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
         {
             LPpath.Text = RPpath.Text;
-            PopulateFilePanel(LPgrid,LPpath.Text);
+            FileUtility.PopulateFilePanel(LPgrid,LPpath.Text);
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
         {
             RPpath.Text = LPpath.Text;
-            PopulateFilePanel(RPgrid, RPpath.Text);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
             
         }
 
@@ -602,7 +605,7 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                PopulateFilePanel(RPgrid, RPpath.Text);
+                FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
             }
         }
 
@@ -610,7 +613,7 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                PopulateFilePanel(LPgrid, LPpath.Text);
+                FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
             }
         }
 
@@ -1451,7 +1454,7 @@ namespace DirOpusReImagined
 
             //LPpath.Text = newpath;
             
-            PopulateFilePanel(LPgrid, LPpath.Text);
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
 
         }
 
@@ -1494,7 +1497,7 @@ namespace DirOpusReImagined
                 RPpath.Text = newpath;
             }
 
-            PopulateFilePanel(RPgrid, RPpath.Text);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
         }
 
         private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -1507,7 +1510,7 @@ namespace DirOpusReImagined
                 {
                     oldpath = RPpath.Text;
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    PopulateFilePanel(RPgrid, RPpath.Text);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                 }
                 else
                 {
@@ -1537,7 +1540,7 @@ namespace DirOpusReImagined
                     oldpath = RPpath.Text;
                     
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    PopulateFilePanel(RPgrid, RPpath.Text);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
                 }
                 else
                 {
@@ -1574,7 +1577,7 @@ namespace DirOpusReImagined
                     // Its A folder so gets go into it
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    PopulateFilePanel(LPgrid, LPpath.Text);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                 }
                 else
                 {
@@ -1613,7 +1616,7 @@ namespace DirOpusReImagined
                 {
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    PopulateFilePanel(LPgrid, LPpath.Text);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
                 }
                 else
                 {
@@ -1692,119 +1695,119 @@ namespace DirOpusReImagined
 
         private void RefreshLPGrid ()
         {
-              PopulateFilePanel(LPgrid, LPpath.Text);
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
         }
 
         private void RefreshRPGrid()
         {
-            PopulateFilePanel(RPgrid, RPpath.Text);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
         }   
 
-        private void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
-        {
-            //LPgrid.PopulateGrid(PATHNAME);
-
-            //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
-
-            // using linq to sort the directories by name alphabetically
-            
-            try
-            {
-                
-                var Directories = Directory.EnumerateDirectories(PATHNAME)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            ThePanel.SuspendRendering = true;
-
-            ThePanel.Items.Clear();
-            List<Object> FileList = new List<Object>();
-
-            foreach (string dir in Directories)
-            {
-                DirectoryInfo di = new DirectoryInfo(dir);
-                try
-                {
-
-                    if (di.Attributes.HasFlag(FileAttributes.System))
-                    {
-                        continue;
-                    }
-
-                    string flags = GetAbbreviatedAttributes(di.Attributes);
-                                        
-                    var ds = di.GetDirectories().GetUpperBound(0) + 1;
-                    var fs = di.GetFiles().GetUpperBound(0) + 1;
-
-                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    
-                    try
-                    {                    
-                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                //var ds = di.GetDirectories().GetUpperBound(0);
-                //var fs = di.GetFiles().GetUpperBound(0);
-
-                //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
-            }
-
-            // Using Linq to sort the files alphabetically
-            var files = Directory.EnumerateFiles(PATHNAME)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToList(); ;
-
-            foreach (string file in files)
-            {
-                try
-                {
-                    FileInfo fi = new FileInfo(file);
-
-                    FileAttributes fa = File.GetAttributes(fi.FullName);
-
-                    string flags = GetAbbreviatedAttributes(fa);
-
-                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString(); 
-
-                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
-                }
-                catch
-                {
-                    
-                }
-            }
-
-            ThePanel.Items = FileList.OfType<object>().ToList(); 
-
-
-            }
-            catch (Exception e)
-            {
-                MessageBox MB = new MessageBox(e.Message);
-
-                MB.ShowDialog(this);
-                
-                if (ThePanel.Name == "RPgrid")
-                {
-                    RPpath.Text = oldpath;
-                }
-                else
-                {
-                    LPpath.Text = oldpath;
-                }
-                
-            }
-            
-            
-            ThePanel.SuspendRendering = false;
-        }
+        // private void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
+        // {
+        //     //LPgrid.PopulateGrid(PATHNAME);
+        //
+        //     //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
+        //
+        //     // using linq to sort the directories by name alphabetically
+        //     
+        //     try
+        //     {
+        //         
+        //         var Directories = Directory.EnumerateDirectories(PATHNAME)
+        //         .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+        //         .ToList();
+        //
+        //     ThePanel.SuspendRendering = true;
+        //
+        //     ThePanel.Items.Clear();
+        //     List<Object> FileList = new List<Object>();
+        //
+        //     foreach (string dir in Directories)
+        //     {
+        //         DirectoryInfo di = new DirectoryInfo(dir);
+        //         try
+        //         {
+        //
+        //             if (di.Attributes.HasFlag(FileAttributes.System))
+        //             {
+        //                 continue;
+        //             }
+        //
+        //             string flags = GetAbbreviatedAttributes(di.Attributes);
+        //                                 
+        //             var ds = di.GetDirectories().GetUpperBound(0) + 1;
+        //             var fs = di.GetFiles().GetUpperBound(0) + 1;
+        //
+        //             FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+        //         }
+        //         catch (UnauthorizedAccessException)
+        //         {
+        //             
+        //             try
+        //             {                    
+        //                 FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
+        //             }
+        //             catch
+        //             {
+        //
+        //             }
+        //         }
+        //         //var ds = di.GetDirectories().GetUpperBound(0);
+        //         //var fs = di.GetFiles().GetUpperBound(0);
+        //
+        //         //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
+        //     }
+        //
+        //     // Using Linq to sort the files alphabetically
+        //     var files = Directory.EnumerateFiles(PATHNAME)
+        //         .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+        //         .ToList(); ;
+        //
+        //     foreach (string file in files)
+        //     {
+        //         try
+        //         {
+        //             FileInfo fi = new FileInfo(file);
+        //
+        //             FileAttributes fa = File.GetAttributes(fi.FullName);
+        //
+        //             string flags = GetAbbreviatedAttributes(fa);
+        //
+        //             string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString(); 
+        //
+        //             FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+        //         }
+        //         catch
+        //         {
+        //             
+        //         }
+        //     }
+        //
+        //     ThePanel.Items = FileList.OfType<object>().ToList(); 
+        //
+        //
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         MessageBox MB = new MessageBox(e.Message);
+        //
+        //         MB.ShowDialog(this);
+        //         
+        //         if (ThePanel.Name == "RPgrid")
+        //         {
+        //             RPpath.Text = oldpath;
+        //         }
+        //         else
+        //         {
+        //             LPpath.Text = oldpath;
+        //         }
+        //         
+        //     }
+        //     
+        //     
+        //     ThePanel.SuspendRendering = false;
+        // }
 
         private string GetRootDirectoryPath()
         {
@@ -1922,104 +1925,104 @@ namespace DirOpusReImagined
             return rootDirectoryPath;
         }
         
-        private string GetAbbreviatedAttributes(FileAttributes attributes)
-        {
-            string abbreviatedAttributes = string.Empty;
-
-            if ((attributes & FileAttributes.ReadOnly) != 0)
-                abbreviatedAttributes += "RO ";
-            else
-                abbreviatedAttributes += "RW ";
-            if ((attributes & FileAttributes.Hidden) != 0)
-                abbreviatedAttributes += "H ";
-            else
-                abbreviatedAttributes += "V ";
-            if ((attributes & FileAttributes.System) != 0)
-                abbreviatedAttributes += "S ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Directory) != 0)
-                abbreviatedAttributes += "D ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Archive) != 0)
-                abbreviatedAttributes += "A ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Device) != 0)
-                abbreviatedAttributes += "DEV ";
-            else
-            {
-                abbreviatedAttributes += "    ";
-            }
-            if ((attributes & FileAttributes.Normal) != 0)
-                abbreviatedAttributes += "N ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Temporary) != 0)
-                abbreviatedAttributes += "T ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.SparseFile) != 0)
-                abbreviatedAttributes += "SF ";
-            else
-            {
-                abbreviatedAttributes += "   ";
-            }
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
-                abbreviatedAttributes += "RP ";
-            else
-            {
-                abbreviatedAttributes += "   ";
-            }
-            if ((attributes & FileAttributes.Compressed) != 0)
-                abbreviatedAttributes += "C ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Offline) != 0)
-                abbreviatedAttributes += "O ";
-            else
-            {
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.NotContentIndexed) != 0)
-                abbreviatedAttributes += "NCI ";
-            else
-            {
-                
-                abbreviatedAttributes += "  ";
-            }
-            if ((attributes & FileAttributes.Encrypted) != 0)
-                abbreviatedAttributes += "E ";
-            else
-            { abbreviatedAttributes += "  "; }
-            if ((attributes & FileAttributes.IntegrityStream) != 0)
-                abbreviatedAttributes += "IS ";
-            else
-            { abbreviatedAttributes += "  "; }
-            if ((attributes & FileAttributes.NoScrubData) != 0)
-                abbreviatedAttributes += "NSD ";
-            else
-            {
-                
-                abbreviatedAttributes += "   ";
-            }
-
-            return abbreviatedAttributes.Trim();
-        }
-                
+        // private string GetAbbreviatedAttributes(FileAttributes attributes)
+        // {
+        //     string abbreviatedAttributes = string.Empty;
+        //
+        //     if ((attributes & FileAttributes.ReadOnly) != 0)
+        //         abbreviatedAttributes += "RO ";
+        //     else
+        //         abbreviatedAttributes += "RW ";
+        //     if ((attributes & FileAttributes.Hidden) != 0)
+        //         abbreviatedAttributes += "H ";
+        //     else
+        //         abbreviatedAttributes += "V ";
+        //     if ((attributes & FileAttributes.System) != 0)
+        //         abbreviatedAttributes += "S ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Directory) != 0)
+        //         abbreviatedAttributes += "D ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Archive) != 0)
+        //         abbreviatedAttributes += "A ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Device) != 0)
+        //         abbreviatedAttributes += "DEV ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "    ";
+        //     }
+        //     if ((attributes & FileAttributes.Normal) != 0)
+        //         abbreviatedAttributes += "N ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Temporary) != 0)
+        //         abbreviatedAttributes += "T ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.SparseFile) != 0)
+        //         abbreviatedAttributes += "SF ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "   ";
+        //     }
+        //     if ((attributes & FileAttributes.ReparsePoint) != 0)
+        //         abbreviatedAttributes += "RP ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "   ";
+        //     }
+        //     if ((attributes & FileAttributes.Compressed) != 0)
+        //         abbreviatedAttributes += "C ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Offline) != 0)
+        //         abbreviatedAttributes += "O ";
+        //     else
+        //     {
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.NotContentIndexed) != 0)
+        //         abbreviatedAttributes += "NCI ";
+        //     else
+        //     {
+        //         
+        //         abbreviatedAttributes += "  ";
+        //     }
+        //     if ((attributes & FileAttributes.Encrypted) != 0)
+        //         abbreviatedAttributes += "E ";
+        //     else
+        //     { abbreviatedAttributes += "  "; }
+        //     if ((attributes & FileAttributes.IntegrityStream) != 0)
+        //         abbreviatedAttributes += "IS ";
+        //     else
+        //     { abbreviatedAttributes += "  "; }
+        //     if ((attributes & FileAttributes.NoScrubData) != 0)
+        //         abbreviatedAttributes += "NSD ";
+        //     else
+        //     {
+        //         
+        //         abbreviatedAttributes += "   ";
+        //     }
+        //
+        //     return abbreviatedAttributes.Trim();
+        // }
+        //         
         public void ApplyButtonSettingsFromXml(string xmlFilePath, Window window)
         {
             try

@@ -103,7 +103,7 @@
 			        Grid.Row="1"
 			        HorizontalAlignment="Center"
 			        Content="all ---&gt;"
-			        ToolTip.Tip="Clears the items selected in the right panel" >
+			        ToolTip.Tip="Selects all the FILES only in the right panel" >
 			</Button>
 
 			<Button Name="AllLeftButton"
@@ -111,7 +111,7 @@
 			        Grid.Row="1"
 			        HorizontalAlignment="Center"
 			        Content="&lt;--- all"
-			        ToolTip.Tip="Clears the items selected in the left panel"></Button>
+			        ToolTip.Tip="Selects all the FILES only in the left panel"></Button>
 			
 			<Button Name="ClearRightButton"
 					Grid.Column="1"
