@@ -34,6 +34,7 @@
          </TextBlock>
        
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
+            <CheckBox IsChecked="True" x:Name="chkPad">Pad %ORD% with 0's</CheckBox>
             <Button x:Name="OKButton" Content="OK"  Margin="5"/>
             <Button x:Name="CANCELButton" Content="Cancel"  Margin="5"/>
         </StackPanel>

@@ -76,18 +76,34 @@ public partial class RenameFileInterface : Window
                         i += 1;
                         string oldpath = Path.Combine(thePath, af.Name);
                         
+                        string oldfilename = FileUtility.FileNameMinusExtension(oldpath);
+                        string oldfileext = FileUtility.FilenameExtension(oldpath); 
+                        
                         // now lets get the new name
                         string newname = "";
                         string pfx = "" + this.PrefixTextBox.Text;
                         string sfx = "" + this.SuffixTextBox.Text;
                         string bsn = "" + this.BasenameTextBox.Text;
+
+                        string ord = i.ToString();
+                        if (chkPad.IsChecked == true)
+                        {
+                            ord = ord.PadLeft(4, '0');
+                        }
                         
-                        pfx = pfx.Replace("%ORD%", i.ToString());
-                        pfx = pfx.Replace("%NAME%", af.Name);
-                        sfx = sfx.Replace("%ORD%", i.ToString());
-                        sfx = sfx.Replace("%NAME%", af.Name);
-                        bsn = bsn.Replace("%ORD%", i.ToString());
-                        bsn = bsn.Replace("%NAME%", af.Name);
+                        pfx = pfx.Replace("%ORD%", ord);
+                        pfx = pfx.Replace("%NAME%", oldfilename);
+                        sfx = sfx.Replace("%ORD%", ord);
+                        sfx = sfx.Replace("%NAME%", oldfilename);
+                        bsn = bsn.Replace("%ORD%", ord);
+                        bsn = bsn.Replace("%NAME%", oldfilename);
+                        
+                        if (sfx == "")
+                        {
+                            // Dont add the extension if its already on the resulting name
+                            if (!(pfx + bsn).EndsWith(oldfileext))
+                                sfx = oldfileext;
+                        }
                         
                         string newpath = Path.Combine(thePath, pfx + bsn + sfx);
                         

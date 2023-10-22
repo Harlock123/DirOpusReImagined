@@ -161,6 +161,20 @@ namespace DirOpusReImagined
 
         }
 
+        public static string FileNameMinusExtension(string path)
+        {
+            string result = Path.GetFileNameWithoutExtension(path);
+
+            return result;
+        }
+        
+        public static string FilenameExtension(string path)
+        {
+            string result = Path.GetExtension(path);
+
+            return result;
+        }
+        
         public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
         {
             //LPgrid.PopulateGrid(PATHNAME);

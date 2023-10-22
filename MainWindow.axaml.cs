@@ -196,17 +196,11 @@ namespace DirOpusReImagined
                 return;
             }
 
-            RenameFileInterface fi = new RenameFileInterface();
+            RenameFileInterface fi = new RenameFileInterface(LPgrid, LPpath.Text);
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);
             
-            LoopAsync(fi);
-            
-            if (!fi.Canceled)
-            {
-                MessageBox MB = new MessageBox("Gonna Rename with Prefix:" + fi.newprefix + " and Suffix: " + fi.newsuffix + " and New Name: " + fi.NewName);
-            }
         }
 
         private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
@@ -236,25 +230,9 @@ namespace DirOpusReImagined
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);
-
-            LoopAsync(fi);
-
-            if (!fi.Canceled)
-            {
-                MessageBox MB = new MessageBox("Gonna Rename with Prefix:" + fi.newprefix + " and Suffix: " + fi.newsuffix + " and New Name: " + fi.NewName);
-            }
+            
         }
         
-        public async Task LoopAsync(RenameFileInterface fi)
-        {
-            while (fi.IsVisible) // This is the loop condition
-            {
-                // Your loop logic here
-
-                await Task.Delay(100); // This will yield control back to the UI for 100ms.
-            }
-        }
-
         private void WireUpButtonHandlers()
         {
             #region Click  Handlers
