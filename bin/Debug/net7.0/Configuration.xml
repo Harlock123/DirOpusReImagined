@@ -39,6 +39,24 @@
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 		<Button>
+			<Name>LPButton33</Name>
+			<Content>Windows Terminal on Left</Content>
+			<Action>wt</Action>
+			<Args>-d %LPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens a windows terminal in the filder shown on the left panel</ToolTip>
+		</Button>
+		<Button>
+			<Name>LPButton34</Name>
+			<Content>Windows Terminal on Right</Content>
+			<Action>wt</Action>
+			<Args>-d %RPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
+		</Button>
+		<Button>
 			<Name>LPButton35</Name>
 			<Content>Terminal on Left</Content>
 			<Action>alacritty</Action>
