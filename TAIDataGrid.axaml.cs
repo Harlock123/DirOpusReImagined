@@ -1406,9 +1406,61 @@ namespace DirOpusReImagined
             }
             else
             {
-                // we are not CTRL clicking so single select
-                _selecteditems.Clear(); 
-                _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
+                if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                {
+                    // here we want to see if we are selecting a range of items
+                    if (_selecteditems.Count > 0)
+                    {
+                        int startrow = -1;
+                        int endrow = -1;
+                        
+                        foreach (AFileEntry af in _items)
+                        {
+                            if (af == _selecteditems[0])
+                            {
+                                startrow = _items.IndexOf(af);
+                            }
+                            
+                            if (af == TheItemUnderTheMouse.ItemUnderMouse)
+                            {
+                                endrow = _items.IndexOf(af);
+                            }
+                        }
+                        
+                        if (startrow > endrow)
+                        {
+                            // we need to swap the start and end rows
+                            int temp = startrow;
+                            startrow = endrow;
+                            endrow = temp;
+                        }   
+                        
+                        _selecteditems.Clear();
+                        
+                        for (int i = startrow; i <= endrow; i++)
+                        {
+                            _selecteditems.Add(_items[i]);
+                        }   
+                        
+                    }
+                    else
+                    {
+                        // we are SHIFT clicking but nothing has been selected yet
+                        _selecteditems.Clear();
+                        _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                        
+                    }
+                }
+                else
+                {
+                    // we are not CTRL clicking so single select
+                    _selecteditems.Clear();
+                    _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                }
+
+                // // we are not CTRL clicking so single select
+                // _selecteditems.Clear(); 
+                // _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
 
             }
             // Look to handle double click here
