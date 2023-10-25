@@ -412,7 +412,7 @@ namespace DirOpusReImagined
 
             DeleteFilesDialog df = new DeleteFilesDialog(LPgrid.SelectedItems);
 
-            df.ShowDialog(this);
+            df.ShowDialog(this); 
             
         }
 
