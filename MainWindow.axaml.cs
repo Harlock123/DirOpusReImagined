@@ -245,6 +245,9 @@ namespace DirOpusReImagined
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
+            
+            DeleteLeftButton.Click += DeleteLeftButton_Click;
+            DeleteRightButton.Click += DeleteRightButton_Click;
 
             LPButton1.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton2.Click += Handle_Lower_Panel_Button_Clicks;
@@ -375,6 +378,42 @@ namespace DirOpusReImagined
             LPButton36.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
 
             #endregion
+        }
+
+        private void DeleteRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (RPgrid.SelectedItems.Count == 0)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MB.ShowDialog(this);
+                return;
+            }
+            
+            // Here vwe want to iterate over the selected items and delete them
+
+            DeleteFilesDialog df = new DeleteFilesDialog(RPgrid.SelectedItems);
+
+            df.ShowDialog(this);
+
+
+
+        }
+
+        private void DeleteLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (LPgrid.SelectedItems.Count == 0)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MB.ShowDialog(this);
+                return;
+            }
+            
+            // Here vwe want to iterate over the selected items and delete them
+
+            DeleteFilesDialog df = new DeleteFilesDialog(LPgrid.SelectedItems);
+
+            df.ShowDialog(this);
+            
         }
 
         private void AllLeftButton_Click(object? sender, RoutedEventArgs e)
