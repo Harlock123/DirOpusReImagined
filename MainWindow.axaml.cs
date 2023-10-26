@@ -391,12 +391,10 @@ namespace DirOpusReImagined
             
             // Here vwe want to iterate over the selected items and delete them
 
-            DeleteFilesDialog df = new DeleteFilesDialog(RPgrid.SelectedItems);
+            DeleteFilesDialog df = new DeleteFilesDialog(RPgrid.SelectedItems, RPpath.Text, RPgrid,
+                LPpath.Text, LPgrid);
 
             df.ShowDialog(this);
-
-
-
         }
 
         private void DeleteLeftButton_Click(object? sender, RoutedEventArgs e)
@@ -410,10 +408,10 @@ namespace DirOpusReImagined
             
             // Here vwe want to iterate over the selected items and delete them
 
-            DeleteFilesDialog df = new DeleteFilesDialog(LPgrid.SelectedItems);
+            DeleteFilesDialog df = new DeleteFilesDialog(LPgrid.SelectedItems, LPpath.Text, LPgrid,
+                RPpath.Text, RPgrid);
 
             df.ShowDialog(this); 
-            
         }
 
         private void AllLeftButton_Click(object? sender, RoutedEventArgs e)

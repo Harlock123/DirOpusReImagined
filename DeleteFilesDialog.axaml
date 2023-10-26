@@ -3,14 +3,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="180"
+        Width="600" Height="180" WindowStartupLocation="CenterScreen"
         x:Class="DirOpusReImagined.DeleteFilesDialog"
         Title="DeleteFilesDialog">
     <Grid>
         <TextBlock x:Name="TheMessage" TextWrapping="Wrap" Margin="2" HorizontalAlignment="Center">
             <Run Text="You are about to delete" />
-            <Run Text="%ORD%" FontWeight="Bold"/>
+            <Run x:Name="Frun" Text="%ORD%" FontWeight="Bold"/>
             <Run Text="files and" />
-            <Run Text="%NAME%" FontWeight="Bold"/>
+            <Run x:Name="Drun" Text="%NAME%" FontWeight="Bold"/>
             <Run Text="folders, are you sure this is what you want to do?"/> 
         </TextBlock>
     

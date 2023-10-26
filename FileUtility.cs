@@ -378,6 +378,40 @@ namespace DirOpusReImagined
 
             return abbreviatedAttributes.Trim();
         }
-        
+
+        public static void DeleteFolder(string rootPath)
+        {
+            try
+            {
+                if (Directory.Exists(rootPath))
+                {
+                    Directory.Delete(rootPath, true);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox MB = new MessageBox(e.Message);
+
+                MB.ShowDialog(null);
+            }
+            
+        }
+
+        public static void DeleteFile(string rootPath)
+        {
+            try
+            {
+                if (File.Exists(rootPath))
+                {
+                    File.Delete(rootPath);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox MB = new MessageBox(e.Message);
+
+                MB.ShowDialog(null);
+            }
+        }
     }
 }
