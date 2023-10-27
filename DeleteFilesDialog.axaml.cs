@@ -15,8 +15,8 @@ public partial class DeleteFilesDialog : Window
     private List<Object> FilesToDelete = new List<Object>();
     private string RootPath = "";
     private string OtherRootPath = "";
-    private TaiDataGrid ThePanel = null;
-    private TaiDataGrid OtherPanel = null;
+    private TaiDataGrid ThePanel = null!;
+    private TaiDataGrid OtherPanel = null!;
     
     public DeleteFilesDialog()
     {
@@ -52,17 +52,18 @@ public partial class DeleteFilesDialog : Window
         //string message = "Are you sure you want to delete " + f + " files and " + d + " folders?";
         //TheMessage.Text= message;
 
-        foreach (Run r in TheMessage.Inlines)
-        {
-            if (r.Text.Contains("%ORD%"))
+        if (TheMessage.Inlines != null)
+            foreach (Run r in TheMessage.Inlines)
             {
-                r.Text = f.ToString();
+                if (r.Text.Contains("%ORD%"))
+                {
+                    r.Text = f.ToString();
+                }
+                else if (r.Text.Contains("%NAME%"))
+                {
+                    r.Text = d.ToString();
+                }
             }
-            else if (r.Text.Contains("%NAME%"))
-            {
-                r.Text = d.ToString();
-            }
-        }
     }
 
     private void OKButton_Click(object? sender, RoutedEventArgs e)

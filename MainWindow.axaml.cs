@@ -2329,6 +2329,16 @@ namespace DirOpusReImagined
     
     public class DriveButtonEntry
     {
+        public DriveButtonEntry()
+        {
+            Order = "";
+            Name = "";
+            Path = "";
+            Content = "";
+            Background = "";
+            Foreground = "";
+            ToolTip = "";
+        }
         public string Order { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
@@ -2431,6 +2441,22 @@ namespace DirOpusReImagined
 
     public class ButtonSettings
     {
+        public ButtonSettings()
+        {
+            Name = "";
+            Content = "";
+            Background = "";
+            Foreground = "";
+            HorizontalAlignment = "";
+            VerticalAlignment = "";
+            Margin = "";
+            Action = "";
+            Args = "";
+            ShellExecute = "";
+            ShowWindow = "";
+            ToolTip = "";
+        }
+        
         public string Name { get; set; }
         public string Content { get; set; }
         public string Background { get; set; }

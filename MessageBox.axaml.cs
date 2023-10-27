@@ -14,9 +14,9 @@ public partial class MessageBox : Window
         InitializeComponent();
         messageTextBlock = this.FindControl<TextBlock>("messageTextBlock");
         okButton = this.FindControl<Button>("okButton");
-        messageTextBlock.Text = "A Message Goes Here";
+        if (messageTextBlock != null) messageTextBlock.Text = "A Message Goes Here";
 
-        okButton.Click += OnOKButtonClick;
+        if (okButton != null) okButton.Click += OnOKButtonClick;
     }
 
     public MessageBox(string message)
@@ -24,9 +24,9 @@ public partial class MessageBox : Window
         InitializeComponent();
         messageTextBlock = this.FindControl<TextBlock>("messageTextBlock");
         okButton = this.FindControl<Button>("okButton");
-        messageTextBlock.Text = message;
+        if (messageTextBlock != null) messageTextBlock.Text = message;
 
-        okButton.Click += OnOKButtonClick;
+        if (okButton != null) okButton.Click += OnOKButtonClick;
     }
 
     private void InitializeComponent()
