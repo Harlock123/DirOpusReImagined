@@ -161,6 +161,8 @@ namespace DirOpusReImagined
 
         private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
             
             bool fileselected = false;
 
@@ -192,6 +194,9 @@ namespace DirOpusReImagined
 
         private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             bool fileselected = false;
 
             if (RPgrid.SelectedItems.Count > 0)
@@ -382,6 +387,9 @@ namespace DirOpusReImagined
 
         private void DeleteRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (RPgrid.SelectedItems.Count == 0)
             {
                 MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
@@ -399,6 +407,9 @@ namespace DirOpusReImagined
 
         private void DeleteLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (LPgrid.SelectedItems.Count == 0)
             {
                 MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
@@ -416,11 +427,17 @@ namespace DirOpusReImagined
 
         private void AllLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             LPgrid.SelectAllFilesOnly();
         }
 
         private void AllRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             RPgrid.SelectAllFilesOnly();
         }
 
@@ -592,12 +609,18 @@ namespace DirOpusReImagined
 
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             LPpath.Text = RPpath.Text;
             FileUtility.PopulateFilePanel(LPgrid,LPpath.Text);
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             RPpath.Text = LPpath.Text;
             FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
             
@@ -621,12 +644,18 @@ namespace DirOpusReImagined
 
         private void ClearRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             RPgrid.SelectedItems.Clear();
             RPgrid.ReRender();
         }
 
         private void ClearLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             LPgrid.SelectedItems.Clear();
             LPgrid.ReRender();
         }
@@ -1054,6 +1083,9 @@ namespace DirOpusReImagined
 
         private void SwapButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             var p1 = LPpath.Text;
             var p2 = RPpath.Text;
 
@@ -1082,6 +1114,9 @@ namespace DirOpusReImagined
 
         private void MoveRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (LPgrid.SelectedItems.Count > 0)
             {
                 string spath = LPpath.Text.Replace(@"\\", @"\");
@@ -1183,6 +1218,9 @@ namespace DirOpusReImagined
 
         private void MoveLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (RPgrid.SelectedItems.Count > 0)
             {
                 string spath = RPpath.Text.Replace(@"\\", @"\");
@@ -1255,6 +1293,9 @@ namespace DirOpusReImagined
 
         private void CopyRightButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (LPgrid.SelectedItems.Count > 0)
             {
                 string spath = LPpath.Text.Replace(@"\\",@"\");
@@ -1324,6 +1365,9 @@ namespace DirOpusReImagined
 
         private void CopyLeftButton_Click(object? sender, RoutedEventArgs e)
         {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
             if (RPgrid.SelectedItems.Count > 0)
             {
                 string spath = RPpath.Text.Replace(@"\\", @"\");
