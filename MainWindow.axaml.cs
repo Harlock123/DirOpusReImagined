@@ -42,7 +42,7 @@ namespace DirOpusReImagined
         
         private string LastButtonPopupName = "";
 
-        private PopUp pop;
+        private PopUp _pop;
         
         #endregion
         
@@ -145,18 +145,15 @@ namespace DirOpusReImagined
             
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
-            
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
-            
-            //PopulateFilePanel(LPgrid,LPpath.Text);
-            //PopulateFilePanel(RPgrid, RPpath.Text);
-
-            // wire up button click events for the lower panel buttons
-
+           
+            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+           
             WireUpButtonHandlers();
-            
-            Title = Title + " " + Assembly.GetExecutingAssembly().GetName().Version.ToString(); 
+
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            if (version != null)
+                Title = Title + " " + version.ToString();
         }
 
         private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
@@ -555,10 +552,10 @@ namespace DirOpusReImagined
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
         {
-            if (pop != null && pop.IsVisible )
+            if (_pop != null && _pop.IsVisible )
             {
-                pop.Close();
-                pop = null;
+                _pop.Close();
+                _pop = null;
             }
             
             LastButtonPopupName = "";
@@ -583,19 +580,19 @@ namespace DirOpusReImagined
 
                     LastButtonPopupName = B.Name;
                                         
-                    pop = new PopUp();
-                    pop.Title = B.Content.ToString();
+                    _pop = new PopUp();
+                    _pop.Title = B.Content.ToString();
 
-                    pop.SetText(item.ToolTip);
+                    _pop.SetText(item.ToolTip);
 
                     var p = VisualRoot.PointToScreen(e.GetPosition(this));
 
-                    pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
+                    _pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
 
-                    pop.Width = 240;
-                    pop.Height = 100;
+                    _pop.Width = 240;
+                    _pop.Height = 100;
 
-                    pop.Show(); 
+                    _pop.Show(); 
 
                     //Avalonia.Threading.DispatcherTimer.Run(() =>
                     //{
@@ -613,7 +610,7 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B,false);
             
             LPpath.Text = RPpath.Text;
-            FileUtility.PopulateFilePanel(LPgrid,LPpath.Text);
+            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
@@ -622,15 +619,14 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B,false);
             
             RPpath.Text = LPpath.Text;
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
-            
+            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
         }
 
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
             }
         }
 
@@ -638,7 +634,7 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
             }
         }
 
@@ -753,7 +749,7 @@ namespace DirOpusReImagined
                 {
                     // the left grid has a folder selected
 
-                    PTH = MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder();
+                    if (LPpath.Text != null) PTH = MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder();
 
                     string ret = bcontent.Replace("%FD%", PTH);
 
@@ -764,7 +760,7 @@ namespace DirOpusReImagined
                 {
                     // the right grid has a folder selected
 
-                    PTH = MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder();
+                    if (RPpath.Text != null) PTH = MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder();
 
                     string ret = bcontent.Replace("%FD%", PTH);
 
@@ -1741,12 +1737,12 @@ namespace DirOpusReImagined
 
         private void RefreshLPGrid ()
         {
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
         }
 
         private void RefreshRPGrid()
         {
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
         }   
         
         private string GetRootDirectoryPath()
