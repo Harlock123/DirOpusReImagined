@@ -73,60 +73,69 @@ namespace DirOpusReImagined
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
-            
-            Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
-            Bitmap B3 = new Bitmap(@"Assets/Drives.png");
-            Bitmap B4 = new Bitmap(@"Assets/LeftArrow.png");
-            Bitmap B5 = new Bitmap(@"Assets/RightArrow.png");
-            Bitmap B6 = new Bitmap(@"Assets/LeftRightArrows.png");
 
-            Image I1 = new Image();
-            Image I2 = new Image();
-            Image I3 = new Image();
-            Image I4 = new Image();
-            Image I5 = new Image();
-            Image I6 = new Image();
-            Image I7 = new Image();
-            
-            I1.Source = B2;
-            I1.Width = RPBackButton.Width + 8;
-            I1.Height = RPBackButton.Height+ 8;
+            if (Directory.Exists("Assets"))
+            {
 
-            I2.Source = B2;
-            I2.Width = LPBackButton.Width + 8;
-            I2.Height = LPBackButton.Height + 8;
-            
-            I3.Source = B3;
-            I3.Width = 28;
-            I3.Height = 28;
-            
-            I4.Source = B3;
-            I4.Width = 28;
-            I4.Height = 28;
-            
-            I5.Source = B4;
-            I5.Width = 18;
-            I5.Height = 18;
-            
-            I6.Source = B5;
-            I6.Width = 18;
-            I6.Height= 18;
-            
-            I7.Source = B6;
-            I7.Width = 18;
-            I7.Height = 18;
-            
-            
-            RPBackButton.Content = I1;
-            LPBackButton.Content = I2;
-            
-            SwapButton.Content = I7;
-            LeftToRightButton.Content = I5;
-            RightToLeftButton.Content = I6;
-            
-            LPDriveButton.Content = I3;
-            RPDriveButton.Content = I4;
-            
+                Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
+                Bitmap B3 = new Bitmap(@"Assets/Drives.png");
+                Bitmap B4 = new Bitmap(@"Assets/LeftArrow.png");
+                Bitmap B5 = new Bitmap(@"Assets/RightArrow.png");
+                Bitmap B6 = new Bitmap(@"Assets/LeftRightArrows.png");
+
+                Image I1 = new Image();
+                Image I2 = new Image();
+                Image I3 = new Image();
+                Image I4 = new Image();
+                Image I5 = new Image();
+                Image I6 = new Image();
+                Image I7 = new Image();
+
+                I1.Source = B2;
+                I1.Width = RPBackButton.Width + 8;
+                I1.Height = RPBackButton.Height + 8;
+
+                I2.Source = B2;
+                I2.Width = LPBackButton.Width + 8;
+                I2.Height = LPBackButton.Height + 8;
+
+                I3.Source = B3;
+                I3.Width = 28;
+                I3.Height = 28;
+
+                I4.Source = B3;
+                I4.Width = 28;
+                I4.Height = 28;
+
+                I5.Source = B4;
+                I5.Width = 18;
+                I5.Height = 18;
+
+                I6.Source = B5;
+                I6.Width = 18;
+                I6.Height = 18;
+
+                I7.Source = B6;
+                I7.Width = 18;
+                I7.Height = 18;
+
+
+                RPBackButton.Content = I1;
+                LPBackButton.Content = I2;
+
+                SwapButton.Content = I7;
+                LeftToRightButton.Content = I5;
+                RightToLeftButton.Content = I6;
+
+                LPDriveButton.Content = I3;
+                RPDriveButton.Content = I4;
+            }
+            else
+            {
+                this.Title = "The ASSETS Folder is missing. Some Icons will not display correctly";
+
+            }
+
             RPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
             LPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
 
