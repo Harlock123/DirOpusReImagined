@@ -51,7 +51,7 @@
 					Grid.Column="1"
 					Grid.Row="1">
 			<StackPanel Name="TheDrivePresetsSp" Orientation="Vertical">
-				<Grid>
+				<Grid Margin="2">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="0.5*"/>
 						<ColumnDefinition Width="0.5*"/>
@@ -98,8 +98,7 @@
 			</StackPanel>
 			<Label Name="LPLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
 
-			<StackPanel Orientation="Horizontal">
-				
+			<StackPanel Orientation="Horizontal" Margin="2">
 
 				<Button Name="AllLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
@@ -117,7 +116,7 @@
 				</Button>
 			</StackPanel>
 			
-			<StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="ClearLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
 				        Grid.Row="1"
@@ -138,7 +137,7 @@
 			
 			<Label Name="LPLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
 
-			<StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="CopyLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
 				        Grid.Row="1"
@@ -154,7 +153,7 @@
 				        ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
 			
-			<StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="MoveLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
 				        Grid.Row="1"
@@ -170,7 +169,7 @@
 				        ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
 			
-			<StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="RenameLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
 				        Grid.Row="1"
@@ -186,7 +185,7 @@
 				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
 			</StackPanel>
 			
-			<StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="DeleteLeftButton" Height="22" Padding="1"
 				        Grid.Column="1"
 				        Grid.Row="1"
@@ -200,6 +199,38 @@
 				        HorizontalAlignment="Center" Width="70"
 				        Content="  delete-&gt;"
 				        ToolTip.Tip="Deletes the items selected in the right panel"></Button>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal" Margin="2">
+				<Button Name="MkDirLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="&lt;-mkdir"
+				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Left Panel"></Button>
+				
+				<Button Name="MkDirRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="   mkdir-&gt;"
+				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Right Panel"></Button>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal" Margin="2">
+				<Button Name="ArchiveLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="&lt;-zip"
+				        ToolTip.Tip="Will Create a ZIP file from selected contents in Left Panel"></Button>
+				
+				<Button Name="ArchiveRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="       zip-&gt;"
+				        ToolTip.Tip="Will Create a ZIP file from selected contents in Right Panel"></Button>
 			</StackPanel>
 			
 		</StackPanel>

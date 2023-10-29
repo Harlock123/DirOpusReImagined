@@ -2494,4 +2494,15 @@ namespace DirOpusReImagined
             return string.Format("{0:0.##}{1}", result, orders[order]);
         }
     }
+
+    public class ThePanelSetup
+    {
+        // for communicating the Grid setup into dialogs when needed
+        // rather than handing each sub-element into the dialog vis separate parameters
+        
+        TaiDataGrid PrimaryGrid { get; set; }
+        string PrimaryPath { get; set; }
+        TaiDataGrid SecondaryGrid { get; set; }
+        string SecondaryPath { get; set; }
+    }
 }
