@@ -2507,10 +2507,18 @@ namespace DirOpusReImagined
     {
         // for communicating the Grid setup into dialogs when needed
         // rather than handing each sub-element into the dialog vis separate parameters
-        
-        TaiDataGrid PrimaryGrid { get; set; }
-        string PrimaryPath { get; set; }
-        TaiDataGrid SecondaryGrid { get; set; }
-        string SecondaryPath { get; set; }
+
+        public ThePanelSetup(TaiDataGrid primaryGrid, string primaryPath, TaiDataGrid secondaryGrid, string secondaryPath)
+        {
+            PrimaryGrid = primaryGrid;
+            PrimaryPath = primaryPath;
+            SecondaryGrid = secondaryGrid;
+            SecondaryPath = secondaryPath;
+        }
+
+        public TaiDataGrid PrimaryGrid { get; set; }
+        public string PrimaryPath { get; set; }
+        public TaiDataGrid SecondaryGrid { get; set; }
+        public string SecondaryPath { get; set; }
     }
 }

@@ -265,6 +265,13 @@ namespace DirOpusReImagined
             DeleteLeftButton.Click += DeleteLeftButton_Click;
             DeleteRightButton.Click += DeleteRightButton_Click;
 
+            MkDirRightButton.Click += MkDirRightButton_Click;
+            MkDirLeftButton.Click += MkDirLeftButton_Click;
+            
+            ArchiveLeftButton.Click += ArchiveLeftButton_Click;
+            ArchiveRightButton.Click += ArchiveRightButton_Click;   
+            
+            
             LPButton1.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton2.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton3.Click += Handle_Lower_Panel_Button_Clicks;
@@ -394,6 +401,56 @@ namespace DirOpusReImagined
             LPButton36.PointerExited += Handle_Lower_Panel_Button_PointerLeave;
 
             #endregion
+        }
+
+        private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
+            if (RPgrid.SelectedItems.Count == 0)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MB.ShowDialog(this);
+                return;
+            }
+            
+            ThePanelSetup PS = new ThePanelSetup(RPgrid, RPpath.Text, LPgrid, LPpath.Text);
+            
+            CreateArchive CA = new CreateArchive(PS);
+
+            CA.ShowDialog(this);
+        }
+
+        private void ArchiveLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
+            if (LPgrid.SelectedItems.Count == 0)
+            {
+                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MB.ShowDialog(this);
+                return;
+            }   
+            
+            ThePanelSetup PS = new ThePanelSetup(LPgrid, LPpath.Text, RPgrid, RPpath.Text);
+            
+            CreateArchive CA = new CreateArchive(PS);
+
+            CA.ShowDialog(this);
+            
+            
+        }
+
+        private void MkDirLeftButton_Click(object? sender, RoutedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private void MkDirRightButton_Click(object? sender, RoutedEventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         private void DeleteRightButton_Click(object? sender, RoutedEventArgs e)
