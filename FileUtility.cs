@@ -132,7 +132,35 @@ namespace DirOpusReImagined
                 Console.WriteLine($"Error renaming the file: {ex.Message}");
             }
         }
+        
+        public static void RenameDirectory(string olddir, string newdir)
+        {
+            try
+            {
+                // Verify that the source directory exists
+                if (!Directory.Exists(olddir) || Directory.Exists(newdir))
+                {
+                    MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.");
+                    
+                    mb.Show(null);
+                    
+                    //throw new DirectoryNotFoundException("The source directory does not exist.");
+                    // we need to handle this a little better
+                }
 
+                // Rename the directory using Directory.Move
+                Directory.Move(olddir, newdir);
+
+                //Console.WriteLine($"Directory renamed from '{olddir}' to '{newdir}'");
+            }
+            catch (Exception ex)
+            {
+                MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}");
+                mb.Show(null);
+                
+                //Console.WriteLine($"Error renaming the directory: {ex.Message}");
+            }
+        }
         public static string MakePathENVSafe(string path)
         {
             string result = path.Replace(@"\\", @"\"); // get rid of double backslashes

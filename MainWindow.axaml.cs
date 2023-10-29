@@ -176,7 +176,7 @@ namespace DirOpusReImagined
             {
                 foreach (AFileEntry af in LPgrid.SelectedItems)
                 {
-                    if (!af.Typ)
+                    if (true) //(!af.Typ)
                     {
                         fileselected = true;
                         break;
@@ -186,12 +186,14 @@ namespace DirOpusReImagined
 
             if (!fileselected)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MessageBox MB = new MessageBox("You have to have a file or a folder selected in the Left panel");
                 MB.ShowDialog(this);
                 return;
             }
 
-            RenameFileInterface fi = new RenameFileInterface(LPgrid, LPpath.Text);
+            RenameFileInterface fi = 
+                new RenameFileInterface(LPgrid, LPpath.Text+"",
+                    RPgrid,RPpath.Text+"");
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);
@@ -209,7 +211,7 @@ namespace DirOpusReImagined
             {
                 foreach (AFileEntry af in RPgrid.SelectedItems)
                 {
-                    if (!af.Typ)
+                    if (true)//(!af.Typ)
                     {
                         fileselected = true;
                         break;
@@ -224,7 +226,10 @@ namespace DirOpusReImagined
                 return;
             }
 
-            RenameFileInterface fi = new RenameFileInterface(RPgrid, RPpath.Text);
+            
+            RenameFileInterface fi = 
+                new RenameFileInterface(RPgrid, RPpath.Text+ "",
+                    LPgrid,LPpath.Text + "");
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);

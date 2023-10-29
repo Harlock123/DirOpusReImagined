@@ -98,91 +98,110 @@
 			</StackPanel>
 			<Label Name="LPLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
 
-			<Button Name="AllRightButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content="         all ---&gt;"
-			        ToolTip.Tip="Selects all the FILES only in the right panel" >
-			</Button>
+			<StackPanel Orientation="Horizontal">
+				
 
-			<Button Name="AllLeftButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content=" &lt;--- all"
-			        ToolTip.Tip="Selects all the FILES only in the left panel"></Button>
+				<Button Name="AllLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content=" &lt;- all"
+				        ToolTip.Tip="Selects all the FILES only in the left panel"></Button>
+				
+				<Button Name="AllRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="       all -&gt;"
+				        ToolTip.Tip="Selects all the FILES only in the right panel" >
+				</Button>
+			</StackPanel>
 			
-			<Button Name="ClearRightButton" Height="22" Padding="1"
-					Grid.Column="1"
-					Grid.Row="1"
-					HorizontalAlignment="Center" Width="100"
-					Content="    clear ---&gt;"
-					ToolTip.Tip="Clears the items selected in the right panel" >
-			</Button>
+			<StackPanel Orientation="Horizontal">
+				<Button Name="ClearLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content=" &lt;- clear"
+				        ToolTip.Tip="Clears the items selected in the left panel"></Button>
 
-			<Button Name="ClearLeftButton" Height="22" Padding="1"
-					Grid.Column="1"
-					Grid.Row="1"
-					HorizontalAlignment="Center" Width="100"
-					Content=" &lt;--- clear"
-					ToolTip.Tip="Clears the items selected in the left panel"></Button>
+				<Button Name="ClearRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="  clear -&gt;"
+				        ToolTip.Tip="Clears the items selected in the right panel" >
+				</Button>
+			</StackPanel>
+			
 
+			
 			<Label Name="LPLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
 
-
-			<Button Name="CopyRightButton" Height="22" Padding="1"
-					Grid.Column="1"
-					Grid.Row="1"
-					HorizontalAlignment="Center" Width="100"
-					Content="     copy ---&gt;"
-					ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
-			<Button Name="CopyLeftButton" Height="22" Padding="1"
-						Grid.Column="1"
-						Grid.Row="1"
-						HorizontalAlignment="Center" Width="100"
-						Content=" &lt;--- copy"
-						ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
-
-			<Button Name="MoveRightButton" Height="22" Padding="1"
-					Grid.Column="1"
-					Grid.Row="1"
-					HorizontalAlignment="Center" Width="100"
-					Content="     move---&gt;"
-					ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
-			<Button Name="MoveLeftButton" Height="22" Padding="1"
-						Grid.Column="1"
-						Grid.Row="1"
-						HorizontalAlignment="Center" Width="100"
-						Content=" &lt;---move"
-						ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
+			<StackPanel Orientation="Horizontal">
+				<Button Name="CopyLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content=" &lt;- copy"
+				        ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
+				
+				<Button Name="CopyRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="  copy -&gt;"
+				        ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
+			</StackPanel>
 			
-			<Button Name="RenameRightButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content="rename  ---&gt;"
-			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
-			<Button Name="RenameLeftButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content="&lt;---  rename"
-			        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
+			<StackPanel Orientation="Horizontal">
+				<Button Name="MoveLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content=" &lt;-move"
+				        ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
+				
+				<Button Name="MoveRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="  move-&gt;"
+				        ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
+			</StackPanel>
 			
-			<Button Name="DeleteRightButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content="    delete---&gt;"
-			        ToolTip.Tip="Deletes the items selected in the right panel"></Button>
-			<Button Name="DeleteLeftButton" Height="22" Padding="1"
-			        Grid.Column="1"
-			        Grid.Row="1"
-			        HorizontalAlignment="Center" Width="100"
-			        Content=" &lt;---delete"
-			        ToolTip.Tip="Deletes the items selected in the left panel"></Button>
+			<StackPanel Orientation="Horizontal">
+				<Button Name="RenameLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="&lt;-rename"
+				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
 
+				<Button Name="RenameRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="rename-&gt;"
+				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal">
+				<Button Name="DeleteLeftButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="&lt;-delete"
+				        ToolTip.Tip="Deletes the items selected in the left panel"></Button>
+				
+				<Button Name="DeleteRightButton" Height="22" Padding="1"
+				        Grid.Column="1"
+				        Grid.Row="1"
+				        HorizontalAlignment="Center" Width="70"
+				        Content="  delete-&gt;"
+				        ToolTip.Tip="Deletes the items selected in the right panel"></Button>
+			</StackPanel>
+			
 		</StackPanel>
 		
 
