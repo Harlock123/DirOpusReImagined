@@ -85,6 +85,7 @@ namespace DirOpusReImagined
         private bool _inDesignMode;
 
         public GridHoverItem TheItemUnderTheMouse = new GridHoverItem();
+        public GridHoverItem TheItemUnderTheMouseLast = new GridHoverItem();
 
         private DispatcherTimer _doubleClickTimer;
         private int _clickCounter;
@@ -972,56 +973,7 @@ namespace DirOpusReImagined
 
                     // Figure out the ROW we are on
 
-                    int offsety = 0;
-
-                    for (int i = _gridYShift; i < _gridRows; i++)
-                    {
-                        offsety += _rowHeights[i];
-
-                        if (_curMouseY - _gridHeaderAndTitleHeight < offsety)
-                        {
-                            TheItemUnderTheMouse.rowID = i;
-                            break;
-                        }
-                    }
-
-                    // Figure out the COLUMN we are on
-
-                    offsety = 0;
-                    for (int i = 0; i < _gridCols; i++)
-                    {
-                        offsety += _colWidths[i];
-
-
-                        if (_lastPosition.X + _gridXShift < offsety)
-                        {
-                            TheItemUnderTheMouse.colID = i;
-                            if (_items.Count > 0)
-                                TheItemUnderTheMouse.ItemUnderMouse = _items[TheItemUnderTheMouse.rowID];
-                            break;
-                        }
-
-                    }
-
-                    // figure out the value of whats being hovered over
-                    TheItemUnderTheMouse.cellContent = "";
-
-                    if (Items.Count > 0)
-                    {
-
-                        object theitem = TheItemUnderTheMouse.ItemUnderMouse;//this.items[this.TheItemUnderTheMouse.rowID];
-                        int idx = 0;
-                        foreach (PropertyInfo property in Items[0].GetType().GetProperties())
-                        {
-                            if (idx == TheItemUnderTheMouse.colID)
-                            {
-                                TheItemUnderTheMouse.cellContent = property.GetValue(Items[TheItemUnderTheMouse.rowID])?.ToString() + "";
-                                break;
-                            }
-                            idx++;
-                        }
-                    }
-
+                    RecalcItemUnderMouse();
 
                     GridHover?.Invoke(this, TheItemUnderTheMouse);
                 }
@@ -1031,6 +983,59 @@ namespace DirOpusReImagined
             catch (Exception ex)
             {
                 //Debug.WriteLine(ex.Message);
+            }
+        }
+
+        private void RecalcItemUnderMouse()
+        {
+            int offsety = 0;
+
+            for (int i = _gridYShift; i < _gridRows; i++)
+            {
+                offsety += _rowHeights[i];
+
+                if (_curMouseY - _gridHeaderAndTitleHeight < offsety)
+                {
+                    TheItemUnderTheMouse.rowID = i;
+                    break;
+                }
+            }
+
+            // Figure out the COLUMN we are on
+
+            offsety = 0;
+            for (int i = 0; i < _gridCols; i++)
+            {
+                offsety += _colWidths[i];
+
+
+                if (_lastPosition.X + _gridXShift < offsety)
+                {
+                    TheItemUnderTheMouse.colID = i;
+                    if (_items.Count > 0)
+                        TheItemUnderTheMouse.ItemUnderMouse = _items[TheItemUnderTheMouse.rowID];
+                    break;
+                }
+            }
+
+            // figure out the value of whats being hovered over
+            TheItemUnderTheMouse.cellContent = "";
+
+            if (Items.Count > 0)
+            {
+                object theitem = TheItemUnderTheMouse.ItemUnderMouse; //this.items[this.TheItemUnderTheMouse.rowID];
+                int idx = 0;
+                foreach (PropertyInfo property in Items[0].GetType().GetProperties())
+                {
+                    if (idx == TheItemUnderTheMouse.colID)
+                    {
+                        TheItemUnderTheMouse.cellContent =
+                            property.GetValue(Items[TheItemUnderTheMouse.rowID])?.ToString() + "";
+                        break;
+                    }
+
+                    idx++;
+                }
             }
         }
 
@@ -1318,16 +1323,19 @@ namespace DirOpusReImagined
                 _curMouseX = (int)position.X - (int)TheCanvas.Bounds.Left;
                 _curMouseY = (int)position.Y - (int)TheCanvas.Bounds.Top;
             }
-            //this.CurMouseX = (int)position.X;
-            //this.CurMouseX = (int)position.X - (int)TheCanvas.Bounds.Left;
 
-            //this.CurMouseY = (int)position.Y - (int)TheCanvas.Bounds.Top;
-
-
-            if (_showCrossHairs)
+            RecalcItemUnderMouse();
+           
+            if (_showCrossHairs && TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
             {
+                //TheItemUnderTheMouseLast = null;
                 ReRender();
             }
+            
+            this.TheItemUnderTheMouseLast.rowID = this.TheItemUnderTheMouse.rowID;
+            this.TheItemUnderTheMouseLast.colID = this.TheItemUnderTheMouse.colID;
+            this.TheItemUnderTheMouseLast.cellContent = this.TheItemUnderTheMouse.cellContent;
+            this.TheItemUnderTheMouseLast.ItemUnderMouse = this.TheItemUnderTheMouse.ItemUnderMouse;    
 
             e.Handled = true; // Mark the event as handled to prevent it from bubbling up
 
