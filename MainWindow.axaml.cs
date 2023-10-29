@@ -445,12 +445,26 @@ namespace DirOpusReImagined
 
         private void MkDirLeftButton_Click(object? sender, RoutedEventArgs e)
         {
-            //throw new NotImplementedException();
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
+            ThePanelSetup PS = new ThePanelSetup(LPgrid, LPpath.Text, RPgrid, RPpath.Text);
+            
+            CreateFolder CF = new CreateFolder(PS);
+
+            CF.ShowDialog(this);
         }
 
         private void MkDirRightButton_Click(object? sender, RoutedEventArgs e)
         {
-            //throw new NotImplementedException();
+            Button B = (Button)sender;
+            ToolTip.SetIsOpen(B,false);
+            
+            ThePanelSetup PS = new ThePanelSetup(RPgrid, RPpath.Text, LPgrid, LPpath.Text);
+            
+            CreateFolder CF = new CreateFolder(PS);
+
+            CF.ShowDialog(this);
         }
 
         private void DeleteRightButton_Click(object? sender, RoutedEventArgs e)
