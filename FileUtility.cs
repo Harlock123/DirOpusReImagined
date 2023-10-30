@@ -292,7 +292,7 @@ namespace DirOpusReImagined
             {
                 MessageBox MB = new MessageBox(e.Message);
 
-                MB.ShowDialog(null);
+                MB.Show();
                 
                 // if (ThePanel.Name == "RPgrid")
                 // {

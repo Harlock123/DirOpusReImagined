@@ -31,7 +31,7 @@
 					VerticalAlignment="Center"
 					HorizontalAlignment="Center"
 					Grid.Column="1"
-					Grid.Row="0" >
+					Grid.Row="0">
 			<StackPanel Orientation="Horizontal" Spacing="2">
 				<Button Name="LeftToRightButton" Background="Goldenrod"
 				        Content="&gt;"
@@ -50,8 +50,9 @@
 					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="1">
-			<StackPanel Name="TheDrivePresetsSp" Orientation="Vertical">
-				<Grid Margin="2">
+			<StackPanel Name="TheDrivePresetsSp" 
+			            Orientation="Vertical">
+				<Grid >
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="0.5*"/>
 						<ColumnDefinition Width="0.5*"/>
@@ -65,34 +66,34 @@
 					</Grid.RowDefinitions>
 					<Button Name="DrivePreset1a" Grid.Column="0" Grid.Row="0" Height="22" Padding="1"
 							Content="&lt; Drv1" HorizontalAlignment="Left"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset1b" Grid.Column="1" Grid.Row="0" Height="22" Padding="1"
 					        Content="Drv1 &gt;" HorizontalAlignment="Right" 
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset2a" Grid.Column="0" Grid.Row="1" Height="22" Padding="1"
 					        Content="Drive 3" HorizontalAlignment="Left"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset2b" Grid.Column="1" Grid.Row="1" Height="22" Padding="1"
 					        Content="Drive 4" HorizontalAlignment="Right"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset3a" Grid.Column="0" Grid.Row="2" Height="22" Padding="1"
 					        Content="Drive 5" HorizontalAlignment="Left"
-					        VerticalAlignment="Stretch"/>
+					        VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset3b" Grid.Column="1" Grid.Row="2" Height="22" Padding="1"
 					        Content="Drive 6" HorizontalAlignment="Right"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset4a" Grid.Column="0" Grid.Row="3" Height="22" Padding="1"
 					        Content="Drive 7" HorizontalAlignment="Left"
-					        VerticalAlignment="Stretch"/>
+					        VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset4b" Grid.Column="1" Grid.Row="3" Height="22" Padding="1"
 					        Content="Drive 8" HorizontalAlignment="Right"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset5a" Grid.Column="0" Grid.Row="4" Height="22" Padding="1"
 					        Content="Drive 9" HorizontalAlignment="Left"
-					        VerticalAlignment="Stretch"/>
+					        VerticalAlignment="Stretch" Margin="2"/>
 					<Button Name="DrivePreset5b" Grid.Column="1" Grid.Row="4" Height="22" Padding="1"
 					        Content="Drive 10" HorizontalAlignment="Right"
-							VerticalAlignment="Stretch"/>
+							VerticalAlignment="Stretch" Margin="2"/>
 					
 					</Grid>
 			</StackPanel>
@@ -266,11 +267,11 @@
 		
 		
 
-		<cons:TaiDataGrid  Margin="4,4,0,4" Name="LPgrid" Grid.Column="0" Grid.Row="1" />
+		<cons:TaiDataGrid  Margin="4,4,4,4" Name="LPgrid" Grid.Column="0" Grid.Row="1" />
 
 		<cons:TaiDataGrid  Margin="4,4,0,4" Name="RPgrid" Grid.Column="2" Grid.Row="1" />
 
-		<Grid Name="ButtonGrid" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="2">
+		<Grid Name="ButtonGrid" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4" Grid.RowSpan="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="*"/>

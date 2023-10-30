@@ -37,6 +37,7 @@
 					   Value="0"
 					   ViewportSize="10"
 					   Visibility="Visible"
+					   Background="Honeydew"
 					   />
 			<ScrollBar Name="TheHorizontalScrollBar"
 					   Orientation="Horizontal"
@@ -47,6 +48,7 @@
 					   Value="0"
 					   ViewportSize="10"
 					   Visibility="Visible"
+					   Background="Honeydew"
 					   />
 		</Grid>
 		<!-- 
