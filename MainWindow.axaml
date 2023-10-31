@@ -5,7 +5,7 @@
 		xmlns:cons="clr-namespace:DirOpusReImagined;assembly=DirOpusReImagined"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="DirOpusReImagined.MainWindow"
-        Title="DirOpusReImagined"
+        Title="DORI"
 		Background="LightGray">
 	
 	<!-- Set the DataContext for the MainWindow to itself 
@@ -14,11 +14,12 @@
 	</Window.DataContext>
 -->
 	
-	<Grid Name="MainWindowGridContainer" >
+	<Grid Name="MainWindowGridContainer" 
+	>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="0.45*"/>
+			<ColumnDefinition Width="45*"/>
 			<ColumnDefinition Width="auto"/>
-			<ColumnDefinition Width="0.45*"/>
+			<ColumnDefinition Width="45*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
@@ -410,4 +411,5 @@
 
 
 	</Grid>
+	
 </Window>
