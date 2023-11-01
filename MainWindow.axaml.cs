@@ -100,24 +100,24 @@ namespace DirOpusReImagined
                 I2.Height = LPBackButton.Height + 8;
 
                 I3.Source = B3;
-                I3.Width = 28;
-                I3.Height = 28;
+                I3.Width = 24;
+                I3.Height = 24;
 
                 I4.Source = B3;
-                I4.Width = 28;
-                I4.Height = 28;
+                I4.Width = 24;
+                I4.Height = 24;
 
                 I5.Source = B4;
-                I5.Width = 18;
-                I5.Height = 18;
+                I5.Width = 12;
+                I5.Height = 12;
 
                 I6.Source = B5;
-                I6.Width = 18;
-                I6.Height = 18;
+                I6.Width = 12;
+                I6.Height = 12;
 
                 I7.Source = B6;
-                I7.Width = 18;
-                I7.Height = 18;
+                I7.Width = 12;
+                I7.Height = 12;
 
 
                 RPBackButton.Content = I1;
