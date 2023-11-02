@@ -54,6 +54,7 @@
 					Grid.Row="1">
 			<StackPanel Name="TheDrivePresetsSp" 
 			            Orientation="Vertical">
+				<Label Name="LPLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
 				<Grid >
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="0.5*"/>

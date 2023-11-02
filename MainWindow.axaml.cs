@@ -664,20 +664,22 @@ namespace DirOpusReImagined
                     // We have a winner - do the action
 
                     LastButtonPopupName = B.Name;
+                    ToolTip.SetTip(B,item.ToolTip);
+                    ToolTip.SetIsOpen(B, true);
                                         
-                    _pop = new PopUp();
-                    _pop.Title = B.Content.ToString();
+                    //_pop = new PopUp();
+                    //_pop.Title = B.Content.ToString();
 
-                    _pop.SetText(item.ToolTip);
+                    //_pop.SetText(item.ToolTip);
 
-                    var p = VisualRoot.PointToScreen(e.GetPosition(this));
+                    //var p = VisualRoot.PointToScreen(e.GetPosition(this));
 
-                    _pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
+                    //_pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
 
-                    _pop.Width = 240;
-                    _pop.Height = 100;
+                    //_pop.Width = 240;
+                    //_pop.Height = 100;
 
-                    _pop.Show(); 
+                    //_pop.Show(); 
 
                     //Avalonia.Threading.DispatcherTimer.Run(() =>
                     //{

@@ -30,6 +30,7 @@
 			</Canvas>
 			<ScrollBar Name="TheVerticleScrollBar" 
 					   Orientation="Vertical"
+					   AllowAutoHide="False"
 					   Grid.Row="0"
 					   Grid.Column="1"
 					   Minimum="0"
@@ -41,6 +42,7 @@
 					   />
 			<ScrollBar Name="TheHorizontalScrollBar"
 					   Orientation="Horizontal"
+					   AllowAutoHide="False"
 					   Grid.Row="1"
 					   Grid.Column="0"
 					   Minimum="0"
