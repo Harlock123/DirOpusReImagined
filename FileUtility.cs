@@ -211,6 +211,12 @@ namespace DirOpusReImagined
 
             // using linq to sort the directories by name alphabetically
             
+            if (PATHNAME == null || PATHNAME == "")
+            {
+                return;
+            }
+            
+            
             try
             {
                 

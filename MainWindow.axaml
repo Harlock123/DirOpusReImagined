@@ -357,7 +357,7 @@
 			</Grid.ColumnDefinitions>
 			<Button Name="LPBackButton" Grid.Column="0" Grid.Row="0" 
 			        Background="Goldenrod" Content="&lt;=" />
-			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
+			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text=""/>
 			<Button Name="LPDriveButton" Background="Goldenrod"
 			        Grid.Column="2" Grid.Row="0" Content="" />
 		</Grid>
@@ -370,7 +370,7 @@
 			</Grid.ColumnDefinitions>
 			<Button Name="RPBackButton" Grid.Column="0" Grid.Row="0" 
 			        Background="Goldenrod" Content="&lt;=" />
-			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text="C:\"/>
+			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text=""/>
 			<Button Name="RPDriveButton" Background="Goldenrod" 
 			        Grid.Column="2" Grid.Row="0" Content="" />
 		</Grid>
