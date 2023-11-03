@@ -673,6 +673,8 @@ namespace DirOpusReImagined
         private void SetToolTipForItem(Button B, ButtonEntry item)
         {
             LastButtonPopupName = B.Name;
+            ToolTip.SetHorizontalOffset(B,10.0);
+            ToolTip.SetVerticalOffset(B,10.0);
             ToolTip.SetTip(B, item.ToolTip);
             ToolTip.SetIsOpen(B, true);
         }
