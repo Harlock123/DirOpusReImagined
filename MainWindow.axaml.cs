@@ -663,32 +663,18 @@ namespace DirOpusReImagined
                 {
                     // We have a winner - do the action
 
-                    LastButtonPopupName = B.Name;
-                    ToolTip.SetTip(B,item.ToolTip);
-                    ToolTip.SetIsOpen(B, true);
-                                        
-                    //_pop = new PopUp();
-                    //_pop.Title = B.Content.ToString();
+                    SetToolTipForItem(B, item);
 
-                    //_pop.SetText(item.ToolTip);
-
-                    //var p = VisualRoot.PointToScreen(e.GetPosition(this));
-
-                    //_pop.Position = new Avalonia.PixelPoint((int)p.X+ 30, (int)p.Y + 30);
-
-                    //_pop.Width = 240;
-                    //_pop.Height = 100;
-
-                    //_pop.Show(); 
-
-                    //Avalonia.Threading.DispatcherTimer.Run(() =>
-                    //{
-                    //    pop.Close();
-                    //    return false;
-                    //}, TimeSpan.FromSeconds(3)); // adjust the delay as needed
-
+                    break;
                 }
             }
+        }
+
+        private void SetToolTipForItem(Button B, ButtonEntry item)
+        {
+            LastButtonPopupName = B.Name;
+            ToolTip.SetTip(B, item.ToolTip);
+            ToolTip.SetIsOpen(B, true);
         }
 
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
