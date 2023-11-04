@@ -11,6 +11,7 @@ public partial class RenameFileInterface : Window
     bool FrmCanceled;
     private TaiDataGrid theGrid;
     private string thePath = "";
+    private bool _ShowHidden = true;
     
     private TaiDataGrid theOtherGrid;
     private string theOtherPath = "";
@@ -40,7 +41,7 @@ public partial class RenameFileInterface : Window
         
     }
     
-    public RenameFileInterface(TaiDataGrid Thegrid, string ThePath,TaiDataGrid TheOtherGrid, string TheOtherPath)
+    public RenameFileInterface(TaiDataGrid Thegrid, string ThePath,TaiDataGrid TheOtherGrid, string TheOtherPath, bool ShowHidden)
     {
         InitializeComponent();
         OKButton.Click += OKButton_Click;
@@ -52,6 +53,7 @@ public partial class RenameFileInterface : Window
         this.theOtherGrid = TheOtherGrid;
         this.theOtherPath = FileUtility.MakePathENVSafe(TheOtherPath);
         
+        _ShowHidden = ShowHidden;
     }
     
 
@@ -158,9 +160,9 @@ public partial class RenameFileInterface : Window
                     }
                 }
                 
-                FileUtility.PopulateFilePanel(theGrid,thePath);
+                FileUtility.PopulateFilePanel(theGrid,thePath,_ShowHidden);
                 if (thePath == theOtherPath)
-                    FileUtility.PopulateFilePanel(theOtherGrid,theOtherPath);
+                    FileUtility.PopulateFilePanel(theOtherGrid,theOtherPath,_ShowHidden);
                 
                 
             }

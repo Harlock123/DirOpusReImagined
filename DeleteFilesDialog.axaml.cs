@@ -17,6 +17,7 @@ public partial class DeleteFilesDialog : Window
     private string OtherRootPath = "";
     private TaiDataGrid ThePanel = null!;
     private TaiDataGrid OtherPanel = null!;
+    private bool _ShowHidden = true;
     
     public DeleteFilesDialog()
     {
@@ -25,7 +26,8 @@ public partial class DeleteFilesDialog : Window
     
     public DeleteFilesDialog(List<Object> filesToDelete, 
         string rootPath, TaiDataGrid thepanel,
-        string otherrootPath,TaiDataGrid otherpanel)
+        string otherrootPath,TaiDataGrid otherpanel,
+        bool ShowHidden)
     {
         InitializeComponent();
         
@@ -37,6 +39,7 @@ public partial class DeleteFilesDialog : Window
         ThePanel = thepanel;
         OtherRootPath = otherrootPath;
         OtherPanel = otherpanel;
+        _ShowHidden = ShowHidden;
 
         int f = 0;
         int d = 0;
@@ -87,9 +90,9 @@ public partial class DeleteFilesDialog : Window
             
         }
         
-        FileUtility.PopulateFilePanel(ThePanel, RootPath);
+        FileUtility.PopulateFilePanel(ThePanel, RootPath,_ShowHidden);
         if (OtherRootPath == RootPath)
-            FileUtility.PopulateFilePanel(OtherPanel, OtherRootPath);
+            FileUtility.PopulateFilePanel(OtherPanel, OtherRootPath,_ShowHidden);
         
         
         this.Close();

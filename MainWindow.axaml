@@ -345,6 +345,16 @@
 				        ToolTip.Tip="Will Create a ZIP file from selected contents in Right Panel"></Button>
 			</StackPanel>
 			
+			<StackPanel Orientation="Horizontal">
+				<CheckBox Name="chkShowHidden" 
+				          Margin="2"
+				          HorizontalAlignment="Center"
+				          IsChecked="True"
+				          FontSize="11"
+				          FontWeight="Bold"
+				          Content="Show Hidden" />
+			</StackPanel>
+			
 		</StackPanel>
 		
 

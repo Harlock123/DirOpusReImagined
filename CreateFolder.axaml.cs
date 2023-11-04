@@ -9,6 +9,7 @@ namespace DirOpusReImagined;
 public partial class CreateFolder : Window
 {
     private ThePanelSetup? _panelSetup;
+    private bool _ShowHidden = true;
     
     public CreateFolder()
     {
@@ -19,10 +20,11 @@ public partial class CreateFolder : Window
 
     
 
-    public CreateFolder(ThePanelSetup panelSetup)
+    public CreateFolder(ThePanelSetup panelSetup, bool ShowHidden)
     {
         InitializeComponent();
         _panelSetup = panelSetup;
+        _ShowHidden = ShowHidden;
         
         OkButton.Click += OkButton_Click;
         CancelButton.Click += CancelButton_Click;
@@ -38,11 +40,11 @@ public partial class CreateFolder : Window
     {
         CreateFolderMethod();
         
-        FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath);
+        FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath, _ShowHidden);
         
         if (_panelSetup!.PrimaryPath == _panelSetup!.SecondaryPath)
         {
-            FileUtility.PopulateFilePanel(_panelSetup!.SecondaryGrid, _panelSetup!.SecondaryPath);
+            FileUtility.PopulateFilePanel(_panelSetup!.SecondaryGrid, _panelSetup!.SecondaryPath,_ShowHidden);
         }
         
         Close();
@@ -63,11 +65,11 @@ public partial class CreateFolder : Window
 
         Directory.CreateDirectory(folderPath);
         
-        FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath);
+        FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath, _ShowHidden);
         
         if (_panelSetup!.PrimaryPath == _panelSetup!.SecondaryPath)
         {
-            FileUtility.PopulateFilePanel(_panelSetup!.SecondaryGrid, _panelSetup!.SecondaryPath);
+            FileUtility.PopulateFilePanel(_panelSetup!.SecondaryGrid, _panelSetup!.SecondaryPath,_ShowHidden);
         }
 
         Close();

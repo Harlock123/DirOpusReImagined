@@ -155,8 +155,12 @@ namespace DirOpusReImagined
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
            
-            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
-            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            if (LPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
+            if (RPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
            
             WireUpButtonHandlers();
 
@@ -193,7 +197,7 @@ namespace DirOpusReImagined
 
             RenameFileInterface fi = 
                 new RenameFileInterface(LPgrid, LPpath.Text+"",
-                    RPgrid,RPpath.Text+"");
+                    RPgrid,RPpath.Text+"", chkShowHidden.IsChecked.Value);
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);
@@ -229,7 +233,7 @@ namespace DirOpusReImagined
             
             RenameFileInterface fi = 
                 new RenameFileInterface(RPgrid, RPpath.Text+ "",
-                    LPgrid,LPpath.Text + "");
+                    LPgrid,LPpath.Text + "", chkShowHidden.IsChecked.Value);
             fi.Width = 600;
             fi.Height = 180;
             fi.Show(this);
@@ -324,6 +328,13 @@ namespace DirOpusReImagined
 
             #endregion
 
+            #region CheckBox Handlers
+            
+            chkShowHidden.Checked += ChkShowHidden_Checked;
+            chkShowHidden.Unchecked += ChkShowHidden_Checked;
+            
+            #endregion
+            
             #region Pointer Enter/Leave Handlers
 
             LPButton1.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
@@ -403,6 +414,13 @@ namespace DirOpusReImagined
             #endregion
         }
 
+        private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
+        { 
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
+            
+        }
+
         private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
@@ -417,7 +435,7 @@ namespace DirOpusReImagined
             
             ThePanelSetup PS = new ThePanelSetup(RPgrid, RPpath.Text, LPgrid, LPpath.Text);
             
-            CreateArchive CA = new CreateArchive(PS);
+            CreateArchive CA = new CreateArchive(PS, chkShowHidden.IsChecked.Value);
 
             CA.ShowDialog(this);
         }
@@ -436,7 +454,7 @@ namespace DirOpusReImagined
             
             ThePanelSetup PS = new ThePanelSetup(LPgrid, LPpath.Text, RPgrid, RPpath.Text);
             
-            CreateArchive CA = new CreateArchive(PS);
+            CreateArchive CA = new CreateArchive(PS, chkShowHidden.IsChecked.Value);
 
             CA.ShowDialog(this);
             
@@ -450,7 +468,7 @@ namespace DirOpusReImagined
             
             ThePanelSetup PS = new ThePanelSetup(LPgrid, LPpath.Text, RPgrid, RPpath.Text);
             
-            CreateFolder CF = new CreateFolder(PS);
+            CreateFolder CF = new CreateFolder(PS, chkShowHidden.IsChecked.Value);
 
             CF.ShowDialog(this);
         }
@@ -462,7 +480,7 @@ namespace DirOpusReImagined
             
             ThePanelSetup PS = new ThePanelSetup(RPgrid, RPpath.Text, LPgrid, LPpath.Text);
             
-            CreateFolder CF = new CreateFolder(PS);
+            CreateFolder CF = new CreateFolder(PS, chkShowHidden.IsChecked.Value);
 
             CF.ShowDialog(this);
         }
@@ -482,7 +500,7 @@ namespace DirOpusReImagined
             // Here vwe want to iterate over the selected items and delete them
 
             DeleteFilesDialog df = new DeleteFilesDialog(RPgrid.SelectedItems, RPpath.Text, RPgrid,
-                LPpath.Text, LPgrid);
+                LPpath.Text, LPgrid, chkShowHidden.IsChecked.Value);
 
             df.ShowDialog(this);
         }
@@ -502,7 +520,7 @@ namespace DirOpusReImagined
             // Here vwe want to iterate over the selected items and delete them
 
             DeleteFilesDialog df = new DeleteFilesDialog(LPgrid.SelectedItems, LPpath.Text, LPgrid,
-                RPpath.Text, RPgrid);
+                RPpath.Text, RPgrid, chkShowHidden.IsChecked.Value);
 
             df.ShowDialog(this); 
         }
@@ -543,12 +561,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetHomeDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = GetHomeDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                     }
 
                     break;
@@ -556,12 +576,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetRootDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value); 
                     }
                     else // Right
                     {
                         RPpath.Text = GetRootDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value); 
                     }
 
                     break;
@@ -569,12 +591,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetDesktopDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = GetDesktopDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value); 
                     }
 
                     break;
@@ -582,12 +606,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetDocumentsDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = GetDocumentsDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                     }
 
                     break;
@@ -595,12 +621,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetPicturesDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = GetPicturesDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                     }
 
                     break;
@@ -608,12 +636,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = GetPicturesDirectoryPath();
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = GetPicturesDirectoryPath();
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                     }
 
                     break;
@@ -621,12 +651,14 @@ namespace DirOpusReImagined
                     if (nm.EndsWith("a")) // Left
                     {
                         LPpath.Text = dbe.Path;
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                     }
                     else // Right
                     {
                         RPpath.Text = dbe.Path;
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                        if (chkShowHidden != null) 
+                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                     }
 
                     break;
@@ -685,7 +717,9 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B,false);
             
             LPpath.Text = RPpath.Text;
-            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+            if (LPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
@@ -694,14 +728,18 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B,false);
             
             RPpath.Text = LPpath.Text;
-            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            if (RPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
         }
 
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                if (RPpath.Text != null) 
+                    if (chkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
             }
         }
 
@@ -709,7 +747,9 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                if (LPpath.Text != null) 
+                    if (chkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
             }
         }
 
@@ -1570,9 +1610,8 @@ namespace DirOpusReImagined
             //}
 
             //LPpath.Text = newpath;
-            
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
 
+            if (chkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
         }
 
         private void RPBackButton_Click(object? sender, RoutedEventArgs e)
@@ -1614,7 +1653,7 @@ namespace DirOpusReImagined
                 RPpath.Text = newpath;
             }
 
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            if (chkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,chkShowHidden.IsChecked.Value);
         }
 
         private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -1627,7 +1666,7 @@ namespace DirOpusReImagined
                 {
                     oldpath = RPpath.Text;
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                    if (chkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                 }
                 else
                 {
@@ -1657,7 +1696,7 @@ namespace DirOpusReImagined
                     oldpath = RPpath.Text;
                     
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+                    if (chkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
                 }
                 else
                 {
@@ -1694,7 +1733,7 @@ namespace DirOpusReImagined
                     // Its A folder so gets go into it
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                    if (chkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                 }
                 else
                 {
@@ -1733,7 +1772,7 @@ namespace DirOpusReImagined
                 {
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+                    if (chkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
                 }
                 else
                 {
@@ -1812,12 +1851,16 @@ namespace DirOpusReImagined
 
         private void RefreshLPGrid ()
         {
-            if (LPpath.Text != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text);
+            if (LPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
         }
 
         private void RefreshRPGrid()
         {
-            if (RPpath.Text != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text);
+            if (RPpath.Text != null) 
+                if (chkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
         }   
         
         private string GetRootDirectoryPath()

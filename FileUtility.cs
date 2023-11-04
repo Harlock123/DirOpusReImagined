@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DirOpusReImagined
 {
@@ -161,6 +162,7 @@ namespace DirOpusReImagined
                 //Console.WriteLine($"Error renaming the directory: {ex.Message}");
             }
         }
+        
         public static string MakePathENVSafe(string path)
         {
             string result = path.Replace(@"\\", @"\"); // get rid of double backslashes
@@ -203,7 +205,7 @@ namespace DirOpusReImagined
             return result;
         }
         
-        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME)
+        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden)
         {
             //LPgrid.PopulateGrid(PATHNAME);
 
@@ -244,8 +246,21 @@ namespace DirOpusReImagined
                                         
                     var ds = di.GetDirectories().GetUpperBound(0) + 1;
                     var fs = di.GetFiles().GetUpperBound(0) + 1;
+                    
+                    // if we are showing hidden files 
+                    // and the flags contain the hidden flag
+                    // then we add it to the list
 
-                    FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                    if (ShowHidden) // Who cares show em all
+                    {
+                        FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                    }
+                    else if (!ShowHidden && !flags.Contains(" H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                    {
+                        FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                    }
+                    
+                    //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -280,9 +295,18 @@ namespace DirOpusReImagined
 
                     string flags = GetAbbreviatedAttributes(fa);
 
-                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString(); 
+                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
 
-                    FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                    if (ShowHidden) // Again who cares
+                    {
+                        FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                    }
+                    else if (!ShowHidden && !flags.Contains(" H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                    {
+                        FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                    }
+                    
+                    //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
                 }
                 catch
                 {
