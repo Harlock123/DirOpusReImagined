@@ -33,6 +33,8 @@ namespace DirOpusReImagined
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
         private List<DriveButtonEntry> TheDriveButtons = new List<DriveButtonEntry>();
         
+        private List<Button> TheLowerPanelButtons = new List<Button>();
+        
         private string StartRightPath = "";
         private string StartLeftPath = "";
 
@@ -49,6 +51,9 @@ namespace DirOpusReImagined
         public MainWindow()
         {
             InitializeComponent();
+            
+            PopulateTheButtons();
+            
 
             // Apply The Settings if possible
             // First Look where the app is running from for Configuration.xml
@@ -62,6 +67,7 @@ namespace DirOpusReImagined
             // if it does then use it
             if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
             {
+                ClearLowerButtons();
                 ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
             }
             else
@@ -167,6 +173,40 @@ namespace DirOpusReImagined
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             if (version != null)
                 Title = Title + " " + version.ToString();
+        }
+
+        private void PopulateTheButtons()
+        {
+            for (int i = 1; i <= 36; i++)
+            {
+                var buttonName = $"LPButton{i}";
+                var lpButton = this.FindControl<Button>(buttonName);
+    
+                if (lpButton != null)
+                {
+                    TheLowerPanelButtons.Add(lpButton);
+                }
+            }
+        }
+
+        private void ClearLowerButtons()
+        {
+            foreach (Button b in TheLowerPanelButtons)
+            {
+                b.Content = "";
+                b.Tag = null;
+            }
+            
+            DrivePreset1a.Content = "";
+            DrivePreset1b.Content = "";
+            DrivePreset2a.Content = "";
+            DrivePreset2b.Content = "";
+            DrivePreset3a.Content = "";
+            DrivePreset3b.Content = "";
+            DrivePreset4a.Content = "";
+            DrivePreset4b.Content = "";
+            DrivePreset5a.Content = "";
+            DrivePreset5b.Content = "";
         }
 
         private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
