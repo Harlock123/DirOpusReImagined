@@ -355,6 +355,22 @@
 				          Content="Show Hidden" />
 			</StackPanel>
 			
+			<StackPanel Orientation="Vertical">
+				<Label FontSize="11" Margin="0,0,0,-4"
+				       FontWeight="Bold">Sort Options</Label>
+				<RadioButton Name="rbSortName"
+							 FontSize="11"
+				             FontWeight="Bold"
+				             Content="Name"
+				             IsChecked="True"
+							 Margin="0,0,0,-8"></RadioButton>
+				<RadioButton Name="rbSortSize"
+							 FontSize="11"
+				             FontWeight="Bold"
+				             Content="Size"
+							 Margin="0,0,0,-4"></RadioButton>
+			</StackPanel>
+			
 		</StackPanel>
 		
 
