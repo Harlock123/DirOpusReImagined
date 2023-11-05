@@ -991,14 +991,16 @@ namespace DirOpusReImagined
         private void RecalcItemUnderMouse()
         {
             int offsety = 0;
-
-            GridHoverItem temp = TheItemUnderTheMouse;
+            
+            //GridHoverItem temp = TheItemUnderTheMouse;
+            
+            //Console.WriteLine("X: " + _curMouseX + " Y: " + _curMouseY);
 
             for (int i = _gridYShift; i < _gridRows; i++)
             {
                 offsety += _rowHeights[i];
 
-                if (_curMouseY - _gridHeaderAndTitleHeight < offsety)
+                if (_curMouseY - _gridHeaderAndTitleHeight < offsety && _curMouseY != -1)
                 {
                     TheItemUnderTheMouse.rowID = i;
                     break;
