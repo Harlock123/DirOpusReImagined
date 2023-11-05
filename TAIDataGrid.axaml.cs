@@ -1529,6 +1529,8 @@ namespace DirOpusReImagined
             //this.ShowCrossHairs = false;
 
             //this.ReRender();
+            
+            ToolTip.SetIsOpen(this,false);
 
             _mouseInControl = false;
             _curMouseX = -1;

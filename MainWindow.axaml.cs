@@ -43,7 +43,9 @@ namespace DirOpusReImagined
         private bool UseIntegratedImageViewer = true;
         
         private string LastButtonPopupName = "";
-
+        
+        private AFileEntry LastFileHovered = null;
+        
         private PopUp _pop;
         
         #endregion
@@ -150,6 +152,9 @@ namespace DirOpusReImagined
 
             LPgrid.GridItemClick += LPgrid_GridItemClick;
             RPgrid.GridItemClick += RPgrid_GridItemClick;
+            
+            LPgrid.GridHover += Handle_GridHover;
+            RPgrid.GridHover += Handle_GridHover;
 
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
@@ -173,6 +178,33 @@ namespace DirOpusReImagined
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             if (version != null)
                 Title = Title + " " + version.ToString();
+        }
+
+        private void Handle_GridHover(object? sender, GridHoverItem e)
+        {
+            if (e.ItemUnderMouse is null)
+            {
+                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+                
+                return;
+            }
+            
+            if (e.ItemUnderMouse is AFileEntry)
+            {
+                AFileEntry af = (AFileEntry)e.ItemUnderMouse;
+                
+                if (LastFileHovered != null && LastFileHovered.Name == af.Name)
+                {
+                    return;
+                }
+                
+                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+                
+                SetToolTipForGridItem((TaiDataGrid)sender, af);
+                
+            }
+
+
         }
 
         private void PopulateTheButtons()
@@ -751,6 +783,21 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B, true);
         }
 
+        private void SetToolTipForGridItem(TaiDataGrid grid, AFileEntry item)
+        {
+            
+            ToolTip.SetHorizontalOffset(grid,10.0);
+            ToolTip.SetVerticalOffset(grid,10.0);
+            if (item.Typ)
+                ToolTip.SetTip(grid, "Folder: " + item.Name);
+            else
+                ToolTip.SetTip(grid, "File: " + item.Name); 
+            
+            ToolTip.SetIsOpen(grid, true);
+
+            LastFileHovered = item;
+        }
+        
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
