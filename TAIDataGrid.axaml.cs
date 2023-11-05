@@ -120,6 +120,8 @@ namespace DirOpusReImagined
             PointerExited += OnPointerExited;
             PointerPressed += OnPointerPressed;
             PointerReleased += OnPointerReleased;
+            
+            TheCanvas.PointerExited += OnPointerExited;
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _doubleClickTimer.Tick += DoubleClickTimer_Tick;
@@ -990,6 +992,8 @@ namespace DirOpusReImagined
         {
             int offsety = 0;
 
+            GridHoverItem temp = TheItemUnderTheMouse;
+
             for (int i = _gridYShift; i < _gridRows; i++)
             {
                 offsety += _rowHeights[i];
@@ -1007,7 +1011,6 @@ namespace DirOpusReImagined
             for (int i = 0; i < _gridCols; i++)
             {
                 offsety += _colWidths[i];
-
 
                 if (_lastPosition.X + _gridXShift < offsety)
                 {
