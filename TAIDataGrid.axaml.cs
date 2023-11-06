@@ -990,12 +990,85 @@ namespace DirOpusReImagined
 
         private void RecalcItemUnderMouse()
         {
+            int rowidx = -1;
+            int colidx = -1;
+            
             int offsety = 0;
+            
+            for (int i = _gridYShift; i < _gridRows; i++)
+            {
+                offsety += _rowHeights[i];
+
+                if (_curMouseY - _gridHeaderAndTitleHeight < offsety && _curMouseY != -1)
+                {
+                    rowidx = i;
+                    break;
+                }
+                else
+                {
+                    rowidx = -1;
+                }
+            }
+
+            offsety = 0;
+            
+            for (int i = 0; i < _gridCols; i++)
+            {
+                offsety += _colWidths[i];
+
+                if (_curMouseX + _gridXShift < offsety)
+                {
+                    colidx = i;
+                    break;
+                }
+                else
+                {
+                    colidx = -1;
+                }
+            }
             
             //GridHoverItem temp = TheItemUnderTheMouse;
             
-            //Console.WriteLine("X: " + _curMouseX + " Y: " + _curMouseY);
+            //Console.WriteLine("X: " + colidx + " Y: " + rowidx);
 
+            if (rowidx > -1 && colidx > -1)
+            {
+                // we are actually over something so lets hydrate the something
+                
+                TheItemUnderTheMouse.rowID = rowidx;
+                TheItemUnderTheMouse.colID = colidx;
+                TheItemUnderTheMouse.ItemUnderMouse = _items[rowidx];
+                
+                TheItemUnderTheMouse.cellContent = "";
+
+                if (Items.Count > 0)
+                {
+                    object theitem = TheItemUnderTheMouse.ItemUnderMouse; //this.items[this.TheItemUnderTheMouse.rowID];
+                    int idx = 0;
+                    foreach (PropertyInfo property in Items[0].GetType().GetProperties())
+                    {
+                        if (idx == TheItemUnderTheMouse.colID)
+                        {
+                            TheItemUnderTheMouse.cellContent =
+                                property.GetValue(Items[TheItemUnderTheMouse.rowID])?.ToString() + "";
+                            break;
+                        }
+
+                        idx++;
+                    }
+                }
+                
+            }
+            else
+            {
+                TheItemUnderTheMouse.rowID = -1;
+                TheItemUnderTheMouse.colID = -1;
+                TheItemUnderTheMouse.ItemUnderMouse = null;
+                TheItemUnderTheMouse.cellContent = "";
+            }
+            
+            
+            /*
             for (int i = _gridYShift; i < _gridRows; i++)
             {
                 offsety += _rowHeights[i];
@@ -1041,7 +1114,7 @@ namespace DirOpusReImagined
 
                     idx++;
                 }
-            }
+            }*/
         }
 
         public void TestPopulate()
@@ -1333,8 +1406,12 @@ namespace DirOpusReImagined
            
             if (_showCrossHairs && TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
             {
-                //TheItemUnderTheMouseLast = null;
-                ReRender();
+                if (TheItemUnderTheMouse.rowID > -1)
+                {
+                    //TheItemUnderTheMouseLast = null;
+                    Console.WriteLine("OldRow: " + TheItemUnderTheMouseLast.rowID + " NewRow: " + TheItemUnderTheMouse.rowID);
+                    ReRender();
+                }
             }
             
             this.TheItemUnderTheMouseLast.rowID = this.TheItemUnderTheMouse.rowID;
