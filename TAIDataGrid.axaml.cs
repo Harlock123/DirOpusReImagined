@@ -983,8 +983,14 @@ namespace DirOpusReImagined
                         // Figure out the ROW we are on
 
                         //RecalcItemUnderMouse();
+                        
+                        if (TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
+                        {
+                            //TheItemUnderTheMouseLast = TheItemUnderTheMouse;
+                            GridHover?.Invoke(this, TheItemUnderTheMouse);
+                        }
 
-                        GridHover?.Invoke(this, TheItemUnderTheMouse);
+                        //GridHover?.Invoke(this, TheItemUnderTheMouse);
                     
 
                     _suspendRendering = false;
@@ -1417,9 +1423,9 @@ namespace DirOpusReImagined
             if (_showCrossHairs && TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
             {
                 if (TheItemUnderTheMouse.rowID > -1)
-                {
+                { 
                     //TheItemUnderTheMouseLast = null;
-                    Console.WriteLine("OldRow: " + TheItemUnderTheMouseLast.rowID + " NewRow: " + TheItemUnderTheMouse.rowID);
+                    //Console.WriteLine("OldRow: " + TheItemUnderTheMouseLast.rowID + " NewRow: " + TheItemUnderTheMouse.rowID);
                     ReRender();
                 }
             }

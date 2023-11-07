@@ -199,10 +199,11 @@ namespace DirOpusReImagined
                 }
                 
                 ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+                //
                 
                 SetToolTipForGridItem((TaiDataGrid)sender, af);
-                
             }
+            
 
 
         }
@@ -785,17 +786,24 @@ namespace DirOpusReImagined
 
         private void SetToolTipForGridItem(TaiDataGrid grid, AFileEntry item)
         {
-            
-            ToolTip.SetHorizontalOffset(grid,10.0);
-            ToolTip.SetVerticalOffset(grid,10.0);
-            if (item.Typ)
-                ToolTip.SetTip(grid, "Folder: " + item.Name);
-            else
-                ToolTip.SetTip(grid, "File: " + item.Name); 
-            
-            ToolTip.SetIsOpen(grid, true);
+            if (LastFileHovered != null && LastFileHovered.Name == item.Name)
+            {
+                return;
+            }
+            else 
+            {
 
-            LastFileHovered = item;
+                ToolTip.SetHorizontalOffset(grid, 10.0);
+                ToolTip.SetVerticalOffset(grid, 10.0);
+                if (item.Typ)
+                    ToolTip.SetTip(grid, "Folder: " + item.Name);
+                else
+                    ToolTip.SetTip(grid, "File: " + item.Name);
+
+                ToolTip.SetIsOpen(grid, true);
+
+                LastFileHovered = item;
+            }
         }
         
         private void RightToLeftButton_Click(object? sender, RoutedEventArgs e)
