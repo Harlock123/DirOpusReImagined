@@ -778,6 +778,7 @@ namespace DirOpusReImagined
         private void SetToolTipForItem(Button B, ButtonEntry item)
         {
             LastButtonPopupName = B.Name;
+            ToolTip.SetPlacement(B, PlacementMode.Top); // this is a hack to get the tooltip to show up in the right place
             ToolTip.SetHorizontalOffset(B,10.0);
             ToolTip.SetVerticalOffset(B,10.0);
             ToolTip.SetTip(B, item.ToolTip);
@@ -1755,6 +1756,10 @@ namespace DirOpusReImagined
         {
             var it = e.ItemUnderMouse as AFileEntry;
 
+            // Kill the tooltip if any
+            if (sender != null)
+                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+            
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 if (it.Typ)
@@ -1821,6 +1826,11 @@ namespace DirOpusReImagined
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
+            
+            // Kill the tooltip if any
+            if (sender != null)
+                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+            
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 if (it.Typ)
