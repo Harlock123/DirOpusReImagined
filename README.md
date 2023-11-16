@@ -65,13 +65,31 @@ A Sample of this file is shown below
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 		<Button>
+			<Name>LPButton33</Name>
+			<Content>Windows Terminal on Left</Content>
+			<Action>wt</Action>
+			<Args>-d %LPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens a windows terminal in the filder shown on the left panel</ToolTip>
+		</Button>
+		<Button>
+			<Name>LPButton34</Name>
+			<Content>Windows Terminal on Right</Content>
+			<Action>wt</Action>
+			<Args>-d %RPATH%</Args>
+			<Shell>False</Shell>
+			<Window>False</Window>
+			<ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
+		</Button>
+		<Button>
 			<Name>LPButton35</Name>
 			<Content>Terminal on Left</Content>
 			<Action>alacritty</Action>
 			<Args>--working-directory %LPATH%</Args>
 			<Shell>False</Shell>
 			<Window>False</Window>
-			<ToolTip>Opens an alacrittey terminal in the filder shown on the left panel</ToolTip>
+			<ToolTip>Opens an alacritty terminal in the filder shown on the left panel</ToolTip>
 		</Button>
 		<Button>
 			<Name>LPButton36</Name>
@@ -80,7 +98,7 @@ A Sample of this file is shown below
 			<Args>--working-directory %RPATH%</Args>
 			<Shell>False</Shell>
 			<Window>False</Window>
-			<ToolTip>Opens an alacrittey terminal in the filder shown on the right panel</ToolTip>
+			<ToolTip>Opens an alacritty terminal in the filder shown on the right panel</ToolTip>
 		</Button>
 	</Buttons>
 
@@ -107,16 +125,18 @@ A Sample of this file is shown below
 		</DrivePreset>
 		<DrivePreset>
 			<Order>5</Order>
-			<Name>Vols</Name>
-			<Path>/Volumes</Path>
+			<Name>Pics</Name>
+			<Path>$PICTURES</Path>
 		</DrivePreset>
 	</DrivePresets>
 
 	<Executable>
-		<Extensions>EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
+		<Extensions>
+			EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
 			PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
 			AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
-			CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN</Extensions>
+			CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN
+		</Extensions>
 	</Executable>
 
 	<Images>
