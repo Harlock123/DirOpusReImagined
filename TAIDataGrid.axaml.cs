@@ -553,6 +553,29 @@ namespace DirOpusReImagined
 
         #region Public Methods
 
+        /// <summary>
+        /// The ReRender() method is responsible for redrawing the entire grid component on 
+        /// the UI. It engages only when a canvas is available and rendering is not suspended.
+        /// 
+        /// The rendering process starts by clearing existing elements from the canvas. Next, 
+        /// it handles grid title rendering if a title is provided. The rendered title will vary 
+        /// in dimensions and styles based on the necessary grid properties. 
+        /// 
+        /// The method then computes the width and height for each cell in the grid, and can
+        /// autosize the cells based on the AutosizeCellsToContents property. The grid header
+        /// row is then rendered with each header stylized according to specific properties.
+        /// 
+        /// After this, the method proceeds to render the data rows of the grid. Depending on
+        /// states like selected or highlighted, different styles or colors may be applied
+        /// to the row cells.
+        ///
+        /// The method also handles possible triggering of GridHover event when the mouse pointer
+        /// has moved to a different grid cell.
+        /// 
+        /// Throughout this entire process, any exceptions thrown during rendering are caught and 
+        /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions
+        /// are logged for debugging purposes.
+        /// </summary>
         public void ReRender()
         {
             try
@@ -1004,6 +1027,50 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Function name: RecalcItemUnderMouse
+        /// Purpose: To calculate and store information about the item (or grid cell contents)
+        /// that the mouse is currently hovering over.
+
+        /// Initialize row and column index to -1 
+        /// These will hold the indices of the cell the mouse is over
+
+        /// Initialize a variable "offsety" to accumulate the height or width as we go through
+        /// the rows or columns
+
+        /// Iterate over each row starting from _gridYShift to total _gridRows
+        /// Update y-axis offset by adding the height of current row.
+        /// If the current mouse Y position minus the grid header and title height is less
+        /// than this offset, the mouse is in the current row
+        /// Record row index and break loop
+        /// If not, set row index back to -1 to signify that mouse is not over a row
+
+        /// Now reset y-axis offset to 0 again for processing columns
+
+        /// Iterate over each column from 0 to total _gridCols
+        /// Update y-axis offset by adding the width of the current column.
+        /// If the current mouse X position plus _gridXShift is less than this offset, the mouse
+        /// is in the current col
+        /// Record column index and break loop.
+        /// If not, set column index back to -1 to signify that mouse is not over a column
+
+        /// After both the loops, check if mouse is over a cell in the grid ( both row and column
+        /// indices are not -1 )
+        /// Then set the rowID, colID, and ItemUnderMouse in TheItemUnderTheMouse object
+        /// Initialize cellContent as an empty string
+        /// If there are items
+        /// Loop through properties of the item under the mouse
+        /// If we've hit the index (idx) of TheItemUnderTheMouse.colID, set cellContent to the
+        /// value of current property for the item in the hovered cell
+
+        /// If mouse is not over any cell ( both row and column indices are -1 )
+        /// Then set all properties in TheItemUnderTheMouse object to default values
+
+        /// Note: This method is meant to be called every time the mouse moves to a
+        /// new cell in the grid. The information it stores is then used to provide
+        /// context for other operations (like displaying a tooltip with the cell's
+        /// contents).
+        /// </summary>
         private void RecalcItemUnderMouse()
         {
             int rowidx = -1;
@@ -1154,6 +1221,12 @@ namespace DirOpusReImagined
             ReRender();
         }
 
+        /// <summary>
+        /// In the cases where the Grid contains a series of AFILEENTRY objects
+        /// It will enumerate the selected items and return the first selected
+        /// such item that is a folder objects name, If no folder is selected
+        /// will return an empty string ""
+        /// </summary>
         public string GetFirstSelectedFolder()
         {
             string result = "";
@@ -1172,6 +1245,13 @@ namespace DirOpusReImagined
             return result;
         }
 
+        /// <summary>
+        /// Will enumerate the selected items and return a list of each selected items
+        /// that is a file object. If no files are selected will return an empty list
+        /// </summary>
+        /// <returns>
+        /// List<AFileEntry>
+        /// </returns>
         public List<AFileEntry> GetListOfSelectedFiles()
         {
             List<AFileEntry> result = new List<AFileEntry>();
