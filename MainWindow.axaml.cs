@@ -144,6 +144,9 @@ namespace DirOpusReImagined
 
             }
 
+            RPgrid.TruncateColumnLength = 30;
+            LPgrid.TruncateColumnLength = 30;
+
             RPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
             LPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
 
@@ -168,10 +171,12 @@ namespace DirOpusReImagined
            
             if (LPpath.Text != null) 
                 if (chkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, 
+                        chkShowHidden.IsChecked != null && chkShowHidden.IsChecked.Value);
             if (RPpath.Text != null) 
                 if (chkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, chkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, 
+                        chkShowHidden.IsChecked != null && chkShowHidden.IsChecked.Value);
            
             WireUpButtonHandlers();
 
@@ -203,9 +208,7 @@ namespace DirOpusReImagined
                 
                 SetToolTipForGridItem((TaiDataGrid)sender, af);
             }
-            
-
-
+    
         }
 
         private void PopulateTheButtons()
