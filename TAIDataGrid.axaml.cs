@@ -18,90 +18,313 @@ using System.Threading.Tasks;
 
 namespace DirOpusReImagined
 {
+    /// <summary>
+    /// Represents a data grid control for Avalonia.
+    /// </summary>
     public partial class TaiDataGrid : UserControl
     {
         #region Private Variables
 
+        /// <summary>
+        /// The title of the grid control for Avalonia.
+        /// </summary>
         private string _gridTitle = "The Grid Control for Avalonia";
+
+        /// <summary>
+        /// The font size for the grid title.
+        /// </summary>
         private int _gridTitleFontSize = 20;
+
+        /// The height of the grid title.
+        /// /
         private int _gridTitleHeight = 10;
+
+        /// <summary>
+        /// The size of the line label.
+        /// </
         private int _theLineLabelSize = 10;
+
+        /// The size of the data label.
+        /// </summary>
         private int _theDataLabelSize = 10;
+
+        /// <summary>
+        /// Represents the brush used as the background for a grid.
+        /// </summary>
         private IBrush _gridBackground = Brushes.Cornsilk;
+
+        /// <summary>
+        /// Gets or sets the brush used to draw the outline of a grid cell.
+        /// </summary>
         private IBrush _gridCellOutline = Brushes.Black;
+
+        /// <summary>
+        /// The brush used to color the content of a grid cell.
+        /// </summary
         private IBrush _gridCellContentBrush = Brushes.Black;
+
+        /// <summary>
+        /// Represents the brush used to fill the cells of a grid.
+        /// </summary>
         private IBrush _gridCellBrush = Brushes.Wheat;
 
+        /// <summary>
+        /// The brush used to highlight the background color of a grid cell.
+        /// </summary>
         private IBrush _gridCellHighlightBrush = Brushes.LightBlue;
+
+        /// <summary>
+        /// The brush used to color the selected item in a grid.
+        /// </summary
         private IBrush _gridSelectedItemBrush = Brushes.AliceBlue;
+
+        /// <summary>
+        /// Brush used to highlight the content of a grid cell.
+        /// </summary>
         private IBrush _gridCellHighlightContentBrush = Brushes.Black;
 
+        /// <summary>
+        /// The brush used for the title of the grid.
+        /// </summary>
         private IBrush _gridTitleBrush = Brushes.White;
+
+        /// <summary>
+        /// The brush used to paint the headers of the grid.
+        /// </summary>
         private IBrush _gridHeaderBrush = Brushes.DarkBlue;
+
+        /// <summary>
+        /// Background color of the grid title.
+        /// </summary>
         private IBrush _gridTitleBackground = Brushes.Blue;
+
+        /// <summary>
+        /// Represents the background brush used for the grid header.
+        /// </summary>
         private IBrush _gridHeaderBackground = Brushes.Cyan;
+
+        /// <summary>
+        /// Represents the typeface used for the grid titles.
+        /// </summary>
         private Typeface _gridTitleTypeface = new Typeface("Arial", FontStyle.Normal, FontWeight.Bold);
+
+        /// <summary>
+        /// Represents the Typeface used for grid header in the application.
+        /// </summary>
         private Typeface _gridHeaderTypeface = new Typeface("Arial");
+
+        /// <summary>
+        /// The variable _gridTypeface is of type Typeface and is used to define the typeface or font used for the grid.
+        /// </summary
         private Typeface _gridTypeface = new Typeface("Arial");
+
+        /// <summary>
+        /// The font size of the header in the grid.
+        /// </summary>
+        /// <remarks>
+        /// This variable represents the font size in points (pt) used for the header in the grid.
+        /// The default value is 14.
+        /// </remarks>
         private int _gridheaderFontSize = 14;
+
+        /// <summary>
+        /// Represents the font size for the grid
+        /// </summary>
+        /// <remarks>
+        /// This private variable holds the font size value for the grid.
+        /// The default value is 12.
+        /// </remarks>
         private int _gridFontSize = 12;
 
+        /// <summary>
+        /// Whether or not to show the crosshairs.
+        /// </summary>
         private bool _showCrossHairs = true;
+
+        /// <summary>
+        /// Represents the brush used for drawing the crosshair.
+        /// </summary>
         private IBrush _crossHairBrush = Brushes.Red;
 
+        /// <summary>
+        /// Represents the width of the grid.
+        /// </summary>
         private int _gridWidth = 800;
+
+        /// <summary>
+        /// The height of the grid in pixels.
+        /// </summary>
         private int _gridHeight = 300;
 
+        /// <summary>
+        /// Represents the number of pixels by which the grid is shifted along the x-axis.
+        /// </summary>
         private int _gridXShift;
+
+        /// <summary>
+        /// Represents the shift of the grid in the Y-direction.
+        /// </summary>
         private int _gridYShift;
 
+        /// <summary>
+        /// Represents the last known position of an object.
+        /// </summary>
         private Point _lastPosition;
 
+        /// <summary>
+        /// The current X coordinate of the mouse cursor.
+        /// </summary>
         private int _curMouseX;
+
+        /// <summary>
+        /// Represents the current Y-coordinate of the mouse. </summary>
+        /// <value>
+        /// The current Y-coordinate of the mouse. </value>
+        /// /
         private int _curMouseY;
+
+        /// <summary>
+        /// Represents the current mouse row.
+        /// </summary>
         private int _curMouseRow;
+
+        /// <summary>
+        /// Represents the current column position of the mouse cursor.
+        /// </summary>
         private int _curMouseCol;
+
+        /// <summary>
+        /// Indicates whether the mouse pointer is in control of a specific control.
+        /// </summary>
         private bool _mouseInControl;
+
+        /// <summary>
+        /// The scroll multiplier determines the rate at which scrolling occurs.
+        /// </summary>
         private int _scrollMultiplier = 3;
+
+        /// <summary>
+        /// This variable indicates whether the rendering is currently suspended.
+        /// </summary>
         private bool _suspendRendering;
+
+        /// <summary>
+        /// Determines whether the cells in a container should automatically adjust their size to fit the content.
+        /// </summary>
         private bool _autosizeCellsToContents = true;
 
+        /// <summary>
+        /// Flag indicating whether the object should be populated with test data.
+        /// </summary>
         private bool _populateWithTestData;
 
+        /// <summary>
+        /// The height of the header and title in the grid.
+        /// </summary>
         private int _gridHeaderAndTitleHeight;
 
 
+        /// <summary>
+        /// Represents a list of objects stored in the private variable _items.
+        /// </summary>
         private List<object> _items = new List<object>();
+
+        /// <summary>
+        /// The selected items stored in a list.
+        /// </summary>
         private List<object> _selecteditems = new List<object>();
 
+        /// <summary>
+        /// Represents an array of column widths.
+        /// </summary>
         private int[] _colWidths;
+
+        /// <summary>
+        /// Represents an array of integers that stores the heights of rows.
+        /// </summary>
         private int[] _rowHeights;
 
+        /// <summary>
+        /// Represents the number of grid rows.
+        /// </summary>
         private int _gridRows;
+
+        /// <summary>
+        /// The number of columns in the grid.
+        /// </summary>
         private int _gridCols;
 
+        /// <summary>
+        /// Represents the item currently being hovered over by the mouse cursor.
+        /// </summary
         private object _itemUnderMouse = null;
 
+        /// <summary>
+        /// Indicates whether the current context is in design mode.
+        /// </summary>
         private bool _inDesignMode;
 
+        /// <summary>
+        /// Represents the item currently under the mouse cursor on a grid.
+        /// </summary>
         public GridHoverItem TheItemUnderTheMouse = new GridHoverItem();
+
+        /// <summary>
+        /// Represents the last item that was being hovered by the mouse in a grid.
+        /// </summary>
         public GridHoverItem TheItemUnderTheMouseLast = new GridHoverItem();
 
+        /// <summary>
+        /// The double-click timer used to determine if a double-click event has occurred.
+        /// </summary>
         private DispatcherTimer _doubleClickTimer;
+
+        /// <summary>
+        /// The private variable used to keep track of the number of clicks.
+        /// </summary>
         private int _clickCounter;
 
+        /// <summary>
+        /// Represents a check mark bitmap used for marking a selection or completion.
+        /// </summary>
         private Bitmap _checkMark;
+
+        /// <summary>
+        /// Represents a private variable storing a red "X" bitmap.
+        /// </summary>
         private Bitmap _redX;
+
+        /// <summary>
+        /// Represents a private member variable of type Bitmap, used to store an image of a folder.
+        /// </summary>
         private Bitmap _folder;
+
+        /// <summary>
+        /// Represents a private variable holding a Bitmap object.
+        /// </summary>
         private Bitmap _file;
 
+        /// <summary>
+        /// The private list of integers used to store the columns to justify in a table.
+        /// </summary
         private List<int> _justifyColumns = new List<int>();
 
+        /// <summary>
+        /// This private variable is a list of integers that stores the column indices to be truncated.
+        /// </summary>
         private List<int> _truncateColumns = new List<int>();
+
+        /// <summary>
+        /// The maximum number of characters for truncating a column in a data table.
+        /// </summary>
         private int _truncateColumnLength = 30;
         #endregion
 
         #region Constructor
+
+        /// Constructor for TaiDataGrid class.
+        /// Initializes the component and sets the initial properties of the data grid.
+        /// /
         public TaiDataGrid()
         {
             InitializeComponent();
@@ -145,6 +368,15 @@ namespace DirOpusReImagined
         #region Properties
 
         // this is the title of the grid
+        /// <summary>
+        /// Gets or sets the title for the grid control.
+        /// </summary>
+        /// <value>
+        /// The title for the grid control.
+        /// </value>
+        /// <remarks>
+        /// The default value for the <see cref="GridTitle"/> property is "The Grid Control for Avalonia".
+        /// </remarks>
         [DefaultValue("The Grid Control for Avalonia")]
         public string GridTitle
         {
@@ -157,6 +389,16 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid title
+        /// <summary>
+        /// Gets or sets the font size of the grid title.
+        /// </summary>
+        /// <value>
+        /// The font size of the grid title.
+        /// </value>
+        /// <remarks>
+        /// The default value is 20.
+        /// Changing the font size will trigger a re-rendering of the grid.
+        /// </remarks>
         [DefaultValue(20)]
         public int GridTitleFontSize
         {
@@ -169,6 +411,9 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid headers (column names)
+        /// <summary>
+        /// Gets or sets the font size of the header in the grid.
+        /// </summary>
         [DefaultValue(14)]
         public int GridHeaderFontSize
         {
@@ -181,6 +426,12 @@ namespace DirOpusReImagined
         }
 
         // this is the font size for the grid contents
+        /// <summary>
+        /// Gets or sets the font size of the grid.
+        /// </summary>
+        /// <value>
+        /// The font size of the grid.
+        /// </value>
         [DefaultValue(12)]
         public int GridFontSize
         {
@@ -205,6 +456,12 @@ namespace DirOpusReImagined
         }
 
         // this is the brush used to render the Grid Background
+        /// <summary>
+        /// Gets or sets the background brush for the grid.
+        /// </summary>
+        /// <value>
+        /// The background brush for the grid.
+        /// </value>
         [DefaultValue("Cornsilk")]
         public IBrush GridBackground
         {
@@ -217,6 +474,11 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grid title font
+        /// Gets or sets the brush used for the title of the grid.
+        /// </summary>
+        /// <value>
+        /// The brush used for the title of the grid. The default value is "White".
+        /// </value>
         [DefaultValue("White")]
         public IBrush GridTitleBrush
         {
@@ -229,6 +491,16 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grids title background
+        /// <summary>
+        /// Gets or sets the background color for the title of the grid.
+        /// </summary>
+        /// <value>
+        /// The background color of the grid title.
+        /// </value>
+        /// <remarks>
+        /// The default value is "Blue".
+        /// The title background color will be updated automatically when the property value is set.
+        /// </remarks
         [DefaultValue("Blue")]
         public IBrush GridTitleBackground
         {
@@ -241,6 +513,12 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grids headers (column names)
+        /// <summary>
+        /// Gets or sets the brush used for the header of the grid.
+        /// </summary>
+        /// <remarks>
+        /// The default value is "DarkBlue".
+        /// </remarks>
         [DefaultValue("DarkBlue")]
         public IBrush GridHeaderBrush
         {
@@ -253,6 +531,12 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to fill the grid header
+        /// <summary>
+        /// Gets or sets the background brush of the grid header.
+        /// </summary>
+        /// <value>
+        /// The background brush of the grid header.
+        /// </value>
         [DefaultValue("Cyan")]
         public IBrush GridHeaderBackground
         {
@@ -265,6 +549,15 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to outline the grid cells
+        /// <summary>
+        /// Gets or sets the outline color of a grid cell.
+        /// </summary>
+        /// <value>
+        /// The outline color of a grid cell. The default value is "Black".
+        /// </value>
+        /// <remarks>
+        /// This property specifies the color of the outline when rendering a grid cell.
+        /// </remarks
         [DefaultValue("Black")]
         public IBrush GridCellOutline
         {
@@ -277,6 +570,12 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to fill the grid cells
+        /// <summary>
+        /// Gets or sets the brush used for rendering the grid cell.
+        /// </summary>
+        /// <remarks>
+        /// The default value is "Wheat".
+        /// </remarks>
         [DefaultValue("Wheat")]
         public IBrush GridCellBrush
         {
@@ -289,6 +588,15 @@ namespace DirOpusReImagined
         }
 
         // Hovering over a cell will highlight its background with this brush
+        /// <summary>
+        /// Gets or sets the brush used to highlight the grid cell.
+        /// </summary>
+        /// <value>
+        /// The brush used to highlight the grid cell.
+        /// </value>
+        /// <remarks>
+        /// The default value is "LightBlue".
+        /// </remarks>
         [DefaultValue("LightBlue")]
         public IBrush GridCellHighlightBrush
         {
@@ -301,6 +609,12 @@ namespace DirOpusReImagined
         }
 
         // Hovering over a cell will highlight its content with this brush
+        /// <summary>
+        /// Gets or sets the brush used to highlight the content of a grid cell.
+        /// </summary>
+        /// <value>
+        /// The brush used to highlight the content of a grid cell. The default value is "Black".
+        /// </value>
         [DefaultValue("Black")]
         public IBrush GridCellHighlightContentBrush
         {
@@ -313,6 +627,12 @@ namespace DirOpusReImagined
         }
 
         // SelectedItems in the grid will be highlighted with this brush
+        /// <summary>
+        /// Gets or sets the brush used to highlight the selected item in the grid.
+        /// </summary>
+        /// <value>
+        /// The brush used to highlight the selected item in the grid. The default value is "AliceBlue".
+        /// </value>
         [DefaultValue("AliceBlue")]
         public IBrush GridSelectedItemBrush
         {
@@ -325,6 +645,12 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid title
+        /// <summary>
+        /// Gets or sets the typeface for the grid title.
+        /// </summary>
+        /// <value>
+        /// The typeface for the grid title. The default value is "Arial, 12, Normal, Normal".
+        /// </value
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTitleTypeface
         {
@@ -337,6 +663,12 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid contents
+        /// <summary>
+        /// Gets or sets the typeface used for rendering the grid.
+        /// </summary>
+        /// <remarks>
+        /// The default value is "Arial, 12, Normal, Normal".
+        /// </remarks>
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTypeface
         {
@@ -349,6 +681,13 @@ namespace DirOpusReImagined
         }
 
         // this is the font definition for the grid header
+        /// <summary>
+        /// Gets or sets the typeface for the grid header.
+        /// </summary>
+        /// <value>
+        /// The typeface for the grid header.
+        /// The default value is "Arial, 14, Normal, Normal".
+        /// </value>
         [DefaultValue("Arial, 14, Normal, Normal")]
         public Typeface GridHeaderTypeface
         {
@@ -361,6 +700,9 @@ namespace DirOpusReImagined
         }
 
         // This is the data that will be displayed in the grid
+        /// <summary>
+        /// Gets or sets the list of items.
+        /// </summary>
         [DefaultValue(null)]
         public List<object> Items
         {
@@ -382,6 +724,8 @@ namespace DirOpusReImagined
         }
 
         // This is the data that will be displayed in the grid as selected rows
+        /// Gets or sets the selected items in the list.
+        /// @value {List<object>} The items to be selected.
         [DefaultValue(null)]
         public List<object> SelectedItems 
         {   
@@ -394,6 +738,15 @@ namespace DirOpusReImagined
         }
 
         // Flag to enable or disable rendering the grid
+        /// <summary>
+        /// Gets or sets a value indicating whether rendering is suspended.
+        /// </summary>
+        /// <remarks>
+        /// When <c>true</c>, rendering is suspended and no further rendering will be performed until <see cref="SuspendRendering"/> is set to <c>false</c>.
+        /// </remarks>
+        /// <value>
+        /// <c>true</c> if rendering is suspended; otherwise, <c>false</c>.
+        /// </value>
         [DefaultValue(false)]
         public bool SuspendRendering
         {
@@ -406,6 +759,14 @@ namespace DirOpusReImagined
         }
 
         // Flag to enable or disable autosizing the cells to the contents
+        /// <summary>
+        /// Gets or sets a value indicating whether the cells in the property will automatically adjust their size to fit their contents.
+        /// </summary>
+        /// <remarks>
+        /// The default value is true.
+        /// When set to true, the cells in the property will automatically adjust their size to fit the content within them.
+        /// When set to false, the cells will not resize automatically and the content might be truncated if it does not fit within the cell boundaries.
+        /// </remarks>
         [DefaultValue(true)]
         public bool AutosizeCellsToContents
         {
@@ -418,6 +779,15 @@ namespace DirOpusReImagined
         }
 
         // The width of the grid in Pixels
+        /// <summary>
+        /// Gets or sets the width of the grid.
+        /// </summary>
+        /// <value>
+        /// The width of the grid.
+        /// </value>
+        /// <remarks>
+        /// The default value is 800.
+        /// </remarks>
         [DefaultValue(800)]
         public int GridWidth
         {
@@ -430,6 +800,12 @@ namespace DirOpusReImagined
         }
 
         // The height of the grid in Pixels
+        /// <summary>
+        /// Gets or sets the height of the grid.
+        /// </summary>
+        /// <value>
+        /// The height of the grid.
+        /// </value>
         [DefaultValue(300)]
         public int GridHeight
         {
@@ -442,6 +818,12 @@ namespace DirOpusReImagined
         }
 
         // Boolean to Show or Hide Crosshairs on hovering over a cell
+        /// <summary>
+        /// Gets or sets a value indicating whether the crosshairs are shown.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the crosshairs are shown; otherwise, <c>false</c>.
+        /// </
         [DefaultValue(true)]
         public bool ShowCrossHairs
         {
@@ -454,6 +836,13 @@ namespace DirOpusReImagined
         }
 
         // Boolean to Show or Hide A set of self contained test objects in the grid
+        /// <summary>
+        /// Gets or sets a value indicating whether the property should be populated with test data.
+        /// </summary>
+        /// <remarks>
+        /// When set to <c>true</c>, the property will be populated with test data.
+        /// When set to <c>false</c>, the property will be cleared.
+        /// </remarks>
         [DefaultValue(false)]
         public bool PopulateWithTestData
         {
@@ -477,6 +866,16 @@ namespace DirOpusReImagined
         }
 
         // An accelerator for Mouse Wheel scrolling Operations
+        /// <summary>
+        /// The scroll multiplier property controls how much the scroll wheel increments or decrements the value.
+        /// A higher value will result in a faster scroll movement, while a lower value will result in a slower scroll movement.
+        /// </summary>
+        /// <value>
+        /// The default value for ScrollMultiplier is 3.
+        /// </value>
+        /// <remarks>
+        /// Changing the ScrollMultiplier value will trigger a re-render of the component.
+        /// </remarks>
         [DefaultValue(3)]
         public int ScrollMultiplier
         {
@@ -489,6 +888,12 @@ namespace DirOpusReImagined
         }
 
         // The current row under the mouse
+        /// <summary>Gets or sets the current mouse row position.</summary>
+        /// <value>The current mouse row position.</value>
+        /// <remarks>
+        /// The mouse row position refers to the row index of the mouse pointer within a grid or table.
+        /// By default, the value is set to 0.
+        /// </remarks>
         [DefaultValue(0)]
         public int CurMouseRow
         {
@@ -501,6 +906,15 @@ namespace DirOpusReImagined
         }
 
         // The current column under the mouse   
+        /// <summary>
+        /// Gets or sets the current mouse column.
+        /// </summary>
+        /// <remarks>
+        /// This property represents the column index of the mouse cursor position.
+        /// </remarks>
+        /// <value>
+        /// The current mouse column.
+        /// </value>
         [DefaultValue(0)]
         public int CurMouseCol
         {
@@ -513,6 +927,11 @@ namespace DirOpusReImagined
         }
 
         // list of columns that will need to be right justified
+        /// <summary>
+        /// Gets or sets the list of columns to justify. </summary> <value>
+        /// The list of columns to justify. </value> <remarks>
+        /// When setting the value of this property, it triggers the ReRender method to update the rendering of the control. </remarks> <seealso cref="ReRender"/> <seealso cref="DefaultValueAttribute"/>
+        /// /
         [DefaultValue(null)]
         public List<int> JustifyColumns
         {
@@ -525,6 +944,18 @@ namespace DirOpusReImagined
         }
 
         // list of columns that will need to be truncated at truncatecolumnlength
+        /// <summary>
+        /// Gets or sets the list of columns that should be truncated.
+        /// </summary>
+        /// <value>
+        /// The list of columns that should be truncated.
+        /// </value>
+        /// <remarks>
+        /// This property is used to specify the columns that should have their contents truncated.
+        /// Truncation means that the contents of the columns will be cut off after a certain number of characters.
+        /// When setting this property, the <see cref="ReRender"/> method is called to update the rendering of the control.
+        /// The default value is null.
+        /// </remarks>
         [DefaultValue(null)]
         public List<int> TruncateColumns
         {
@@ -538,6 +969,15 @@ namespace DirOpusReImagined
 
         // The number of characters that columns that are being truncated
         // will be truncated at
+        /// <summary>
+        /// Gets or sets the length at which a column should be truncated.
+        /// </summary>
+        /// <remarks>
+        /// The default value for this property is 30. Setting this property will automatically trigger a re-rendering of the column.
+        /// </remarks>
+        /// <value>
+        /// The length at which a column should be truncated.
+        /// </value>
         [DefaultValue(30)]
         public int TruncateColumnLength
         {
@@ -554,65 +994,58 @@ namespace DirOpusReImagined
         #region Public Methods
 
         /// <summary>
-        /// The ReRender() method is responsible for redrawing the entire grid component on 
-        /// the UI. It engages only when a canvas is available and rendering is not suspended.
-        /// 
-        /// The rendering process starts by clearing existing elements from the canvas. Next, 
-        /// it handles grid title rendering if a title is provided. The rendered title will vary 
-        /// in dimensions and styles based on the necessary grid properties. 
-        /// 
-        /// The method then computes the width and height for each cell in the grid, and can
-        /// autosize the cells based on the AutosizeCellsToContents property. The grid header
-        /// row is then rendered with each header stylized according to specific properties.
-        /// 
-        /// After this, the method proceeds to render the data rows of the grid. Depending on
-        /// states like selected or highlighted, different styles or colors may be applied
-        /// to the row cells.
-        ///
-        /// The method also handles possible triggering of GridHover event when the mouse pointer
-        /// has moved to a different grid cell.
-        /// 
-        /// Throughout this entire process, any exceptions thrown during rendering are caught and 
-        /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions
-        /// are logged for debugging purposes.
-        /// </summary>
+        /// The ReRender() method is responsible for redrawing the entire grid component on the UI.
+        /// It engages only when a canvas is available and rendering is not suspended.
+        /// The rendering process starts by clearing existing elements from the canvas. Next, it handles
+        /// grid title rendering if a title is provided. The rendered title will vary in dimensions and
+        /// styles based on the necessary grid properties.
+        /// The method then computes the width and height for each cell in the grid, and can autosize the
+        /// cells based on the AutosizeCellsToContents property. The grid header row is then rendered with
+        /// each header stylized according to specific properties.
+        /// After this, the method proceeds to render the data rows of the grid. Depending on states like
+        /// selected or highlighted, different styles or colors may be applied to the row cells.
+        /// The method also handles possible triggering of GridHover event when the mouse pointer has moved
+        /// to a different grid cell.
+        /// Throughout this entire process, any exceptions thrown during rendering are caught and
+        /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions are
+        /// logged for debugging purposes.
+        /// </summary
         public void ReRender()
         {
             try
             {
-
                 if (TheCanvas != null && !_suspendRendering)
                 {
                     // the canvas exists so lets render the grid
 
                     // clear the canvas
-                    
+
                     _suspendRendering = true;
-                    
-                        TheCanvas.Children.Clear();
 
-                        _gridHeaderAndTitleHeight = 0;
+                    TheCanvas.Children.Clear();
 
-                        #region Render Title
+                    _gridHeaderAndTitleHeight = 0;
 
-                        if (GridTitle != String.Empty)
+                    #region Render Title
+
+                    if (GridTitle != String.Empty)
+                    {
+                        var formattedText =
+                            new FormattedText(GridTitle, CultureInfo.CurrentCulture,
+                                FlowDirection.LeftToRight, GridTitleTypeface, GridTitleFontSize,
+                                GridTitleBrush);
+
+                        Rectangle rr = new Rectangle();
+                        rr.Width = TheCanvas.Width;
+                        //rr.Height = formattedText.Height;
+
+                        if (GridTitleHeight < formattedText.Height)
                         {
-                            var formattedText =
-                                new FormattedText(GridTitle, CultureInfo.CurrentCulture,
-                                    FlowDirection.LeftToRight, GridTitleTypeface, GridTitleFontSize,
-                                    GridTitleBrush);
-
-                            Rectangle rr = new Rectangle();
-                            rr.Width = TheCanvas.Width;
-                            //rr.Height = formattedText.Height;
-
-                            if (GridTitleHeight < formattedText.Height)
-                            {
-                                rr.Height = formattedText.Height;
-                                _gridTitleHeight = (int)formattedText.Height;
-                                _gridHeaderAndTitleHeight = _gridTitleHeight;
-                            }
-                            else
+                            rr.Height = formattedText.Height;
+                            _gridTitleHeight = (int)formattedText.Height;
+                            _gridHeaderAndTitleHeight = _gridTitleHeight;
+                        }
+                        else
                             {
                                 rr.Height = GridTitleHeight;
 
@@ -1031,29 +1464,23 @@ namespace DirOpusReImagined
         /// Function name: RecalcItemUnderMouse
         /// Purpose: To calculate and store information about the item (or grid cell contents)
         /// that the mouse is currently hovering over.
-
-        /// Initialize row and column index to -1 
+        /// Initialize row and column index to -1
         /// These will hold the indices of the cell the mouse is over
-
         /// Initialize a variable "offsety" to accumulate the height or width as we go through
         /// the rows or columns
-
         /// Iterate over each row starting from _gridYShift to total _gridRows
         /// Update y-axis offset by adding the height of current row.
         /// If the current mouse Y position minus the grid header and title height is less
         /// than this offset, the mouse is in the current row
         /// Record row index and break loop
         /// If not, set row index back to -1 to signify that mouse is not over a row
-
         /// Now reset y-axis offset to 0 again for processing columns
-
         /// Iterate over each column from 0 to total _gridCols
         /// Update y-axis offset by adding the width of the current column.
         /// If the current mouse X position plus _gridXShift is less than this offset, the mouse
         /// is in the current col
         /// Record column index and break loop.
         /// If not, set column index back to -1 to signify that mouse is not over a column
-
         /// After both the loops, check if mouse is over a cell in the grid ( both row and column
         /// indices are not -1 )
         /// Then set the rowID, colID, and ItemUnderMouse in TheItemUnderTheMouse object
@@ -1062,10 +1489,8 @@ namespace DirOpusReImagined
         /// Loop through properties of the item under the mouse
         /// If we've hit the index (idx) of TheItemUnderTheMouse.colID, set cellContent to the
         /// value of current property for the item in the hovered cell
-
         /// If mouse is not over any cell ( both row and column indices are -1 )
         /// Then set all properties in TheItemUnderTheMouse object to default values
-
         /// Note: This method is meant to be called every time the mouse moves to a
         /// new cell in the grid. The information it stores is then used to provide
         /// context for other operations (like displaying a tooltip with the cell's
@@ -1075,9 +1500,9 @@ namespace DirOpusReImagined
         {
             int rowidx = -1;
             int colidx = -1;
-            
+
             int offsety = 0;
-            
+
             for (int i = _gridYShift; i < _gridRows; i++)
             {
                 offsety += _rowHeights[i];
@@ -1094,7 +1519,7 @@ namespace DirOpusReImagined
             }
 
             offsety = 0;
-            
+
             for (int i = 0; i < _gridCols; i++)
             {
                 offsety += _colWidths[i];
@@ -1109,19 +1534,19 @@ namespace DirOpusReImagined
                     colidx = -1;
                 }
             }
-            
+
             //GridHoverItem temp = TheItemUnderTheMouse;
-            
+
             //Console.WriteLine("X: " + colidx + " Y: " + rowidx);
 
             if (rowidx > -1 && colidx > -1)
             {
                 // we are actually over something so lets hydrate the something
-                
+
                 TheItemUnderTheMouse.rowID = rowidx;
                 TheItemUnderTheMouse.colID = colidx;
                 TheItemUnderTheMouse.ItemUnderMouse = _items[rowidx];
-                
+
                 TheItemUnderTheMouse.cellContent = "";
 
                 if (Items.Count > 0)
@@ -1140,7 +1565,6 @@ namespace DirOpusReImagined
                         idx++;
                     }
                 }
-                
             }
             else
             {
@@ -1200,11 +1624,17 @@ namespace DirOpusReImagined
             }*/
         }
 
+        /// <summary>
+        /// This method is used to test the PopulateTestData method.
+        /// </summary
         public void TestPopulate()
         {
             PopulateTestData();
         }
 
+        /// <summary>
+        /// Clears the children of TheCanvas, clears the _items collection, and triggers a re-render of the canvas.
+        /// </summary>
         public void ClearTestPopulate()
         {
             TheCanvas.Children.Clear();
@@ -1212,6 +1642,11 @@ namespace DirOpusReImagined
             ReRender();
         }
 
+        /// <summary>
+        /// SetGridSize method sets the width and height of the canvas and the control itself based on the specified width and height values.
+        /// </summary>
+        /// <param name="width">The desired width of the canvas</param>
+        /// <param name="height">The desired height of the canvas</param>
         public void SetGridSize(int width, int height)
         {
             TheCanvas.Width = width;
@@ -1222,20 +1657,19 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
-        /// In the cases where the Grid contains a series of AFILEENTRY objects
-        /// It will enumerate the selected items and return the first selected
-        /// such item that is a folder objects name, If no folder is selected
-        /// will return an empty string ""
+        /// Retrieves the name of the first selected folder from a grid containing AFILEENTRY objects.
+        /// If no folder is selected, an empty string is returned.
         /// </summary>
+        /// <returns>The name of the first selected folder, or an empty string if no folder is selected.</returns>
         public string GetFirstSelectedFolder()
         {
             string result = "";
 
-            foreach(AFileEntry item in SelectedItems)
+            foreach (AFileEntry item in SelectedItems)
             {
                 //var item = i.ItemUnderMouse as AFileEntry;
 
-                if ( item.Typ)
+                if (item.Typ)
                 {
                     result = item.Name;
                     break;
@@ -1249,9 +1683,7 @@ namespace DirOpusReImagined
         /// Will enumerate the selected items and return a list of each selected items
         /// that is a file object. If no files are selected will return an empty list
         /// </summary>
-        /// <returns>
-        /// List<AFileEntry>
-        /// </returns>
+        /// <returns>A list of file objects</returns>
         public List<AFileEntry> GetListOfSelectedFiles()
         {
             List<AFileEntry> result = new List<AFileEntry>();
@@ -1269,6 +1701,9 @@ namespace DirOpusReImagined
             return result;
         }
 
+        /// <summary>
+        /// Selects all files only by adding them to the SelectedItems collection.
+        /// </summary>
         public void SelectAllFilesOnly()
         {
             SelectedItems.Clear();
@@ -1283,7 +1718,10 @@ namespace DirOpusReImagined
 
             ReRender();
         }
-        
+
+        /// <summary>
+        /// Clears the selected items and selects only the folders from the list of items.
+        /// </summary>
         public void SelectAllFoldersOnly()
         {
             SelectedItems.Clear();
@@ -1303,6 +1741,9 @@ namespace DirOpusReImagined
 
         #region Private methods
 
+        /// <summary>
+        /// Populates test data in the canvas.
+        /// </summary>
         private void PopulateTestData()
         {
             TheCanvas.Children.Clear();
@@ -1345,6 +1786,8 @@ namespace DirOpusReImagined
             return schema;
         }
 
+        /// Renders crosshairs on TheCanvas based on the current mouse position.
+        /// If the current mouse position is outside the bounds of TheCanvas, the method returns without doing anything.
         private void RenderCrossHairs()
         {
             if (_curMouseY >= TheCanvas.Height || _curMouseX >= TheCanvas.Width)
@@ -1367,6 +1810,11 @@ namespace DirOpusReImagined
             TheCanvas.Children.Add(l2);
         }
 
+        /// <summary>
+        /// Loads an image asynchronously from a base64 string.
+        /// </summary>
+        /// <param name="base64">The base64 encoded image string.</param>
+        /// <returns>Returns a task that represents the asynchronous loading of the image.</returns
         private async Task<Bitmap> LoadImageAsync(string base64)
         {
             byte[] bytes = Convert.FromBase64String(base64);
@@ -1377,6 +1825,11 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Loads an image from a base64 string.
+        /// </summary>
+        /// <param name="base64">The base64 string representing the image.</param>
+        /// <returns>The loaded image as a <see cref="System.Drawing.Bitmap"/> object.</returns>
         private  Bitmap LoadImage(string base64)
         {
             byte[] bytes = Convert.FromBase64String(base64);
@@ -1391,6 +1844,11 @@ namespace DirOpusReImagined
 
         #region Event Handlers
 
+        /// <summary>
+        /// Handles the event when the pointer wheel is changed.
+        /// </summary>
+        /// <param name="sender">The object that raises the event.</param>
+        /// <param name="e">The event arguments containing information about the pointer wheel change.</param>
         private void OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
         {
             // Your logic here
@@ -1480,6 +1938,11 @@ namespace DirOpusReImagined
             e.Handled = true; // Mark the event as handled to prevent it from bubbling up
         }
 
+        /// <summary>
+        /// Event handler for the pointer moved event.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event arguments containing the pointer information.</param
         private void OnPointerMoved(object sender, PointerEventArgs e)
         {
             // Get the current pointer position relative to the UserControl
@@ -1554,6 +2017,9 @@ namespace DirOpusReImagined
 
         }
 
+        /// Handles the pointer pressed event.
+        /// @param sender The object that raised the event.
+        /// @param e The event arguments containing information about the pointer press.
         private void OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             // Get the current pointer position relative to the UserControl
@@ -1672,6 +2138,11 @@ namespace DirOpusReImagined
 
         }
 
+        /// <summary>
+        /// Event handler for double-click event.
+        /// </summary>
+        /// <param name="sender">The object that triggered the event.</param>
+        /// <param name="e">The event arguments that contain information about the double-click event.</param>
         private void OnDoubleClick(object? sender, PointerPressedEventArgs e)
         {
             // Handle double-click event here
@@ -1684,6 +2155,11 @@ namespace DirOpusReImagined
             //Console.WriteLine("Double-click detected");
         }
 
+        /// <summary>
+        /// Event handler for the <see cref="UIElement.PointerReleased"/> event.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event data.</param>
         private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
         {
             // Get the current pointer position relative to the UserControl
@@ -1692,6 +2168,11 @@ namespace DirOpusReImagined
 
         }
 
+        /// <summary>
+        /// Event handler for when the pointer enters the control.
+        /// </summary>
+        /// <param name="sender">The object that fired the event.</param>
+        /// <param name="e">The event arguments containing information about the pointer.</param>
         private void OnPointerEntered(object sender, PointerEventArgs e)
         {
             //this.ShowCrossHairs = true;
@@ -1702,6 +2183,11 @@ namespace DirOpusReImagined
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Handles the event when the pointer exits the control.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event arguments for the pointer event.</param>
         private void OnPointerExited(object sender, PointerEventArgs e)
         {
             //this.ShowCrossHairs = false;
@@ -1718,6 +2204,11 @@ namespace DirOpusReImagined
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Event handler for the Scroll event of the vertical scroll bar.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">A <see cref="ScrollEventArgs"/> object that contains the event data.</param>
         private void TheVerticleScrollBar_Scroll(object? sender, ScrollEventArgs e)
         {
             _gridYShift = 0;
@@ -1731,6 +2222,18 @@ namespace DirOpusReImagined
             //throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Event handler for the scroll event of the horizontal scroll bar.
+        /// Adjusts the horizontal position of the grid based on the new scroll value.
+        /// </summary>
+        /// <param name="sender">The object that triggered the event.</param>
+        /// <param name="e">The scroll event arguments.</param>
+        /// <remarks>
+        /// This method calculates the maximum horizontal position of the grid by summing up all the column widths.
+        /// It then calculates the new horizontal position based on the percentage of the maximum position
+        /// specified by the new scroll value.
+        /// The horizontal position is then updated and the grid is re-rendered.
+        /// </remarks>
         private void TheHorizontalScrollBar_scroll(object? sender, ScrollEventArgs e)
         {
             if (_items.Count > 0)
@@ -1752,6 +2255,12 @@ namespace DirOpusReImagined
             //throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Event handler for the DoubleClickTimer's Tick event.
+        /// Resets the click counter and stops the DoubleClickTimer.
+        /// </summary>
+        /// <param name="sender">The object that triggered the event.</param>
+        /// <param name="e">The EventArgs containing event data.</param>
         private void DoubleClickTimer_Tick(object? sender, EventArgs e)
         {
             _clickCounter = 0;
@@ -1760,6 +2269,12 @@ namespace DirOpusReImagined
 
         #region Context Menu Handlers
 
+        /// <summary>
+        /// Event handler for when Option1 button is clicked.
+        /// Increases the font size of the grid elements by 1.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">Event arguments for the event.</param>
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
             this.GridFontSize += 1;
@@ -1770,6 +2285,12 @@ namespace DirOpusReImagined
 
         }
 
+        /// <summary>
+        /// Event handler for clicking on Option 2.
+        /// Decreases the font size of the grid, title and header by 1.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void Option2_Click(object sender, RoutedEventArgs e)
         {
             // Implement the action for Option 2
@@ -1786,10 +2307,32 @@ namespace DirOpusReImagined
 
         #region Events Exposed
 
+        /// <summary>
+        /// Event that is triggered when hovering over a grid item.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="GridHover"/> event is raised when the user hovers over an item in the grid.
+        /// You can handle this event to perform certain actions when the user interacts with the grid items in a hover state.
+        /// </remarks>
+        /// <param name="sender">The object that triggered the event.</param>
+        /// <param name="e">An instance of the <see cref="GridHoverItem"/> class containing information about the grid item being hovered.</param>
         public event EventHandler<GridHoverItem> GridHover;
 
+        /// <summary>
+        /// Event triggered when a grid item is double-clicked.
+        /// </summary>
+        /// <remarks>
+        /// This event is raised when a grid item in the user interface is double-clicked.
+        /// </remarks>
+        /// <seealso cref="GridHoverItem"/>
+        /// <seealso cref="EventHandler{TEventArgs}"/>
         public event EventHandler<GridHoverItem> GridItemDoubleClick;
 
+        /// <summary>
+        /// Represents the event that is raised when a grid item is clicked.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">A GridHoverItem object that contains event data.</param>
         public event EventHandler<GridHoverItem> GridItemClick;
 
         #endregion
