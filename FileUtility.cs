@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace DirOpusReImagined
 {
+    /// <summary>
+    /// Provides utility methods for file operations.
+    /// </summary>
     public static class FileUtility
     {
         public static void CopyFileToFolder(string sourceFile, string targetFolder)
@@ -33,6 +36,11 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Copies the contents of a directory to another directory, including subdirectories.
+        /// </summary>
+        /// <param name="sourceDirectory">The path of the source directory to be copied.</param>
+        /// <param name="targetDirectory">The path of the target directory where the contents will be copied.</param>
         public static void CopyDirectoryToFolder(string sourceDirectory, string targetDirectory)
         {
             try
@@ -68,6 +76,12 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Moves a file from the source location to the target directory.
+        /// If the target directory doesn't exist, it will be created.
+        /// </summary>
+        /// <param name="sourceFile">The full path of the file to be moved.</param>
+        /// <param name="targetDirectory">The target directory where the file will be moved to.</param>
         public static void MoveFile(string sourceFile, string targetDirectory)
         {
             try
@@ -93,6 +107,12 @@ namespace DirOpusReImagined
             }
         }
 
+        /// Moves a directory from the source directory to the target directory.
+        /// </summary>
+        /// <param name="sourceDirectory">The path of the directory to be moved.</param>
+        /// <param name="targetDirectory">The path of the target directory where the source directory will be moved to.</param>
+        /// <exception cref="IOException">Thrown if an I/O error occurs while moving the directory.</exception>
+        /// <exception cref="Exception">Thrown if an unexpected error occurs.</exception>
         public static void MoveDirectory(string sourceDirectory, string targetDirectory)
         {
             try
@@ -112,6 +132,11 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Renames a file from the specified old file path to the specified new file path.
+        /// </summary>
+        /// <param name="oldFilePath">The path of the file to be renamed.</param>
+        /// <param name="newFilePath">The new path for the file after renaming.</param>
         public static void RenameFile(string oldFilePath, string newFilePath)
         {
             try
@@ -133,7 +158,12 @@ namespace DirOpusReImagined
                 Console.WriteLine($"Error renaming the file: {ex.Message}");
             }
         }
-        
+
+        /// <summary>
+        /// Renames a directory from the specified old directory path to the specified new directory path.
+        /// </summary>
+        /// <param name="olddir">The path of the directory to be renamed.</param>
+        /// <param name="newdir">The new path for the renamed directory.</param>
         public static void RenameDirectory(string olddir, string newdir)
         {
             try
@@ -162,7 +192,13 @@ namespace DirOpusReImagined
                 //Console.WriteLine($"Error renaming the directory: {ex.Message}");
             }
         }
-        
+
+        /// <summary>
+        /// Replaces double backslashes with single backslashes in the given path.
+        /// Appends a trailing backslash for Windows OS or a trailing forward slash for Unix/MacOSX OS if necessary.
+        /// </summary>
+        /// <param name="path">The original path.</param>
+        /// <returns>The modified path.</returns>
         public static string MakePathENVSafe(string path)
         {
             string result = path.Replace(@"\\", @"\"); // get rid of double backslashes
@@ -191,20 +227,36 @@ namespace DirOpusReImagined
 
         }
 
+        /// <summary>
+        /// Returns the file name without the extension from the specified path.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The file name without the extension.</returns>
         public static string FileNameMinusExtension(string path)
         {
             string result = Path.GetFileNameWithoutExtension(path);
 
             return result;
         }
-        
+
+        /// <summary>
+        /// Gets the extension of a file name from the provided path.
+        /// </summary>
+        /// <param name="path">The path of the file.</param>
+        /// <returns>The extension of the file name.</returns>
         public static string FilenameExtension(string path)
         {
             string result = Path.GetExtension(path);
 
             return result;
         }
-        
+
+        /// <summary>
+        /// Populates a file panel with the directories and files from a specified path.
+        /// </summary>
+        /// <param name="ThePanel">The file panel to populate.</param>
+        /// <param name="PATHNAME">The path name of the directory to populate from.</param>
+        /// <param name="ShowHidden">A boolean value indicating whether to show hidden files.</param>
         public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden)
         {
             //LPgrid.PopulateGrid(PATHNAME);
@@ -338,7 +390,12 @@ namespace DirOpusReImagined
             
             ThePanel.SuspendRendering = false;
         }
-        
+
+        /// <summary>
+        /// Abbreviates the given file attributes and returns the result as a string.
+        /// </summary>
+        /// <param name="attributes">The file attributes to be abbreviated.</param>
+        /// <returns>The abbreviated file attributes as a string.</returns>
         private static string GetAbbreviatedAttributes(FileAttributes attributes)
         {
             string abbreviatedAttributes = string.Empty;
@@ -437,6 +494,10 @@ namespace DirOpusReImagined
             return abbreviatedAttributes.Trim();
         }
 
+        /// <summary>
+        /// Deletes a folder and its contents.
+        /// </summary>
+        /// <param name="rootPath">The root path of the folder to delete.</param>
         public static void DeleteFolder(string rootPath)
         {
             try
@@ -455,6 +516,10 @@ namespace DirOpusReImagined
             
         }
 
+        /// <summary>
+        /// This method deletes a file at the specified root path.
+        /// </summary>
+        /// <param name="rootPath">The root path of the file to be deleted.</param>
         public static void DeleteFile(string rootPath)
         {
             try

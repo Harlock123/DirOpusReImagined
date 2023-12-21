@@ -211,6 +211,10 @@ namespace DirOpusReImagined
     
         }
 
+        /// <summary>
+        /// Populates the buttons in the lower panel.
+        /// reads from the configuration.xml file and populates the buttons
+        /// </summary>
         private void PopulateTheButtons()
         {
             for (int i = 1; i <= 36; i++)
@@ -225,6 +229,10 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Clears the lower buttons by setting their content and tag to null.
+        /// Also clears the content of the DrivePreset buttons.
+        /// </summary>
         private void ClearLowerButtons()
         {
             foreach (Button b in TheLowerPanelButtons)
@@ -245,6 +253,11 @@ namespace DirOpusReImagined
             DrivePreset5b.Content = "";
         }
 
+        /// <summary>
+        /// Handles the click event of the "Rename Left Button".
+        /// @param sender The source of the event.
+        /// @param e The event data.
+        /// </summary>
         private void RenameLeftButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
@@ -280,6 +293,11 @@ namespace DirOpusReImagined
             
         }
 
+        /// <summary>
+        /// Handles the Click event of the RenameRightButton.
+        /// </summary>
+        /// <param name="sender">The object that raises the event.</param>
+        /// <param name="e">The
         private void RenameRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
@@ -315,7 +333,10 @@ namespace DirOpusReImagined
             fi.Show(this);
             
         }
-        
+
+        /// <summary>
+        /// This method wire up the event handlers for the buttons in the UI.
+        /// </summary>
         private void WireUpButtonHandlers()
         {
             #region Click  Handlers
@@ -490,6 +511,9 @@ namespace DirOpusReImagined
             #endregion
         }
 
+        /// <summary>
+        /// Method to handle the Checked event of the ChkShowHidden checkbox. </summary> <param name="sender">The object that raised the event.</param> <param name="e">The RoutedEventArgs containing event data.</param> <returns>Void.</returns>
+        /// /
         private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
         { 
             FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, chkShowHidden.IsChecked.Value);
