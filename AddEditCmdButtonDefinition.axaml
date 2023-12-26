@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
+        Title="AddEditCmdButtonDefinition" Width="800" Height="450">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Add" Click="Add_OnClick" Margin="5"/>
+            <Button Content="Edit" Click="Edit_OnClick" Margin="5" />
+            <Button Content="Delete" Click="Delete_OnClick" Margin="5" />
+        </StackPanel>
+        <ScrollViewer DockPanel.Dock="Left" 
+                      VerticalScrollBarVisibility="Visible"
+                      >
+        <StackPanel Width="140">
+            <Button Name="LPB1" Width="125"  Content="LPBUTTON 1"></Button>
+            <Button Name="LPB2" Width="125"  Content="LPBUTTON 2"></Button>
+            <Button Name="LPB3" Width="125"  Content="LPBUTTON 3"></Button>
+            <Button Name="LPB4" Width="125"  Content="LPBUTTON 4"></Button>
+            <Button Name="LPB5" Width="125"  Content="LPBUTTON 5"></Button>
+            <Button Name="LPB6" Width="125"  Content="LPBUTTON 6"></Button>
+            <Button Name="LPB7" Width="125"  Content="LPBUTTON 7"></Button>
+            <Button Name="LPB8" Width="125"  Content="LPBUTTON 8"></Button>
+            <Button Name="LPB9" Width="125"  Content="LPBUTTON 9"></Button>
+            <Button Name="LPB10" Width="125"  Content="LPBUTTON 10"></Button>
+            <Button Name="LPB11" Width="125"  Content="LPBUTTON 11"></Button>
+            <Button Name="LPB12" Width="125"  Content="LPBUTTON 12"></Button>
+            <Button Name="LPB13" Width="125"  Content="LPBUTTON 13"></Button>
+            <Button Name="LPB14" Width="125"  Content="LPBUTTON 14"></Button>
+            <Button Name="LPB15" Width="125"  Content="LPBUTTON 15"></Button>
+            <Button Name="LPB16" Width="125"  Content="LPBUTTON 16"></Button>
+            <Button Name="LPB17" Width="125"  Content="LPBUTTON 17"></Button>
+            <Button Name="LPB18" Width="125"  Content="LPBUTTON 18"></Button>
+            <Button Name="LPB19" Width="125"  Content="LPBUTTON 19"></Button>
+            <Button Name="LPB20" Width="125"  Content="LPBUTTON 20"></Button>
+            <Button Name="LPB21" Width="125"  Content="LPBUTTON 21"></Button>
+            <Button Name="LPB22" Width="125"  Content="LPBUTTON 22"></Button>
+            <Button Name="LPB23" Width="125"  Content="LPBUTTON 23"></Button>
+            <Button Name="LPB24" Width="125"  Content="LPBUTTON 24"></Button>
+            <Button Name="LPB25" Width="125"  Content="LPBUTTON 25"></Button>
+            <Button Name="LPB26" Width="125"  Content="LPBUTTON 26"></Button>
+            <Button Name="LPB27" Width="125"  Content="LPBUTTON 27"></Button>
+            <Button Name="LPB28" Width="125"  Content="LPBUTTON 28"></Button>
+            <Button Name="LPB29" Width="125"  Content="LPBUTTON 29"></Button>
+            <Button Name="LPB30" Width="125"  Content="LPBUTTON 30"></Button>
+            <Button Name="LPB31" Width="125"  Content="LPBUTTON 31"></Button>
+            <Button Name="LPB32" Width="125"  Content="LPBUTTON 32"></Button>
+            <Button Name="LPB33" Width="125"  Content="LPBUTTON 33"></Button>
+            <Button Name="LPB34" Width="125"  Content="LPBUTTON 34"></Button>
+            <Button Name="LPB35" Width="125"  Content="LPBUTTON 35"></Button>
+            <Button Name="LPB36" Width="125"  Content="LPBUTTON 36"></Button>
+        </StackPanel>
+        </ScrollViewer>
+        <StackPanel Margin="4,0,4,0">
+            <Label 
+                Padding="4" Content="ButtonName" />
+            <TextBox 
+                Padding="4" Text="{Binding SelectedItem.Bname, Mode=TwoWay}"/>
+            <Label 
+                Padding="4" Content="Command To Run"/>
+            <TextBox 
+                Padding="4" Text="{Binding SelectedItem.Bcontent, Mode=TwoWay}"/>
+            <Label
+                Padding="4" Content="Arguments"/>
+            <TextBox 
+                Padding="4" Text="{Binding SelectedItem.Bargs, Mode=TwoWay}"/>
+            <CheckBox 
+                Padding="4" IsChecked="{Binding SelectedItem.ShellExecute, Mode=TwoWay}">Shell Execute</CheckBox>
+            <CheckBox 
+                Padding="4" IsChecked="{Binding SelectedItem.ShowWindow, Mode=TwoWay}">Show Window</CheckBox>
+            <Label 
+                Padding="4" Content="ToolTip"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="140">
+                <TextBox 
+                         Padding="4" 
+                         AcceptsReturn="True" 
+                         TextWrapping="Wrap" 
+                         Text="{Binding SelectedItem.ToolTip, Mode=TwoWay}"/>
+            </ScrollViewer>
+        </StackPanel>
+    </DockPanel>
+</Window>
