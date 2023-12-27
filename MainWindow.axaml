@@ -540,10 +540,5 @@
 					Content="Button 36" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 		</Grid>
-		
-		
-
-
 	</Grid>
-	
 </Window>
