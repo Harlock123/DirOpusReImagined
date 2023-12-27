@@ -39,6 +39,15 @@
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 		<Button>
+			<Name>LPButton31</Name>
+			<Content>Configure Buttons</Content>
+			<Action>%BUTTONCONFIG%</Action>
+			<Args></Args>
+			<Shell>False</Shell>
+			<Window>True</Window>
+			<ToolTip>Calls the Internal Button configure Interface</ToolTip>
+		</Button>
+		<Button>
 			<Name>LPButton33</Name>
 			<Content>Windows Terminal on Left</Content>
 			<Action>wt</Action>

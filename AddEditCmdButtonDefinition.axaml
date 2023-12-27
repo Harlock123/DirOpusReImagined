@@ -2,9 +2,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
-        Title="AddEditCmdButtonDefinition" Width="800" Height="450">
+        Title="AddEditCmdButtonDefinition" Width="800" Height="600">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Add" Click="Add_OnClick" Margin="5"/>
@@ -14,7 +14,7 @@
         <ScrollViewer DockPanel.Dock="Left" 
                       VerticalScrollBarVisibility="Visible"
                       >
-        <StackPanel Width="140">
+        <StackPanel Width="140" Spacing="4">
             <Button Name="LPB1" Width="125"  Content="LPBUTTON 1"></Button>
             <Button Name="LPB2" Width="125"  Content="LPBUTTON 2"></Button>
             <Button Name="LPB3" Width="125"  Content="LPBUTTON 3"></Button>
@@ -55,7 +55,7 @@
         </ScrollViewer>
         <StackPanel Margin="4,0,4,0">
             <Label 
-                Padding="4" Content="ButtonName" />
+                Padding="4" Content="Button Label" />
             <TextBox 
                 Padding="4" Text="{Binding SelectedItem.Bname, Mode=TwoWay}"/>
             <Label 
@@ -66,6 +66,25 @@
                 Padding="4" Content="Arguments"/>
             <TextBox 
                 Padding="4" Text="{Binding SelectedItem.Bargs, Mode=TwoWay}"/>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <StackPanel>
+                    <Label Padding="4" Content="Forground Color"></Label>
+                    <ComboBox Name="cbFOREGROUND" Width="180"></ComboBox>
+                    <Label Padding="4" Content="Background Color"></Label>
+                    <ComboBox Name="cbBACKGROUND" Width="180"></ComboBox>
+                </StackPanel>
+                <StackPanel>
+                    <Label Padding="4" Content="Horizontal Alignment"></Label>
+                    <ComboBox Name="cbHorizontal" Width="180">
+                        
+                    </ComboBox>
+                    <Label Padding="4" Content= "Veritcal Alignment"></Label>
+                    <ComboBox Name="cbVertical" Width="180">
+                        
+                    </ComboBox>
+                </StackPanel>
+                <Button Name="SampleButton" Content="Sample Button" Width="180" Height="38" />
+            </StackPanel>
             <CheckBox 
                 Padding="4" IsChecked="{Binding SelectedItem.ShellExecute, Mode=TwoWay}">Shell Execute</CheckBox>
             <CheckBox 

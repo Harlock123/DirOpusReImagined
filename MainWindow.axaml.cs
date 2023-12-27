@@ -911,6 +911,15 @@ namespace DirOpusReImagined
                 if (item.Bname.ToUpper() == nm.ToUpper())
                 {
                     // We have a winner - do the action
+                    
+                    if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
+                    {
+                        // we need to open the button config window
+                        AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition();
+                        BC.ShowDialog(this);
+                        break;
+                    }
+                    
 
                     string newaction = ParseTheArgs(item.Bargs);
 
