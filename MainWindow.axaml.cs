@@ -35,6 +35,8 @@ namespace DirOpusReImagined
         
         private List<Button> TheLowerPanelButtons = new List<Button>();
         
+        private List<ButtonSettings> TheButtonSettings = new List<ButtonSettings>();
+        
         private string StartRightPath = "";
         private string StartLeftPath = "";
 
@@ -915,7 +917,7 @@ namespace DirOpusReImagined
                     if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
                     {
                         // we need to open the button config window
-                        AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition();
+                        AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
                         BC.ShowDialog(this);
                         break;
                     }
@@ -2358,13 +2360,13 @@ namespace DirOpusReImagined
                                              ToolTip = (string)btn.Element("ToolTip")
                                          };
 
+                TheButtonSettings = buttonSettingsList.ToList();
+                // Find the grid where the buttons exist
+                var grid = (Grid)window.FindControl<Control>("ButtonGrid");
                 
                 // Apply settings to each button
                 foreach (var buttonSettings in buttonSettingsList)
                 {
-                    // Find the grid where the buttons exist
-                    var grid = (Grid)window.FindControl<Control>("ButtonGrid");
-                    
                     // Find the button by its name
                     Button button = (Button)grid.FindControl<Control>(buttonSettings.Name);
 

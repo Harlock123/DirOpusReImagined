@@ -7,9 +7,9 @@
         Title="AddEditCmdButtonDefinition" Width="800" Height="600">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Add" Click="Add_OnClick" Margin="5"/>
-            <Button Content="Edit" Click="Edit_OnClick" Margin="5" />
-            <Button Content="Delete" Click="Delete_OnClick" Margin="5" />
+            <Button Content="Save" Click="Save_OnClick" Margin="5"/>
+            <Button Content="Clear" Click="Clear_OnClick" Margin="5" />
+            <Button Content="Exit" Click="Exit_OnClick" Margin="5" />
         </StackPanel>
         <ScrollViewer DockPanel.Dock="Left" 
                       VerticalScrollBarVisibility="Visible"
@@ -57,15 +57,15 @@
             <Label 
                 Padding="4" Content="Button Label" />
             <TextBox 
-                Padding="4" Text="{Binding SelectedItem.Bname, Mode=TwoWay}"/>
+                Padding="4" Name="tbContent" />
             <Label 
                 Padding="4" Content="Command To Run"/>
             <TextBox 
-                Padding="4" Text="{Binding SelectedItem.Bcontent, Mode=TwoWay}"/>
+                Padding="4" Name="tbCommand" />
             <Label
                 Padding="4" Content="Arguments"/>
             <TextBox 
-                Padding="4" Text="{Binding SelectedItem.Bargs, Mode=TwoWay}"/>
+                Padding="4" Name="tbArguments" />
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <StackPanel>
                     <Label Padding="4" Content="Forground Color"></Label>
@@ -86,17 +86,17 @@
                 <Button Name="SampleButton" Content="Sample Button" Width="180" Height="38" />
             </StackPanel>
             <CheckBox 
-                Padding="4" IsChecked="{Binding SelectedItem.ShellExecute, Mode=TwoWay}">Shell Execute</CheckBox>
+                Padding="4" Name="cbShellExecute">Shell Execute</CheckBox>
             <CheckBox 
-                Padding="4" IsChecked="{Binding SelectedItem.ShowWindow, Mode=TwoWay}">Show Window</CheckBox>
+                Padding="4" Name="cbShowWindow">Show Window</CheckBox>
             <Label 
                 Padding="4" Content="ToolTip"/>
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="140">
-                <TextBox 
+                <TextBox Name="tbToolTip"
                          Padding="4" 
                          AcceptsReturn="True" 
                          TextWrapping="Wrap" 
-                         Text="{Binding SelectedItem.ToolTip, Mode=TwoWay}"/>
+                         />
             </ScrollViewer>
         </StackPanel>
     </DockPanel>
