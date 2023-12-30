@@ -7,6 +7,7 @@ using Avalonia;
 
 using Avalonia.Interactivity;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,6 +58,8 @@ public partial class AddEditCmdButtonDefinition : Window
         this.FindControl<ComboBox>("cbHorizontal").SelectionChanged += CbHorizontal_OnSelectionChanged;
         this.FindControl<ComboBox>("cbVertical").SelectionChanged += CbVertical_OnSelectionChanged;
         
+        this.FindControl<TextBox>("tbContent").KeyUp += HandleButtonContentChanged;    
+        
         for(int i=1;i<=36;i++)
         {
             Button b = this.FindControl<Button>("LPB" + i.ToString());
@@ -67,7 +70,13 @@ public partial class AddEditCmdButtonDefinition : Window
         
         //b.
     }
-    
+
+    private void HandleButtonContentChanged(object? sender, KeyEventArgs e)
+    {
+        TextBox tb = (TextBox)sender;
+        this.FindControl<Button>("SampleButton").Content = tb.Text;
+    }
+
     private void PersistCurrentButtonInterface()
     {
         if (TheCurrentButton == null)
@@ -110,7 +119,13 @@ public partial class AddEditCmdButtonDefinition : Window
         bs.ShowWindow = this.FindControl<CheckBox>("cbShowWindow").IsChecked + "";
         bs.ToolTip = this.FindControl<TextBox>("tbToolTip").Text;
         
-        this.FindControl<Button>(TheCurrentButton.Name).Tag = bs;
+        Button b = this.FindControl<Button>(TheCurrentButton.Name);
+        
+        b.Tag = bs;
+        b.Content = bs.Content;
+        b.Background = new SolidColorBrush((Color)Color.Parse(bs.Background));
+        b.Foreground = new SolidColorBrush((Color)Color.Parse(bs.Foreground));
+        //b.VerticalAlignment = (VerticalAlignment)Enum.Parse(typeof(VerticalAlignment), bs.VerticalAlignment);
     }
 
     private void HandleButtonClicked(object? sender, RoutedEventArgs e)
@@ -149,6 +164,7 @@ public partial class AddEditCmdButtonDefinition : Window
         //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
         
         this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
+        this.FindControl<Button>("SampleButton").Content = bs.Content;
         this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = bs.Background + "";
         this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = bs.Foreground  + "";
         this.FindControl<ComboBox>("cbHorizontal").SelectedItem = bs.HorizontalAlignment + "";
