@@ -268,6 +268,12 @@ public partial class AddEditCmdButtonDefinition : Window
         b.Background = new SolidColorBrush((Color)Color.Parse((string)e.AddedItems[0]));
     }
 
+    /// <summary>
+    /// This method is called when the AddEditCmdButtonDefinition is loaded.
+    /// It initializes the available colors, horizontal alignments, and vertical alignments for ComboBox controls.
+    /// </summary>
+    /// <param name="sender">The object that triggered the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void AddEditCmdButtonDefinition_Loaded(object? sender, RoutedEventArgs e)
     {
         List<string> thecolors = new List<string>();
@@ -298,9 +304,16 @@ public partial class AddEditCmdButtonDefinition : Window
         this.FindControl<ComboBox>("cbFOREGROUND").Items = thecolors;
         
     }
-    
+
+    /// <summary>
+    /// Method to serialize a list of button settings to XML format. </summary>
+    /// <param name="settings">List of button settings to be serialized.</param>
+    /// <returns>Serialized XML string of the button settings list.</returns>
+    /// /
     public string SerializeButtonSettingsListToXml(List<ButtonSettings> settings)
     {
+        
+        
         // make sure each button has a Margin element
         foreach (var button in settings)
         {
@@ -332,7 +345,12 @@ public partial class AddEditCmdButtonDefinition : Window
             }
         }
     }
-    
+
+    /// <summary>
+    /// Handles the Click event of the Save button.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void Save_OnClick(object sender, RoutedEventArgs e)
     {
         // Implement save logic here.
