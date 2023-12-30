@@ -77,6 +77,28 @@ public partial class AddEditCmdButtonDefinition : Window
 
         ButtonSettings bs = (ButtonSettings)TheCurrentButton.Tag; 
         
+        if (bs == null)
+        {
+            return;
+
+            // bs = new ButtonSettings();
+            // bs.Content = "{What Will Show}";
+            //
+            // bs.Action = "{Action}";
+            // bs.Args = "{Arguments}";
+            // bs.Background = "LightGray";
+            // bs.Foreground = "Black";
+            // bs.Name = TheCurrentButton.Name;
+            // bs.Name = bs.Name.Replace("LPB", "LPButton");
+            // bs.HorizontalAlignment = "Center";
+            // bs.VerticalAlignment = "Center";
+            // bs.ShellExecute = "False";
+            // bs.ShowWindow = "False";
+            // bs.ToolTip = "{ToolTip}";
+            //
+            // TheCurrentButton.Tag = bs;
+        }
+        
         bs.Content = this.FindControl<TextBox>("tbContent").Text;
         bs.Background = this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem + "";
         bs.Foreground = this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem + "";
@@ -101,7 +123,25 @@ public partial class AddEditCmdButtonDefinition : Window
         
         if (b.Tag == null)
         {
-            return;
+            ButtonSettings bs1 = new ButtonSettings();
+            
+            bs1.Content = "{What Will Show}";
+            
+            bs1.Action = "{Action}";
+            bs1.Args = "{Arguments}";
+            bs1.Background = "LightGray";
+            bs1.Foreground = "Black";
+            bs1.Name = TheCurrentButton.Name;
+            bs1.Name = bs1.Name.Replace("LPB", "LPButton");
+            bs1.HorizontalAlignment = "Center";
+            bs1.VerticalAlignment = "Center";
+            bs1.ShellExecute = "False";
+            bs1.ShowWindow = "False";
+            bs1.ToolTip = "{ToolTip}";
+            
+            TheCurrentButton.Tag = bs1;
+            
+             
         }
         
         ButtonSettings bs = (ButtonSettings)b.Tag;
