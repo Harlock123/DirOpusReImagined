@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml.Serialization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -296,9 +299,61 @@ public partial class AddEditCmdButtonDefinition : Window
         
     }
     
+    public string SerializeButtonSettingsListToXml(List<ButtonSettings> settings)
+    {
+        // make sure each button has a Margin element
+        foreach (var button in settings)
+        {
+            if (button.Margin == null)
+            {
+                button.Margin = "2,2,2,2";
+            }
+        }
+        
+        var serializer = new XmlSerializer(typeof(List<ButtonSettings>));
+
+        using (var stream = new MemoryStream())
+        {
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                serializer.Serialize(writer, settings);
+                var xml = Encoding.UTF8.GetString(stream.ToArray());
+
+                // Remove the ArrayOfButtonSettings line
+                xml = xml.Substring(xml.IndexOf('>') + 1);
+                xml = xml.Substring(xml.IndexOf('>') + 1);
+                xml = xml.Substring(0, xml.LastIndexOf('<'));
+
+                // Replace ButtonSettings with Button tags
+                xml = xml.Replace("<ButtonSettings>", "<Button>");
+                xml = xml.Replace("</ButtonSettings>", "</Button>");
+
+                return xml;
+            }
+        }
+    }
+    
     private void Save_OnClick(object sender, RoutedEventArgs e)
     {
-        // Implement add logic here.
+        // Implement save logic here.
+        
+        List<ButtonSettings> theButtonSettings = new List<ButtonSettings>();
+        
+        for (int i=1;i<=36;i++)
+        {
+            Button b = this.FindControl<Button>("LPB" + i.ToString());
+            ButtonSettings bs = (ButtonSettings)b.Tag;
+            if (bs != null)
+            {
+                theButtonSettings.Add(bs);
+            }
+            //theButtonSettings.Add(bs);
+        }
+        
+        string xml = SerializeButtonSettingsListToXml(theButtonSettings);
+        
+        Console.WriteLine(xml);
+        
     }
 
     private void Clear_OnClick(object sender, RoutedEventArgs e)
