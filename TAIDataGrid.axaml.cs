@@ -318,6 +318,10 @@ namespace DirOpusReImagined
         /// The maximum number of characters for truncating a column in a data table.
         /// </summary>
         private int _truncateColumnLength = 30;
+
+        /// The Backing Canvas as an attempt to double buffer rendering
+        private Canvas BackingCanvas = null;
+        
         #endregion
 
         #region Constructor
@@ -1017,12 +1021,15 @@ namespace DirOpusReImagined
                 if (TheCanvas != null && !_suspendRendering)
                 {
                     // the canvas exists so lets render the grid
-
+                    _suspendRendering = true;
                     // clear the canvas
 
-                    _suspendRendering = true;
+                    BackingCanvas = new Canvas();
+                    BackingCanvas.Width = TheCanvas.Width;
+                    BackingCanvas.Height = TheCanvas.Height;
+                    //TheCanvas.Children.Add(BackingCanvas);
 
-                    TheCanvas.Children.Clear();
+                    BackingCanvas.Children.Clear();
 
                     _gridHeaderAndTitleHeight = 0;
 
@@ -1036,7 +1043,7 @@ namespace DirOpusReImagined
                                 GridTitleBrush);
 
                         Rectangle rr = new Rectangle();
-                        rr.Width = TheCanvas.Width;
+                        rr.Width = BackingCanvas.Width;
                         //rr.Height = formattedText.Height;
 
                         if (GridTitleHeight < formattedText.Height)
@@ -1059,7 +1066,7 @@ namespace DirOpusReImagined
                             rr.Fill = GridTitleBackground;
                             Canvas.SetLeft(rr, 0);
                             Canvas.SetTop(rr, 0);
-                            TheCanvas.Children.Add(rr);
+                            BackingCanvas.Children.Add(rr);
 
                             TextBlock ttb = new TextBlock();
                             ttb.Text = GridTitle;
@@ -1070,7 +1077,7 @@ namespace DirOpusReImagined
                             ttb.FontStyle = GridTitleTypeface.Style;
                             Canvas.SetLeft(ttb, 0);
                             Canvas.SetTop(ttb, 0);
-                            TheCanvas.Children.Add(ttb);
+                            BackingCanvas.Children.Add(ttb);
 
                         }
 
@@ -1213,7 +1220,7 @@ namespace DirOpusReImagined
                                 Canvas.SetLeft(rr1, left - _gridXShift);
                                 Canvas.SetTop(rr1, top);
 
-                                TheCanvas.Children.Add(rr1);
+                                BackingCanvas.Children.Add(rr1);
 
                                 Rectangle rr = new Rectangle();
                                 rr.Width = _colWidths[idx]; //(int)formattedText.Width + 10;
@@ -1223,7 +1230,7 @@ namespace DirOpusReImagined
                                 Canvas.SetLeft(rr, left - _gridXShift);
                                 Canvas.SetTop(rr, top);
 
-                                TheCanvas.Children.Add(rr);
+                                BackingCanvas.Children.Add(rr);
 
                                 TextBlock ttb = new TextBlock();
                                 ttb.Text = property.Name;
@@ -1234,7 +1241,7 @@ namespace DirOpusReImagined
                                 ttb.FontStyle = GridHeaderTypeface.Style;
                                 Canvas.SetLeft(ttb, left + 2 - _gridXShift);
                                 Canvas.SetTop(ttb, top + 1);
-                                TheCanvas.Children.Add(ttb);
+                                BackingCanvas.Children.Add(ttb);
                                 left += _colWidths[idx];
 
                                 idx++;
@@ -1312,7 +1319,7 @@ namespace DirOpusReImagined
                                             Canvas.SetLeft(rr, left - _gridXShift);
                                             Canvas.SetTop(rr, top);
 
-                                            TheCanvas.Children.Add(rr);
+                                            BackingCanvas.Children.Add(rr);
 
 
                                             Rectangle rr1 = new Rectangle();
@@ -1323,7 +1330,7 @@ namespace DirOpusReImagined
                                             Canvas.SetLeft(rr1, left - _gridXShift);
                                             Canvas.SetTop(rr1, top);
 
-                                            TheCanvas.Children.Add(rr1);
+                                            BackingCanvas.Children.Add(rr1);
 
                                             string theText = (property.GetValue(item)?.ToString() + "").ToUpper()
                                                 .Trim();
@@ -1356,7 +1363,7 @@ namespace DirOpusReImagined
                                                 Canvas.SetTop(image, top + 1);
 
                                                 // Add the image to the canvas.
-                                                TheCanvas.Children.Add(image);
+                                                BackingCanvas.Children.Add(image);
                                             }
                                             else
                                             {
@@ -1405,7 +1412,7 @@ namespace DirOpusReImagined
 
                                                 Canvas.SetLeft(ttb, left + leftoffset - _gridXShift);
                                                 Canvas.SetTop(ttb, top + 1);
-                                                TheCanvas.Children.Add(ttb);
+                                                BackingCanvas.Children.Add(ttb);
                                                 lastCellItemText = ttb.Text;
                                             }
                                         }
@@ -1448,6 +1455,12 @@ namespace DirOpusReImagined
 
                         //GridHover?.Invoke(this, TheItemUnderTheMouse);
                     
+                       // here we blit TheBackingCanvas onto TheCanvas
+                       TheCanvas.Children.Clear();
+                       TheCanvas.Children.Add(BackingCanvas);
+
+                       BackingCanvas = null;
+                        
 
                     _suspendRendering = false;
                 }
