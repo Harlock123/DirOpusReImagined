@@ -793,7 +793,7 @@ namespace DirOpusReImagined
 
             foreach (ButtonEntry item in TheButtons)
             {
-                if (item.Bname.ToUpper() == nm.ToUpper() && item.ToolTip!=null && LastButtonPopupName != B.Name)
+                if (item.Bname.ToUpper() == nm.ToUpper() && (item.ToolTip + "") !="" && LastButtonPopupName != B.Name)
                 {
                     // We have a winner - do the action
 

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -163,8 +165,20 @@ public partial class AddEditCmdButtonDefinition : Window
         }
         
         ButtonSettings bs = (ButtonSettings)b.Tag;
+        
+        // if the sheelexecute or showwindow elements are null then set them to false
+        if (bs.ShellExecute == null)
+        {
+            bs.ShellExecute = "False";
+        }
+        if (bs.ShowWindow == null)
+        {
+            bs.ShowWindow = "False";
+        }   
 
         //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
+        
+        
         
         this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
         this.FindControl<Button>("SampleButton").Content = bs.Content;
@@ -370,7 +384,33 @@ public partial class AddEditCmdButtonDefinition : Window
         
         string xml = SerializeButtonSettingsListToXml(theButtonSettings);
         
-        Console.WriteLine(xml);
+        // Load the Configuration.xml file into an XDocument
+        var doc = XDocument.Load("Configuration.xml");
+
+        // Parse the xml string into an XElement
+        var newElement = XElement.Parse("<Buttons>" + xml + "</Buttons>").Elements();
+
+        // Find the Buttons element
+        var buttonsElement = doc.Descendants("Buttons").FirstOrDefault();
+
+        // If the Buttons element exists, add the new element
+        if (buttonsElement != null)
+        {
+            buttonsElement.RemoveAll();
+            
+            buttonsElement.Add(newElement);
+
+            // Save the modifications back to the Configuration.xml file
+            doc.Save("Configuration.xml");
+        }
+        else
+        {
+            Console.WriteLine("Buttons element not found in the XML file");
+        }
+        
+        
+        
+        //Console.WriteLine(xml);
         
     }
 
