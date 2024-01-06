@@ -3,7 +3,7 @@
   <Buttons>
     <Button>
       <Name>LPButton1</Name>
-      <Content>VSCODE here</Content>
+      <Content>VSCODE here Test</Content>
       <Background>Red</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment>Center</HorizontalAlignment>
@@ -18,7 +18,7 @@
     <Button>
       <Name>LPButton2</Name>
       <Content>VSCODE All Files</Content>
-      <Background>LightGray</Background>
+      <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment />
       <VerticalAlignment />
@@ -32,22 +32,29 @@
     <Button>
       <Name>LPButton3</Name>
       <Content>NotePad all seq</Content>
-      <Background>LightGray</Background>
+      <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
+      <HorizontalAlignment />
+      <VerticalAlignment />
       <Margin>2,2,2,2</Margin>
       <Action>notepad.exe</Action>
       <Args>%LAF%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip />
     </Button>
     <Button>
       <Name>LPButton4</Name>
       <Content>Code Diff</Content>
-      <Background>LightGray</Background>
+      <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment />
       <VerticalAlignment />
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>--diff %LF1% %RF1%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
     </Button>
     <Button>

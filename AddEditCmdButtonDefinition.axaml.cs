@@ -180,8 +180,6 @@ public partial class AddEditCmdButtonDefinition : Window
 
         //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
         
-        
-        
         this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
         this.FindControl<Button>("SampleButton").Content = bs.Content;
         this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = bs.Background + "";
@@ -371,6 +369,8 @@ public partial class AddEditCmdButtonDefinition : Window
     {
         // Implement save logic here.
         
+        PersistCurrentButtonInterface();
+        
         List<ButtonSettings> theButtonSettings = new List<ButtonSettings>();
         
         for (int i=1;i<=36;i++)
@@ -416,11 +416,24 @@ public partial class AddEditCmdButtonDefinition : Window
 
     private void Clear_OnClick(object sender, RoutedEventArgs e)
     {
-        // Implement edit logic here.
+        this.FindControl<TextBox>("tbContent").Text = "";
+        this.FindControl<Button>("SampleButton").Content = "";
+        this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = "";
+        this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = "";
+        this.FindControl<ComboBox>("cbHorizontal").SelectedItem = "";
+        this.FindControl<ComboBox>("cbVertical").SelectedItem = "";
+        this.FindControl<TextBox>("tbCommand").Text = "";
+        this.FindControl<TextBox>("tbArguments").Text = "";
+        this.FindControl<CheckBox>("cbShellExecute").IsChecked = false;
+        this.FindControl<CheckBox>("cbShowWindow").IsChecked = false;
+        this.FindControl<TextBox>("tbToolTip").Text = "";
+        
+        TheCurrentButton = null;
     }
 
     private void Exit_OnClick(object sender, RoutedEventArgs e)
     {
         // Implement delete logic here.
+        this.Close();
     }
 }

@@ -771,6 +771,19 @@ namespace DirOpusReImagined
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
         {
+            //if (_pop != null && _pop.IsVisible )
+            //{
+            //    _pop.Close();
+            //    _pop = null;
+            //}
+            
+            //LastButtonPopupName = "";
+            
+            KillPop();
+        }
+
+        private void KillPop()
+        {
             if (_pop != null && _pop.IsVisible )
             {
                 _pop.Close();
@@ -813,7 +826,17 @@ namespace DirOpusReImagined
             ToolTip.SetTip(B, item.ToolTip);
             ToolTip.SetIsOpen(B, true);
         }
-
+        
+        private void KillToolTipForItem(Button B)
+        {
+            LastButtonPopupName = B.Name;
+            ToolTip.SetPlacement(B, PlacementMode.Top); // this is a hack to get the tooltip to show up in the right place
+            ToolTip.SetHorizontalOffset(B,10.0);
+            ToolTip.SetVerticalOffset(B,10.0);
+            ToolTip.SetTip(B, "");
+            ToolTip.SetIsOpen(B, false);
+        }
+        
         private void SetToolTipForGridItem(TaiDataGrid grid, AFileEntry item)
         {
             if (LastFileHovered != null && LastFileHovered.Name == item.Name)
@@ -903,8 +926,9 @@ namespace DirOpusReImagined
             {
                 return;
             }
-
+            
             Button B = (Button)sender;
+            KillToolTipForItem(B);
 
             string nm = B.Name;
 
@@ -916,6 +940,8 @@ namespace DirOpusReImagined
                     
                     if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
                     {
+                        
+                        
                         // we need to open the button config window
                         AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
                         BC.TheMainWindow = this;
@@ -928,7 +954,7 @@ namespace DirOpusReImagined
 
                     if (newaction != "%ERROR%")
                     {
-
+                        
                         try
                         {
                             if (newaction.Contains(","))
