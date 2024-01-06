@@ -3,7 +3,7 @@
   <Buttons>
     <Button>
       <Name>LPButton1</Name>
-      <Content>VSCODE here test</Content>
+      <Content>VSCODE here</Content>
       <Background>Red</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment>Center</HorizontalAlignment>
@@ -13,7 +13,7 @@
       <Args>%FD%</Args>
       <ShellExecute>False</ShellExecute>
       <ShowWindow>False</ShowWindow>
-      <ToolTip>A Tool tip test</ToolTip>
+      <ToolTip>A Tool tip</ToolTip>
     </Button>
     <Button>
       <Name>LPButton2</Name>
@@ -48,8 +48,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>--diff %LF1% %RF1%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
     </Button>
     <Button>

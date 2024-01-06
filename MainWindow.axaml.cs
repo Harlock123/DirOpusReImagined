@@ -918,6 +918,7 @@ namespace DirOpusReImagined
                     {
                         // we need to open the button config window
                         AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
+                        BC.TheMainWindow = this;
                         BC.ShowDialog(this);
                         break;
                     }
@@ -2579,6 +2580,20 @@ namespace DirOpusReImagined
             catch (Exception ex)
             {
                 Console.WriteLine("Unexpected error: " + ex.Message);
+            }
+        }
+
+        public void DoButtonRefresh()
+        {
+            if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
+            {
+                ClearLowerButtons();
+                ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
+            }
+            else
+            {
+                // Look in the alternate places here based on OS
+                
             }
         }
         

@@ -22,6 +22,8 @@ namespace DirOpusReImagined;
 public partial class AddEditCmdButtonDefinition : Window
 {
     List<ButtonSettings> TheButtons = new List<ButtonSettings>();
+    
+    public MainWindow TheMainWindow = null;
 
     private Button TheCurrentButton = null;
     
@@ -402,15 +404,13 @@ public partial class AddEditCmdButtonDefinition : Window
 
             // Save the modifications back to the Configuration.xml file
             doc.Save("Configuration.xml");
+            
+            TheMainWindow.DoButtonRefresh();
         }
         else
         {
             Console.WriteLine("Buttons element not found in the XML file");
         }
-        
-        
-        
-        //Console.WriteLine(xml);
         
     }
 
