@@ -60,6 +60,10 @@ public partial class AddEditCmdButtonDefinition : Window
         //this.FindControl<Button>("btnADD").Click += Add_OnClick;
         //this.FindControl<Button>("btnEDIT").Click += Edit_OnClick;
         //this.FindControl<Button>("btnDELETE").Click += Delete_OnClick;
+        
+        this.FindControl<Button>("btnCommandHelp").Click += CommandHelp_OnClick;
+        this.FindControl<Button>("btnArgHelp").Click += ArgHelp_OnClick;
+        
         this.FindControl<ComboBox>("cbBACKGROUND").SelectionChanged += CbBACKGROUND_OnSelectionChanged;
         this.FindControl<ComboBox>("cbFOREGROUND").SelectionChanged += CbFOREGROUND_OnSelectionChanged;
         this.FindControl<ComboBox>("cbHorizontal").SelectionChanged += CbHorizontal_OnSelectionChanged;
@@ -76,6 +80,16 @@ public partial class AddEditCmdButtonDefinition : Window
         //Button b = this.FindControl<Button>("LPB1");
         
         //b.
+    }
+
+    private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
+    {
+        //throw new NotImplementedException();
+    }
+    
+    private void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
+    {
+        //throw new NotImplementedException();
     }
 
     private void HandleButtonContentChanged(object? sender, KeyEventArgs e)
@@ -436,4 +450,6 @@ public partial class AddEditCmdButtonDefinition : Window
         // Implement delete logic here.
         this.Close();
     }
+
+    
 }

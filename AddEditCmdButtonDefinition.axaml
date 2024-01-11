@@ -56,16 +56,37 @@
         <StackPanel Margin="4,0,4,0">
             <Label 
                 Padding="4" Content="Button Label" />
-            <TextBox 
-                Padding="4" Name="tbContent" />
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBox Width="460"
+                         Padding="4" Name="tbContent" />
+                
+            </StackPanel>
+            
             <Label 
                 Padding="4" Content="Command To Run"/>
-            <TextBox 
-                Padding="4" Name="tbCommand" />
+            
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                
+                <TextBox Width="460"
+                    Padding="4" Name="tbCommand" />
+                <Button Name="btnCommandHelp" Content="Show Command Help"  />
+                
+            </StackPanel>
+            
             <Label
                 Padding="4" Content="Arguments"/>
-            <TextBox 
-                Padding="4" Name="tbArguments" />
+            
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBox Width="460"
+                    Padding="4" Name="tbArguments" />
+                <Button Name="btnArgHelp" Content="Show Argument Help"  />
+                
+            </StackPanel>
+            
+            
+            
+            
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <StackPanel>
                     <Label Padding="4" Content="Forground Color"></Label>
