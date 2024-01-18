@@ -12,6 +12,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
+using NickStrupat;
+//using NickStrupat.ComputerInfo;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
 using Image = Avalonia.Controls.Image;
@@ -56,11 +58,11 @@ namespace DirOpusReImagined
         {
             InitializeComponent();
             
-            PopulateTheButtons();
+            var cinf = new ComputerInfo();
+            
+            var globalMEM = cinf.TotalPhysicalMemory;
 
-            //var globalMEM = GC.GetTotalMemory(false);
-
-            //this.Title += " " + globalMEM.ToString();
+            this.Title += " " + (globalMEM / 1024 / 1024 / 1024).ToString() + " GB ";
             
             // Apply The Settings if possible
             // First Look where the app is running from for Configuration.xml
