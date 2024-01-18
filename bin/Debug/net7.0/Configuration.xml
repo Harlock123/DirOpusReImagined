@@ -11,6 +11,8 @@
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>%FD%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>A Tool tip</ToolTip>
     </Button>
     <Button>
@@ -18,11 +20,13 @@
       <Content>VSCODE All Files</Content>
       <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
-      <HorizontalAlignment />
-      <VerticalAlignment />
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>%AF%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip />
     </Button>
     <Button>
@@ -30,11 +34,13 @@
       <Content>NotePad all seq</Content>
       <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
-      <HorizontalAlignment />
-      <VerticalAlignment />
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
       <Margin>2,2,2,2</Margin>
       <Action>notepad.exe</Action>
       <Args>%LAF%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip />
     </Button>
     <Button>
@@ -42,11 +48,13 @@
       <Content>Code Diff</Content>
       <Background>GreenYellow</Background>
       <Foreground>Black</Foreground>
-      <HorizontalAlignment />
-      <VerticalAlignment />
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>--diff %LF1% %RF1%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
     </Button>
     <Button>
@@ -59,8 +67,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>%BUTTONCONFIG%</Action>
       <Args />
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Calls the Internal Button configure Interface</ToolTip>
     </Button>
     <Button>
@@ -73,8 +79,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>wt</Action>
       <Args>-d %LPATH%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens a windows terminal in the filder shown on the left panel</ToolTip>
     </Button>
     <Button>
@@ -87,8 +91,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>wt</Action>
       <Args>-d %RPATH%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
     </Button>
     <Button>
@@ -101,8 +103,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>alacritty</Action>
       <Args>--working-directory %LPATH%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens an alacritty terminal in the filder shown on the left panel</ToolTip>
     </Button>
     <Button>
@@ -115,8 +115,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>alacritty</Action>
       <Args>--working-directory %RPATH%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens an alacritty terminal in the filder shown on the right panel</ToolTip>
     </Button>
   </Buttons>

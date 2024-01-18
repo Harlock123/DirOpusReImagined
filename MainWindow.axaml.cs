@@ -57,8 +57,11 @@ namespace DirOpusReImagined
             InitializeComponent();
             
             PopulateTheButtons();
-            
 
+            //var globalMEM = GC.GetTotalMemory(false);
+
+            //this.Title += " " + globalMEM.ToString();
+            
             // Apply The Settings if possible
             // First Look where the app is running from for Configuration.xml
             // Otherwise
@@ -1334,6 +1337,7 @@ namespace DirOpusReImagined
 
             }
             
+            // Path to the files shown in the left panel
             if (bcontent.Contains("%LPATH%"))
             {
                 string ret = bcontent.Replace("%LPATH%", MakePathEnvSafe(LPpath.Text));
@@ -1341,6 +1345,7 @@ namespace DirOpusReImagined
                 return ret;
             }
             
+            // Path to the files shown in the right panel
             if (bcontent.Contains("%RPATH%"))
             {
                 string ret = bcontent.Replace("%RPATH%", MakePathEnvSafe(RPpath.Text));
