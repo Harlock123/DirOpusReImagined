@@ -84,12 +84,19 @@ public partial class AddEditCmdButtonDefinition : Window
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
     {
-        //throw new NotImplementedException();
+        // we need to open the button config window
+        ConfigHelp BC = new ConfigHelp();
+        //BC.TheMainWindow = this;
+        BC.ShowDialog(this);
+        
     }
     
     private void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
     {
-        //throw new NotImplementedException();
+        // we need to open the button config window
+        ConfigHelp BC = new ConfigHelp();
+        //BC.TheMainWindow = this;
+        BC.ShowDialog(this);
     }
 
     private void HandleButtonContentChanged(object? sender, KeyEventArgs e)

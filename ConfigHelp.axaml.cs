@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace DirOpusReImagined;
 
-public partial class FileViewer : Window
+public partial class ConfigHelp : Window
 {
-    public FileViewer()
+    public ConfigHelp()
     {
         InitializeComponent();
     }
