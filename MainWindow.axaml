@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:cons="clr-namespace:DirOpusReImagined;assembly=DirOpusReImagined"
         mc:Ignorable="d" d:DesignWidth="1260" d:DesignHeight="800"
-        Height="800" Width="1260"
+        Height="800" Width="1260" WindowStartupLocation="CenterScreen"
         x:Class="DirOpusReImagined.MainWindow"
         Title="DORI"
 		Background="LightGray">
