@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
 using NickStrupat;
+using Tomlyn;
 //using NickStrupat.ComputerInfo;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
@@ -2393,6 +2394,8 @@ namespace DirOpusReImagined
                                              ShowWindow = (string)btn.Element("Window"),
                                              ToolTip = (string)btn.Element("ToolTip")
                                          };
+                
+                //Console.WriteLine(Toml.FromModel(buttonSettingsList));
 
                 TheButtonSettings = buttonSettingsList.ToList();
                 // Find the grid where the buttons exist

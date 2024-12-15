@@ -11,8 +11,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>%FD%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip>A Tool tip</ToolTip>
     </Button>
     <Button>
@@ -25,8 +23,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>code</Action>
       <Args>%AF%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip />
     </Button>
     <Button>
@@ -39,8 +35,6 @@
       <Margin>2,2,2,2</Margin>
       <Action>notepad.exe</Action>
       <Args>%LAF%</Args>
-      <ShellExecute>False</ShellExecute>
-      <ShowWindow>False</ShowWindow>
       <ToolTip />
     </Button>
     <Button>
@@ -91,30 +85,36 @@
       <Margin>2,2,2,2</Margin>
       <Action>wt</Action>
       <Args>-d %RPATH%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
     </Button>
     <Button>
       <Name>LPButton35</Name>
       <Content>Alacritty Term on Left</Content>
-      <Background>Ivory</Background>
+      <Background>Goldenrod</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment>Center</HorizontalAlignment>
       <VerticalAlignment>Center</VerticalAlignment>
       <Margin>2,2,2,2</Margin>
       <Action>alacritty</Action>
       <Args>--working-directory %LPATH%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens an alacritty terminal in the filder shown on the left panel</ToolTip>
     </Button>
     <Button>
       <Name>LPButton36</Name>
       <Content>Alacritty Term on right</Content>
-      <Background>Ivory</Background>
+      <Background>Goldenrod</Background>
       <Foreground>Black</Foreground>
       <HorizontalAlignment>Center</HorizontalAlignment>
       <VerticalAlignment>Center</VerticalAlignment>
       <Margin>2,2,2,2</Margin>
       <Action>alacritty</Action>
       <Args>--working-directory %RPATH%</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>Opens an alacritty terminal in the filder shown on the right panel</ToolTip>
     </Button>
   </Buttons>
