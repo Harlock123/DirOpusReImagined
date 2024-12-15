@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
-        Title="AddEditCmdButtonDefinition" Width="800" Height="600">
+        Title="AddEditCmdButtonDefinition" Width="800" Height="600" WindowStartupLocation="CenterScreen">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save" Click="Save_OnClick" Margin="5"/>
