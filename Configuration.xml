@@ -123,7 +123,7 @@
 	</Executable>
 
 	<Images>
-		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX</ImageExtensions>
+		<ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX,AI</ImageExtensions>
 		<UseIntegratedImageViewer>False</UseIntegratedImageViewer>
 	</Images>
 
