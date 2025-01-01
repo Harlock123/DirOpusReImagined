@@ -401,94 +401,106 @@ namespace DirOpusReImagined
             string abbreviatedAttributes = string.Empty;
 
             if ((attributes & FileAttributes.ReadOnly) != 0)
-                abbreviatedAttributes += "RO ";
+                abbreviatedAttributes += "RO-";
             else
-                abbreviatedAttributes += "RW ";
+                abbreviatedAttributes += "RW-";
             if ((attributes & FileAttributes.Hidden) != 0)
-                abbreviatedAttributes += "H ";
+                abbreviatedAttributes += "H-";
             else
-                abbreviatedAttributes += "V ";
+                abbreviatedAttributes += "V-";
             if ((attributes & FileAttributes.System) != 0)
-                abbreviatedAttributes += "S ";
+                abbreviatedAttributes += "S-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Directory) != 0)
-                abbreviatedAttributes += "D ";
+                abbreviatedAttributes += "D-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Archive) != 0)
-                abbreviatedAttributes += "A ";
+                abbreviatedAttributes += "A-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Device) != 0)
-                abbreviatedAttributes += "DEV ";
+                abbreviatedAttributes += "DEV-";
             else
             {
-                abbreviatedAttributes += "    ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Normal) != 0)
-                abbreviatedAttributes += "N ";
+                abbreviatedAttributes += "N-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Temporary) != 0)
-                abbreviatedAttributes += "T ";
+                abbreviatedAttributes += "T-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.SparseFile) != 0)
-                abbreviatedAttributes += "SF ";
+                abbreviatedAttributes += "SF-";
             else
             {
-                abbreviatedAttributes += "   ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.ReparsePoint) != 0)
-                abbreviatedAttributes += "RP ";
+                abbreviatedAttributes += "RP-";
             else
             {
-                abbreviatedAttributes += "   ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Compressed) != 0)
-                abbreviatedAttributes += "C ";
+                abbreviatedAttributes += "C-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Offline) != 0)
-                abbreviatedAttributes += "O ";
+                abbreviatedAttributes += "O-";
             else
             {
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.NotContentIndexed) != 0)
-                abbreviatedAttributes += "NCI ";
+                abbreviatedAttributes += "NCI-";
             else
             {
                 
-                abbreviatedAttributes += "  ";
+                abbreviatedAttributes += "";
             }
             if ((attributes & FileAttributes.Encrypted) != 0)
-                abbreviatedAttributes += "E ";
+                abbreviatedAttributes += "E-";
             else
-            { abbreviatedAttributes += "  "; }
+            {
+                abbreviatedAttributes += ""; 
+                
+            }
             if ((attributes & FileAttributes.IntegrityStream) != 0)
-                abbreviatedAttributes += "IS ";
+                abbreviatedAttributes += "IS-";
             else
-            { abbreviatedAttributes += "  "; }
+            {
+                abbreviatedAttributes += ""; 
+                
+            }
             if ((attributes & FileAttributes.NoScrubData) != 0)
-                abbreviatedAttributes += "NSD ";
+                abbreviatedAttributes += "NSD-";
             else
             {
                 
-                abbreviatedAttributes += "   ";
+                abbreviatedAttributes += "";
+            }
+
+            if (abbreviatedAttributes.EndsWith("-"))
+            {
+                abbreviatedAttributes = 
+                    abbreviatedAttributes.Substring(0, abbreviatedAttributes.Length - 1);
             }
 
             return abbreviatedAttributes.Trim();
