@@ -54,7 +54,7 @@
 					Grid.Row="1">
 			<StackPanel Name="TheDrivePresetsSp" 
 			            Orientation="Vertical">
-				<Label Name="LPLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
+				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
 				<Grid >
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="0.5*"/>
@@ -67,70 +67,70 @@
 						<RowDefinition Height="0.2*"/>
 						<RowDefinition Height="0.2*"/>
 					</Grid.RowDefinitions>
-					<Button Name="DrivePreset1a" Grid.Column="0" Grid.Row="0" 
+					<Button Name="DrivePreset1A" Grid.Column="0" Grid.Row="0" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 							Content="&lt; Drv1" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
-					<Button Name="DrivePreset1b" Grid.Column="1" Grid.Row="0" 
+					<Button Name="DrivePreset1B" Grid.Column="1" Grid.Row="0" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drv1 &gt;" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
-					<Button Name="DrivePreset2a" Grid.Column="0" Grid.Row="1" 
+					<Button Name="DrivePreset2A" Grid.Column="0" Grid.Row="1" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 3" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center" 
 					        />
-					<Button Name="DrivePreset2b" Grid.Column="1" Grid.Row="1" 
+					<Button Name="DrivePreset2B" Grid.Column="1" Grid.Row="1" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 4" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
-					<Button Name="DrivePreset3a" Grid.Column="0" Grid.Row="2" 
+					<Button Name="DrivePreset3A" Grid.Column="0" Grid.Row="2" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 5" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
-					<Button Name="DrivePreset3b" Grid.Column="1" Grid.Row="2" 
+					<Button Name="DrivePreset3B" Grid.Column="1" Grid.Row="2" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 6" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
-					<Button Name="DrivePreset4a" Grid.Column="0" Grid.Row="3" 
+					<Button Name="DrivePreset4A" Grid.Column="0" Grid.Row="3" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 7" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
-					<Button Name="DrivePreset4b" Grid.Column="1" Grid.Row="3" 
+					<Button Name="DrivePreset4B" Grid.Column="1" Grid.Row="3" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 8" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center"
 					        />
-					<Button Name="DrivePreset5a" Grid.Column="0" Grid.Row="4" 
+					<Button Name="DrivePreset5A" Grid.Column="0" Grid.Row="4" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 9" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
-					<Button Name="DrivePreset5b" Grid.Column="1" Grid.Row="4" 
+					<Button Name="DrivePreset5B" Grid.Column="1" Grid.Row="4" 
 					        Height="22" Width="50" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 10" 

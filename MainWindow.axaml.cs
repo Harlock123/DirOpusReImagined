@@ -249,16 +249,16 @@ namespace DirOpusReImagined
                 b.Tag = null;
             }
             
-            DrivePreset1a.Content = "";
-            DrivePreset1b.Content = "";
-            DrivePreset2a.Content = "";
-            DrivePreset2b.Content = "";
-            DrivePreset3a.Content = "";
-            DrivePreset3b.Content = "";
-            DrivePreset4a.Content = "";
-            DrivePreset4b.Content = "";
-            DrivePreset5a.Content = "";
-            DrivePreset5b.Content = "";
+            DrivePreset1A.Content = "";
+            DrivePreset1B.Content = "";
+            DrivePreset2A.Content = "";
+            DrivePreset2B.Content = "";
+            DrivePreset3A.Content = "";
+            DrivePreset3B.Content = "";
+            DrivePreset4A.Content = "";
+            DrivePreset4B.Content = "";
+            DrivePreset5A.Content = "";
+            DrivePreset5B.Content = "";
         }
 
         /// <summary>
@@ -418,16 +418,16 @@ namespace DirOpusReImagined
             LPButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LPButton36.Click += Handle_Lower_Panel_Button_Clicks;
             
-            DrivePreset1a.Click += Handle_Drive_Button_Clicks;
-            DrivePreset1b.Click += Handle_Drive_Button_Clicks;
-            DrivePreset2a.Click += Handle_Drive_Button_Clicks;
-            DrivePreset2b.Click += Handle_Drive_Button_Clicks;
-            DrivePreset3a.Click += Handle_Drive_Button_Clicks;
-            DrivePreset3b.Click += Handle_Drive_Button_Clicks;
-            DrivePreset4a.Click += Handle_Drive_Button_Clicks;
-            DrivePreset4b.Click += Handle_Drive_Button_Clicks;
-            DrivePreset5a.Click += Handle_Drive_Button_Clicks;
-            DrivePreset5b.Click += Handle_Drive_Button_Clicks;
+            DrivePreset1A.Click += Handle_Drive_Button_Clicks;
+            DrivePreset1B.Click += Handle_Drive_Button_Clicks;
+            DrivePreset2A.Click += Handle_Drive_Button_Clicks;
+            DrivePreset2B.Click += Handle_Drive_Button_Clicks;
+            DrivePreset3A.Click += Handle_Drive_Button_Clicks;
+            DrivePreset3B.Click += Handle_Drive_Button_Clicks;
+            DrivePreset4A.Click += Handle_Drive_Button_Clicks;
+            DrivePreset4B.Click += Handle_Drive_Button_Clicks;
+            DrivePreset5A.Click += Handle_Drive_Button_Clicks;
+            DrivePreset5B.Click += Handle_Drive_Button_Clicks;
             
             
 
@@ -2544,8 +2544,8 @@ namespace DirOpusReImagined
                     switch (thing.Order)
                     {
                         case "1":
-                            Button b1 = (Button)window.FindControl<Control>("DrivePreset1a");
-                            Button b2 = (Button)window.FindControl<Control>("DrivePreset1b");
+                            Button b1 = (Button)window.FindControl<Control>("DrivePreset1A");
+                            Button b2 = (Button)window.FindControl<Control>("DrivePreset1B");
                             if (thing.Content != null)
                             {
                                 b1.Content = "<-" + thing.Content.ToString();
@@ -2557,8 +2557,8 @@ namespace DirOpusReImagined
 
                             break;
                         case "2":
-                            Button b3 = (Button)window.FindControl<Control>("DrivePreset2a");
-                            Button b4 = (Button)window.FindControl<Control>("DrivePreset2b");
+                            Button b3 = (Button)window.FindControl<Control>("DrivePreset2A");
+                            Button b4 = (Button)window.FindControl<Control>("DrivePreset2B");
                             if (thing.Content != null)
                             {
                                 b3.Content = "<-" + thing.Content.ToString();
@@ -2570,8 +2570,8 @@ namespace DirOpusReImagined
 
                             break;
                         case "3":
-                            Button b5 = (Button)window.FindControl<Control>("DrivePreset3a");
-                            Button b6 = (Button)window.FindControl<Control>("DrivePreset3b");
+                            Button b5 = (Button)window.FindControl<Control>("DrivePreset3A");
+                            Button b6 = (Button)window.FindControl<Control>("DrivePreset3B");
                             if (thing.Content != null)
                             {
                                 b5.Content = "<-" + thing.Content.ToString();
@@ -2583,8 +2583,8 @@ namespace DirOpusReImagined
 
                             break;
                         case "4":
-                            Button b7 = (Button)window.FindControl<Control>("DrivePreset4a");
-                            Button b8 = (Button)window.FindControl<Control>("DrivePreset4b");
+                            Button b7 = (Button)window.FindControl<Control>("DrivePreset4A");
+                            Button b8 = (Button)window.FindControl<Control>("DrivePreset4B");
                             if (thing.Content != null)
                             {
                                 b7.Content = "<-" + thing.Content.ToString();
@@ -2596,8 +2596,8 @@ namespace DirOpusReImagined
 
                             break;
                         case "5":
-                            Button b9 = (Button)window.FindControl<Control>("DrivePreset5a");
-                            Button b10 = (Button)window.FindControl<Control>("DrivePreset5b");
+                            Button b9 = (Button)window.FindControl<Control>("DrivePreset5A");
+                            Button b10 = (Button)window.FindControl<Control>("DrivePreset5B");
                             if (thing.Content != null)
                             {
                                 b9.Content = "<-" + thing.Content.ToString();
