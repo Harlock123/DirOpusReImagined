@@ -140,7 +140,7 @@
 					
 					</Grid>
 			</StackPanel>
-			<Label Name="LPLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
+			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 
@@ -199,7 +199,7 @@
 				</Button>
 			</StackPanel>
 			
-			<Label Name="LPLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
+			<Label Name="LpLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="CopyLeftButton" Height="22" Padding="1"
@@ -346,7 +346,7 @@
 			</StackPanel>
 			
 			<StackPanel Orientation="Horizontal">
-				<CheckBox Name="chkShowHidden" 
+				<CheckBox Name="ChkShowHidden" 
 				          Margin="2"
 				          HorizontalAlignment="Center"
 				          IsChecked="True"
