@@ -108,12 +108,12 @@ namespace DirOpusReImagined
                 Image I7 = new Image();
 
                 I1.Source = B2;
-                I1.Width = RPBackButton.Width + 8;
-                I1.Height = RPBackButton.Height + 8;
+                I1.Width = RpBackButton.Width + 8;
+                I1.Height = RpBackButton.Height + 8;
 
                 I2.Source = B2;
-                I2.Width = LPBackButton.Width + 8;
-                I2.Height = LPBackButton.Height + 8;
+                I2.Width = LpBackButton.Width + 8;
+                I2.Height = LpBackButton.Height + 8;
 
                 I3.Source = B3;
                 I3.Width = 24;
@@ -136,15 +136,15 @@ namespace DirOpusReImagined
                 I7.Height = 12;
 
 
-                RPBackButton.Content = I1;
-                LPBackButton.Content = I2;
+                RpBackButton.Content = I1;
+                LpBackButton.Content = I2;
 
                 SwapButton.Content = I7;
                 LeftToRightButton.Content = I5;
                 RightToLeftButton.Content = I6;
 
-                LPDriveButton.Content = I3;
-                RPDriveButton.Content = I4;
+                LpDriveButton.Content = I3;
+                RpDriveButton.Content = I4;
             }
             else
             {
@@ -365,8 +365,8 @@ namespace DirOpusReImagined
             MoveLeftButton.Click += MoveLeftButton_Click;  
             MoveRightButton.Click += MoveRightButton_Click;
 
-            RPBackButton.Click += RPBackButton_Click;
-            LPBackButton.Click += LPBackButton_Click;
+            RpBackButton.Click += RPBackButton_Click;
+            LpBackButton.Click += LPBackButton_Click;
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
