@@ -307,7 +307,7 @@ namespace DirOpusReImagined
                     {
                         FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
                     }
-                    else if (!ShowHidden && !flags.Contains(" H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                    else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                     {
                         FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
                     }
@@ -353,7 +353,7 @@ namespace DirOpusReImagined
                     {
                         FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
                     }
-                    else if (!ShowHidden && !flags.Contains(" H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                    else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                     {
                         FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
                     }

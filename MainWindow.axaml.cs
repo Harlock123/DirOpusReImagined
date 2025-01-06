@@ -176,6 +176,8 @@ namespace DirOpusReImagined
             
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
+
+            //ChkShowHidden.PointerReleased += ChkShowHidden_Checked;
            
             if (LPpath.Text != null) 
                 if (ChkShowHidden != null) 
