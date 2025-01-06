@@ -235,7 +235,7 @@ public partial class AddEditCmdButtonDefinition : Window
         
         foreach (ButtonSettings b in TheButtons)
         {
-            string name = b.Name.Replace("LPButton", "LPB");
+            string name = b.Name.Replace("LpButton", "LPB");
             Button theButton = this.FindControl<Button>(name);
             theButton.Content = b.Content;
             

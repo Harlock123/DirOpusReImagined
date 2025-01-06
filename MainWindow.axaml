@@ -408,119 +408,119 @@
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
 			
-			<Button Name="LPButton1" Grid.Column="0" Grid.Row="0" 
+			<Button Name="LpButton1" Grid.Column="0" Grid.Row="0" 
 					Content="Button 1" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton2" Grid.Column="1" Grid.Row="0" 
+			<Button Name="LpButton2" Grid.Column="1" Grid.Row="0" 
 					Content="Button 2" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton3" Grid.Column="2" Grid.Row="0" 
+			<Button Name="LpButton3" Grid.Column="2" Grid.Row="0" 
 					Content="Button 3" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton4" Grid.Column="3" Grid.Row="0" 
+			<Button Name="LpButton4" Grid.Column="3" Grid.Row="0" 
 					Content="Button 4" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 					<!-- ToolTip.Tip = "{Binding LPBTT4}" -->
 			
-			<Button Name="LPButton5" Grid.Column="4" Grid.Row="0" 
+			<Button Name="LpButton5" Grid.Column="4" Grid.Row="0" 
 					Content="Button 5" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton6" Grid.Column="5" Grid.Row="0" 
+			<Button Name="LpButton6" Grid.Column="5" Grid.Row="0" 
 					Content="Button 6" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 			
-			<Button Name="LPButton7" Grid.Column="0" Grid.Row="1" 
+			<Button Name="LpButton7" Grid.Column="0" Grid.Row="1" 
 					Content="Button 7" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton8" Grid.Column="1" Grid.Row="1" 
+			<Button Name="LpButton8" Grid.Column="1" Grid.Row="1" 
 					Content="Button 8" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton9" Grid.Column="2" Grid.Row="1" 
+			<Button Name="LpButton9" Grid.Column="2" Grid.Row="1" 
 					Content="Button 9" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton10" Grid.Column="3" Grid.Row="1" 
+			<Button Name="LpButton10" Grid.Column="3" Grid.Row="1" 
 					Content="Button 10" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton11" Grid.Column="4" Grid.Row="1" 
+			<Button Name="LpButton11" Grid.Column="4" Grid.Row="1" 
 					Content="Button 11" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton12" Grid.Column="5" Grid.Row="1" 
+			<Button Name="LpButton12" Grid.Column="5" Grid.Row="1" 
 					Content="Button 12" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 			
-			<Button Name="LPButton13" Grid.Column="0" Grid.Row="2" 
+			<Button Name="LpButton13" Grid.Column="0" Grid.Row="2" 
 					Content="Button 13" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton14" Grid.Column="1" Grid.Row="2" 
+			<Button Name="LpButton14" Grid.Column="1" Grid.Row="2" 
 					Content="Button 14" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton15" Grid.Column="2" Grid.Row="2" 
+			<Button Name="LpButton15" Grid.Column="2" Grid.Row="2" 
 					Content="Button 15" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton16" Grid.Column="3" Grid.Row="2" 
+			<Button Name="LpButton16" Grid.Column="3" Grid.Row="2" 
 					Content="Button 16" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton17" Grid.Column="4" Grid.Row="2" 
+			<Button Name="LpButton17" Grid.Column="4" Grid.Row="2" 
 					Content="Button 17" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton18" Grid.Column="5" Grid.Row="2" 
+			<Button Name="LpButton18" Grid.Column="5" Grid.Row="2" 
 					Content="Button 18" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 			
-			<Button Name="LPButton19" Grid.Column="0" Grid.Row="3" 
+			<Button Name="LpButton19" Grid.Column="0" Grid.Row="3" 
 					Content="Button 19" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton20" Grid.Column="1" Grid.Row="3" 
+			<Button Name="LpButton20" Grid.Column="1" Grid.Row="3" 
 					Content="Button 20" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton21" Grid.Column="2" Grid.Row="3" 
+			<Button Name="LpButton21" Grid.Column="2" Grid.Row="3" 
 					Content="Button 21" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton22" Grid.Column="3" Grid.Row="3" 
+			<Button Name="LpButton22" Grid.Column="3" Grid.Row="3" 
 					Content="Button 22" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton23" Grid.Column="4" Grid.Row="3" 
+			<Button Name="LpButton23" Grid.Column="4" Grid.Row="3" 
 					Content="Button 23" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton24" Grid.Column="5" Grid.Row="3" 
+			<Button Name="LpButton24" Grid.Column="5" Grid.Row="3" 
 					Content="Button 24" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 			
-			<Button Name="LPButton25" Grid.Column="0" Grid.Row="4"
+			<Button Name="LpButton25" Grid.Column="0" Grid.Row="4"
 					Content="Button 25" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton26" Grid.Column="1" Grid.Row="4"
+			<Button Name="LpButton26" Grid.Column="1" Grid.Row="4"
 					Content="Button 26" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton27" Grid.Column="2" Grid.Row="4"
+			<Button Name="LpButton27" Grid.Column="2" Grid.Row="4"
 					Content="Button 27" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton28" Grid.Column="3" Grid.Row="4"
+			<Button Name="LpButton28" Grid.Column="3" Grid.Row="4"
 					Content="Button 28" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton29" Grid.Column="4" Grid.Row="4"
+			<Button Name="LpButton29" Grid.Column="4" Grid.Row="4"
 					Content="Button 29" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton30" Grid.Column="5" Grid.Row="4"
+			<Button Name="LpButton30" Grid.Column="5" Grid.Row="4"
 					Content="Button 30" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 			
-			<Button Name="LPButton31" Grid.Column="0" Grid.Row="5"
+			<Button Name="LpButton31" Grid.Column="0" Grid.Row="5"
 					Content="Button 31" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton32" Grid.Column="1" Grid.Row="5"
+			<Button Name="LpButton32" Grid.Column="1" Grid.Row="5"
 					Content="Button 32" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton33" Grid.Column="2" Grid.Row="5"
+			<Button Name="LpButton33" Grid.Column="2" Grid.Row="5"
 					Content="Button 33" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton34" Grid.Column="3" Grid.Row="5"
+			<Button Name="LpButton34" Grid.Column="3" Grid.Row="5"
 					Content="Button 34" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton35" Grid.Column="4" Grid.Row="5"
+			<Button Name="LpButton35" Grid.Column="4" Grid.Row="5"
 					Content="Button 35" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
-			<Button Name="LPButton36" Grid.Column="5" Grid.Row="5"
+			<Button Name="LpButton36" Grid.Column="5" Grid.Row="5"
 					Content="Button 36" HorizontalAlignment="Stretch" 
 					VerticalAlignment="Stretch"/>
 		</Grid>

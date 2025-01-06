@@ -1,7 +1,7 @@
 ﻿<Settings>
 	<Buttons>
 		<Button>
-			<Name>LPButton1</Name>
+			<Name>LpButton1</Name>
 			<Content>VSCODE here</Content>
 			<Background>Red</Background>
 			<Foreground>Black</Foreground>
@@ -14,7 +14,7 @@
 			<Window>True</Window>
 		</Button>
 		<Button>
-			<Name>LPButton2</Name>
+			<Name>LpButton2</Name>
 			<Content>VSCODE All Files</Content>
 			<Action>code</Action>
 			<Args>%AF%</Args>
@@ -22,7 +22,7 @@
 			<Window>True</Window>
 		</Button>
 		<Button>
-			<Name>LPButton3</Name>
+			<Name>LpButton3</Name>
 			<Content>NotePad all seq</Content>
 			<Action>notepad.exe</Action>
 			<Args>%LAF%</Args>
@@ -30,7 +30,7 @@
 			<Window>False</Window>
 		</Button>
 		<Button>
-			<Name>LPButton4</Name>
+			<Name>LpButton4</Name>
 			<Content>Code Diff</Content>
 			<Action>code</Action>
 			<Args>--diff %LF1% %RF1%</Args>
@@ -39,7 +39,7 @@
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
 		<Button>
-			<Name>LPButton31</Name>
+			<Name>LpButton31</Name>
 			<Content>Configure Buttons</Content>
 			<Action>%BUTTONCONFIG%</Action>
 			<Args></Args>
@@ -48,7 +48,7 @@
 			<ToolTip>Calls the Internal Button configure Interface</ToolTip>
 		</Button>
 		<Button>
-			<Name>LPButton33</Name>
+			<Name>LpButton33</Name>
 			<Content>Windows Terminal on Left</Content>
 			<Action>wt</Action>
 			<Args>-d %LPATH%</Args>
@@ -57,7 +57,7 @@
 			<ToolTip>Opens a windows terminal in the filder shown on the left panel</ToolTip>
 		</Button>
 		<Button>
-			<Name>LPButton34</Name>
+			<Name>LpButton34</Name>
 			<Content>Windows Terminal on Right</Content>
 			<Action>wt</Action>
 			<Args>-d %RPATH%</Args>
@@ -66,7 +66,7 @@
 			<ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
 		</Button>
 		<Button>
-			<Name>LPButton35</Name>
+			<Name>LpButton35</Name>
 			<Content>Terminal on Left</Content>
 			<Action>alacritty</Action>
 			<Args>--working-directory %LPATH%</Args>
@@ -75,7 +75,7 @@
 			<ToolTip>Opens an alacritty terminal in the filder shown on the left panel</ToolTip>
 		</Button>
 		<Button>
-			<Name>LPButton36</Name>
+			<Name>LpButton36</Name>
 			<Content>Terminal on right</Content>
 			<Action>alacritty</Action>
 			<Args>--working-directory %RPATH%</Args>
