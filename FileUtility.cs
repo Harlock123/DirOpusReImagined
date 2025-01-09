@@ -278,95 +278,94 @@ namespace DirOpusReImagined
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            ThePanel.SuspendRendering = true;
+                ThePanel.SuspendRendering = true;
 
-            ThePanel.Items.Clear();
-            List<Object> FileList = new List<Object>();
+                ThePanel.Items.Clear();
+                List<Object> FileList = new List<Object>();
 
-            foreach (string dir in Directories)
-            {
-                DirectoryInfo di = new DirectoryInfo(dir);
-                try
+                foreach (string dir in Directories)
                 {
-
-                    if (di.Attributes.HasFlag(FileAttributes.System))
-                    {
-                        continue;
-                    }
-
-                    string flags = GetAbbreviatedAttributes(di.Attributes);
-                                        
-                    var ds = di.GetDirectories().GetUpperBound(0) + 1;
-                    var fs = di.GetFiles().GetUpperBound(0) + 1;
-                    
-                    // if we are showing hidden files 
-                    // and the flags contain the hidden flag
-                    // then we add it to the list
-
-                    if (ShowHidden) // Who cares show em all
-                    {
-                        FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
-                    }
-                    else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                    {
-                        FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
-                    }
-                    
-                    //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    
+                    DirectoryInfo di = new DirectoryInfo(dir);
                     try
-                    {                    
-                        FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
+                    {
+
+                        if (di.Attributes.HasFlag(FileAttributes.System))
+                        {
+                            continue;
+                        }
+
+                        string flags = GetAbbreviatedAttributes(di.Attributes);
+                                        
+                        var ds = di.GetDirectories().GetUpperBound(0) + 1;
+                        var fs = di.GetFiles().GetUpperBound(0) + 1;
+                    
+                        // if we are showing hidden files 
+                        // and the flags contain the hidden flag
+                        // then we add it to the list
+
+                        if (ShowHidden) // Who cares show em all
+                        {
+                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        }
+                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                        {
+                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        }
+                    
+                        //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                    }
+                    catch (UnauthorizedAccessException)
+                    {   
+                        try
+                        {                    
+                            FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    //var ds = di.GetDirectories().GetUpperBound(0);
+                    //var fs = di.GetFiles().GetUpperBound(0);
+
+                    //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
+                }
+
+                // Using Linq to sort the files alphabetically
+                var files = Directory.EnumerateFiles(PATHNAME)
+                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                    .ToList(); ;
+
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(file);
+
+                        FileAttributes fa = File.GetAttributes(fi.FullName);
+
+                        string flags = GetAbbreviatedAttributes(fa);
+
+                        string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
+
+                        if (ShowHidden) // Again who cares
+                        {
+                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        }
+                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                        {
+                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        }
+                        
+                        //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
                     }
                     catch
                     {
-
+                        
                     }
                 }
-                //var ds = di.GetDirectories().GetUpperBound(0);
-                //var fs = di.GetFiles().GetUpperBound(0);
 
-                //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
-            }
-
-            // Using Linq to sort the files alphabetically
-            var files = Directory.EnumerateFiles(PATHNAME)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToList(); ;
-
-            foreach (string file in files)
-            {
-                try
-                {
-                    FileInfo fi = new FileInfo(file);
-
-                    FileAttributes fa = File.GetAttributes(fi.FullName);
-
-                    string flags = GetAbbreviatedAttributes(fa);
-
-                    string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
-
-                    if (ShowHidden) // Again who cares
-                    {
-                        FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
-                    }
-                    else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                    {
-                        FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
-                    }
-                    
-                    //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
-                }
-                catch
-                {
-                    
-                }
-            }
-
-            ThePanel.Items = FileList.OfType<object>().ToList(); 
+                ThePanel.Items = FileList.OfType<object>().ToList(); 
 
 
             }
