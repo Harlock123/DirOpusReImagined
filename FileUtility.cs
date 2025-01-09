@@ -257,6 +257,154 @@ namespace DirOpusReImagined
         /// <param name="ThePanel">The file panel to populate.</param>
         /// <param name="PATHNAME">The path name of the directory to populate from.</param>
         /// <param name="ShowHidden">A boolean value indicating whether to show hidden files.</param>
+        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, bool SortByName)
+        {
+            //LPgrid.PopulateGrid(PATHNAME);
+
+            //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
+
+            // using linq to sort the directories by name alphabetically
+            
+            if (PATHNAME == null || PATHNAME == "")
+            {
+                return;
+            }
+            
+            
+            try
+            {
+                
+                var Directories = Directory.EnumerateDirectories(PATHNAME)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+                ThePanel.SuspendRendering = true;
+
+                ThePanel.Items.Clear();
+                List<AFileEntry> FileList = new List<AFileEntry>();
+
+                foreach (string dir in Directories)
+                {
+                    DirectoryInfo di = new DirectoryInfo(dir);
+                    try
+                    {
+
+                        if (di.Attributes.HasFlag(FileAttributes.System))
+                        {
+                            continue;
+                        }
+
+                        string flags = GetAbbreviatedAttributes(di.Attributes);
+                                        
+                        var ds = di.GetDirectories().GetUpperBound(0) + 1;
+                        var fs = di.GetFiles().GetUpperBound(0) + 1;
+                    
+                        // if we are showing hidden files 
+                        // and the flags contain the hidden flag
+                        // then we add it to the list
+
+                        if (ShowHidden) // Who cares show em all
+                        {
+                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        }
+                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                        {
+                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        }
+                    
+                        //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                    }
+                    catch (UnauthorizedAccessException)
+                    {   
+                        try
+                        {                    
+                            FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    //var ds = di.GetDirectories().GetUpperBound(0);
+                    //var fs = di.GetFiles().GetUpperBound(0);
+
+                    //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
+                }
+
+                // Using Linq to sort the files alphabetically
+                var files = Directory.EnumerateFiles(PATHNAME)
+                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                    .ToList(); ;
+
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(file);
+
+                        FileAttributes fa = File.GetAttributes(fi.FullName);
+
+                        string flags = GetAbbreviatedAttributes(fa);
+
+                        string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
+
+                        if (ShowHidden) // Again who cares
+                        {
+                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        }
+                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
+                        {
+                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        }
+                        
+                        //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                    }
+                    catch
+                    {
+                        
+                    }
+                }
+
+                if (SortByName)
+                {
+                    FileList = FileList.OrderBy(fe => fe.Name ).ToList();
+                }
+                else
+                {
+                    FileList = FileList.OrderBy(fe => fe.FileSize ).ToList();
+                }
+                
+                ThePanel.Items = FileList.OfType<object>().ToList(); 
+
+
+            }
+            catch (Exception e)
+            {
+                MessageBox MB = new MessageBox(e.Message);
+
+                MB.Show();
+                
+                // if (ThePanel.Name == "RPgrid")
+                // {
+                //     RPpath.Text = oldpath;
+                // }
+                // else
+                // {
+                //     LPpath.Text = oldpath;
+                // }
+                
+            }
+            
+            
+            ThePanel.SuspendRendering = false;
+        }
+
+/// <summary>
+        /// Populates a file panel with the directories and files from a specified path.
+        /// </summary>
+        /// <param name="ThePanel">The file panel to populate.</param>
+        /// <param name="PATHNAME">The path name of the directory to populate from.</param>
+        /// <param name="ShowHidden">A boolean value indicating whether to show hidden files.</param>
         public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden)
         {
             //LPgrid.PopulateGrid(PATHNAME);
@@ -389,7 +537,8 @@ namespace DirOpusReImagined
             
             ThePanel.SuspendRendering = false;
         }
-
+        
+        
         /// <summary>
         /// Abbreviates the given file attributes and returns the result as a string.
         /// </summary>

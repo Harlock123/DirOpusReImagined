@@ -12,6 +12,7 @@ public partial class CreateArchive : Window
 {
     private ThePanelSetup? _panelSetup;
     private bool _ShowHidden = true;
+    private bool _SortByName = true;
     
     public CreateArchive()
     {
@@ -25,6 +26,7 @@ public partial class CreateArchive : Window
         InitializeComponent();
         _panelSetup = panelSetup;
         _ShowHidden = ShowHidden;
+        
         
         OkButton.Click += OkButton_Click;
         CancelButton.Click += CancelButton_Click;   
