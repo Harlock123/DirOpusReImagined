@@ -257,6 +257,7 @@ namespace DirOpusReImagined
         /// <param name="ThePanel">The file panel to populate.</param>
         /// <param name="PATHNAME">The path name of the directory to populate from.</param>
         /// <param name="ShowHidden">A boolean value indicating whether to show hidden files.</param>
+        /// <param name="SortByName">A boolean value indicating the results get sorted by Name</param>
         public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, bool SortByName)
         {
             //LPgrid.PopulateGrid(PATHNAME);

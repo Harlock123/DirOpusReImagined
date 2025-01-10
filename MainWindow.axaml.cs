@@ -526,8 +526,8 @@ namespace DirOpusReImagined
         /// /
         private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
         { 
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
             
         }
 
@@ -1841,7 +1841,7 @@ namespace DirOpusReImagined
                 {
                     oldpath = RPpath.Text;
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
                 {
@@ -1913,7 +1913,7 @@ namespace DirOpusReImagined
                     // Its A folder so gets go into it
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
                 {
@@ -2033,14 +2033,14 @@ namespace DirOpusReImagined
         {
             if (LPpath.Text != null) 
                 if (ChkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
         }
 
         private void RefreshRPGrid()
         {
             if (RPpath.Text != null) 
                 if (ChkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
         }   
         
         private string GetRootDirectoryPath()
