@@ -2432,9 +2432,11 @@ namespace DirOpusReImagined
                 // Apply settings to each button
                 foreach (var buttonSettings in buttonSettingsList)
                 {
+                    buttonSettings.Name = buttonSettings.Name.Replace("LP", "Lp");
+                    
                     // Find the button by its name
                     Button button = (Button)grid.FindControl<Control>(buttonSettings.Name);
-
+                    
                     // Check if the button control exists
                     if (button != null)
                     {

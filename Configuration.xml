@@ -38,6 +38,15 @@
 			<Window>False</Window>
 			<ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
 		</Button>
+        <Button>
+            <Name>LpButton5</Name>
+            <Content>Edit w Code</Content>
+            <Action>code</Action>
+            <Args>%AF%</Args>
+            <Shell>True</Shell>
+            <Window>False</Window>
+            <ToolTip>Call VSCODE with the the AF selected file argument (First Left Panel, the Right Panel if nothing selected in Left Panel</ToolTip>
+        </Button>
 		<Button>
 			<Name>LpButton31</Name>
 			<Content>Configure Buttons</Content>
