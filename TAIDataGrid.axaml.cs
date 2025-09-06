@@ -3113,6 +3113,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3136,6 +3137,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3159,6 +3161,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3181,6 +3184,8 @@ namespace DirOpusReImagined
             Name = name;
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
+                
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3220,6 +3225,9 @@ namespace DirOpusReImagined
 
         public string ConvertNumberToReadableString(long number)
         {
+            
+            return number.ToString();
+            
             const int scale = 1024;
 
             string[] orders = new string[] { "b", "Kb", "Mb", "Gb" };
