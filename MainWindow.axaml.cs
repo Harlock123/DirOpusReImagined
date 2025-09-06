@@ -976,24 +976,50 @@ namespace DirOpusReImagined
 
                                 foreach (string arg in args)
                                 {
-                                    Process.Start(new ProcessStartInfo()
+                                    var process = Process.Start(new ProcessStartInfo()
                                     {
                                         FileName = item.Bcontent,
                                         Arguments = arg,
                                         UseShellExecute = item.ShellExecute,
                                         CreateNoWindow = item.ShowWindow
-                                    }).WaitForExit();
+                                    });
+                                        
+                                    if (process != null)
+                                    {
+                                        process.WaitForExit();
+                                        process.Dispose(); // Good practice
+                                    }
+                                    else
+                                    {
+                                        // we got a null process - this is bad
+                                        MessageBox mb = new MessageBox("Failed to start process: " + item.Bcontent);
+                                        mb.ShowDialog(this);
+                                    }
                                 }
                             }
                             else
                             {
-                                Process.Start(new ProcessStartInfo()
+                                var process = Process.Start(new ProcessStartInfo()
                                 {
                                     FileName = item.Bcontent,
                                     Arguments = newaction,
                                     UseShellExecute = item.ShellExecute,
                                     CreateNoWindow = item.ShowWindow
                                 });
+                                
+                                if (process != null)
+                                {
+                                    process.WaitForExit();
+                                    process.Dispose(); // Good practice
+                                }
+                                else
+                                {
+                                    // we got a null process - this is bad
+                                    MessageBox mb = new MessageBox("Failed to start process: " + item.Bcontent);
+                                    mb.ShowDialog(this);
+                                }
+                                
+                                
                             }
 
 
