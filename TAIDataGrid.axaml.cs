@@ -2038,8 +2038,9 @@ namespace DirOpusReImagined
             // Get the current pointer position relative to the UserControl
             //Point position = e.GetPosition(this);
             // Do something with this 411
-            
-            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+
+            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind ==
+                PointerUpdateKind.RightButtonPressed)
             {
                 // Right mouse button was pressed
                 // Handle the right button click here
@@ -2060,13 +2061,12 @@ namespace DirOpusReImagined
                 if (_selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
                 {
                     // we are unselecting an item
-                    _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);    
+                    _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);
                 }
                 else
                 {
                     // we are adding the item to the selection list
                     _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
-
                 }
             }
             else
@@ -2078,58 +2078,60 @@ namespace DirOpusReImagined
                     {
                         int startrow = -1;
                         int endrow = -1;
-                        
+
                         foreach (AFileEntry af in _items)
                         {
                             if (af == _selecteditems[0])
                             {
                                 startrow = _items.IndexOf(af);
                             }
-                            
+
                             if (af == TheItemUnderTheMouse.ItemUnderMouse)
                             {
                                 endrow = _items.IndexOf(af);
                             }
                         }
-                        
+
                         if (startrow > endrow)
                         {
                             // we need to swap the start and end rows
                             int temp = startrow;
                             startrow = endrow;
                             endrow = temp;
-                        }   
-                        
+                        }
+
                         _selecteditems.Clear();
-                        
+
                         for (int i = startrow; i <= endrow; i++)
                         {
                             _selecteditems.Add(_items[i]);
-                        }   
-                        
+                        }
                     }
                     else
                     {
                         // we are SHIFT clicking but nothing has been selected yet
                         _selecteditems.Clear();
                         _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
-                        
                     }
                 }
                 else
                 {
-                    // we are not CTRL clicking so single select
-                    _selecteditems.Clear();
-                    _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                    // No modifier keys - check if clicking on already selected item
+                    if (_selecteditems.Count == 1 && _selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
+                    {
+                        // Clicking on the only selected item - deselect it
+                        _selecteditems.Clear();
+                    }
+                    else
+                    {
+                        // Normal single select behavior
+                        _selecteditems.Clear();
+                        _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                    }
                 }
-
-                // // we are not CTRL clicking so single select
-                // _selecteditems.Clear(); 
-                // _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
-
             }
-            // Look to handle double click here
 
+            // Look to handle double click here
             if (e.ClickCount == 1)
             {
                 _clickCounter++;
@@ -2148,8 +2150,126 @@ namespace DirOpusReImagined
                 OnDoubleClick(sender, e);
                 _clickCounter = 0;
             }
-
         }
+        
+        
+        // private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+        // {
+        //     // Get the current pointer position relative to the UserControl
+        //     //Point position = e.GetPosition(this);
+        //     // Do something with this 411
+        //     
+        //     if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+        //     {
+        //         // Right mouse button was pressed
+        //         // Handle the right button click here
+        //         // Just bail here and pass it off to the context menu
+        //
+        //         return;
+        //     }
+        //
+        //     // We have a rowclicked event so fire it
+        //     if (TheItemUnderTheMouse.ItemUnderMouse != null)
+        //     {
+        //         GridItemClick?.Invoke(this, TheItemUnderTheMouse);
+        //     }
+        //
+        //     if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        //     {
+        //         // We are CTRL clicking on items so multi select
+        //         if (_selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
+        //         {
+        //             // we are unselecting an item
+        //             _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);    
+        //         }
+        //         else
+        //         {
+        //             // we are adding the item to the selection list
+        //             _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        //         {
+        //             // here we want to see if we are selecting a range of items
+        //             if (_selecteditems.Count > 0)
+        //             {
+        //                 int startrow = -1;
+        //                 int endrow = -1;
+        //                 
+        //                 foreach (AFileEntry af in _items)
+        //                 {
+        //                     if (af == _selecteditems[0])
+        //                     {
+        //                         startrow = _items.IndexOf(af);
+        //                     }
+        //                     
+        //                     if (af == TheItemUnderTheMouse.ItemUnderMouse)
+        //                     {
+        //                         endrow = _items.IndexOf(af);
+        //                     }
+        //                 }
+        //                 
+        //                 if (startrow > endrow)
+        //                 {
+        //                     // we need to swap the start and end rows
+        //                     int temp = startrow;
+        //                     startrow = endrow;
+        //                     endrow = temp;
+        //                 }   
+        //                 
+        //                 _selecteditems.Clear();
+        //                 
+        //                 for (int i = startrow; i <= endrow; i++)
+        //                 {
+        //                     _selecteditems.Add(_items[i]);
+        //                 }   
+        //                 
+        //             }
+        //             else
+        //             {
+        //                 // we are SHIFT clicking but nothing has been selected yet
+        //                 _selecteditems.Clear();
+        //                 _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //                 
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // we are not CTRL clicking so single select
+        //             _selecteditems.Clear();
+        //             _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //         }
+        //
+        //         // // we are not CTRL clicking so single select
+        //         // _selecteditems.Clear(); 
+        //         // _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
+        //
+        //     }
+        //     // Look to handle double click here
+        //
+        //     if (e.ClickCount == 1)
+        //     {
+        //         _clickCounter++;
+        //         if (_clickCounter == 2)
+        //         {
+        //             OnDoubleClick(sender, e);
+        //             _clickCounter = 0;
+        //         }
+        //         else
+        //         {
+        //             _doubleClickTimer.Start();
+        //         }
+        //     }
+        //     else
+        //     {
+        //         OnDoubleClick(sender, e);
+        //         _clickCounter = 0;
+        //     }
+        //
+        // }
 
         /// <summary>
         /// Event handler for double-click event.
