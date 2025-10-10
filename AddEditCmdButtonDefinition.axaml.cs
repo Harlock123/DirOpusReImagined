@@ -215,7 +215,7 @@ public partial class AddEditCmdButtonDefinition : Window
     }
 
     private void InitializeComponent()
-    {
+    { 
         AvaloniaXamlLoader.Load(this);
     }
 
