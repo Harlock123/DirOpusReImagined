@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia;
 
 using Avalonia.Interactivity;
 using Avalonia.Data;
@@ -23,9 +22,9 @@ public partial class AddEditCmdButtonDefinition : Window
 {
     List<ButtonSettings> TheButtons = new List<ButtonSettings>();
     
-    public MainWindow TheMainWindow = null;
+    public MainWindow? TheMainWindow ;//= null;
 
-    private Button TheCurrentButton = null;
+    private Button? TheCurrentButton ;//= null;
     
     //SolidColorBrush theDefaultBackground = new SolidColorBrush((Color)Color.Parse("Grey"));
     

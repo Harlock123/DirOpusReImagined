@@ -406,122 +406,123 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
+				
 			</Grid.RowDefinitions>
 			
 			<Button Name="LpButton1" Grid.Column="0" Grid.Row="0" 
-					Content="Button 1" HorizontalAlignment="Stretch" 
+					Content="Button 1" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton2" Grid.Column="1" Grid.Row="0" 
-					Content="Button 2" HorizontalAlignment="Stretch" 
+					Content="Button 2" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton3" Grid.Column="2" Grid.Row="0" 
-					Content="Button 3" HorizontalAlignment="Stretch" 
+					Content="Button 3" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton4" Grid.Column="3" Grid.Row="0" 
-					Content="Button 4" HorizontalAlignment="Stretch" 
+					Content="Button 4" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 					<!-- ToolTip.Tip = "{Binding LPBTT4}" -->
 			
 			<Button Name="LpButton5" Grid.Column="4" Grid.Row="0" 
-					Content="Button 5" HorizontalAlignment="Stretch" 
+					Content="Button 5" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton6" Grid.Column="5" Grid.Row="0" 
-					Content="Button 6" HorizontalAlignment="Stretch" 
+					Content="Button 6" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton7" Grid.Column="0" Grid.Row="1" 
-					Content="Button 7" HorizontalAlignment="Stretch" 
+					Content="Button 7" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton8" Grid.Column="1" Grid.Row="1" 
-					Content="Button 8" HorizontalAlignment="Stretch" 
+					Content="Button 8" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton9" Grid.Column="2" Grid.Row="1" 
-					Content="Button 9" HorizontalAlignment="Stretch" 
+					Content="Button 9" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton10" Grid.Column="3" Grid.Row="1" 
-					Content="Button 10" HorizontalAlignment="Stretch" 
+					Content="Button 10" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton11" Grid.Column="4" Grid.Row="1" 
-					Content="Button 11" HorizontalAlignment="Stretch" 
+					Content="Button 11" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton12" Grid.Column="5" Grid.Row="1" 
-					Content="Button 12" HorizontalAlignment="Stretch" 
+					Content="Button 12" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton13" Grid.Column="0" Grid.Row="2" 
-					Content="Button 13" HorizontalAlignment="Stretch" 
+					Content="Button 13" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton14" Grid.Column="1" Grid.Row="2" 
-					Content="Button 14" HorizontalAlignment="Stretch" 
+					Content="Button 14" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton15" Grid.Column="2" Grid.Row="2" 
-					Content="Button 15" HorizontalAlignment="Stretch" 
+					Content="Button 15" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton16" Grid.Column="3" Grid.Row="2" 
-					Content="Button 16" HorizontalAlignment="Stretch" 
+					Content="Button 16" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton17" Grid.Column="4" Grid.Row="2" 
-					Content="Button 17" HorizontalAlignment="Stretch" 
+					Content="Button 17" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton18" Grid.Column="5" Grid.Row="2" 
-					Content="Button 18" HorizontalAlignment="Stretch" 
+					Content="Button 18" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton19" Grid.Column="0" Grid.Row="3" 
-					Content="Button 19" HorizontalAlignment="Stretch" 
+					Content="Button 19" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton20" Grid.Column="1" Grid.Row="3" 
-					Content="Button 20" HorizontalAlignment="Stretch" 
+					Content="Button 20" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton21" Grid.Column="2" Grid.Row="3" 
-					Content="Button 21" HorizontalAlignment="Stretch" 
+					Content="Button 21" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton22" Grid.Column="3" Grid.Row="3" 
-					Content="Button 22" HorizontalAlignment="Stretch" 
+					Content="Button 22" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton23" Grid.Column="4" Grid.Row="3" 
-					Content="Button 23" HorizontalAlignment="Stretch" 
+					Content="Button 23" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton24" Grid.Column="5" Grid.Row="3" 
-					Content="Button 24" HorizontalAlignment="Stretch" 
+					Content="Button 24" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton25" Grid.Column="0" Grid.Row="4"
-					Content="Button 25" HorizontalAlignment="Stretch" 
+					Content="Button 25" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton26" Grid.Column="1" Grid.Row="4"
-					Content="Button 26" HorizontalAlignment="Stretch" 
+					Content="Button 26" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton27" Grid.Column="2" Grid.Row="4"
-					Content="Button 27" HorizontalAlignment="Stretch" 
+					Content="Button 27" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton28" Grid.Column="3" Grid.Row="4"
-					Content="Button 28" HorizontalAlignment="Stretch" 
+					Content="Button 28" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton29" Grid.Column="4" Grid.Row="4"
-					Content="Button 29" HorizontalAlignment="Stretch" 
+					Content="Button 29" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton30" Grid.Column="5" Grid.Row="4"
-					Content="Button 30" HorizontalAlignment="Stretch" 
+					Content="Button 30" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton31" Grid.Column="0" Grid.Row="5"
-					Content="Button 31" HorizontalAlignment="Stretch" 
+					Content="Button 31" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton32" Grid.Column="1" Grid.Row="5"
-					Content="Button 32" HorizontalAlignment="Stretch" 
+					Content="Button 32" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton33" Grid.Column="2" Grid.Row="5"
-					Content="Button 33" HorizontalAlignment="Stretch" 
+					Content="Button 33" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton34" Grid.Column="3" Grid.Row="5"
-					Content="Button 34" HorizontalAlignment="Stretch" 
+					Content="Button 34" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton35" Grid.Column="4" Grid.Row="5"
-					Content="Button 35" HorizontalAlignment="Stretch" 
+					Content="Button 35" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton36" Grid.Column="5" Grid.Row="5"
-					Content="Button 36" HorizontalAlignment="Stretch" 
+					Content="Button 36" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 		</Grid>
 	</Grid>
