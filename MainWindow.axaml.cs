@@ -2418,8 +2418,8 @@ namespace DirOpusReImagined
                                              Margin = (string)btn.Element("Margin"),
                                              Action = (string)btn.Element("Action"),
                                              Args = (string)btn.Element("Args"),
-                                             ShellExecute = (string)btn.Element("Shell"),
-                                             ShowWindow = (string)btn.Element("Window"),
+                                             ShellExecute = (string)btn.Element("ShellExecute"),
+                                             ShowWindow = (string)btn.Element("ShowWindow"),
                                              ToolTip = (string)btn.Element("ToolTip")
                                          };
                 

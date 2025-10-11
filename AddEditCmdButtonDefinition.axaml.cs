@@ -75,10 +75,7 @@ public partial class AddEditCmdButtonDefinition : Window
             Button b = this.FindControl<Button>("LPB" + i.ToString());
             b.Click += HandleButtonClicked;
         }
-        
-        //Button b = this.FindControl<Button>("LPB1");
-        
-        //b.
+      
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
