@@ -236,6 +236,13 @@ public partial class AddEditCmdButtonDefinition : Window
         {
             string name = b.Name.Replace("LpButton", "LPB");
             Button theButton = this.FindControl<Button>(name);
+
+            if (theButton == null)
+            {
+                name = b.Name.Replace("LPButton", "LPB");
+                theButton = this.FindControl<Button>(name);
+            }
+            
             theButton.Content = b.Content;
             
             if (b.Background == null)

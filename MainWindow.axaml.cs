@@ -1001,7 +1001,7 @@ namespace DirOpusReImagined
                             {
                                 var process = Process.Start(new ProcessStartInfo()
                                 {
-                                    FileName = item.Bcontent,
+                                    FileName = item.Bcontent.Trim(),
                                     Arguments = newaction,
                                     UseShellExecute = item.ShellExecute,
                                     CreateNoWindow = item.ShowWindow

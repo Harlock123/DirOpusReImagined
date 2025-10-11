@@ -41,9 +41,10 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The size of the line label.
-        /// </
+        /// </summary>
         private int _theLineLabelSize = 10;
-
+        
+        ///<summary>
         /// The size of the data label.
         /// </summary>
         private int _theDataLabelSize = 10;
@@ -60,7 +61,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The brush used to color the content of a grid cell.
-        /// </summary
+        /// </summary>
         private IBrush _gridCellContentBrush = Brushes.Black;
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The brush used to color the selected item in a grid.
-        /// </summary
+        /// </summary>
         private IBrush _gridSelectedItemBrush = Brushes.AliceBlue;
 
         /// <summary>
@@ -256,7 +257,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// Represents the item currently being hovered over by the mouse cursor.
-        /// </summary
+        /// </summary>
         private object _itemUnderMouse = null;
 
         /// <summary>
@@ -306,7 +307,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The private list of integers used to store the columns to justify in a table.
-        /// </summary
+        /// </summary>
         private List<int> _justifyColumns = new List<int>();
 
         /// <summary>
@@ -478,6 +479,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grid title font
+        /// <summary>
         /// Gets or sets the brush used for the title of the grid.
         /// </summary>
         /// <value>
@@ -504,7 +506,7 @@ namespace DirOpusReImagined
         /// <remarks>
         /// The default value is "Blue".
         /// The title background color will be updated automatically when the property value is set.
-        /// </remarks
+        /// </remarks>
         [DefaultValue("Blue")]
         public IBrush GridTitleBackground
         {
@@ -654,7 +656,7 @@ namespace DirOpusReImagined
         /// </summary>
         /// <value>
         /// The typeface for the grid title. The default value is "Arial, 12, Normal, Normal".
-        /// </value
+        /// </value>
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTitleTypeface
         {
@@ -1013,7 +1015,7 @@ namespace DirOpusReImagined
         /// Throughout this entire process, any exceptions thrown during rendering are caught and
         /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions are
         /// logged for debugging purposes.
-        /// </summary
+        /// </summary>
         public void ReRender()
         {
             try
@@ -1639,7 +1641,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// This method is used to test the PopulateTestData method.
-        /// </summary
+        /// </summary>
         public void TestPopulate()
         {
             PopulateTestData();
@@ -3226,6 +3228,8 @@ namespace DirOpusReImagined
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
+
+        //public bool FileSizeCollapsedNumber { get; set; } = false;
         
         public AFileEntry(string name, int filesize, bool isdirectory)
         {
@@ -3342,10 +3346,10 @@ namespace DirOpusReImagined
 
             //Files = files;
         }
-
+        
+        
         public string ConvertNumberToReadableString(long number)
         {
-            
             return number.ToString();
             
             const int scale = 1024;
@@ -3363,6 +3367,7 @@ namespace DirOpusReImagined
             }
 
             double result = number;
+            
             return string.Format("{0:0.##}{1}", result, orders[order]);
         }
     }
