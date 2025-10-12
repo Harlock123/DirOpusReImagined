@@ -948,21 +948,16 @@ namespace DirOpusReImagined
                     
                     if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
                     {
-                        
-                        
                         // we need to open the button config window
                         AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
                         BC.TheMainWindow = this;
                         BC.ShowDialog(this);
                         break;
                     }
-                    
-
                     string newaction = ParseTheArgs(item.Bargs);
 
                     if (newaction != "%ERROR%")
                     {
-                        
                         try
                         {
                             if (newaction.Contains(","))
@@ -970,59 +965,18 @@ namespace DirOpusReImagined
                                 // we have comma seperated arguments so
                                 // we need to split them up and pass them
                                 // to the process start info one at a time
-                                // with Process.Waitforexit() in between
 
                                 string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
                                 foreach (string arg in args)
                                 {
-                                    var process = Process.Start(new ProcessStartInfo()
-                                    {
-                                        FileName = item.Bcontent,
-                                        Arguments = arg,
-                                        UseShellExecute = item.ShellExecute,
-                                        CreateNoWindow = item.ShowWindow
-                                    });
-                                        
-                                    if (process != null)
-                                    {
-                                        process.WaitForExit();
-                                        process.Dispose(); // Good practice
-                                    }
-                                    else
-                                    {
-                                        // we got a null process - this is bad
-                                        MessageBox mb = new MessageBox("Failed to start process: " + item.Bcontent);
-                                        mb.ShowDialog(this);
-                                    }
+                                    StartDetachedProcess(item.Bcontent, arg, item.ShellExecute, item.ShowWindow);
                                 }
                             }
                             else
                             {
-                                var process = Process.Start(new ProcessStartInfo()
-                                {
-                                    FileName = item.Bcontent.Trim(),
-                                    Arguments = newaction,
-                                    UseShellExecute = item.ShellExecute,
-                                    CreateNoWindow = item.ShowWindow
-                                });
-                                
-                                if (process != null)
-                                {
-                                    process.WaitForExit();
-                                    process.Dispose(); // Good practice
-                                }
-                                else
-                                {
-                                    // we got a null process - this is bad
-                                    MessageBox mb = new MessageBox("Failed to start process: " + item.Bcontent);
-                                    mb.ShowDialog(this);
-                                }
-                                
-                                
+                                StartDetachedProcess(item.Bcontent.Trim(), newaction, item.ShellExecute, item.ShowWindow);
                             }
-
-
                         }
                         catch (Exception ex)
                         {
@@ -1038,8 +992,54 @@ namespace DirOpusReImagined
 
                 }
             }
+        }
+        
+        private void StartDetachedProcess(string fileName, string arguments, bool useShellExecute, bool createNoWindow)
+        {
+            try
+            {
+                if (Environment.OSVersion.Platform == PlatformID.Unix || 
+                    Environment.OSVersion.Platform == PlatformID.MacOSX)
+                {
+                    // On Unix/Linux/macOS, use nohup or start a new session
 
-
+                    string args = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"";
+                    
+                    var startInfo = new ProcessStartInfo()
+                    {
+                        FileName = "/bin/sh",
+                        Arguments = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+                    
+                    var process = Process.Start(startInfo);
+                    process?.WaitForExit(100); // Wait briefly for shell to spawn the detached process
+                }
+                else // Windows
+                {
+                    // On Windows, use cmd.exe with START command to detach
+                    var startInfo = new ProcessStartInfo()
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/C start \"\" \"{fileName}\" {arguments}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false
+                    };
+                    
+                    var process = Process.Start(startInfo);
+                    process?.WaitForExit(100); // Wait briefly for cmd to spawn the detached process
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox mb = new MessageBox($"Failed to start process: {fileName}\nError: {ex.Message}");
+                mb.ShowDialog(this);
+            }
         }
 
         private string ParseTheArgs(string bcontent)
