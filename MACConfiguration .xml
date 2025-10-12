@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+  <Buttons>
+    <Button>
+      <Name>LpButton1</Name>
+      <Content>VSCODE here</Content>
+      <Background>Red</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>code</Action>
+      <Args>%FD%</Args>
+      <ToolTip>Open VS Code on whatever folder is select in the LEFT panel or the RIGHT panel if nothing is selected in the LEFT panel</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton2</Name>
+      <Content>VSCODE All Files</Content>
+      <Background>DimGray</Background>
+      <Foreground>White</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>code</Action>
+      <Args>%AF%</Args>
+      <ToolTip />
+    </Button>
+    <Button>
+      <Name>LpButton3</Name>
+      <Content>NotePad all seq</Content>
+      <Background>DimGray</Background>
+      <Foreground>White</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>notepad.exe</Action>
+      <Args>%LAF%</Args>
+      <ToolTip />
+    </Button>
+    <Button>
+      <Name>LpButton4</Name>
+      <Content>Code Diff</Content>
+      <Background>DimGray</Background>
+      <Foreground>White</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>code</Action>
+      <Args>--diff %LF1% %RF1%</Args>
+      <ToolTip>Call VSCODE with the --diff parameter passing the first file selected in the Left and Right panel as arguments</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton5</Name>
+      <Content>Edit w Code</Content>
+      <Background>DimGray</Background>
+      <Foreground>White</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>code</Action>
+      <Args>%AF%</Args>
+      <ToolTip>Call VSCODE with the the AF selected file argument (First Left Panel, the Right Panel if nothing selected in Left Panel</ToolTip>
+    </Button>
+    <Button>
+      <Name>LPButton13</Name>
+      <Content>Spotify</Content>
+      <Background>Ivory</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin />
+      <Action>open </Action>
+      <Args>/Applications/Spotify.app</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>{ToolTip}</ToolTip>
+    </Button>
+    <Button>
+      <Name>LPButton14</Name>
+      <Content>Microsoft Word</Content>
+      <Background>DarkViolet</Background>
+      <Foreground>AliceBlue</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin />
+      <Action>open</Action>
+      <Args>-a 'Microsoft Word'</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>Launch Microsoft Word</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton31</Name>
+      <Content>Configure Buttons</Content>
+      <Background>GreenYellow</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>%BUTTONCONFIG%</Action>
+      <Args />
+      <ToolTip>Calls the Internal Button configure Interface</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton33</Name>
+      <Content>Windows Terminal on Left</Content>
+      <Background>LightCyan</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>wt</Action>
+      <Args>-d %LPATH%</Args>
+      <ToolTip>Opens a windows terminal in the filder shown on the left panel</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton34</Name>
+      <Content>Windows Terminal on Right</Content>
+      <Background>LightCyan</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>wt</Action>
+      <Args>-d %RPATH%</Args>
+      <ToolTip>Opens windows terminal in the filder shown on the right panel</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton35</Name>
+      <Content>Terminal on Left</Content>
+      <Background>LightCyan</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>alacritty</Action>
+      <Args>--working-directory %LPATH%</Args>
+      <ToolTip>Opens an alacritty terminal in the filder shown on the left panel</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton36</Name>
+      <Content>Terminal on right</Content>
+      <Background>LightCyan</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>alacritty</Action>
+      <Args>--working-directory %RPATH%</Args>
+      <ToolTip>Opens an alacritty terminal in the filder shown on the right panel</ToolTip>
+    </Button>
+  </Buttons>
+  <DrivePresets>
+    <DrivePreset>
+      <Order>1</Order>
+      <Name>Home</Name>
+      <Path>$HOME</Path>
+    </DrivePreset>
+    <DrivePreset>
+      <Order>2</Order>
+      <Name>Root</Name>
+      <Path>$ROOT</Path>
+    </DrivePreset>
+    <DrivePreset>
+      <Order>3</Order>
+      <Name>DT</Name>
+      <Path>$DESKTOP</Path>
+    </DrivePreset>
+    <DrivePreset>
+      <Order>4</Order>
+      <Name>Docs</Name>
+      <Path>$DOCUMENTS</Path>
+    </DrivePreset>
+    <DrivePreset>
+      <Order>5</Order>
+      <Name>Pics</Name>
+      <Path>$PICTURES</Path>
+    </DrivePreset>
+  </DrivePresets>
+  <Executable>
+    <Extensions>
+			EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,AI,
+			PNG,DOC,DOCX,XLS,XLSX,PPT,PPTX,PDF,ZIP,RAR,7Z,WAV,AAC,MP3,MP4,
+			AVI,FLV,WMV,MOV,MPG,MPEG,FLAC,OGG,OGV,WEBM,HTML,HTM,XML,JSON,
+			CSS,JS,TS,CS,CSHARP,CSHTML,ASPX,ASP,PHP,SQL,INI,CFG,LOG,MD,MARKDOWN
+		</Extensions>
+  </Executable>
+  <Images>
+    <ImageExtensions>BMP,JPG,JPEG,PNG,TIFF,TIF,GIF,ICO,PCX,AI</ImageExtensions>
+    <UseIntegratedImageViewer>False</UseIntegratedImageViewer>
+  </Images>
+  <LeftGrid>
+    <FontSize>14</FontSize>
+    <HeaderFontSize>16</HeaderFontSize>
+    <Title>LEFT Grid</Title>
+    <TitleFontSize>20</TitleFontSize>
+    <StartPath>/</StartPath>
+  </LeftGrid>
+  <RightGrid>
+    <FontSize>14</FontSize>
+    <HeaderFontSize>16</HeaderFontSize>
+    <Title>RIGHT Grid</Title>
+    <TitleFontSize>20</TitleFontSize>
+    <StartPath>/</StartPath>
+  </RightGrid>
+</Settings>
