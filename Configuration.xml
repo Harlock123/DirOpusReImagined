@@ -69,11 +69,25 @@
       <HorizontalAlignment>Center</HorizontalAlignment>
       <VerticalAlignment>Center</VerticalAlignment>
       <Margin />
-      <Action>flatpak </Action>
-      <Args>run com.spotify.Client</Args>
-      <ShellExecute>True</ShellExecute>
-      <ShowWindow>True</ShowWindow>
+      <Action>open </Action>
+      <Args>/Applications/Spotify.app</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
       <ToolTip>{ToolTip}</ToolTip>
+    </Button>
+    <Button>
+      <Name>LPButton14</Name>
+      <Content>Microsoft Word</Content>
+      <Background>DarkViolet</Background>
+      <Foreground>AliceBlue</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin />
+      <Action>open</Action>
+      <Args>-a 'Microsoft Word'</Args>
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>Launch Microsoft Word</ToolTip>
     </Button>
     <Button>
       <Name>LpButton31</Name>
