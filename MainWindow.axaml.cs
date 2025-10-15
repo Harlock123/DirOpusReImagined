@@ -1903,12 +1903,12 @@ namespace DirOpusReImagined
                 {
                     // its an actual file so can we execute it?
 
+                    string thingtoexecute = (RPpath.Text + "/" + it.Name);
+                    
                     if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
-
-                        string thingtoexecute = (RPpath.Text + "/" + it.Name);
-
+                        
                         Process.Start(new ProcessStartInfo()
                         {
                             FileName = thingtoexecute,
@@ -1917,11 +1917,23 @@ namespace DirOpusReImagined
 
                         //Process.Start(RPpath.Text + "/" + it.Name);
                     }
-
+                    else
+                    {
+                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                            PlatformID.MacOSX == Environment.OSVersion.Platform)
+                        {
+                            if (IsExecutableOnUnixNet6(thingtoexecute))
+                            {
+                                Process.Start(new ProcessStartInfo()
+                                {
+                                    FileName = thingtoexecute,
+                                    UseShellExecute = true,
+                                });
+                            }
+                        }
+                    }
                 }
-
             }
-                        
         }
                 
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -2032,16 +2044,37 @@ namespace DirOpusReImagined
         {
             bool result = false;
 
-            foreach (string s in ExecutableStuff)
+            if (PlatformID.Win32NT == Environment.OSVersion.Platform)
             {
-                if (v.ToUpper().EndsWith(s))
+                foreach (string s in ExecutableStuff)
                 {
-                    result = true;
-                    break;
+                    if (v.ToUpper().EndsWith(s))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+            else if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                     PlatformID.MacOSX == Environment.OSVersion.Platform)
+            {
+                bool IsExecutableOnUnixNet6(string path)
+                {
+                    return IsExecutableOnUnixNet6(v);
                 }
             }
 
             return result;
+        }
+        
+        private bool IsExecutableOnUnixNet6(string path)
+        {
+            if (!File.Exists(path)) return false;
+            var mode = File.GetUnixFileMode(path);
+            // Check any of the execute bits
+            return  mode.HasFlag(UnixFileMode.UserExecute)
+                     || mode.HasFlag(UnixFileMode.GroupExecute)
+                     || mode.HasFlag(UnixFileMode.OtherExecute);
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
