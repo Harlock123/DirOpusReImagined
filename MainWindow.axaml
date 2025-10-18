@@ -18,9 +18,9 @@
 	<Grid Name="MainWindowGridContainer" 
 	>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="45*"/>
+			<ColumnDefinition Width="40*"/>
 			<ColumnDefinition Width="auto"/>
-			<ColumnDefinition Width="45*"/>
+			<ColumnDefinition Width="40*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
@@ -57,81 +57,81 @@
 				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
 				<Grid >
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="0.5*"/>
-						<ColumnDefinition Width="0.5*"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
 					</Grid.RowDefinitions>
 					<Button Name="DrivePreset1A" Grid.Column="0" Grid.Row="0" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 							Content="&lt; Drv1" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset1B" Grid.Column="1" Grid.Row="0" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drv1 &gt;" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset2A" Grid.Column="0" Grid.Row="1" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 3" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset2B" Grid.Column="1" Grid.Row="1" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 4" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset3A" Grid.Column="0" Grid.Row="2" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 5" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset3B" Grid.Column="1" Grid.Row="2" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 6" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset4A" Grid.Column="0" Grid.Row="3" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 7" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset4B" Grid.Column="1" Grid.Row="3" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 8" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset5A" Grid.Column="0" Grid.Row="4" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 9" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset5B" Grid.Column="1" Grid.Row="4" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 10" 
 					        HorizontalContentAlignment="Right" 
@@ -150,7 +150,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left" 
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- all"
 				        ToolTip.Tip="Selects all the FILES only in the left panel">
 					
@@ -162,7 +162,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right" 
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="all -&gt;"
 				        ToolTip.Tip="Selects all the FILES only in the right panel" >
 					
@@ -176,7 +176,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- clear"
 				        ToolTip.Tip="Clears the items selected in the left panel">
 					
@@ -188,7 +188,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="clear -&gt;"
 				        ToolTip.Tip="Clears the items selected in the right panel" >
 					
@@ -204,7 +204,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- copy"
 				        ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
 				
@@ -214,7 +214,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="copy -&gt;"
 				        ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
@@ -226,7 +226,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- move"
 				        ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
 				
@@ -236,7 +236,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="move -&gt;"
 				        ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
@@ -248,7 +248,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- ren"
 				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
 
@@ -258,7 +258,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="ren -&gt;"
 				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
 			</StackPanel>
@@ -270,7 +270,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- del"
 				        ToolTip.Tip="Deletes the items selected in the left panel"></Button>
 				
@@ -280,7 +280,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="del -&gt;"
 				        ToolTip.Tip="Deletes the items selected in the right panel"></Button>
 			</StackPanel>
@@ -292,7 +292,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- mkdir"
 				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Left Panel"></Button>
 				
@@ -302,7 +302,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="mkdir -&gt;"
 				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Right Panel"></Button>
 			</StackPanel>
@@ -314,7 +314,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- zip"
 				        ToolTip.Tip="Will Create a ZIP file from selected contents in Left Panel"></Button>
 				
@@ -324,7 +324,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="zip -&gt;"
 				        ToolTip.Tip="Will Create a ZIP file from selected contents in Right Panel"></Button>
 			</StackPanel>

@@ -1897,7 +1897,8 @@ namespace DirOpusReImagined
                     oldpath = RPpath.Text;
                     
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                    if (ChkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
                 {
@@ -1939,7 +1940,7 @@ namespace DirOpusReImagined
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
-            
+
             // Kill the tooltip if any
             if (sender != null)
                 ToolTip.SetIsOpen((TaiDataGrid)sender,false);
@@ -1948,25 +1949,16 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    // Its A folder so gets go into it
                     oldpath = LPpath.Text;
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+                    if (ChkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
                 {
                     // its an actual file so can we execute it?
 
-                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
-                    {
-                        string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-
-                        ImageViewer iv = new ImageViewer(thingtoexecute);
-
-                        iv.ShowDialog(this);
-
-                    }
-                    else if (FileExtensionIsExecutable(it.Name.ToUpper()))
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
 
@@ -1978,8 +1970,7 @@ namespace DirOpusReImagined
                             UseShellExecute = true,
                         });
 
-
-                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\",@"\"));
+                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
                     
                 }
@@ -1989,27 +1980,20 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     oldpath = LPpath.Text;
+                    
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
                 {
-                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
-                    {
-                        string thingtoexecute = (LPpath.Text + "//" + it.Name).Replace(@"//", @"/");
-                        
-                        ImageViewer iv = new ImageViewer(thingtoexecute);
+                    // its an actual file so can we execute it?
 
-                        iv.ShowDialog(this);
-
-                    }
-                    else 
+                    string thingtoexecute = (LPpath.Text + "/" + it.Name);
+                    
                     if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
-
-                        string thingtoexecute = (LPpath.Text + "/" + it.Name);
-
+                        
                         Process.Start(new ProcessStartInfo()
                         {
                             FileName = thingtoexecute,
@@ -2018,9 +2002,22 @@ namespace DirOpusReImagined
 
                         //Process.Start(LPpath.Text + "/" + it.Name);
                     }
-
+                    else
+                    {
+                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                            PlatformID.MacOSX == Environment.OSVersion.Platform)
+                        {
+                            if (IsExecutableOnUnixNet6(thingtoexecute))
+                            {
+                                Process.Start(new ProcessStartInfo()
+                                {
+                                    FileName = thingtoexecute,
+                                    UseShellExecute = true,
+                                });
+                            }
+                        }
+                    }
                 }
-
             }
         }
 
@@ -2086,6 +2083,11 @@ namespace DirOpusReImagined
 
             LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16);
             RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16 );
+            
+            // here we should also set the sizes for other elements of the UI
+            // like the center buttons between the file grids
+            
+            
         }
 
         private void RefreshLPGrid ()

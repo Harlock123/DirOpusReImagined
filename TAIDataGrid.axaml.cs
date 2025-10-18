@@ -349,6 +349,8 @@ namespace DirOpusReImagined
             PointerPressed += OnPointerPressed;
             PointerReleased += OnPointerReleased;
             
+            
+            
             TheCanvas.PointerExited += OnPointerExited;
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
