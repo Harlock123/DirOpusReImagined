@@ -11,11 +11,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove=".gitignore" />
-    <None Remove="Assets\BackFolder.png" />
-    <None Remove="Assets\Drives.png" />
-    <None Remove="Assets\LeftArrow.png" />
-    <None Remove="Assets\LeftRightArrows.png" />
-    <None Remove="Assets\RightArrow.png" />
+      <Content Include="Assets\**\*">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Debug\net7.0\Configuration.xml">
