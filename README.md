@@ -1,8 +1,30 @@
 # DirOpusReImagined
 
-This is a project to reimagine the Amiga file manager Directory Opus 4.12. 
-It is using the Avalonia Framework so as to afford the ability to compile for Linux
-and MacOS as well as Windows.
+This is **DirOpusReImagined** - a modern cross-platform file manager inspired by the classic Amiga Directory Opus 4.12.
+
+## What It Does
+
+It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on Windows, macOS, and Linux. Think of it as a professional-grade file browser with two independent panels side-by-side for efficient file management.
+
+## Key Features
+
+- **Dual-panel interface** for browsing and managing files across two directories simultaneously
+- **Standard file operations**: copy, move, delete, rename, create folders, create ZIP archives
+- **36 customizable action buttons** with extensive parameter substitution (e.g., `%FD%` for selected files, `%LPATH%` for left panel path)
+- **Cross-platform support** with platform-specific configurations (Configuration.xml, MACConfiguration.xml, LINUXConfiguration.xml)
+- **Advanced navigation**: drive presets, folder bookmarks, environment variable support ($HOME, $DESKTOP, etc.)
+- **Selection and filtering**: multi-select, hidden files toggle, file type detection
+- **Integrated tools**: image viewer, batch rename, archive creation
+
+## Tech Stack
+
+- **Framework**: Avalonia 11.0.0 (cross-platform UI)
+- **Runtime**: .NET 8.0 / C#
+- **XML-based configuration** for buttons and settings
+
+The project is currently at version 0.0.4.6 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+
+## Detailed Overview
 
 The interface presents itself as two panels of files in a specified path.
 The standard sorts of navigation allow one to move around the file system 
