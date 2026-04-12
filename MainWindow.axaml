@@ -18,9 +18,9 @@
 	<Grid Name="MainWindowGridContainer" 
 	>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="45*"/>
+			<ColumnDefinition Width="40*"/>
 			<ColumnDefinition Width="auto"/>
-			<ColumnDefinition Width="45*"/>
+			<ColumnDefinition Width="40*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
@@ -59,81 +59,81 @@
 				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
 				<Grid >
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="0.5*"/>
-						<ColumnDefinition Width="0.5*"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
-						<RowDefinition Height="0.2*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
 					</Grid.RowDefinitions>
 					<Button Name="DrivePreset1A" Grid.Column="0" Grid.Row="0" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 							Content="&lt; Drv1" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset1B" Grid.Column="1" Grid.Row="0" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drv1 &gt;" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset2A" Grid.Column="0" Grid.Row="1" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 3" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset2B" Grid.Column="1" Grid.Row="1" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 4" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset3A" Grid.Column="0" Grid.Row="2" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 5" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset3B" Grid.Column="1" Grid.Row="2" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 6" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center" 
 					        />
 					<Button Name="DrivePreset4A" Grid.Column="0" Grid.Row="3" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 7" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset4B" Grid.Column="1" Grid.Row="3" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 8" 
 					        HorizontalContentAlignment="Right" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset5A" Grid.Column="0" Grid.Row="4" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 9" 
 					        HorizontalContentAlignment="Left" 
 					        VerticalContentAlignment="Center"
 					        />
 					<Button Name="DrivePreset5B" Grid.Column="1" Grid.Row="4" 
-					        Height="22" Width="50" Padding="1"
+					        Height="22" Width="60" Padding="1"
 					        FontSize="11" FontWeight="Bold"
 					        Content="Drive 10" 
 					        HorizontalContentAlignment="Right" 
@@ -152,7 +152,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left" 
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- all"
 				        ToolTip.Tip="Selects all the FILES only in the left panel">
 					
@@ -164,7 +164,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right" 
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="all -&gt;"
 				        ToolTip.Tip="Selects all the FILES only in the right panel" >
 					
@@ -178,7 +178,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- clear"
 				        ToolTip.Tip="Clears the items selected in the left panel">
 					
@@ -190,7 +190,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="clear -&gt;"
 				        ToolTip.Tip="Clears the items selected in the right panel" >
 					
@@ -206,7 +206,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- copy"
 				        ToolTip.Tip="Copied the items selected in the right panel to the contents of the left panel"></Button>
 				
@@ -216,7 +216,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="copy -&gt;"
 				        ToolTip.Tip="Copies the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
@@ -228,7 +228,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- move"
 				        ToolTip.Tip="Moves the items selected in the right panel to the contents of the left panel"></Button>
 				
@@ -238,7 +238,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="move -&gt;"
 				        ToolTip.Tip="Moves the items selected in the left panel to the contents of the right panel"></Button>
 			</StackPanel>
@@ -250,7 +250,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- ren"
 				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Left Panel"></Button>
 
@@ -260,7 +260,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="ren -&gt;"
 				        ToolTip.Tip="Brings up the Rename Interface allowing patterned renaming of selected files in the Right Panel"></Button>
 			</StackPanel>
@@ -272,7 +272,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- del"
 				        ToolTip.Tip="Deletes the items selected in the left panel"></Button>
 				
@@ -282,7 +282,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="del -&gt;"
 				        ToolTip.Tip="Deletes the items selected in the right panel"></Button>
 			</StackPanel>
@@ -294,7 +294,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- mkdir"
 				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Left Panel"></Button>
 				
@@ -304,7 +304,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="mkdir -&gt;"
 				        ToolTip.Tip="Will prompt for and then create a folder named from prompt in Right Panel"></Button>
 			</StackPanel>
@@ -316,7 +316,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Left"
 				        VerticalContentAlignment="Center" 
-				        Width="50"
+				        Width="60"
 				        Content="&lt;- zip"
 				        ToolTip.Tip="Will Create a ZIP file from selected contents in Left Panel"></Button>
 				
@@ -326,7 +326,7 @@
 				        FontWeight="Bold"
 				        HorizontalContentAlignment="Right"
 				        VerticalContentAlignment="Center"
-				        Width="50"
+				        Width="60"
 				        Content="zip -&gt;"
 				        ToolTip.Tip="Will Create a ZIP file from selected contents in Right Panel"></Button>
 			</StackPanel>
@@ -436,122 +436,123 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
+				
 			</Grid.RowDefinitions>
 			
 			<Button Name="LpButton1" Grid.Column="0" Grid.Row="0" 
-					Content="Button 1" HorizontalAlignment="Stretch" 
+					Content="Button 1" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton2" Grid.Column="1" Grid.Row="0" 
-					Content="Button 2" HorizontalAlignment="Stretch" 
+					Content="Button 2" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton3" Grid.Column="2" Grid.Row="0" 
-					Content="Button 3" HorizontalAlignment="Stretch" 
+					Content="Button 3" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton4" Grid.Column="3" Grid.Row="0" 
-					Content="Button 4" HorizontalAlignment="Stretch" 
+					Content="Button 4" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 					<!-- ToolTip.Tip = "{Binding LPBTT4}" -->
 			
 			<Button Name="LpButton5" Grid.Column="4" Grid.Row="0" 
-					Content="Button 5" HorizontalAlignment="Stretch" 
+					Content="Button 5" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton6" Grid.Column="5" Grid.Row="0" 
-					Content="Button 6" HorizontalAlignment="Stretch" 
+					Content="Button 6" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton7" Grid.Column="0" Grid.Row="1" 
-					Content="Button 7" HorizontalAlignment="Stretch" 
+					Content="Button 7" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton8" Grid.Column="1" Grid.Row="1" 
-					Content="Button 8" HorizontalAlignment="Stretch" 
+					Content="Button 8" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton9" Grid.Column="2" Grid.Row="1" 
-					Content="Button 9" HorizontalAlignment="Stretch" 
+					Content="Button 9" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton10" Grid.Column="3" Grid.Row="1" 
-					Content="Button 10" HorizontalAlignment="Stretch" 
+					Content="Button 10" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton11" Grid.Column="4" Grid.Row="1" 
-					Content="Button 11" HorizontalAlignment="Stretch" 
+					Content="Button 11" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton12" Grid.Column="5" Grid.Row="1" 
-					Content="Button 12" HorizontalAlignment="Stretch" 
+					Content="Button 12" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton13" Grid.Column="0" Grid.Row="2" 
-					Content="Button 13" HorizontalAlignment="Stretch" 
+					Content="Button 13" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton14" Grid.Column="1" Grid.Row="2" 
-					Content="Button 14" HorizontalAlignment="Stretch" 
+					Content="Button 14" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton15" Grid.Column="2" Grid.Row="2" 
-					Content="Button 15" HorizontalAlignment="Stretch" 
+					Content="Button 15" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton16" Grid.Column="3" Grid.Row="2" 
-					Content="Button 16" HorizontalAlignment="Stretch" 
+					Content="Button 16" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton17" Grid.Column="4" Grid.Row="2" 
-					Content="Button 17" HorizontalAlignment="Stretch" 
+					Content="Button 17" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton18" Grid.Column="5" Grid.Row="2" 
-					Content="Button 18" HorizontalAlignment="Stretch" 
+					Content="Button 18" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton19" Grid.Column="0" Grid.Row="3" 
-					Content="Button 19" HorizontalAlignment="Stretch" 
+					Content="Button 19" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton20" Grid.Column="1" Grid.Row="3" 
-					Content="Button 20" HorizontalAlignment="Stretch" 
+					Content="Button 20" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton21" Grid.Column="2" Grid.Row="3" 
-					Content="Button 21" HorizontalAlignment="Stretch" 
+					Content="Button 21" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton22" Grid.Column="3" Grid.Row="3" 
-					Content="Button 22" HorizontalAlignment="Stretch" 
+					Content="Button 22" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton23" Grid.Column="4" Grid.Row="3" 
-					Content="Button 23" HorizontalAlignment="Stretch" 
+					Content="Button 23" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton24" Grid.Column="5" Grid.Row="3" 
-					Content="Button 24" HorizontalAlignment="Stretch" 
+					Content="Button 24" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton25" Grid.Column="0" Grid.Row="4"
-					Content="Button 25" HorizontalAlignment="Stretch" 
+					Content="Button 25" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton26" Grid.Column="1" Grid.Row="4"
-					Content="Button 26" HorizontalAlignment="Stretch" 
+					Content="Button 26" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton27" Grid.Column="2" Grid.Row="4"
-					Content="Button 27" HorizontalAlignment="Stretch" 
+					Content="Button 27" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton28" Grid.Column="3" Grid.Row="4"
-					Content="Button 28" HorizontalAlignment="Stretch" 
+					Content="Button 28" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton29" Grid.Column="4" Grid.Row="4"
-					Content="Button 29" HorizontalAlignment="Stretch" 
+					Content="Button 29" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton30" Grid.Column="5" Grid.Row="4"
-					Content="Button 30" HorizontalAlignment="Stretch" 
+					Content="Button 30" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			
 			<Button Name="LpButton31" Grid.Column="0" Grid.Row="5"
-					Content="Button 31" HorizontalAlignment="Stretch" 
+					Content="Button 31" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton32" Grid.Column="1" Grid.Row="5"
-					Content="Button 32" HorizontalAlignment="Stretch" 
+					Content="Button 32" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton33" Grid.Column="2" Grid.Row="5"
-					Content="Button 33" HorizontalAlignment="Stretch" 
+					Content="Button 33" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton34" Grid.Column="3" Grid.Row="5"
-					Content="Button 34" HorizontalAlignment="Stretch" 
+					Content="Button 34" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton35" Grid.Column="4" Grid.Row="5"
-					Content="Button 35" HorizontalAlignment="Stretch" 
+					Content="Button 35" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 			<Button Name="LpButton36" Grid.Column="5" Grid.Row="5"
-					Content="Button 36" HorizontalAlignment="Stretch" 
+					Content="Button 36" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 		</Grid>
 

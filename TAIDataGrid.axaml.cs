@@ -41,9 +41,10 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The size of the line label.
-        /// </
+        /// </summary>
         private int _theLineLabelSize = 10;
-
+        
+        ///<summary>
         /// The size of the data label.
         /// </summary>
         private int _theDataLabelSize = 10;
@@ -60,7 +61,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The brush used to color the content of a grid cell.
-        /// </summary
+        /// </summary>
         private IBrush _gridCellContentBrush = Brushes.Black;
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The brush used to color the selected item in a grid.
-        /// </summary
+        /// </summary>
         private IBrush _gridSelectedItemBrush = Brushes.AliceBlue;
 
         /// <summary>
@@ -256,7 +257,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// Represents the item currently being hovered over by the mouse cursor.
-        /// </summary
+        /// </summary>
         private object _itemUnderMouse = null;
 
         /// <summary>
@@ -306,7 +307,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// The private list of integers used to store the columns to justify in a table.
-        /// </summary
+        /// </summary>
         private List<int> _justifyColumns = new List<int>();
 
         /// <summary>
@@ -347,6 +348,8 @@ namespace DirOpusReImagined
             PointerExited += OnPointerExited;
             PointerPressed += OnPointerPressed;
             PointerReleased += OnPointerReleased;
+            
+            
             
             TheCanvas.PointerExited += OnPointerExited;
 
@@ -478,6 +481,7 @@ namespace DirOpusReImagined
         }
 
         // this is the brush that will be used to render the grid title font
+        /// <summary>
         /// Gets or sets the brush used for the title of the grid.
         /// </summary>
         /// <value>
@@ -504,7 +508,7 @@ namespace DirOpusReImagined
         /// <remarks>
         /// The default value is "Blue".
         /// The title background color will be updated automatically when the property value is set.
-        /// </remarks
+        /// </remarks>
         [DefaultValue("Blue")]
         public IBrush GridTitleBackground
         {
@@ -654,7 +658,7 @@ namespace DirOpusReImagined
         /// </summary>
         /// <value>
         /// The typeface for the grid title. The default value is "Arial, 12, Normal, Normal".
-        /// </value
+        /// </value>
         [DefaultValue("Arial, 12, Normal, Normal")]
         public Typeface GridTitleTypeface
         {
@@ -1013,7 +1017,7 @@ namespace DirOpusReImagined
         /// Throughout this entire process, any exceptions thrown during rendering are caught and
         /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions are
         /// logged for debugging purposes.
-        /// </summary
+        /// </summary>
         public void ReRender()
         {
             try
@@ -1639,7 +1643,7 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// This method is used to test the PopulateTestData method.
-        /// </summary
+        /// </summary>
         public void TestPopulate()
         {
             PopulateTestData();
@@ -2038,8 +2042,9 @@ namespace DirOpusReImagined
             // Get the current pointer position relative to the UserControl
             //Point position = e.GetPosition(this);
             // Do something with this 411
-            
-            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+
+            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind ==
+                PointerUpdateKind.RightButtonPressed)
             {
                 // Right mouse button was pressed
                 // Handle the right button click here
@@ -2060,13 +2065,12 @@ namespace DirOpusReImagined
                 if (_selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
                 {
                     // we are unselecting an item
-                    _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);    
+                    _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);
                 }
                 else
                 {
                     // we are adding the item to the selection list
                     _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
-
                 }
             }
             else
@@ -2078,58 +2082,60 @@ namespace DirOpusReImagined
                     {
                         int startrow = -1;
                         int endrow = -1;
-                        
+
                         foreach (AFileEntry af in _items)
                         {
                             if (af == _selecteditems[0])
                             {
                                 startrow = _items.IndexOf(af);
                             }
-                            
+
                             if (af == TheItemUnderTheMouse.ItemUnderMouse)
                             {
                                 endrow = _items.IndexOf(af);
                             }
                         }
-                        
+
                         if (startrow > endrow)
                         {
                             // we need to swap the start and end rows
                             int temp = startrow;
                             startrow = endrow;
                             endrow = temp;
-                        }   
-                        
+                        }
+
                         _selecteditems.Clear();
-                        
+
                         for (int i = startrow; i <= endrow; i++)
                         {
                             _selecteditems.Add(_items[i]);
-                        }   
-                        
+                        }
                     }
                     else
                     {
                         // we are SHIFT clicking but nothing has been selected yet
                         _selecteditems.Clear();
                         _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
-                        
                     }
                 }
                 else
                 {
-                    // we are not CTRL clicking so single select
-                    _selecteditems.Clear();
-                    _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                    // No modifier keys - check if clicking on already selected item
+                    if (_selecteditems.Count == 1 && _selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
+                    {
+                        // Clicking on the only selected item - deselect it
+                        _selecteditems.Clear();
+                    }
+                    else
+                    {
+                        // Normal single select behavior
+                        _selecteditems.Clear();
+                        _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+                    }
                 }
-
-                // // we are not CTRL clicking so single select
-                // _selecteditems.Clear(); 
-                // _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
-
             }
-            // Look to handle double click here
 
+            // Look to handle double click here
             if (e.ClickCount == 1)
             {
                 _clickCounter++;
@@ -2148,8 +2154,126 @@ namespace DirOpusReImagined
                 OnDoubleClick(sender, e);
                 _clickCounter = 0;
             }
-
         }
+        
+        
+        // private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+        // {
+        //     // Get the current pointer position relative to the UserControl
+        //     //Point position = e.GetPosition(this);
+        //     // Do something with this 411
+        //     
+        //     if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+        //     {
+        //         // Right mouse button was pressed
+        //         // Handle the right button click here
+        //         // Just bail here and pass it off to the context menu
+        //
+        //         return;
+        //     }
+        //
+        //     // We have a rowclicked event so fire it
+        //     if (TheItemUnderTheMouse.ItemUnderMouse != null)
+        //     {
+        //         GridItemClick?.Invoke(this, TheItemUnderTheMouse);
+        //     }
+        //
+        //     if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        //     {
+        //         // We are CTRL clicking on items so multi select
+        //         if (_selecteditems.Contains(TheItemUnderTheMouse.ItemUnderMouse))
+        //         {
+        //             // we are unselecting an item
+        //             _selecteditems.Remove(TheItemUnderTheMouse.ItemUnderMouse);    
+        //         }
+        //         else
+        //         {
+        //             // we are adding the item to the selection list
+        //             _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        //         {
+        //             // here we want to see if we are selecting a range of items
+        //             if (_selecteditems.Count > 0)
+        //             {
+        //                 int startrow = -1;
+        //                 int endrow = -1;
+        //                 
+        //                 foreach (AFileEntry af in _items)
+        //                 {
+        //                     if (af == _selecteditems[0])
+        //                     {
+        //                         startrow = _items.IndexOf(af);
+        //                     }
+        //                     
+        //                     if (af == TheItemUnderTheMouse.ItemUnderMouse)
+        //                     {
+        //                         endrow = _items.IndexOf(af);
+        //                     }
+        //                 }
+        //                 
+        //                 if (startrow > endrow)
+        //                 {
+        //                     // we need to swap the start and end rows
+        //                     int temp = startrow;
+        //                     startrow = endrow;
+        //                     endrow = temp;
+        //                 }   
+        //                 
+        //                 _selecteditems.Clear();
+        //                 
+        //                 for (int i = startrow; i <= endrow; i++)
+        //                 {
+        //                     _selecteditems.Add(_items[i]);
+        //                 }   
+        //                 
+        //             }
+        //             else
+        //             {
+        //                 // we are SHIFT clicking but nothing has been selected yet
+        //                 _selecteditems.Clear();
+        //                 _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //                 
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // we are not CTRL clicking so single select
+        //             _selecteditems.Clear();
+        //             _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);
+        //         }
+        //
+        //         // // we are not CTRL clicking so single select
+        //         // _selecteditems.Clear(); 
+        //         // _selecteditems.Add(TheItemUnderTheMouse.ItemUnderMouse);   
+        //
+        //     }
+        //     // Look to handle double click here
+        //
+        //     if (e.ClickCount == 1)
+        //     {
+        //         _clickCounter++;
+        //         if (_clickCounter == 2)
+        //         {
+        //             OnDoubleClick(sender, e);
+        //             _clickCounter = 0;
+        //         }
+        //         else
+        //         {
+        //             _doubleClickTimer.Start();
+        //         }
+        //     }
+        //     else
+        //     {
+        //         OnDoubleClick(sender, e);
+        //         _clickCounter = 0;
+        //     }
+        //
+        // }
 
         /// <summary>
         /// Event handler for double-click event.
@@ -3106,6 +3230,8 @@ namespace DirOpusReImagined
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
+
+        //public bool FileSizeCollapsedNumber { get; set; } = false;
         
         public AFileEntry(string name, int filesize, bool isdirectory)
         {
@@ -3113,6 +3239,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3136,6 +3263,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3159,6 +3287,7 @@ namespace DirOpusReImagined
 
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3181,6 +3310,8 @@ namespace DirOpusReImagined
             Name = name;
             if (filesize > 0)
             {
+                //FileSize = filesize.ToString();
+                
                 FileSize = ConvertNumberToReadableString(filesize);
             }
             else
@@ -3217,9 +3348,12 @@ namespace DirOpusReImagined
 
             //Files = files;
         }
-
+        
+        
         public string ConvertNumberToReadableString(long number)
         {
+            return number.ToString();
+            
             const int scale = 1024;
 
             string[] orders = new string[] { "b", "Kb", "Mb", "Gb" };
@@ -3235,6 +3369,7 @@ namespace DirOpusReImagined
             }
 
             double result = number;
+            
             return string.Format("{0:0.##}{1}", result, orders[order]);
         }
     }

@@ -50,12 +50,9 @@ namespace DirOpusReImagined
         private string LastButtonPopupName = "";
         
         private AFileEntry LastFileHovered = null;
-
+        
         private PopUp _pop;
-
-        private List<object> _lpUnfilteredItems = new List<object>();
-        private List<object> _rpUnfilteredItems = new List<object>();
-
+        
         #endregion
         
         public MainWindow()
@@ -180,27 +177,16 @@ namespace DirOpusReImagined
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
 
-            LPfilter.KeyUp += LPfilter_KeyUp;
-            RPfilter.KeyUp += RPfilter_KeyUp;
-            LPfilterClear.Click += LPfilterClear_Click;
-            RPfilterClear.Click += RPfilterClear_Click;
-
-            LPgrid.GridItemClick += (_, _) => UpdateStatusBar();
-            RPgrid.GridItemClick += (_, _) => UpdateStatusBar();
-
             //ChkShowHidden.PointerReleased += ChkShowHidden_Checked;
            
-            if (LPpath.Text != null)
-                if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text,
+            if (LPpath.Text != null) 
+                if (ChkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, 
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
-            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
-            if (RPpath.Text != null)
-                if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,
+            if (RPpath.Text != null) 
+                if (ChkShowHidden != null) 
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, 
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
-            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
-            UpdateStatusBar();
            
             WireUpButtonHandlers();
 
@@ -539,11 +525,10 @@ namespace DirOpusReImagined
         /// Method to handle the Checked event of the ChkShowHidden checkbox. </summary> <param name="sender">The object that raised the event.</param> <param name="e">The RoutedEventArgs containing event data.</param> <returns>Void.</returns>
         /// /
         private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
-        {
+        { 
             FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
             FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-            RefreshLPGridPostActions();
-            RefreshRPGridPostActions();
+            
         }
 
         private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
@@ -789,16 +774,7 @@ namespace DirOpusReImagined
                     break;
             }
 
-            if (nm.EndsWith("A"))
-            {
-                LPfilter.Text = "";
-                RefreshLPGridPostActions();
-            }
-            else
-            {
-                RPfilter.Text = "";
-                RefreshRPGridPostActions();
-            }
+
         }
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
@@ -895,37 +871,31 @@ namespace DirOpusReImagined
         {
             Button B = (Button)sender;
             ToolTip.SetIsOpen(B,false);
-
+            
             LPpath.Text = RPpath.Text;
-            LPfilter.Text = "";
-            if (LPpath.Text != null)
-                if (ChkShowHidden != null)
+            if (LPpath.Text != null) 
+                if (ChkShowHidden != null) 
                     FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-            RefreshLPGridPostActions();
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
             ToolTip.SetIsOpen(B,false);
-
+            
             RPpath.Text = LPpath.Text;
-            RPfilter.Text = "";
-            if (RPpath.Text != null)
-                if (ChkShowHidden != null)
+            if (RPpath.Text != null) 
+                if (ChkShowHidden != null) 
                     FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-            RefreshRPGridPostActions();
         }
 
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                RPfilter.Text = "";
-                if (RPpath.Text != null)
-                    if (ChkShowHidden != null)
+                if (RPpath.Text != null) 
+                    if (ChkShowHidden != null) 
                         FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                RefreshRPGridPostActions();
             }
         }
 
@@ -933,11 +903,9 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                LPfilter.Text = "";
-                if (LPpath.Text != null)
-                    if (ChkShowHidden != null)
+                if (LPpath.Text != null) 
+                    if (ChkShowHidden != null) 
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                RefreshLPGridPostActions();
             }
         }
 
@@ -980,21 +948,16 @@ namespace DirOpusReImagined
                     
                     if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
                     {
-                        
-                        
                         // we need to open the button config window
                         AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
                         BC.TheMainWindow = this;
                         BC.ShowDialog(this);
                         break;
                     }
-                    
-
                     string newaction = ParseTheArgs(item.Bargs);
 
                     if (newaction != "%ERROR%")
                     {
-                        
                         try
                         {
                             if (newaction.Contains(","))
@@ -1002,33 +965,18 @@ namespace DirOpusReImagined
                                 // we have comma seperated arguments so
                                 // we need to split them up and pass them
                                 // to the process start info one at a time
-                                // with Process.Waitforexit() in between
 
                                 string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
                                 foreach (string arg in args)
                                 {
-                                    Process.Start(new ProcessStartInfo()
-                                    {
-                                        FileName = item.Bcontent,
-                                        Arguments = arg,
-                                        UseShellExecute = item.ShellExecute,
-                                        CreateNoWindow = item.ShowWindow
-                                    }).WaitForExit();
+                                    StartDetachedProcess(item.Bcontent, arg, item.ShellExecute, item.ShowWindow);
                                 }
                             }
                             else
                             {
-                                Process.Start(new ProcessStartInfo()
-                                {
-                                    FileName = item.Bcontent,
-                                    Arguments = newaction,
-                                    UseShellExecute = item.ShellExecute,
-                                    CreateNoWindow = item.ShowWindow
-                                });
+                                StartDetachedProcess(item.Bcontent.Trim(), newaction, item.ShellExecute, item.ShowWindow);
                             }
-
-
                         }
                         catch (Exception ex)
                         {
@@ -1044,8 +992,54 @@ namespace DirOpusReImagined
 
                 }
             }
+        }
+        
+        private void StartDetachedProcess(string fileName, string arguments, bool useShellExecute, bool createNoWindow)
+        {
+            try
+            {
+                if (Environment.OSVersion.Platform == PlatformID.Unix || 
+                    Environment.OSVersion.Platform == PlatformID.MacOSX)
+                {
+                    // On Unix/Linux/macOS, use nohup or start a new session
 
-
+                    string args = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"";
+                    
+                    var startInfo = new ProcessStartInfo()
+                    {
+                        FileName = "/bin/sh",
+                        Arguments = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+                    
+                    var process = Process.Start(startInfo);
+                    process?.WaitForExit(100); // Wait briefly for shell to spawn the detached process
+                }
+                else // Windows
+                {
+                    // On Windows, use cmd.exe with START command to detach
+                    var startInfo = new ProcessStartInfo()
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/C start \"\" \"{fileName}\" {arguments}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false
+                    };
+                    
+                    var process = Process.Start(startInfo);
+                    process?.WaitForExit(100); // Wait briefly for cmd to spawn the detached process
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox mb = new MessageBox($"Failed to start process: {fileName}\nError: {ex.Message}");
+                mb.ShowDialog(this);
+            }
         }
 
         private string ParseTheArgs(string bcontent)
@@ -1814,9 +1808,7 @@ namespace DirOpusReImagined
 
             //LPpath.Text = newpath;
 
-            LPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-            RefreshLPGridPostActions();
         }
 
         private void RPBackButton_Click(object? sender, RoutedEventArgs e)
@@ -1858,9 +1850,7 @@ namespace DirOpusReImagined
                 RPpath.Text = newpath;
             }
 
-            RPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,ChkShowHidden.IsChecked.Value);
-            RefreshRPGridPostActions();
         }
 
         private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -1907,7 +1897,62 @@ namespace DirOpusReImagined
                     oldpath = RPpath.Text;
                     
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                    if (ChkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                }
+                else
+                {
+                    // its an actual file so can we execute it?
+
+                    string thingtoexecute = (RPpath.Text + "/" + it.Name);
+                    
+                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
+                    {
+                        // we can execute it
+                        
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = thingtoexecute,
+                            UseShellExecute = true,
+                        });
+
+                        //Process.Start(RPpath.Text + "/" + it.Name);
+                    }
+                    else
+                    {
+                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                            PlatformID.MacOSX == Environment.OSVersion.Platform)
+                        {
+                            if (IsExecutableOnUnixNet6(thingtoexecute))
+                            {
+                                Process.Start(new ProcessStartInfo()
+                                {
+                                    FileName = thingtoexecute,
+                                    UseShellExecute = true,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+                
+        private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
+        {
+            var it = e.ItemUnderMouse as AFileEntry;
+
+            // Kill the tooltip if any
+            if (sender != null)
+                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
+            
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                if (it.Typ)
+                {
+                    oldpath = LPpath.Text;
+                    LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                    if (ChkShowHidden != null) 
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
                 {
@@ -1917,62 +1962,6 @@ namespace DirOpusReImagined
                     {
                         // we can execute it
 
-                        string thingtoexecute = (RPpath.Text + "/" + it.Name);
-
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = thingtoexecute,
-                            UseShellExecute = true,
-                        });
-
-                        //Process.Start(RPpath.Text + "/" + it.Name);
-                    }
-
-                }
-
-            }
-
-            if (it.Typ)
-            {
-                RPfilter.Text = "";
-                RefreshRPGridPostActions();
-            }
-        }
-
-        private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
-        {
-            var it = e.ItemUnderMouse as AFileEntry;
-            
-            // Kill the tooltip if any
-            if (sender != null)
-                ToolTip.SetIsOpen((TaiDataGrid)sender,false);
-            
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                if (it.Typ)
-                {
-                    // Its A folder so gets go into it
-                    oldpath = LPpath.Text;
-                    LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-                }
-                else
-                {
-                    // its an actual file so can we execute it?
-
-                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
-                    {
-                        string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-
-                        ImageViewer iv = new ImageViewer(thingtoexecute);
-
-                        iv.ShowDialog(this);
-
-                    }
-                    else if (FileExtensionIsExecutable(it.Name.ToUpper()))
-                    {
-                        // we can execute it
-
                         string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
 
                         Process.Start(new ProcessStartInfo()
@@ -1981,8 +1970,7 @@ namespace DirOpusReImagined
                             UseShellExecute = true,
                         });
 
-
-                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\",@"\"));
+                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
                     
                 }
@@ -1992,27 +1980,20 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     oldpath = LPpath.Text;
+                    
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
                 {
-                    if (FileExtensionIsImage(it.Name.ToUpper()) && UseIntegratedImageViewer)
-                    {
-                        string thingtoexecute = (LPpath.Text + "//" + it.Name).Replace(@"//", @"/");
-                        
-                        ImageViewer iv = new ImageViewer(thingtoexecute);
+                    // its an actual file so can we execute it?
 
-                        iv.ShowDialog(this);
-
-                    }
-                    else 
+                    string thingtoexecute = (LPpath.Text + "/" + it.Name);
+                    
                     if (FileExtensionIsExecutable(it.Name.ToUpper()))
                     {
                         // we can execute it
-
-                        string thingtoexecute = (LPpath.Text + "/" + it.Name);
-
+                        
                         Process.Start(new ProcessStartInfo()
                         {
                             FileName = thingtoexecute,
@@ -2021,15 +2002,22 @@ namespace DirOpusReImagined
 
                         //Process.Start(LPpath.Text + "/" + it.Name);
                     }
-
+                    else
+                    {
+                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                            PlatformID.MacOSX == Environment.OSVersion.Platform)
+                        {
+                            if (IsExecutableOnUnixNet6(thingtoexecute))
+                            {
+                                Process.Start(new ProcessStartInfo()
+                                {
+                                    FileName = thingtoexecute,
+                                    UseShellExecute = true,
+                                });
+                            }
+                        }
+                    }
                 }
-
-            }
-
-            if (it.Typ)
-            {
-                LPfilter.Text = "";
-                RefreshLPGridPostActions();
             }
         }
 
@@ -2053,16 +2041,37 @@ namespace DirOpusReImagined
         {
             bool result = false;
 
-            foreach (string s in ExecutableStuff)
+            if (PlatformID.Win32NT == Environment.OSVersion.Platform)
             {
-                if (v.ToUpper().EndsWith(s))
+                foreach (string s in ExecutableStuff)
                 {
-                    result = true;
-                    break;
+                    if (v.ToUpper().EndsWith(s))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+            else if (PlatformID.Unix == Environment.OSVersion.Platform ||
+                     PlatformID.MacOSX == Environment.OSVersion.Platform)
+            {
+                bool IsExecutableOnUnixNet6(string path)
+                {
+                    return IsExecutableOnUnixNet6(v);
                 }
             }
 
             return result;
+        }
+        
+        private bool IsExecutableOnUnixNet6(string path)
+        {
+            if (!File.Exists(path)) return false;
+            var mode = File.GetUnixFileMode(path);
+            // Check any of the execute bits
+            return  mode.HasFlag(UnixFileMode.UserExecute)
+                     || mode.HasFlag(UnixFileMode.GroupExecute)
+                     || mode.HasFlag(UnixFileMode.OtherExecute);
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
@@ -2070,192 +2079,31 @@ namespace DirOpusReImagined
 
             double nwidth = e.NewSize.Width * .45;
 
-            double nheight = ((e.NewSize.Height) - 30 - 26 - 24) * .7;
+            double nheight = ((e.NewSize.Height) - 30) * .7;
 
             LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16);
             RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16 );
+            
+            // here we should also set the sizes for other elements of the UI
+            // like the center buttons between the file grids
+            
+            
         }
 
         private void RefreshLPGrid ()
         {
-            if (LPpath.Text != null)
-                if (ChkShowHidden != null)
+            if (LPpath.Text != null) 
+                if (ChkShowHidden != null) 
                     FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
-            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
-            UpdateStatusBar();
         }
 
         private void RefreshRPGrid()
         {
-            if (RPpath.Text != null)
-                if (ChkShowHidden != null)
+            if (RPpath.Text != null) 
+                if (ChkShowHidden != null) 
                     FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
-            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void RefreshLPGridPostActions()
-        {
-            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
-            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void RefreshRPGridPostActions()
-        {
-            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
-            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void CaptureUnfilteredItems(TaiDataGrid grid, ref List<object> store)
-        {
-            store = new List<object>(grid.Items);
-        }
-
-        private void ApplyFilter(TaiDataGrid grid, string filterText, List<object> unfilteredItems)
-        {
-            if (string.IsNullOrWhiteSpace(filterText))
-            {
-                if (grid.Items.Count != unfilteredItems.Count)
-                {
-                    grid.Items = new List<object>(unfilteredItems);
-                    grid.SuspendRendering = false;
-                }
-                return;
-            }
-
-            var filtered = unfilteredItems.Where(item =>
-            {
-                if (item is AFileEntry af)
-                    return af.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase);
-                return true;
-            }).ToList();
-
-            grid.SuspendRendering = true;
-            grid.Items = filtered;
-            grid.SuspendRendering = false;
-        }
-
-        private void LPfilter_KeyUp(object? sender, KeyEventArgs e)
-        {
-            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void RPfilter_KeyUp(object? sender, KeyEventArgs e)
-        {
-            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void LPfilterClear_Click(object? sender, RoutedEventArgs e)
-        {
-            LPfilter.Text = "";
-            ApplyFilter(LPgrid, "", _lpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void RPfilterClear_Click(object? sender, RoutedEventArgs e)
-        {
-            RPfilter.Text = "";
-            ApplyFilter(RPgrid, "", _rpUnfilteredItems);
-            UpdateStatusBar();
-        }
-
-        private void UpdateStatusBar()
-        {
-            LeftStatusText.Text = BuildStatusText(LPgrid, LPpath.Text);
-            RightStatusText.Text = BuildStatusText(RPgrid, RPpath.Text);
-        }
-
-        private string BuildStatusText(TaiDataGrid grid, string path)
-        {
-            int totalItems = grid.Items.Count;
-            int folders = 0;
-            int files = 0;
-            long selectedBytes = 0;
-            int selectedCount = 0;
-
-            foreach (var item in grid.Items)
-            {
-                if (item is AFileEntry af)
-                {
-                    if (af.Typ) folders++;
-                    else files++;
-                }
-            }
-
-            foreach (var item in grid.SelectedItems)
-            {
-                if (item is AFileEntry af && !af.Typ)
-                {
-                    selectedCount++;
-                    selectedBytes += ParseFileSize(af.FileSize);
-                }
-            }
-
-            string freeSpace = "";
-            try
-            {
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
-                {
-                    var root = Path.GetPathRoot(path);
-                    if (!string.IsNullOrEmpty(root))
-                    {
-                        var di = new DriveInfo(root);
-                        freeSpace = FormatBytes(di.AvailableFreeSpace) + " free";
-                    }
-                }
-            }
-            catch { }
-
-            string selInfo = selectedCount > 0
-                ? $" | Sel: {selectedCount} ({FormatBytes(selectedBytes)})"
-                : "";
-
-            return $"{folders} folders, {files} files{selInfo}" +
-                   (freeSpace != "" ? $" | {freeSpace}" : "");
-        }
-
-        private long ParseFileSize(string sizeStr)
-        {
-            if (string.IsNullOrEmpty(sizeStr)) return 0;
-            sizeStr = sizeStr.Trim();
-            if (sizeStr.EndsWith("Gb", StringComparison.OrdinalIgnoreCase))
-            {
-                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024 * 1024 * 1024);
-            }
-            else if (sizeStr.EndsWith("Mb", StringComparison.OrdinalIgnoreCase))
-            {
-                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024 * 1024);
-            }
-            else if (sizeStr.EndsWith("Kb", StringComparison.OrdinalIgnoreCase))
-            {
-                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024);
-            }
-            else if (sizeStr.EndsWith("b", StringComparison.OrdinalIgnoreCase))
-            {
-                if (double.TryParse(sizeStr[..^1], out var v)) return (long)v;
-            }
-            return 0;
-        }
-
-        private string FormatBytes(long bytes)
-        {
-            string[] units = { "B", "KB", "MB", "GB", "TB" };
-            double val = bytes;
-            int unit = 0;
-            while (val >= 1024 && unit < units.Length - 1)
-            {
-                val /= 1024;
-                unit++;
-            }
-            return $"{val:0.##} {units[unit]}";
-        }
-
+        }   
+        
         private string GetRootDirectoryPath()
         {
             string rootDirectoryPath = "";
@@ -2605,8 +2453,8 @@ namespace DirOpusReImagined
                                              Margin = (string)btn.Element("Margin"),
                                              Action = (string)btn.Element("Action"),
                                              Args = (string)btn.Element("Args"),
-                                             ShellExecute = (string)btn.Element("Shell"),
-                                             ShowWindow = (string)btn.Element("Window"),
+                                             ShellExecute = (string)btn.Element("ShellExecute"),
+                                             ShowWindow = (string)btn.Element("ShowWindow"),
                                              ToolTip = (string)btn.Element("ToolTip")
                                          };
                 
@@ -2619,9 +2467,11 @@ namespace DirOpusReImagined
                 // Apply settings to each button
                 foreach (var buttonSettings in buttonSettingsList)
                 {
+                    buttonSettings.Name = buttonSettings.Name.Replace("LP", "Lp");
+                    
                     // Find the button by its name
                     Button button = (Button)grid.FindControl<Control>(buttonSettings.Name);
-
+                    
                     // Check if the button control exists
                     if (button != null)
                     {

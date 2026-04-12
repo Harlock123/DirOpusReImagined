@@ -34,7 +34,7 @@ public partial class MessageBox : Window
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void OnOKButtonClick(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void OnOKButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         Close();
     }

@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia;
 
 using Avalonia.Interactivity;
 using Avalonia.Data;
@@ -23,9 +22,9 @@ public partial class AddEditCmdButtonDefinition : Window
 {
     List<ButtonSettings> TheButtons = new List<ButtonSettings>();
     
-    public MainWindow TheMainWindow = null;
+    public MainWindow? TheMainWindow ;//= null;
 
-    private Button TheCurrentButton = null;
+    private Button? TheCurrentButton ;//= null;
     
     //SolidColorBrush theDefaultBackground = new SolidColorBrush((Color)Color.Parse("Grey"));
     
@@ -76,10 +75,7 @@ public partial class AddEditCmdButtonDefinition : Window
             Button b = this.FindControl<Button>("LPB" + i.ToString());
             b.Click += HandleButtonClicked;
         }
-        
-        //Button b = this.FindControl<Button>("LPB1");
-        
-        //b.
+      
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
@@ -216,7 +212,7 @@ public partial class AddEditCmdButtonDefinition : Window
     }
 
     private void InitializeComponent()
-    {
+    { 
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -237,6 +233,13 @@ public partial class AddEditCmdButtonDefinition : Window
         {
             string name = b.Name.Replace("LpButton", "LPB");
             Button theButton = this.FindControl<Button>(name);
+
+            if (theButton == null)
+            {
+                name = b.Name.Replace("LPButton", "LPB");
+                theButton = this.FindControl<Button>(name);
+            }
+            
             theButton.Content = b.Content;
             
             if (b.Background == null)

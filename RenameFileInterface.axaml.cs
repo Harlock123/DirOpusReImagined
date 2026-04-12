@@ -16,17 +16,17 @@ public partial class RenameFileInterface : Window
     private TaiDataGrid theOtherGrid;
     private string theOtherPath = "";
 
-    public string NewName
+    public string? NewName
     {
         get { return this.BasenameTextBox.Text; }
     }
 
-    public string newprefix
+    public string? newprefix
     {
         get {return this.PrefixTextBox.Text; }
     }
 
-    public string newsuffix
+    public string? newsuffix
     {
         get {return this.SuffixTextBox.Text; }
     }
