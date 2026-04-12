@@ -50,9 +50,12 @@ namespace DirOpusReImagined
         private string LastButtonPopupName = "";
         
         private AFileEntry LastFileHovered = null;
-        
+
         private PopUp _pop;
-        
+
+        private List<object> _lpUnfilteredItems = new List<object>();
+        private List<object> _rpUnfilteredItems = new List<object>();
+
         #endregion
         
         public MainWindow()
@@ -177,16 +180,27 @@ namespace DirOpusReImagined
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
 
+            LPfilter.KeyUp += LPfilter_KeyUp;
+            RPfilter.KeyUp += RPfilter_KeyUp;
+            LPfilterClear.Click += LPfilterClear_Click;
+            RPfilterClear.Click += RPfilterClear_Click;
+
+            LPgrid.GridItemClick += (_, _) => UpdateStatusBar();
+            RPgrid.GridItemClick += (_, _) => UpdateStatusBar();
+
             //ChkShowHidden.PointerReleased += ChkShowHidden_Checked;
            
-            if (LPpath.Text != null) 
-                if (ChkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, 
+            if (LPpath.Text != null)
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text,
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
-            if (RPpath.Text != null) 
-                if (ChkShowHidden != null) 
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, 
+            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
+            if (RPpath.Text != null)
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
+            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
+            UpdateStatusBar();
            
             WireUpButtonHandlers();
 
@@ -525,10 +539,11 @@ namespace DirOpusReImagined
         /// Method to handle the Checked event of the ChkShowHidden checkbox. </summary> <param name="sender">The object that raised the event.</param> <param name="e">The RoutedEventArgs containing event data.</param> <returns>Void.</returns>
         /// /
         private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
-        { 
+        {
             FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
             FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-            
+            RefreshLPGridPostActions();
+            RefreshRPGridPostActions();
         }
 
         private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
@@ -774,7 +789,16 @@ namespace DirOpusReImagined
                     break;
             }
 
-
+            if (nm.EndsWith("A"))
+            {
+                LPfilter.Text = "";
+                RefreshLPGridPostActions();
+            }
+            else
+            {
+                RPfilter.Text = "";
+                RefreshRPGridPostActions();
+            }
         }
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
@@ -871,31 +895,37 @@ namespace DirOpusReImagined
         {
             Button B = (Button)sender;
             ToolTip.SetIsOpen(B,false);
-            
+
             LPpath.Text = RPpath.Text;
-            if (LPpath.Text != null) 
-                if (ChkShowHidden != null) 
+            LPfilter.Text = "";
+            if (LPpath.Text != null)
+                if (ChkShowHidden != null)
                     FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+            RefreshLPGridPostActions();
         }
 
         private void LeftToRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
             ToolTip.SetIsOpen(B,false);
-            
+
             RPpath.Text = LPpath.Text;
-            if (RPpath.Text != null) 
-                if (ChkShowHidden != null) 
+            RPfilter.Text = "";
+            if (RPpath.Text != null)
+                if (ChkShowHidden != null)
                     FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+            RefreshRPGridPostActions();
         }
 
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                if (RPpath.Text != null) 
-                    if (ChkShowHidden != null) 
+                RPfilter.Text = "";
+                if (RPpath.Text != null)
+                    if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                RefreshRPGridPostActions();
             }
         }
 
@@ -903,9 +933,11 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
-                if (LPpath.Text != null) 
-                    if (ChkShowHidden != null) 
+                LPfilter.Text = "";
+                if (LPpath.Text != null)
+                    if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                RefreshLPGridPostActions();
             }
         }
 
@@ -1782,7 +1814,9 @@ namespace DirOpusReImagined
 
             //LPpath.Text = newpath;
 
+            LPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+            RefreshLPGridPostActions();
         }
 
         private void RPBackButton_Click(object? sender, RoutedEventArgs e)
@@ -1824,7 +1858,9 @@ namespace DirOpusReImagined
                 RPpath.Text = newpath;
             }
 
+            RPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,ChkShowHidden.IsChecked.Value);
+            RefreshRPGridPostActions();
         }
 
         private void RPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -1895,9 +1931,14 @@ namespace DirOpusReImagined
                 }
 
             }
-                        
+
+            if (it.Typ)
+            {
+                RPfilter.Text = "";
+                RefreshRPGridPostActions();
+            }
         }
-                
+
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
         {
             var it = e.ItemUnderMouse as AFileEntry;
@@ -1984,6 +2025,12 @@ namespace DirOpusReImagined
                 }
 
             }
+
+            if (it.Typ)
+            {
+                LPfilter.Text = "";
+                RefreshLPGridPostActions();
+            }
         }
 
         private bool FileExtensionIsImage(string v)
@@ -2023,7 +2070,7 @@ namespace DirOpusReImagined
 
             double nwidth = e.NewSize.Width * .45;
 
-            double nheight = ((e.NewSize.Height) - 30) * .7;
+            double nheight = ((e.NewSize.Height) - 30 - 26 - 24) * .7;
 
             LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16);
             RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16 );
@@ -2031,18 +2078,184 @@ namespace DirOpusReImagined
 
         private void RefreshLPGrid ()
         {
-            if (LPpath.Text != null) 
-                if (ChkShowHidden != null) 
+            if (LPpath.Text != null)
+                if (ChkShowHidden != null)
                     FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
+            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
+            UpdateStatusBar();
         }
 
         private void RefreshRPGrid()
         {
-            if (RPpath.Text != null) 
-                if (ChkShowHidden != null) 
+            if (RPpath.Text != null)
+                if (ChkShowHidden != null)
                     FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-        }   
-        
+            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
+            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void RefreshLPGridPostActions()
+        {
+            CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
+            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void RefreshRPGridPostActions()
+        {
+            CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
+            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void CaptureUnfilteredItems(TaiDataGrid grid, ref List<object> store)
+        {
+            store = new List<object>(grid.Items);
+        }
+
+        private void ApplyFilter(TaiDataGrid grid, string filterText, List<object> unfilteredItems)
+        {
+            if (string.IsNullOrWhiteSpace(filterText))
+            {
+                if (grid.Items.Count != unfilteredItems.Count)
+                {
+                    grid.Items = new List<object>(unfilteredItems);
+                    grid.SuspendRendering = false;
+                }
+                return;
+            }
+
+            var filtered = unfilteredItems.Where(item =>
+            {
+                if (item is AFileEntry af)
+                    return af.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase);
+                return true;
+            }).ToList();
+
+            grid.SuspendRendering = true;
+            grid.Items = filtered;
+            grid.SuspendRendering = false;
+        }
+
+        private void LPfilter_KeyUp(object? sender, KeyEventArgs e)
+        {
+            ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void RPfilter_KeyUp(object? sender, KeyEventArgs e)
+        {
+            ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void LPfilterClear_Click(object? sender, RoutedEventArgs e)
+        {
+            LPfilter.Text = "";
+            ApplyFilter(LPgrid, "", _lpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void RPfilterClear_Click(object? sender, RoutedEventArgs e)
+        {
+            RPfilter.Text = "";
+            ApplyFilter(RPgrid, "", _rpUnfilteredItems);
+            UpdateStatusBar();
+        }
+
+        private void UpdateStatusBar()
+        {
+            LeftStatusText.Text = BuildStatusText(LPgrid, LPpath.Text);
+            RightStatusText.Text = BuildStatusText(RPgrid, RPpath.Text);
+        }
+
+        private string BuildStatusText(TaiDataGrid grid, string path)
+        {
+            int totalItems = grid.Items.Count;
+            int folders = 0;
+            int files = 0;
+            long selectedBytes = 0;
+            int selectedCount = 0;
+
+            foreach (var item in grid.Items)
+            {
+                if (item is AFileEntry af)
+                {
+                    if (af.Typ) folders++;
+                    else files++;
+                }
+            }
+
+            foreach (var item in grid.SelectedItems)
+            {
+                if (item is AFileEntry af && !af.Typ)
+                {
+                    selectedCount++;
+                    selectedBytes += ParseFileSize(af.FileSize);
+                }
+            }
+
+            string freeSpace = "";
+            try
+            {
+                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                {
+                    var root = Path.GetPathRoot(path);
+                    if (!string.IsNullOrEmpty(root))
+                    {
+                        var di = new DriveInfo(root);
+                        freeSpace = FormatBytes(di.AvailableFreeSpace) + " free";
+                    }
+                }
+            }
+            catch { }
+
+            string selInfo = selectedCount > 0
+                ? $" | Sel: {selectedCount} ({FormatBytes(selectedBytes)})"
+                : "";
+
+            return $"{folders} folders, {files} files{selInfo}" +
+                   (freeSpace != "" ? $" | {freeSpace}" : "");
+        }
+
+        private long ParseFileSize(string sizeStr)
+        {
+            if (string.IsNullOrEmpty(sizeStr)) return 0;
+            sizeStr = sizeStr.Trim();
+            if (sizeStr.EndsWith("Gb", StringComparison.OrdinalIgnoreCase))
+            {
+                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024 * 1024 * 1024);
+            }
+            else if (sizeStr.EndsWith("Mb", StringComparison.OrdinalIgnoreCase))
+            {
+                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024 * 1024);
+            }
+            else if (sizeStr.EndsWith("Kb", StringComparison.OrdinalIgnoreCase))
+            {
+                if (double.TryParse(sizeStr[..^2], out var v)) return (long)(v * 1024);
+            }
+            else if (sizeStr.EndsWith("b", StringComparison.OrdinalIgnoreCase))
+            {
+                if (double.TryParse(sizeStr[..^1], out var v)) return (long)v;
+            }
+            return 0;
+        }
+
+        private string FormatBytes(long bytes)
+        {
+            string[] units = { "B", "KB", "MB", "GB", "TB" };
+            double val = bytes;
+            int unit = 0;
+            while (val >= 1024 && unit < units.Length - 1)
+            {
+                val /= 1024;
+                unit++;
+            }
+            return $"{val:0.##} {units[unit]}";
+        }
+
         private string GetRootDirectoryPath()
         {
             string rootDirectoryPath = "";
