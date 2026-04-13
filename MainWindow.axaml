@@ -3,8 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:cons="clr-namespace:DirOpusReImagined;assembly=DirOpusReImagined"
-        mc:Ignorable="d" d:DesignWidth="1260" d:DesignHeight="800"
-        Height="800" Width="1260" WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d" d:DesignWidth="1300" d:DesignHeight="800"
+        Height="800" Width="1300" WindowStartupLocation="CenterScreen"
         x:Class="DirOpusReImagined.MainWindow"
         Title="DORI"
 		Background="LightGray">
@@ -15,12 +15,12 @@
 	</Window.DataContext>
 -->
 	
-	<Grid Name="MainWindowGridContainer" 
+	<Grid Name="MainWindowGridContainer" Margin="4,0,4,0"
 	>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="40*"/>
-			<ColumnDefinition Width="auto"/>
-			<ColumnDefinition Width="40*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="auto" MaxWidth="140"/>
+			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
