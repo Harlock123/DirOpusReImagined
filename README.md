@@ -345,3 +345,88 @@ There are a number of special variables that can be used in the path specificati
 
 ### Prerequisites
 
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
+
+Verify your installation:
+
+```bash
+dotnet --version
+```
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Harlock123/DirOpusReImagined.git
+cd DirOpusReImagined
+```
+
+### Build
+
+```bash
+dotnet build
+```
+
+The compiled output will be in `bin/Debug/net8.0/`.
+
+### Run
+
+```bash
+dotnet run
+```
+
+Or run the compiled binary directly:
+
+```bash
+./bin/Debug/net8.0/DirOpusReImagined
+```
+
+On Windows:
+
+```cmd
+bin\Debug\net8.0\DirOpusReImagined.exe
+```
+
+### Publish a Self-Contained Build
+
+To create a standalone executable that doesn't require the .NET runtime to be installed:
+
+**Windows:**
+```bash
+dotnet publish -c Release -r win-x64 --self-contained
+```
+
+**macOS (Apple Silicon):**
+```bash
+dotnet publish -c Release -r osx-arm64 --self-contained
+```
+
+**macOS (Intel):**
+```bash
+dotnet publish -c Release -r osx-x64 --self-contained
+```
+
+**Linux:**
+```bash
+dotnet publish -c Release -r linux-x64 --self-contained
+```
+
+Published output will be in `bin/Release/net8.0/<runtime-identifier>/publish/`.
+
+### Configuration
+
+Make sure `Configuration.xml` is in the same directory as the executable when running. The application looks for it in the following order:
+
+1. The current working directory
+2. Platform-specific locations:
+   - **Linux/Unix**: `~/.config/dori/Configuration.xml`
+   - **macOS**: `~/Library/Application Support/dori/Configuration.xml`
+   - **Windows**: `%APPDATA%\dori\Configuration.xml`
+
+The `Assets` folder (containing button icons) must also be present alongside the executable.
+
+### Opening in an IDE
+
+- **JetBrains Rider**: Open `DirOpusReImagined.sln`
+- **Visual Studio**: Open `DirOpusReImagined.sln`
+- **VS Code**: Open the project folder and install the C# Dev Kit extension
+
