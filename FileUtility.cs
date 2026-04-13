@@ -11,6 +11,24 @@ namespace DirOpusReImagined
     /// </summary>
     public static class FileUtility
     {
+        public static long GetDirectorySize(string path)
+        {
+            long size = 0;
+            try
+            {
+                foreach (string file in Directory.EnumerateFiles(path))
+                {
+                    try
+                    {
+                        size += new FileInfo(file).Length;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return size;
+        }
+
         public static void CopyFileToFolder(string sourceFile, string targetFolder)
         {
             try
@@ -299,6 +317,7 @@ namespace DirOpusReImagined
                                         
                         var ds = di.GetDirectories().GetUpperBound(0) + 1;
                         var fs = di.GetFiles().GetUpperBound(0) + 1;
+                        long dirSize = GetDirectorySize(di.FullName);
                     
                         // if we are showing hidden files 
                         // and the flags contain the hidden flag
@@ -306,14 +325,14 @@ namespace DirOpusReImagined
 
                         if (ShowHidden) // Who cares show em all
                         {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                         }
                         else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                         {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                         }
                     
-                        //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                     }
                     catch (UnauthorizedAccessException)
                     {   
@@ -351,14 +370,14 @@ namespace DirOpusReImagined
 
                         if (ShowHidden) // Again who cares
                         {
-                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                         }
                         else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                         {
-                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                         }
                         
-                        //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        //FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                     }
                     catch
                     {
@@ -447,6 +466,7 @@ namespace DirOpusReImagined
                                         
                         var ds = di.GetDirectories().GetUpperBound(0) + 1;
                         var fs = di.GetFiles().GetUpperBound(0) + 1;
+                        long dirSize = GetDirectorySize(di.FullName);
                     
                         // if we are showing hidden files 
                         // and the flags contain the hidden flag
@@ -454,14 +474,14 @@ namespace DirOpusReImagined
 
                         if (ShowHidden) // Who cares show em all
                         {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                         }
                         else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                         {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                         }
                     
-                        //FileList.Add(new AFileEntry(di.Name, 0, true, ds, fs,flags));
+                        //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                     }
                     catch (UnauthorizedAccessException)
                     {   
@@ -499,14 +519,14 @@ namespace DirOpusReImagined
 
                         if (ShowHidden) // Again who cares
                         {
-                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                         }
                         else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
                         {
-                            FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                         }
                         
-                        //FileList.Add(new AFileEntry(fi.Name, (int)fi.Length, false,flags,ft));
+                        //FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
                     }
                     catch
                     {

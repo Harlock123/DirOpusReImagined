@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -1931,43 +1932,24 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     oldpath = RPpath.Text;
-                    
+
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
-                    if (ChkShowHidden != null) 
+                    if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
                 {
-                    // its an actual file so can we execute it?
-
                     string thingtoexecute = (RPpath.Text + "/" + it.Name);
-                    
-                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
-                    {
-                        // we can execute it
-                        
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = thingtoexecute,
-                            UseShellExecute = true,
-                        });
 
-                        //Process.Start(RPpath.Text + "/" + it.Name);
-                    }
-                    else
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
-                            PlatformID.MacOSX == Environment.OSVersion.Platform)
-                        {
-                            if (IsExecutableOnUnixNet6(thingtoexecute))
-                            {
-                                Process.Start(new ProcessStartInfo()
-                                {
-                                    FileName = thingtoexecute,
-                                    UseShellExecute = true,
-                                });
-                            }
-                        }
+                        // macOS — use 'open' which delegates to Launch Services
+                        OpenFileWithDefaultApp(thingtoexecute);
+                    }
+                    else if (FileExtensionIsExecutable(it.Name.ToUpper()) || IsExecutableOnUnixNet6(thingtoexecute))
+                    {
+                        // Linux — try xdg-open for known types, fall back to direct execution
+                        OpenFileWithDefaultApp(thingtoexecute);
                     }
                 }
             }
@@ -2022,42 +2004,23 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     oldpath = LPpath.Text;
-                    
+
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
                 {
-                    // its an actual file so can we execute it?
-
                     string thingtoexecute = (LPpath.Text + "/" + it.Name);
-                    
-                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
-                    {
-                        // we can execute it
-                        
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = thingtoexecute,
-                            UseShellExecute = true,
-                        });
 
-                        //Process.Start(LPpath.Text + "/" + it.Name);
-                    }
-                    else
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        if (PlatformID.Unix == Environment.OSVersion.Platform ||
-                            PlatformID.MacOSX == Environment.OSVersion.Platform)
-                        {
-                            if (IsExecutableOnUnixNet6(thingtoexecute))
-                            {
-                                Process.Start(new ProcessStartInfo()
-                                {
-                                    FileName = thingtoexecute,
-                                    UseShellExecute = true,
-                                });
-                            }
-                        }
+                        // macOS — use 'open' which delegates to Launch Services
+                        OpenFileWithDefaultApp(thingtoexecute);
+                    }
+                    else if (FileExtensionIsExecutable(it.Name.ToUpper()) || IsExecutableOnUnixNet6(thingtoexecute))
+                    {
+                        // Linux — try xdg-open for known types, fall back to direct execution
+                        OpenFileWithDefaultApp(thingtoexecute);
                     }
                 }
             }
@@ -2066,6 +2029,29 @@ namespace DirOpusReImagined
             {
                 LPfilter.Text = "";
                 RefreshLPGridPostActions();
+            }
+        }
+
+        private void OpenFileWithDefaultApp(string filePath)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "open",
+                    Arguments = "\"" + filePath + "\"",
+                    UseShellExecute = false,
+                });
+            }
+            else
+            {
+                // Linux — use xdg-open
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "xdg-open",
+                    Arguments = "\"" + filePath + "\"",
+                    UseShellExecute = false,
+                });
             }
         }
 

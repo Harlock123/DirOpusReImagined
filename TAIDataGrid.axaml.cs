@@ -3233,7 +3233,7 @@ namespace DirOpusReImagined
 
         //public bool FileSizeCollapsedNumber { get; set; } = false;
         
-        public AFileEntry(string name, int filesize, bool isdirectory)
+        public AFileEntry(string name, long filesize, bool isdirectory)
         {
             Name = name;
 
@@ -3257,7 +3257,7 @@ namespace DirOpusReImagined
             Flags = "";
         }
 
-        public AFileEntry(string name, int filesize, bool isdirectory, string flags)
+        public AFileEntry(string name, long filesize, bool isdirectory, string flags)
         {
             Name = name;
 
@@ -3281,7 +3281,7 @@ namespace DirOpusReImagined
             Flags = flags;
         }
 
-        public AFileEntry(string name, int filesize, bool isdirectory, string flags, string FileTimeString)
+        public AFileEntry(string name, long filesize, bool isdirectory, string flags, string FileTimeString)
         {
             Name = name;
 
@@ -3305,7 +3305,7 @@ namespace DirOpusReImagined
             Flags = flags;
         }
 
-        public AFileEntry(string name, int filesize, bool isdirectory, int directories, int files, string flags)
+        public AFileEntry(string name, long filesize, bool isdirectory, int directories, int files, string flags)
         {
             Name = name;
             if (filesize > 0)
@@ -3352,25 +3352,15 @@ namespace DirOpusReImagined
         
         public string ConvertNumberToReadableString(long number)
         {
-            return number.ToString();
-            
-            const int scale = 1024;
-
-            string[] orders = new string[] { "b", "Kb", "Mb", "Gb" };
-
-            if (number < scale)
-                return number.ToString() + "b";
-
-            int order = 0;
-            while (number >= scale)
+            string[] units = { "b", "Kb", "Mb", "Gb", "Tb" };
+            double val = number;
+            int unit = 0;
+            while (val >= 1024 && unit < units.Length - 1)
             {
-                order++;
-                number /= scale;
+                val /= 1024;
+                unit++;
             }
-
-            double result = number;
-            
-            return string.Format("{0:0.##}{1}", result, orders[order]);
+            return string.Format("{0:0.##}{1}", val, units[unit]);
         }
     }
 
