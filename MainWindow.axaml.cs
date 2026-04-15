@@ -70,38 +70,34 @@ namespace DirOpusReImagined
             this.Title += " " + (globalMEM / 1024 / 1024 / 1024).ToString() + " GB ";
             
             // Apply The Settings if possible
-            // First Look where the app is running from for Configuration.xml
-            // Otherwise
-            // If the system is Linux/Unix Look for Config in ~/.config/dori/Configuration.xml
-            // If the system is MacOS Look in ~/Library/Application Support/dori/Configuration.xml
-            // If the system is Windowz Look in %APPDATA%\dori\Configuration.xml
-            // If the file is not found then use the default settings
-           
-            // See if Configuration.xml exists in the current directory
-            // if it does then use it
-            if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
+            // Search order:
+            // 1. Current working directory
+            // 2. Directory where the executable lives
+            // 3. Platform-specific config location:
+            //    - macOS: ~/Library/Application Support/dori/Configuration.xml
+            //    - Linux/Unix: ~/.config/dori/Configuration.xml
+            //    - Windows: %APPDATA%\dori\Configuration.xml
+
+            string configFile = FindConfigurationFile();
+            if (configFile != null)
             {
                 ClearLowerButtons();
-                ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
-            }
-            else
-            {
-                // Look in the alternate places here based on OS
-                
+                ApplyButtonSettingsFromXml(configFile, this);
             }
             
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
 
-            if (Directory.Exists("Assets"))
+            string assetsDir = FindAssetsDirectory();
+            if (assetsDir != null)
             {
 
-                Bitmap B2 = new Bitmap(@"Assets/BackFolder.png");
-                Bitmap B3 = new Bitmap(@"Assets/Drives.png");
-                Bitmap B4 = new Bitmap(@"Assets/LeftArrow.png");
-                Bitmap B5 = new Bitmap(@"Assets/RightArrow.png");
-                Bitmap B6 = new Bitmap(@"Assets/LeftRightArrows.png");
+                Bitmap B2 = new Bitmap(Path.Combine(assetsDir, "BackFolder.png"));
+                Bitmap B3 = new Bitmap(Path.Combine(assetsDir, "Drives.png"));
+                Bitmap B4 = new Bitmap(Path.Combine(assetsDir, "LeftArrow.png"));
+                Bitmap B5 = new Bitmap(Path.Combine(assetsDir, "RightArrow.png"));
+                Bitmap B6 = new Bitmap(Path.Combine(assetsDir, "LeftRightArrows.png"));
 
                 Image I1 = new Image();
                 Image I2 = new Image();
@@ -2303,6 +2299,58 @@ namespace DirOpusReImagined
                 unit++;
             }
             return $"{val:0.##} {units[unit]}";
+        }
+
+        private string FindAssetsDirectory()
+        {
+            // 1. Current working directory
+            string path = Path.Combine(Environment.CurrentDirectory, "Assets");
+            if (Directory.Exists(path)) return path;
+
+            // 2. Executable's directory
+            path = Path.Combine(AppContext.BaseDirectory, "Assets");
+            if (Directory.Exists(path)) return path;
+
+            return null;
+        }
+
+        private string FindConfigurationFile()
+        {
+            const string configName = "Configuration.xml";
+
+            // 1. Current working directory
+            string path = Path.Combine(Environment.CurrentDirectory, configName);
+            if (File.Exists(path)) return path;
+
+            // 2. Directory where the executable lives
+            string exeDir = AppContext.BaseDirectory;
+            path = Path.Combine(exeDir, configName);
+            if (File.Exists(path)) return path;
+
+            // 3. Platform-specific config locations
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                path = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Library", "Application Support", "dori", configName);
+                if (File.Exists(path)) return path;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                path = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    ".config", "dori", configName);
+                if (File.Exists(path)) return path;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                path = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "dori", configName);
+                if (File.Exists(path)) return path;
+            }
+
+            return null;
         }
 
         private string GetRootDirectoryPath()
