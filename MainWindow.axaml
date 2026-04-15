@@ -23,8 +23,8 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="30"/>
-			<RowDefinition Height="26"/>
+			<RowDefinition Height="34"/>
+			<RowDefinition Height="36"/>
 			<RowDefinition Height="0.7*"/>
 			<RowDefinition Height="0.2*"/>
 			<RowDefinition Height="0.1*" />
@@ -367,10 +367,10 @@
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<TextBox Name="LPfilter" Grid.Column="0"
-			         Margin="4,2,0,2" Watermark="Filter files..." FontSize="11" Height="22"/>
+			         Margin="4,4,0,4" Watermark="Filter files..." FontSize="11" Height="22"/>
 			<Button Name="LPfilterClear" Grid.Column="1"
 			        Content="X" FontSize="9" FontWeight="Bold"
-			        Width="22" Height="22" Margin="2,2,4,2"
+			        Width="22" Height="22" Margin="2,4,4,4"
 			        Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
 			        ToolTip.Tip="Clear filter"/>
 		</Grid>
@@ -380,10 +380,10 @@
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<TextBox Name="RPfilter" Grid.Column="0"
-			         Margin="4,2,0,2" Watermark="Filter files..." FontSize="11" Height="22"/>
+			         Margin="4,4,0,4" Watermark="Filter files..." FontSize="11" Height="22"/>
 			<Button Name="RPfilterClear" Grid.Column="1"
 			        Content="X" FontSize="9" FontWeight="Bold"
-			        Width="22" Height="22" Margin="2,2,4,2"
+			        Width="22" Height="22" Margin="2,4,4,4"
 			        Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
 			        ToolTip.Tip="Clear filter"/>
 		</Grid>
@@ -396,11 +396,11 @@
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
-			<Button Name="LpBackButton" Grid.Column="0" Grid.Row="0" 
-			        Background="Goldenrod" Content="&lt;=" />
-			<TextBox Margin="2" Name="LPpath" Grid.Column="1" Grid.Row="0" Text=""/>
+			<Button Name="LpBackButton" Grid.Column="0" Grid.Row="0"
+			        Background="Goldenrod" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			<TextBox Margin="2,4,2,4" Name="LPpath" Grid.Column="1" Grid.Row="0" Text="" Height="28"/>
 			<Button Name="LpDriveButton" Background="Goldenrod"
-			        Grid.Column="2" Grid.Row="0" Content="" />
+			        Grid.Column="2" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"/>
 		</Grid>
 		
 		<Grid Grid.Column="2" Grid.Row="0" x:Name="RightPanelNavigation">
@@ -409,11 +409,11 @@
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
-			<Button Name="RpBackButton" Grid.Column="0" Grid.Row="0" 
-			        Background="Goldenrod" Content="&lt;=" />
-			<TextBox Margin="2" Name="RPpath" Grid.Column="1" Grid.Row="0" Text=""/>
-			<Button Name="RpDriveButton" Background="Goldenrod" 
-			        Grid.Column="2" Grid.Row="0" Content="" />
+			<Button Name="RpBackButton" Grid.Column="0" Grid.Row="0"
+			        Background="Goldenrod" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			<TextBox Margin="2,4,2,4" Name="RPpath" Grid.Column="1" Grid.Row="0" Text="" Height="28"/>
+			<Button Name="RpDriveButton" Background="Goldenrod"
+			        Grid.Column="2" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"/>
 		</Grid>
 
 		<cons:TaiDataGrid  Margin="4,4,4,4" Name="LPgrid" Grid.Column="0" Grid.Row="2" />
