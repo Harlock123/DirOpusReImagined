@@ -386,31 +386,44 @@ On Windows:
 bin\Debug\net8.0\DirOpusReImagined.exe
 ```
 
-### Publish a Self-Contained Build
+### Publish All Platforms (Single-File Executables)
 
-To create a standalone executable that doesn't require the .NET runtime to be installed:
+Build scripts are included that produce self-contained, single-file executables for all 6 supported platforms. No .NET runtime needed on the target machine.
 
-**Windows:**
+**On macOS/Linux:**
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained
+./publish-all.sh
 ```
 
-**macOS (Apple Silicon):**
-```bash
-dotnet publish -c Release -r osx-arm64 --self-contained
+**On Windows (PowerShell):**
+```powershell
+.\publish-all.ps1
 ```
 
-**macOS (Intel):**
+Output goes to `publish/<platform>/`:
+
+| Platform | Runtime ID | Output |
+|---|---|---|
+| Windows Intel/AMD | `win-x64` | `publish/win-x64/DirOpusReImagined.exe` |
+| Windows ARM | `win-arm64` | `publish/win-arm64/DirOpusReImagined.exe` |
+| macOS Intel | `osx-x64` | `publish/osx-x64/DirOpusReImagined` |
+| macOS Apple Silicon | `osx-arm64` | `publish/osx-arm64/DirOpusReImagined` |
+| Linux Intel/AMD | `linux-x64` | `publish/linux-x64/DirOpusReImagined` |
+| Linux ARM | `linux-arm64` | `publish/linux-arm64/DirOpusReImagined` |
+
+### Publish a Single Platform
+
+To build for just one platform:
+
 ```bash
-dotnet publish -c Release -r osx-x64 --self-contained
+dotnet publish -c Release -r <runtime-id> --self-contained true \
+    -p:PublishSingleFile=true \
+    -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:EnableCompressionInSingleFile=true \
+    -o publish/<runtime-id>
 ```
 
-**Linux:**
-```bash
-dotnet publish -c Release -r linux-x64 --self-contained
-```
-
-Published output will be in `bin/Release/net8.0/<runtime-identifier>/publish/`.
+Replace `<runtime-id>` with one of: `win-x64`, `win-arm64`, `osx-x64`, `osx-arm64`, `linux-x64`, `linux-arm64`.
 
 ### Configuration
 
