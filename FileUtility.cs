@@ -334,10 +334,10 @@ namespace DirOpusReImagined
                     
                         //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                     }
-                    catch (UnauthorizedAccessException)
-                    {   
+                    catch (Exception)
+                    {
                         try
-                        {                    
+                        {
                             FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
                         }
                         catch
@@ -483,10 +483,10 @@ namespace DirOpusReImagined
                     
                         //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
                     }
-                    catch (UnauthorizedAccessException)
-                    {   
+                    catch (Exception)
+                    {
                         try
-                        {                    
+                        {
                             FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
                         }
                         catch

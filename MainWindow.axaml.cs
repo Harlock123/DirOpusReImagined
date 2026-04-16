@@ -4,6 +4,7 @@ using Avalonia.Media;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -198,7 +199,16 @@ namespace DirOpusReImagined
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
             CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
             UpdateStatusBar();
-           
+
+            // Breadcrumb bar setup — switch from TextBox to breadcrumb mode
+            // after initial load so TextBox.Text is reliably set during config loading
+            ExitPathEditMode("LP");
+            ExitPathEditMode("RP");
+            LPbreadcrumbBorder.PointerPressed += (_, _) => EnterPathEditMode("LP");
+            RPbreadcrumbBorder.PointerPressed += (_, _) => EnterPathEditMode("RP");
+            LPpath.LostFocus += (_, _) => { if (LPpath.IsVisible) ExitPathEditMode("LP"); };
+            RPpath.LostFocus += (_, _) => { if (RPpath.IsVisible) ExitPathEditMode("RP"); };
+
             WireUpButtonHandlers();
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -923,6 +933,11 @@ namespace DirOpusReImagined
                     if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
                 RefreshRPGridPostActions();
+                ExitPathEditMode("RP");
+            }
+            else if (e.Key == Key.Escape)
+            {
+                ExitPathEditMode("RP");
             }
         }
 
@@ -935,6 +950,11 @@ namespace DirOpusReImagined
                     if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
                 RefreshLPGridPostActions();
+                ExitPathEditMode("LP");
+            }
+            else if (e.Key == Key.Escape)
+            {
+                ExitPathEditMode("LP");
             }
         }
 
@@ -2141,11 +2161,140 @@ namespace DirOpusReImagined
             UpdateStatusBar();
         }
 
+        #region Breadcrumb Path Bar
+
+        private void UpdateBreadcrumbs(string path, ItemsControl breadcrumbs, string side)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+
+            var items = new List<Control>();
+
+            var separator = Path.DirectorySeparatorChar;
+            var segments = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+
+            // Add root segment
+            var rootPath = Environment.OSVersion.Platform == PlatformID.Win32NT
+                ? segments.Length > 0 ? segments[0] + separator : separator.ToString()
+                : separator.ToString();
+
+            var rootButton = CreateBreadcrumbButton(
+                Environment.OSVersion.Platform == PlatformID.Win32NT ? segments[0] : "/",
+                rootPath, side);
+            items.Add(rootButton);
+
+            // Build cumulative path for each segment
+            var cumulativePath = rootPath;
+            var startIndex = Environment.OSVersion.Platform == PlatformID.Win32NT ? 1 : 0;
+
+            for (int i = startIndex; i < segments.Length; i++)
+            {
+                // Add separator label
+                var sepLabel = new TextBlock
+                {
+                    Text = " \u203a ",
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Foreground = new SolidColorBrush(Colors.Gray),
+                    FontSize = 13
+                };
+                items.Add(sepLabel);
+
+                // Build cumulative path
+                cumulativePath = cumulativePath.TrimEnd(separator) + separator + segments[i];
+
+                var segButton = CreateBreadcrumbButton(segments[i], cumulativePath, side);
+                items.Add(segButton);
+            }
+
+            breadcrumbs.Items = items;
+        }
+
+        private Button CreateBreadcrumbButton(string label, string fullPath, string side)
+        {
+            var btn = new Button
+            {
+                Content = label,
+                Tag = new string[] { fullPath, side },
+                Padding = new Avalonia.Thickness(4, 1),
+                Margin = new Avalonia.Thickness(0),
+                MinWidth = 0,
+                MinHeight = 0,
+                FontSize = 12,
+                Background = Brushes.Transparent,
+                BorderThickness = new Avalonia.Thickness(0),
+                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            };
+            btn.Click += BreadcrumbSegment_Click;
+            return btn;
+        }
+
+        private void BreadcrumbSegment_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn || btn.Tag is not string[] info) return;
+
+            var targetPath = info[0];
+            var side = info[1];
+
+            if (side == "LP")
+            {
+                LPpath.Text = targetPath;
+                LPfilter.Text = "";
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+                RefreshLPGridPostActions();
+            }
+            else
+            {
+                RPpath.Text = targetPath;
+                RPfilter.Text = "";
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+                RefreshRPGridPostActions();
+            }
+        }
+
+        private void EnterPathEditMode(string side)
+        {
+            if (side == "LP")
+            {
+                LPbreadcrumbBorder.IsVisible = false;
+                LPpath.IsVisible = true;
+                LPpath.Focus();
+                LPpath.SelectAll();
+            }
+            else
+            {
+                RPbreadcrumbBorder.IsVisible = false;
+                RPpath.IsVisible = true;
+                RPpath.Focus();
+                RPpath.SelectAll();
+            }
+        }
+
+        private void ExitPathEditMode(string side)
+        {
+            if (side == "LP")
+            {
+                LPpath.IsVisible = false;
+                LPbreadcrumbBorder.IsVisible = true;
+                UpdateBreadcrumbs(LPpath.Text, LPbreadcrumbs, "LP");
+            }
+            else
+            {
+                RPpath.IsVisible = false;
+                RPbreadcrumbBorder.IsVisible = true;
+                UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
+            }
+        }
+
+        #endregion
+
         private void RefreshLPGridPostActions()
         {
             CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
             ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
             UpdateStatusBar();
+            UpdateBreadcrumbs(LPpath.Text, LPbreadcrumbs, "LP");
         }
 
         private void RefreshRPGridPostActions()
@@ -2153,6 +2302,7 @@ namespace DirOpusReImagined
             CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
             ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
             UpdateStatusBar();
+            UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
         }
 
         private void CaptureUnfilteredItems(TaiDataGrid grid, ref List<object> store)
