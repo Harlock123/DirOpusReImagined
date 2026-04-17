@@ -21,10 +21,11 @@
 					Grid.Column="0"
 					ClipToBounds="true">
 				<Canvas.ContextMenu>
-					<ContextMenu>
+					<ContextMenu Name="GridContextMenu">
+						<MenuItem Name="CalcFolderSizeMenuItem" Header="Calculate Folder Size" Click="CalculateFolderSize_Click"/>
+						<Separator/>
 						<MenuItem Header="Fonts Larger" Click="Option1_Click"/>
 						<MenuItem Header="Fonts Smaller" Click="Option2_Click"/>
-						<!-- Add more menu items as needed -->
 					</ContextMenu>
 				</Canvas.ContextMenu>
 			</Canvas>

@@ -168,6 +168,9 @@ namespace DirOpusReImagined
             LPgrid.GridHover += Handle_GridHover;
             RPgrid.GridHover += Handle_GridHover;
 
+            LPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
+            RPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
+
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
             LPgrid.JustifyColumns.Add(4);
@@ -240,6 +243,27 @@ namespace DirOpusReImagined
                 SetToolTipForGridItem((TaiDataGrid)sender, af);
             }
     
+        }
+
+        private async void Handle_CalculateFolderSize(object? sender, GridHoverItem e)
+        {
+            if (e.ItemUnderMouse is not AFileEntry entry || !entry.Typ) return;
+
+            var grid = sender as TaiDataGrid;
+            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
+            var separator = Path.DirectorySeparatorChar;
+            var folderPath = currentPath.TrimEnd(separator) + separator + entry.Name;
+
+            // Show a calculating indicator
+            entry.FileSize = "...";
+            grid?.ReRender();
+
+            // Run the recursive calculation on a background thread
+            long size = await Task.Run(() => FileUtility.GetDirectorySizeRecursive(folderPath));
+
+            // Update the entry with the calculated size
+            entry.FileSize = entry.ConvertNumberToReadableString(size);
+            grid?.ReRender();
         }
 
         /// <summary>
@@ -1047,13 +1071,31 @@ namespace DirOpusReImagined
         {
             try
             {
-                if (Environment.OSVersion.Platform == PlatformID.Unix || 
+                if (Environment.OSVersion.Platform == PlatformID.Unix ||
                     Environment.OSVersion.Platform == PlatformID.MacOSX)
                 {
-                    // On Unix/Linux/macOS, use nohup or start a new session
+                    // Check if the program exists before attempting to launch
+                    if (!File.Exists(fileName))
+                    {
+                        // Not an absolute path — check if it's on PATH using 'which'
+                        var whichInfo = new ProcessStartInfo()
+                        {
+                            FileName = "/usr/bin/which",
+                            Arguments = fileName,
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            CreateNoWindow = true
+                        };
+                        var whichProc = Process.Start(whichInfo);
+                        whichProc?.WaitForExit(3000);
+                        if (whichProc == null || whichProc.ExitCode != 0)
+                        {
+                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.");
+                            mb.ShowDialog(this);
+                            return;
+                        }
+                    }
 
-                    string args = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"";
-                    
                     var startInfo = new ProcessStartInfo()
                     {
                         FileName = "/bin/sh",
@@ -1063,13 +1105,34 @@ namespace DirOpusReImagined
                         RedirectStandardOutput = true,
                         RedirectStandardError = true
                     };
-                    
+
                     var process = Process.Start(startInfo);
                     process?.WaitForExit(100); // Wait briefly for shell to spawn the detached process
                 }
                 else // Windows
                 {
-                    // On Windows, use cmd.exe with START command to detach
+                    // Check if the program exists before attempting to launch
+                    if (!File.Exists(fileName))
+                    {
+                        // Check if it's on PATH using 'where'
+                        var whereInfo = new ProcessStartInfo()
+                        {
+                            FileName = "where",
+                            Arguments = fileName,
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            CreateNoWindow = true
+                        };
+                        var whereProc = Process.Start(whereInfo);
+                        whereProc?.WaitForExit(3000);
+                        if (whereProc == null || whereProc.ExitCode != 0)
+                        {
+                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.");
+                            mb.ShowDialog(this);
+                            return;
+                        }
+                    }
+
                     var startInfo = new ProcessStartInfo()
                     {
                         FileName = "cmd.exe",
@@ -1079,7 +1142,7 @@ namespace DirOpusReImagined
                         RedirectStandardOutput = false,
                         RedirectStandardError = false
                     };
-                    
+
                     var process = Process.Start(startInfo);
                     process?.WaitForExit(100); // Wait briefly for cmd to spawn the detached process
                 }

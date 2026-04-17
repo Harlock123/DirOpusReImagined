@@ -2047,8 +2047,9 @@ namespace DirOpusReImagined
                 PointerUpdateKind.RightButtonPressed)
             {
                 // Right mouse button was pressed
-                // Handle the right button click here
-                // Just bail here and pass it off to the context menu
+                // Enable/disable folder-specific menu items before context menu opens
+                bool isFolder = TheItemUnderTheMouse.ItemUnderMouse is AFileEntry entry && entry.Typ;
+                CalcFolderSizeMenuItem.IsEnabled = isFolder;
 
                 return;
             }
@@ -2412,6 +2413,14 @@ namespace DirOpusReImagined
         /// </summary>
         /// <param name="sender">The object that raised the event.</param>
         /// <param name="e">Event arguments for the event.</param>
+        private void CalculateFolderSize_Click(object sender, RoutedEventArgs e)
+        {
+            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry entry && entry.Typ)
+            {
+                GridContextCalculateSize?.Invoke(this, TheItemUnderTheMouse);
+            }
+        }
+
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
             this.GridFontSize += 1;
@@ -2471,6 +2480,8 @@ namespace DirOpusReImagined
         /// <param name="sender">The object that raised the event.</param>
         /// <param name="e">A GridHoverItem object that contains event data.</param>
         public event EventHandler<GridHoverItem> GridItemClick;
+
+        public event EventHandler<GridHoverItem> GridContextCalculateSize;
 
         #endregion
         

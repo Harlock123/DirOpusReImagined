@@ -29,6 +29,24 @@ namespace DirOpusReImagined
             return size;
         }
 
+        public static long GetDirectorySizeRecursive(string path)
+        {
+            long size = 0;
+            try
+            {
+                foreach (string file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+                {
+                    try
+                    {
+                        size += new FileInfo(file).Length;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return size;
+        }
+
         public static void CopyFileToFolder(string sourceFile, string targetFolder)
         {
             try
