@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DirOpusReImagined
@@ -11,6 +14,13 @@ namespace DirOpusReImagined
     /// </summary>
     public static class FileUtility
     {
+        private static Window? GetMainWindow()
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                return desktop.MainWindow;
+            return null;
+        }
+
         public static long GetDirectorySize(string path)
         {
             long size = 0;
@@ -209,7 +219,7 @@ namespace DirOpusReImagined
                 {
                     MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.");
                     
-                    mb.Show(null);
+                    mb.ShowDialog(GetMainWindow());
                     
                     //throw new DirectoryNotFoundException("The source directory does not exist.");
                     // we need to handle this a little better
@@ -223,7 +233,7 @@ namespace DirOpusReImagined
             catch (Exception ex)
             {
                 MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}");
-                mb.Show(null);
+                mb.ShowDialog(GetMainWindow());
                 
                 //Console.WriteLine($"Error renaming the directory: {ex.Message}");
             }
@@ -420,7 +430,7 @@ namespace DirOpusReImagined
             {
                 MessageBox MB = new MessageBox(e.Message);
 
-                MB.Show();
+                MB.ShowDialog(GetMainWindow());
                 
                 // if (ThePanel.Name == "RPgrid")
                 // {
@@ -560,7 +570,7 @@ namespace DirOpusReImagined
             {
                 MessageBox MB = new MessageBox(e.Message);
 
-                MB.Show();
+                MB.ShowDialog(GetMainWindow());
                 
                 // if (ThePanel.Name == "RPgrid")
                 // {
@@ -710,7 +720,7 @@ namespace DirOpusReImagined
             {
                 MessageBox MB = new MessageBox(e.Message);
 
-                MB.ShowDialog(null);
+                MB.ShowDialog(GetMainWindow());
             }
             
         }
@@ -732,7 +742,7 @@ namespace DirOpusReImagined
             {
                 MessageBox MB = new MessageBox(e.Message);
 
-                MB.ShowDialog(null);
+                MB.ShowDialog(GetMainWindow());
             }
         }
     }

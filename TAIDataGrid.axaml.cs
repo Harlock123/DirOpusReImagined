@@ -2047,9 +2047,13 @@ namespace DirOpusReImagined
                 PointerUpdateKind.RightButtonPressed)
             {
                 // Right mouse button was pressed
-                // Enable/disable folder-specific menu items before context menu opens
+                // Enable/disable context-specific menu items before context menu opens
                 bool isFolder = TheItemUnderTheMouse.ItemUnderMouse is AFileEntry entry && entry.Typ;
                 CalcFolderSizeMenuItem.IsEnabled = isFolder;
+
+                bool isUnix = Environment.OSVersion.Platform == PlatformID.Unix ||
+                              Environment.OSVersion.Platform == PlatformID.MacOSX;
+                PermissionsMenuItem.IsEnabled = isUnix && TheItemUnderTheMouse.ItemUnderMouse is AFileEntry;
 
                 return;
             }
@@ -2421,6 +2425,14 @@ namespace DirOpusReImagined
             }
         }
 
+        private void Permissions_Click(object sender, RoutedEventArgs e)
+        {
+            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry)
+            {
+                GridContextPermissions?.Invoke(this, TheItemUnderTheMouse);
+            }
+        }
+
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
             this.GridFontSize += 1;
@@ -2482,6 +2494,8 @@ namespace DirOpusReImagined
         public event EventHandler<GridHoverItem> GridItemClick;
 
         public event EventHandler<GridHoverItem> GridContextCalculateSize;
+
+        public event EventHandler<GridHoverItem> GridContextPermissions;
 
         #endregion
         

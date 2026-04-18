@@ -171,6 +171,9 @@ namespace DirOpusReImagined
             LPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
             RPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
 
+            LPgrid.GridContextPermissions += Handle_Permissions;
+            RPgrid.GridContextPermissions += Handle_Permissions;
+
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
             LPgrid.JustifyColumns.Add(4);
@@ -264,6 +267,19 @@ namespace DirOpusReImagined
             // Update the entry with the calculated size
             entry.FileSize = entry.ConvertNumberToReadableString(size);
             grid?.ReRender();
+        }
+
+        private async void Handle_Permissions(object? sender, GridHoverItem e)
+        {
+            if (e.ItemUnderMouse is not AFileEntry entry) return;
+
+            var grid = sender as TaiDataGrid;
+            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
+            var separator = Path.DirectorySeparatorChar;
+            var filePath = currentPath.TrimEnd(separator) + separator + entry.Name;
+
+            var dialog = new PermissionsDialog(filePath);
+            await dialog.ShowDialog(this);
         }
 
         /// <summary>

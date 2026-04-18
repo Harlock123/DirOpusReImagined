@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="320"
+        Width="400" Height="320" WindowStartupLocation="CenterOwner"
+        x:Class="DirOpusReImagined.PermissionsDialog"
+        Title="File Permissions"
+        CanResize="False">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- File name -->
+        <TextBlock Grid.Row="0" x:Name="FileNameLabel" FontWeight="Bold" FontSize="13"
+                   TextWrapping="Wrap" Text="filename.txt"/>
+
+        <!-- Permissions grid -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="80"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+            </Grid.RowDefinitions>
+
+            <!-- Headers -->
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="Read" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Write" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="0" Grid.Column="3" Text="Execute" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+            <!-- Owner -->
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Owner" FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="1" Grid.Column="1" x:Name="ChkOwnerRead"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="1" Grid.Column="2" x:Name="ChkOwnerWrite"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="1" Grid.Column="3" x:Name="ChkOwnerExecute"
+                      HorizontalAlignment="Center"/>
+
+            <!-- Group -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Group" FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="2" Grid.Column="1" x:Name="ChkGroupRead"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="2" Grid.Column="2" x:Name="ChkGroupWrite"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="2" Grid.Column="3" x:Name="ChkGroupExecute"
+                      HorizontalAlignment="Center"/>
+
+            <!-- Other -->
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Other" FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="3" Grid.Column="1" x:Name="ChkOtherRead"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="3" Grid.Column="2" x:Name="ChkOtherWrite"
+                      HorizontalAlignment="Center"/>
+            <CheckBox Grid.Row="3" Grid.Column="3" x:Name="ChkOtherExecute"
+                      HorizontalAlignment="Center"/>
+        </Grid>
+
+        <!-- Octal display -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="Octal: " FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBox x:Name="OctalTextBox" Width="60" FontSize="14" FontWeight="Bold"
+                     MaxLength="4" HorizontalContentAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="ApplyButton" Content="Apply" Margin="0,0,8,0" Width="80"/>
+            <Button x:Name="CancelButton" Content="Cancel" Width="80"/>
+        </StackPanel>
+    </Grid>
+</Window>
