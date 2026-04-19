@@ -2301,19 +2301,23 @@ namespace DirOpusReImagined
             var separator = Path.DirectorySeparatorChar;
             var segments = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
+            // Handle empty segments (e.g., path is just a separator)
+            if (segments.Length == 0) return;
+
             // Add root segment
-            var rootPath = Environment.OSVersion.Platform == PlatformID.Win32NT
-                ? segments.Length > 0 ? segments[0] + separator : separator.ToString()
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var rootPath = isWindows
+                ? segments[0] + separator
                 : separator.ToString();
 
             var rootButton = CreateBreadcrumbButton(
-                Environment.OSVersion.Platform == PlatformID.Win32NT ? segments[0] : "/",
+                isWindows ? segments[0] : "/",
                 rootPath, side);
             items.Add(rootButton);
 
             // Build cumulative path for each segment
             var cumulativePath = rootPath;
-            var startIndex = Environment.OSVersion.Platform == PlatformID.Win32NT ? 1 : 0;
+            var startIndex = isWindows ? 1 : 0;
 
             for (int i = startIndex; i < segments.Length; i++)
             {
