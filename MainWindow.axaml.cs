@@ -45,7 +45,8 @@ namespace DirOpusReImagined
         private string StartRightPath = "";
         private string StartLeftPath = "";
 
-        private string oldpath = "";
+        private Stack<string> _lpHistory = new Stack<string>();
+        private Stack<string> _rpHistory = new Stack<string>();
 
         private bool UseIntegratedImageViewer = true;
         
@@ -727,6 +728,12 @@ namespace DirOpusReImagined
 
             DriveButtonEntry dbe = (DriveButtonEntry)bb.Tag;
 
+            // Push current path to history before navigating
+            if (nm.EndsWith("A") && !string.IsNullOrEmpty(LPpath.Text))
+                _lpHistory.Push(LPpath.Text);
+            else if (!string.IsNullOrEmpty(RPpath.Text))
+                _rpHistory.Push(RPpath.Text);
+
             switch (dbe.Path.ToUpper())
             {
                 case "$HOME":
@@ -964,10 +971,15 @@ namespace DirOpusReImagined
             RefreshRPGridPostActions();
         }
 
+        private string _rpPathBeforeEdit = "";
+        private string _lpPathBeforeEdit = "";
+
         private void RPpath_KeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
+                if (!string.IsNullOrEmpty(_rpPathBeforeEdit) && _rpPathBeforeEdit != RPpath.Text)
+                    _rpHistory.Push(_rpPathBeforeEdit);
                 RPfilter.Text = "";
                 if (RPpath.Text != null)
                     if (ChkShowHidden != null)
@@ -985,6 +997,8 @@ namespace DirOpusReImagined
         {
             if (e.Key == Key.Enter)
             {
+                if (!string.IsNullOrEmpty(_lpPathBeforeEdit) && _lpPathBeforeEdit != LPpath.Text)
+                    _lpHistory.Push(_lpPathBeforeEdit);
                 LPfilter.Text = "";
                 if (LPpath.Text != null)
                     if (ChkShowHidden != null)
@@ -1933,58 +1947,17 @@ namespace DirOpusReImagined
 
         private void LPBackButton_Click(object? sender, RoutedEventArgs e)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (_lpHistory.Count > 0)
             {
-                string[] arr = LPpath.Text.Split(@"\");
-
-                string newpath = "";
-
-                for (int i = 0; i < arr.Length - 1; i++)
-                {
-                    newpath += arr[i] + @"\";
-                }
-
-                if (newpath.EndsWith(@"\") && newpath.Length > 3)
-                {
-                    newpath = newpath.Substring(0, newpath.Length - 1);
-                }
-
-                LPpath.Text = newpath;
+                LPpath.Text = _lpHistory.Pop();
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            else
             {
-                string[] arr = LPpath.Text.Split(@"/");
-
-                string newpath = "";
-
-                for (int i = 0; i < arr.Length - 1; i++)
-                {
-                    newpath += arr[i] + @"/";
-                }
-
-                if (newpath.EndsWith(@"/") && newpath.Length > 1)
-                {
-                    newpath = newpath.Substring(0, newpath.Length - 1);
-                }
-                LPpath.Text = newpath;
-
+                // Fallback: navigate up the directory tree
+                var parent = Path.GetDirectoryName(LPpath.Text);
+                if (!string.IsNullOrEmpty(parent))
+                    LPpath.Text = parent;
             }
-
-            //string[] arr = LPpath.Text.Split(@"\");
-
-            //string newpath = "";
-
-            //for (int i = 0; i < arr.Length - 1; i++)
-            //{
-            //    newpath += arr[i] + @"\";
-            //}
-
-            //if (newpath.EndsWith(@"\") && newpath.Length > 3)
-            //{
-            //    newpath = newpath.Substring(0, newpath.Length - 1);
-            //}
-
-            //LPpath.Text = newpath;
 
             LPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
@@ -1993,45 +1966,20 @@ namespace DirOpusReImagined
 
         private void RPBackButton_Click(object? sender, RoutedEventArgs e)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (_rpHistory.Count > 0)
             {
-                string[] arr = RPpath.Text.Split(@"\");
-
-                string newpath = "";
-
-                for (int i = 0; i < arr.Length - 1; i++)
-                {
-                    newpath += arr[i] + @"\";
-                }
-
-                if (newpath.EndsWith(@"\") && newpath.Length > 3)
-                {
-                    newpath = newpath.Substring(0, newpath.Length - 1);
-                }
-
-                RPpath.Text = newpath;
+                RPpath.Text = _rpHistory.Pop();
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            else
             {
-                string[] arr = RPpath.Text.Split(@"/");
-
-                string newpath = "";
-
-                for (int i = 0; i < arr.Length - 1; i++)
-                {
-                    newpath += arr[i] + @"/";
-                }
-
-                if (newpath.EndsWith(@"/") && newpath.Length > 1)
-                {
-                    newpath = newpath.Substring(0, newpath.Length - 1);
-                }
-
-                RPpath.Text = newpath;
+                // Fallback: navigate up the directory tree
+                var parent = Path.GetDirectoryName(RPpath.Text);
+                if (!string.IsNullOrEmpty(parent))
+                    RPpath.Text = parent;
             }
 
             RPfilter.Text = "";
-            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text,ChkShowHidden.IsChecked.Value);
+            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
             RefreshRPGridPostActions();
         }
 
@@ -2047,7 +1995,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    oldpath = RPpath.Text;
+                    _rpHistory.Push(RPpath.Text);
                     RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
@@ -2069,14 +2017,14 @@ namespace DirOpusReImagined
 
                         //Process.Start((RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
-                    
+
                 }
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
                 if (it.Typ)
                 {
-                    oldpath = RPpath.Text;
+                    _rpHistory.Push(RPpath.Text);
 
                     RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     if (ChkShowHidden != null)
@@ -2118,9 +2066,9 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    oldpath = LPpath.Text;
+                    _lpHistory.Push(LPpath.Text);
                     LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
-                    if (ChkShowHidden != null) 
+                    if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
@@ -2141,14 +2089,14 @@ namespace DirOpusReImagined
 
                         //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
-                    
+
                 }
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
                 if (it.Typ)
                 {
-                    oldpath = LPpath.Text;
+                    _lpHistory.Push(LPpath.Text);
 
                     LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
@@ -2301,11 +2249,18 @@ namespace DirOpusReImagined
             var separator = Path.DirectorySeparatorChar;
             var segments = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
-            // Handle empty segments (e.g., path is just a separator)
-            if (segments.Length == 0) return;
-
             // Add root segment
             var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+            // Handle root-only path (e.g., "/" on Linux or "C:\" on Windows)
+            if (segments.Length == 0)
+            {
+                var rootOnlyButton = CreateBreadcrumbButton("/", separator.ToString(), side);
+                items.Add(rootOnlyButton);
+                breadcrumbs.Items = items;
+                return;
+            }
+
             var rootPath = isWindows
                 ? segments[0] + separator
                 : separator.ToString();
@@ -2370,6 +2325,8 @@ namespace DirOpusReImagined
 
             if (side == "LP")
             {
+                if (!string.IsNullOrEmpty(LPpath.Text))
+                    _lpHistory.Push(LPpath.Text);
                 LPpath.Text = targetPath;
                 LPfilter.Text = "";
                 if (ChkShowHidden != null)
@@ -2378,6 +2335,8 @@ namespace DirOpusReImagined
             }
             else
             {
+                if (!string.IsNullOrEmpty(RPpath.Text))
+                    _rpHistory.Push(RPpath.Text);
                 RPpath.Text = targetPath;
                 RPfilter.Text = "";
                 if (ChkShowHidden != null)
@@ -2390,6 +2349,7 @@ namespace DirOpusReImagined
         {
             if (side == "LP")
             {
+                _lpPathBeforeEdit = LPpath.Text ?? "";
                 LPbreadcrumbBorder.IsVisible = false;
                 LPpath.IsVisible = true;
                 LPpath.Focus();
@@ -2397,6 +2357,7 @@ namespace DirOpusReImagined
             }
             else
             {
+                _rpPathBeforeEdit = RPpath.Text ?? "";
                 RPbreadcrumbBorder.IsVisible = false;
                 RPpath.IsVisible = true;
                 RPpath.Focus();
