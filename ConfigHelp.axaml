@@ -3,9 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="350"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
         x:Class="DirOpusReImagined.ConfigHelp"
-        Height="350" Width="800" WindowStartupLocation="CenterOwner"
+        Height="400" Width="800" WindowStartupLocation="CenterOwner"
         Title="Configuration Help">
         
         <ScrollViewer>
@@ -16,6 +16,11 @@
                     <TextBlock Text="    -"></TextBlock>
                     <TextBlock Text="%BUTTONCONFIG%" FontWeight="Bold" FontSize="16"></TextBlock>
                     <TextBlock Text="  Will bring up the Add Edit buttons interface of DORI" FontWeight="16"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="    -"></TextBlock>
+                    <TextBlock Text="%DRIVEINFO%" FontWeight="Bold" FontSize="16"></TextBlock>
+                    <TextBlock Text="  Will bring up the VOLUME Information Dialog" FontWeight="16"></TextBlock>
                 </StackPanel>
                 
                 <TextBlock Text="The following commands can be used in the ARGUMENTS field of a button:" FontSize="20" Margin="10"/>

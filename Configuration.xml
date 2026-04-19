@@ -102,6 +102,20 @@
       <ToolTip>Calls the Internal Button configure Interface</ToolTip>
     </Button>
     <Button>
+      <Name>LPButton32</Name>
+      <Content>Show Drive Info</Content>
+      <Background>GreenYellow</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin />
+      <Action>%DRIVEINFO%</Action>
+      <Args />
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>Displays Drive/Volume information</ToolTip>
+    </Button>
+    <Button>
       <Name>LpButton33</Name>
       <Content>Windows Terminal on Left</Content>
       <Background>LightCyan</Background>

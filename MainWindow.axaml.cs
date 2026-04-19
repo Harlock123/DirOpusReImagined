@@ -1057,6 +1057,12 @@ namespace DirOpusReImagined
                         BC.ShowDialog(this);
                         break;
                     }
+                    if (item.Bcontent.ToUpper().Trim() == "%DRIVEINFO%")
+                    {
+                        DriveInfoDialog DI = new DriveInfoDialog();
+                        DI.ShowDialog(this);
+                        break;
+                    }
                     string newaction = ParseTheArgs(item.Bargs);
 
                     if (newaction != "%ERROR%")
