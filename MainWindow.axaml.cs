@@ -1112,18 +1112,24 @@ namespace DirOpusReImagined
                         }
                     }
 
+                    // Launch the process directly with proper argument handling
+                    // instead of routing through /bin/sh which can mangle arguments
                     var startInfo = new ProcessStartInfo()
                     {
-                        FileName = "/bin/sh",
-                        Arguments = $"-c \"nohup '{fileName}' {arguments} > /dev/null 2>&1 &\"",
+                        FileName = fileName,
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true
                     };
 
+                    // Parse arguments respecting quoted strings and add them individually
+                    foreach (var arg in SplitArguments(arguments))
+                    {
+                        startInfo.ArgumentList.Add(arg);
+                    }
+
                     var process = Process.Start(startInfo);
-                    process?.WaitForExit(100); // Wait briefly for shell to spawn the detached process
                 }
                 else // Windows
                 {
@@ -1149,18 +1155,20 @@ namespace DirOpusReImagined
                         }
                     }
 
+                    // On Windows with UseShellExecute, ArgumentList is not supported
+                    // so build a properly quoted Arguments string instead
+                    var parsedArgs = SplitArguments(arguments);
+                    var quotedArgs = string.Join(" ", parsedArgs.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
+
                     var startInfo = new ProcessStartInfo()
                     {
-                        FileName = "cmd.exe",
-                        Arguments = $"/C start \"\" \"{fileName}\" {arguments}",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false
+                        FileName = fileName,
+                        Arguments = quotedArgs,
+                        UseShellExecute = true,
+                        CreateNoWindow = createNoWindow
                     };
 
                     var process = Process.Start(startInfo);
-                    process?.WaitForExit(100); // Wait briefly for cmd to spawn the detached process
                 }
             }
             catch (Exception ex)
@@ -1168,6 +1176,48 @@ namespace DirOpusReImagined
                 MessageBox mb = new MessageBox($"Failed to start process: {fileName}\nError: {ex.Message}");
                 mb.ShowDialog(this);
             }
+        }
+
+        private static string QuoteIfNeeded(string path)
+        {
+            if (path.Contains(' ')) return $"\"{path}\"";
+            return path;
+        }
+
+        private static List<string> SplitArguments(string arguments)
+        {
+            var args = new List<string>();
+            if (string.IsNullOrWhiteSpace(arguments)) return args;
+
+            var current = new System.Text.StringBuilder();
+            bool inQuotes = false;
+
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                char c = arguments[i];
+
+                if (c == '"' || c == '\'')
+                {
+                    inQuotes = !inQuotes;
+                }
+                else if (c == ' ' && !inQuotes)
+                {
+                    if (current.Length > 0)
+                    {
+                        args.Add(current.ToString());
+                        current.Clear();
+                    }
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+
+            if (current.Length > 0)
+                args.Add(current.ToString());
+
+            return args;
         }
 
         private string ParseTheArgs(string bcontent)
@@ -1187,7 +1237,7 @@ namespace DirOpusReImagined
                 {
                     // the left grid has a folder selected
 
-                    if (LPpath.Text != null) PTH = MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder();
+                    if (LPpath.Text != null) PTH = QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + LPgrid.GetFirstSelectedFolder());
 
                     string ret = bcontent.Replace("%FD%", PTH);
 
@@ -1198,7 +1248,7 @@ namespace DirOpusReImagined
                 {
                     // the right grid has a folder selected
 
-                    if (RPpath.Text != null) PTH = MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder();
+                    if (RPpath.Text != null) PTH = QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + RPgrid.GetFirstSelectedFolder());
 
                     string ret = bcontent.Replace("%FD%", PTH);
 
@@ -1230,8 +1280,8 @@ namespace DirOpusReImagined
                     // the left grid has some files selected
 
                     foreach(AFileEntry af in LPgrid.GetListOfSelectedFiles())
-                    {                         
-                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + " ";
+                    {
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + " ";
                     }
 
                     string ret = bcontent.Replace("%AF%", PTH);
@@ -1245,7 +1295,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + " ";
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + " ";
                     }
 
                     string ret = bcontent.Replace("%AF%", PTH);
@@ -1281,7 +1331,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + ",";
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1295,7 +1345,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + ",";
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1335,7 +1385,7 @@ namespace DirOpusReImagined
                     List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
                     List<AFileEntry> thelistb = RPgrid.GetListOfSelectedFiles();
 
-                    PTH = MakePathEnvSafe(LPpath.Text) + thelista[0].Name + " " + MakePathEnvSafe(RPpath.Text) + thelistb[0].Name;
+                    PTH = QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + thelista[0].Name) + " " + QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + thelistb[0].Name);
 
                     string ret = bcontent.Replace("%LF1%", PTH).Replace("%RF1%","");
 
@@ -1369,7 +1419,7 @@ namespace DirOpusReImagined
 
                     List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
 
-                    PTH = MakePathEnvSafe(LPpath.Text) + thelista[0].Name;
+                    PTH = QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + thelista[0].Name);
 
                     string ret = bcontent.Replace("%LF1%", PTH);
 
@@ -1403,7 +1453,7 @@ namespace DirOpusReImagined
 
                     List<AFileEntry> thelista = RPgrid.GetListOfSelectedFiles();
 
-                    PTH = MakePathEnvSafe(RPpath.Text) + thelista[0].Name;
+                    PTH = QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + thelista[0].Name);
 
                     string ret = bcontent.Replace("%RF1%", PTH);
 
@@ -1437,7 +1487,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += MakePathEnvSafe(RPpath.Text) + af.Name + ",";
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%RPAF%", PTH);
@@ -1472,7 +1522,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += MakePathEnvSafe(LPpath.Text) + af.Name + ",";
+                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LPAF%", PTH);
@@ -1499,15 +1549,15 @@ namespace DirOpusReImagined
             // Path to the files shown in the left panel
             if (bcontent.Contains("%LPATH%"))
             {
-                string ret = bcontent.Replace("%LPATH%", MakePathEnvSafe(LPpath.Text));
+                string ret = bcontent.Replace("%LPATH%", QuoteIfNeeded(MakePathEnvSafe(LPpath.Text)));
 
                 return ret;
             }
-            
+
             // Path to the files shown in the right panel
             if (bcontent.Contains("%RPATH%"))
             {
-                string ret = bcontent.Replace("%RPATH%", MakePathEnvSafe(RPpath.Text));
+                string ret = bcontent.Replace("%RPATH%", QuoteIfNeeded(MakePathEnvSafe(RPpath.Text)));
 
                 return ret;
             }   
