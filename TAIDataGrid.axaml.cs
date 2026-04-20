@@ -2433,6 +2433,22 @@ namespace DirOpusReImagined
             }
         }
 
+        private void CopyPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry)
+            {
+                GridContextCopyPath?.Invoke(this, TheItemUnderTheMouse);
+            }
+        }
+
+        private void CopyFullPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry)
+            {
+                GridContextCopyFullPath?.Invoke(this, TheItemUnderTheMouse);
+            }
+        }
+
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
             this.GridFontSize += 1;
@@ -2496,6 +2512,10 @@ namespace DirOpusReImagined
         public event EventHandler<GridHoverItem> GridContextCalculateSize;
 
         public event EventHandler<GridHoverItem> GridContextPermissions;
+
+        public event EventHandler<GridHoverItem> GridContextCopyPath;
+
+        public event EventHandler<GridHoverItem> GridContextCopyFullPath;
 
         #endregion
         

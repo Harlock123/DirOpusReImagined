@@ -25,6 +25,9 @@
 						<MenuItem Name="CalcFolderSizeMenuItem" Header="Calculate Folder Size" Click="CalculateFolderSize_Click"/>
 						<MenuItem Name="PermissionsMenuItem" Header="File Permissions" Click="Permissions_Click"/>
 						<Separator/>
+						<MenuItem Name="CopyPathMenuItem" Header="Copy Path" Click="CopyPath_Click"/>
+						<MenuItem Name="CopyFullPathMenuItem" Header="Copy Full Path" Click="CopyFullPath_Click"/>
+						<Separator/>
 						<MenuItem Header="Fonts Larger" Click="Option1_Click"/>
 						<MenuItem Header="Fonts Smaller" Click="Option2_Click"/>
 					</ContextMenu>

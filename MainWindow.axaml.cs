@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -175,6 +176,11 @@ namespace DirOpusReImagined
             LPgrid.GridContextPermissions += Handle_Permissions;
             RPgrid.GridContextPermissions += Handle_Permissions;
 
+            LPgrid.GridContextCopyPath += Handle_CopyPath;
+            RPgrid.GridContextCopyPath += Handle_CopyPath;
+            LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
+            RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
+
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
             LPgrid.JustifyColumns.Add(4);
@@ -281,6 +287,30 @@ namespace DirOpusReImagined
 
             var dialog = new PermissionsDialog(filePath);
             await dialog.ShowDialog(this);
+        }
+
+        private async void Handle_CopyPath(object? sender, GridHoverItem e)
+        {
+            if (e.ItemUnderMouse is not AFileEntry entry) return;
+
+            var grid = sender as TaiDataGrid;
+            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
+
+            if (Application.Current?.Clipboard != null)
+                await Application.Current.Clipboard.SetTextAsync(currentPath);
+        }
+
+        private async void Handle_CopyFullPath(object? sender, GridHoverItem e)
+        {
+            if (e.ItemUnderMouse is not AFileEntry entry) return;
+
+            var grid = sender as TaiDataGrid;
+            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
+            var separator = Path.DirectorySeparatorChar;
+            var fullPath = currentPath.TrimEnd(separator) + separator + entry.Name;
+
+            if (Application.Current?.Clipboard != null)
+                await Application.Current.Clipboard.SetTextAsync(fullPath);
         }
 
         /// <summary>
