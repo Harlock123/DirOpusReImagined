@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
+using DirOpusReImagined.FileSystem;
 using NickStrupat;
 using Tomlyn;
 //using NickStrupat.ComputerInfo;
@@ -1872,10 +1873,10 @@ namespace DirOpusReImagined
                     if (item.Typ)
                     {
                         string FullPath = spath + item.Name;
-                        
+
                         string NewPath = tpath + item.Name;
 
-                        Directory.CreateDirectory(NewPath);
+                        ProviderRegistry.For(NewPath).CreateDirectory(NewPath);
 
                         FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
 
@@ -1947,7 +1948,7 @@ namespace DirOpusReImagined
 
                         string NewPath = tpath + item.Name;
 
-                        Directory.CreateDirectory(NewPath);
+                        ProviderRegistry.For(NewPath).CreateDirectory(NewPath);
 
                         FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
 
@@ -2525,7 +2526,7 @@ namespace DirOpusReImagined
             string freeSpace = "";
             try
             {
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                if (!string.IsNullOrEmpty(path) && ProviderRegistry.For(path).DirectoryExists(path))
                 {
                     var root = Path.GetPathRoot(path);
                     if (!string.IsNullOrEmpty(root))

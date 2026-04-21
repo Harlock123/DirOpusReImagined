@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using DirOpusReImagined.FileSystem;
 
 namespace DirOpusReImagined;
 
@@ -53,17 +54,18 @@ public partial class CreateFolder : Window
     private void CreateFolderMethod()
     {
         int i = 1;
-        
+
         string basename = Foldername.Text;
-        
-        while(Directory.Exists(Path.Combine(_panelSetup!.PrimaryPath, basename)))
+        var provider = ProviderRegistry.For(_panelSetup!.PrimaryPath);
+
+        while (provider.DirectoryExists(Path.Combine(_panelSetup!.PrimaryPath, basename)))
         {
             basename = Foldername.Text + "_" + i.ToString();
             i++;
         }
         string folderPath = Path.Combine(_panelSetup!.PrimaryPath, basename);
 
-        Directory.CreateDirectory(folderPath);
+        provider.CreateDirectory(folderPath);
         
         FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath, _ShowHidden);
         

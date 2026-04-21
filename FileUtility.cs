@@ -5,6 +5,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using DirOpusReImagined.FileSystem;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DirOpusReImagined
@@ -22,53 +23,21 @@ namespace DirOpusReImagined
         }
 
         public static long GetDirectorySize(string path)
-        {
-            long size = 0;
-            try
-            {
-                foreach (string file in Directory.EnumerateFiles(path))
-                {
-                    try
-                    {
-                        size += new FileInfo(file).Length;
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-            return size;
-        }
+            => ProviderRegistry.For(path).GetDirectorySize(path, recursive: false);
 
         public static long GetDirectorySizeRecursive(string path)
-        {
-            long size = 0;
-            try
-            {
-                foreach (string file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
-                {
-                    try
-                    {
-                        size += new FileInfo(file).Length;
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-            return size;
-        }
+            => ProviderRegistry.For(path).GetDirectorySize(path, recursive: true);
 
         public static void CopyFileToFolder(string sourceFile, string targetFolder)
         {
             try
             {
-                // Ensure that the target directory exists
-                Directory.CreateDirectory(targetFolder);
+                var dstP = ProviderRegistry.For(targetFolder);
+                dstP.CreateDirectory(targetFolder);
 
-                // Generate a target file path
                 string targetFile = Path.Combine(targetFolder, Path.GetFileName(sourceFile));
 
-                // Copy the file to the target directory
-                File.Copy(sourceFile, targetFile, true); // Overwrite existing files
+                CopyFileAcrossProviders(sourceFile, targetFile, overwrite: true);
 
                 Console.WriteLine($"File {sourceFile} was copied to {targetFolder}");
             }
@@ -82,6 +51,25 @@ namespace DirOpusReImagined
             }
         }
 
+        private static void CopyFileAcrossProviders(string src, string dst, bool overwrite)
+        {
+            var srcP = ProviderRegistry.For(src);
+            var dstP = ProviderRegistry.For(dst);
+
+            if (ReferenceEquals(srcP, dstP))
+            {
+                srcP.CopyFile(src, dst, overwrite);
+                return;
+            }
+
+            if (!overwrite && dstP.FileExists(dst))
+                throw new IOException($"Destination exists: {dst}");
+
+            using var inStream = srcP.OpenRead(src);
+            using var outStream = dstP.OpenWrite(dst);
+            inStream.CopyTo(outStream);
+        }
+
         /// <summary>
         /// Copies the contents of a directory to another directory, including subdirectories.
         /// </summary>
@@ -91,23 +79,21 @@ namespace DirOpusReImagined
         {
             try
             {
-                // Create the target directory if it doesn't exist
-                Directory.CreateDirectory(targetDirectory);
+                var srcP = ProviderRegistry.For(sourceDirectory);
+                var dstP = ProviderRegistry.For(targetDirectory);
 
-                // Get all files in the source directory and copy them to the target directory
-                foreach (string file in Directory.GetFiles(sourceDirectory))
+                dstP.CreateDirectory(targetDirectory);
+
+                foreach (var fileEntry in srcP.EnumerateFiles(sourceDirectory))
                 {
-                    string fileName = Path.GetFileName(file);
-                    string targetFile = Path.Combine(targetDirectory, fileName);
-                    File.Copy(file, targetFile, true);
+                    string targetFile = Path.Combine(targetDirectory, fileEntry.Name);
+                    CopyFileAcrossProviders(fileEntry.Path, targetFile, overwrite: true);
                 }
 
-                // Recursively copy subdirectories
-                foreach (string directory in Directory.GetDirectories(sourceDirectory))
+                foreach (var dirEntry in srcP.EnumerateDirectories(sourceDirectory))
                 {
-                    string dirName = Path.GetFileName(directory);
-                    string targetDir = Path.Combine(targetDirectory, dirName);
-                    CopyDirectoryToFolder(directory, targetDir);
+                    string targetDir = Path.Combine(targetDirectory, dirEntry.Name);
+                    CopyDirectoryToFolder(dirEntry.Path, targetDir);
                 }
 
                 Console.WriteLine($"Directory {sourceDirectory} was copied to {targetDirectory}");
@@ -132,14 +118,22 @@ namespace DirOpusReImagined
         {
             try
             {
-                // Ensure that the target directory exists
-                Directory.CreateDirectory(targetDirectory);
+                var srcP = ProviderRegistry.For(sourceFile);
+                var dstP = ProviderRegistry.For(targetDirectory);
 
-                // Generate a target file path
+                dstP.CreateDirectory(targetDirectory);
+
                 string targetFile = Path.Combine(targetDirectory, Path.GetFileName(sourceFile));
 
-                // Move the file to the target directory
-                File.Move(sourceFile, targetFile);
+                if (ReferenceEquals(srcP, dstP))
+                {
+                    srcP.MoveFile(sourceFile, targetFile);
+                }
+                else
+                {
+                    CopyFileAcrossProviders(sourceFile, targetFile, overwrite: false);
+                    srcP.DeleteFile(sourceFile);
+                }
 
                 Console.WriteLine($"File {sourceFile} was moved to {targetDirectory}");
             }
@@ -163,8 +157,18 @@ namespace DirOpusReImagined
         {
             try
             {
-                // Move the directory to the target directory
-                Directory.Move(sourceDirectory, targetDirectory);
+                var srcP = ProviderRegistry.For(sourceDirectory);
+                var dstP = ProviderRegistry.For(targetDirectory);
+
+                if (ReferenceEquals(srcP, dstP))
+                {
+                    srcP.MoveDirectory(sourceDirectory, targetDirectory);
+                }
+                else
+                {
+                    CopyDirectoryToFolder(sourceDirectory, targetDirectory);
+                    srcP.DeleteDirectory(sourceDirectory, recursive: true);
+                }
 
                 Console.WriteLine($"Directory {sourceDirectory} was moved to {targetDirectory}");
             }
@@ -187,15 +191,14 @@ namespace DirOpusReImagined
         {
             try
             {
-                // Verify that the source file exists
-                if (!File.Exists(oldFilePath))
+                var p = ProviderRegistry.For(oldFilePath);
+
+                if (!p.FileExists(oldFilePath))
                 {
                     throw new FileNotFoundException("The source file does not exist.", oldFilePath);
-                    // we need to handle this a little better
                 }
 
-                // Rename the file using File.Move
-                File.Move(oldFilePath, newFilePath);
+                p.MoveFile(oldFilePath, newFilePath);
 
                 Console.WriteLine($"File renamed from '{oldFilePath}' to '{newFilePath}'");
             }
@@ -214,28 +217,20 @@ namespace DirOpusReImagined
         {
             try
             {
-                // Verify that the source directory exists
-                if (!Directory.Exists(olddir) || Directory.Exists(newdir))
+                var p = ProviderRegistry.For(olddir);
+
+                if (!p.DirectoryExists(olddir) || p.DirectoryExists(newdir))
                 {
                     MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.");
-                    
                     mb.ShowDialog(GetMainWindow());
-                    
-                    //throw new DirectoryNotFoundException("The source directory does not exist.");
-                    // we need to handle this a little better
                 }
 
-                // Rename the directory using Directory.Move
-                Directory.Move(olddir, newdir);
-
-                //Console.WriteLine($"Directory renamed from '{olddir}' to '{newdir}'");
+                p.MoveDirectory(olddir, newdir);
             }
             catch (Exception ex)
             {
                 MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}");
                 mb.ShowDialog(GetMainWindow());
-                
-                //Console.WriteLine($"Error renaming the directory: {ex.Message}");
             }
         }
 
@@ -320,130 +315,64 @@ namespace DirOpusReImagined
             
             try
             {
-                
-                var Directories = Directory.EnumerateDirectories(PATHNAME)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+                var provider = ProviderRegistry.For(PATHNAME);
+
+                var directoryEntries = provider.EnumerateDirectories(PATHNAME)
+                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
                 ThePanel.SuspendRendering = true;
-
                 ThePanel.Items.Clear();
                 List<AFileEntry> FileList = new List<AFileEntry>();
 
-                foreach (string dir in Directories)
-                {
-                    DirectoryInfo di = new DirectoryInfo(dir);
-                    try
-                    {
-
-                        if (di.Attributes.HasFlag(FileAttributes.System))
-                        {
-                            continue;
-                        }
-
-                        string flags = GetAbbreviatedAttributes(di.Attributes);
-                                        
-                        var ds = di.GetDirectories().GetUpperBound(0) + 1;
-                        var fs = di.GetFiles().GetUpperBound(0) + 1;
-                        long dirSize = GetDirectorySize(di.FullName);
-                    
-                        // if we are showing hidden files 
-                        // and the flags contain the hidden flag
-                        // then we add it to the list
-
-                        if (ShowHidden) // Who cares show em all
-                        {
-                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                        }
-                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                        {
-                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                        }
-                    
-                        //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                    }
-                    catch (Exception)
-                    {
-                        try
-                        {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                    //var ds = di.GetDirectories().GetUpperBound(0);
-                    //var fs = di.GetFiles().GetUpperBound(0);
-
-                    //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
-                }
-
-                // Using Linq to sort the files alphabetically
-                var files = Directory.EnumerateFiles(PATHNAME)
-                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                    .ToList(); ;
-
-                foreach (string file in files)
+                foreach (var entry in directoryEntries)
                 {
                     try
                     {
-                        FileInfo fi = new FileInfo(file);
+                        if (entry.Flags.HasFlag(FileEntryFlags.System)) continue;
+                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
 
-                        FileAttributes fa = File.GetAttributes(fi.FullName);
+                        var ds = provider.EnumerateDirectories(entry.Path).Count();
+                        var fs = provider.EnumerateFiles(entry.Path).Count();
+                        long dirSize = provider.GetDirectorySize(entry.Path, recursive: false);
 
-                        string flags = GetAbbreviatedAttributes(fa);
-
-                        string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
-
-                        if (ShowHidden) // Again who cares
-                        {
-                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
-                        }
-                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                        {
-                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
-                        }
-                        
-                        //FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
+                        FileList.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
                     }
                     catch
                     {
-                        
+                        try { FileList.Add(new AFileEntry(entry.Name, 0, true, 0, 0, "")); }
+                        catch { }
                     }
                 }
 
-                if (SortByName)
-                {
-                    FileList = FileList.OrderBy(fe => fe.Name ).ToList();
-                }
-                else
-                {
-                    FileList = FileList.OrderBy(fe => fe.FileSize ).ToList();
-                }
-                
-                ThePanel.Items = FileList.OfType<object>().ToList(); 
+                var fileEntries = provider.EnumerateFiles(PATHNAME)
+                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
+                foreach (var entry in fileEntries)
+                {
+                    try
+                    {
+                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
 
+                        string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
+                        FileList.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
+                    }
+                    catch { }
+                }
+
+                FileList = SortByName
+                    ? FileList.OrderBy(fe => fe.Name).ToList()
+                    : FileList.OrderBy(fe => fe.FileSize).ToList();
+
+                ThePanel.Items = FileList.OfType<object>().ToList();
             }
             catch (Exception e)
             {
                 MessageBox MB = new MessageBox(e.Message);
-
                 MB.ShowDialog(GetMainWindow());
-                
-                // if (ThePanel.Name == "RPgrid")
-                // {
-                //     RPpath.Text = oldpath;
-                // }
-                // else
-                // {
-                //     LPpath.Text = oldpath;
-                // }
-                
             }
-            
-            
+
             ThePanel.SuspendRendering = false;
         }
 
@@ -469,238 +398,61 @@ namespace DirOpusReImagined
             
             try
             {
-                
-                var Directories = Directory.EnumerateDirectories(PATHNAME)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+                var provider = ProviderRegistry.For(PATHNAME);
+
+                var directoryEntries = provider.EnumerateDirectories(PATHNAME)
+                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
                 ThePanel.SuspendRendering = true;
-
                 ThePanel.Items.Clear();
                 List<Object> FileList = new List<Object>();
 
-                foreach (string dir in Directories)
-                {
-                    DirectoryInfo di = new DirectoryInfo(dir);
-                    try
-                    {
-
-                        if (di.Attributes.HasFlag(FileAttributes.System))
-                        {
-                            continue;
-                        }
-
-                        string flags = GetAbbreviatedAttributes(di.Attributes);
-                                        
-                        var ds = di.GetDirectories().GetUpperBound(0) + 1;
-                        var fs = di.GetFiles().GetUpperBound(0) + 1;
-                        long dirSize = GetDirectorySize(di.FullName);
-                    
-                        // if we are showing hidden files 
-                        // and the flags contain the hidden flag
-                        // then we add it to the list
-
-                        if (ShowHidden) // Who cares show em all
-                        {
-                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                        }
-                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                        {
-                            FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                        }
-                    
-                        //FileList.Add(new AFileEntry(di.Name, dirSize, true, ds, fs,flags));
-                    }
-                    catch (Exception)
-                    {
-                        try
-                        {
-                            FileList.Add(new AFileEntry(di.Name, 0, true, 0, 0,""));
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                    //var ds = di.GetDirectories().GetUpperBound(0);
-                    //var fs = di.GetFiles().GetUpperBound(0);
-
-                    //FileList.Add(new AFileEntry(di.Name, 0, true,ds,fs));
-                }
-
-                // Using Linq to sort the files alphabetically
-                var files = Directory.EnumerateFiles(PATHNAME)
-                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                    .ToList(); ;
-
-                foreach (string file in files)
+                foreach (var entry in directoryEntries)
                 {
                     try
                     {
-                        FileInfo fi = new FileInfo(file);
+                        if (entry.Flags.HasFlag(FileEntryFlags.System)) continue;
+                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
 
-                        FileAttributes fa = File.GetAttributes(fi.FullName);
+                        var ds = provider.EnumerateDirectories(entry.Path).Count();
+                        var fs = provider.EnumerateFiles(entry.Path).Count();
+                        long dirSize = provider.GetDirectorySize(entry.Path, recursive: false);
 
-                        string flags = GetAbbreviatedAttributes(fa);
-
-                        string ft = fi.LastWriteTime.ToShortDateString() + " " + fi.LastWriteTime.ToShortTimeString();
-
-                        if (ShowHidden) // Again who cares
-                        {
-                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
-                        }
-                        else if (!ShowHidden && !flags.Contains("-H")) // if we are not showing hidden files and the flags do not contain the hidden flag
-                        {
-                            FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
-                        }
-                        
-                        //FileList.Add(new AFileEntry(fi.Name, fi.Length, false,flags,ft));
+                        FileList.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
                     }
                     catch
                     {
-                        
+                        try { FileList.Add(new AFileEntry(entry.Name, 0, true, 0, 0, "")); }
+                        catch { }
                     }
                 }
 
-                ThePanel.Items = FileList.OfType<object>().ToList(); 
+                var fileEntries = provider.EnumerateFiles(PATHNAME)
+                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
+                foreach (var entry in fileEntries)
+                {
+                    try
+                    {
+                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
 
+                        string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
+                        FileList.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
+                    }
+                    catch { }
+                }
+
+                ThePanel.Items = FileList.OfType<object>().ToList();
             }
             catch (Exception e)
             {
                 MessageBox MB = new MessageBox(e.Message);
-
                 MB.ShowDialog(GetMainWindow());
-                
-                // if (ThePanel.Name == "RPgrid")
-                // {
-                //     RPpath.Text = oldpath;
-                // }
-                // else
-                // {
-                //     LPpath.Text = oldpath;
-                // }
-                
             }
-            
-            
+
             ThePanel.SuspendRendering = false;
-        }
-        
-        
-        /// <summary>
-        /// Abbreviates the given file attributes and returns the result as a string.
-        /// </summary>
-        /// <param name="attributes">The file attributes to be abbreviated.</param>
-        /// <returns>The abbreviated file attributes as a string.</returns>
-        private static string GetAbbreviatedAttributes(FileAttributes attributes)
-        {
-            string abbreviatedAttributes = string.Empty;
-
-            if ((attributes & FileAttributes.ReadOnly) != 0)
-                abbreviatedAttributes += "RO-";
-            else
-                abbreviatedAttributes += "RW-";
-            if ((attributes & FileAttributes.Hidden) != 0)
-                abbreviatedAttributes += "H-";
-            else
-                abbreviatedAttributes += "V-";
-            if ((attributes & FileAttributes.System) != 0)
-                abbreviatedAttributes += "S-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Directory) != 0)
-                abbreviatedAttributes += "D-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Archive) != 0)
-                abbreviatedAttributes += "A-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Device) != 0)
-                abbreviatedAttributes += "DEV-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Normal) != 0)
-                abbreviatedAttributes += "N-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Temporary) != 0)
-                abbreviatedAttributes += "T-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.SparseFile) != 0)
-                abbreviatedAttributes += "SF-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
-                abbreviatedAttributes += "RP-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Compressed) != 0)
-                abbreviatedAttributes += "C-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Offline) != 0)
-                abbreviatedAttributes += "O-";
-            else
-            {
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.NotContentIndexed) != 0)
-                abbreviatedAttributes += "NCI-";
-            else
-            {
-                
-                abbreviatedAttributes += "";
-            }
-            if ((attributes & FileAttributes.Encrypted) != 0)
-                abbreviatedAttributes += "E-";
-            else
-            {
-                abbreviatedAttributes += ""; 
-                
-            }
-            if ((attributes & FileAttributes.IntegrityStream) != 0)
-                abbreviatedAttributes += "IS-";
-            else
-            {
-                abbreviatedAttributes += ""; 
-                
-            }
-            if ((attributes & FileAttributes.NoScrubData) != 0)
-                abbreviatedAttributes += "NSD-";
-            else
-            {
-                
-                abbreviatedAttributes += "";
-            }
-
-            if (abbreviatedAttributes.EndsWith("-"))
-            {
-                abbreviatedAttributes = 
-                    abbreviatedAttributes.Substring(0, abbreviatedAttributes.Length - 1);
-            }
-
-            return abbreviatedAttributes.Trim();
         }
 
         /// <summary>
@@ -711,18 +463,17 @@ namespace DirOpusReImagined
         {
             try
             {
-                if (Directory.Exists(rootPath))
+                var p = ProviderRegistry.For(rootPath);
+                if (p.DirectoryExists(rootPath))
                 {
-                    Directory.Delete(rootPath, true);
+                    p.DeleteDirectory(rootPath, recursive: true);
                 }
             }
             catch (Exception e)
             {
                 MessageBox MB = new MessageBox(e.Message);
-
                 MB.ShowDialog(GetMainWindow());
             }
-            
         }
 
         /// <summary>
@@ -733,15 +484,15 @@ namespace DirOpusReImagined
         {
             try
             {
-                if (File.Exists(rootPath))
+                var p = ProviderRegistry.For(rootPath);
+                if (p.FileExists(rootPath))
                 {
-                    File.Delete(rootPath);
+                    p.DeleteFile(rootPath);
                 }
             }
             catch (Exception e)
             {
                 MessageBox MB = new MessageBox(e.Message);
-
                 MB.ShowDialog(GetMainWindow());
             }
         }
