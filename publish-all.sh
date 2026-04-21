@@ -8,9 +8,18 @@ set -e
 PROJECT="DirOpusReImagined.csproj"
 CONFIG="Release"
 OUT_BASE="publish"
+DIST_BASE="dist"
+
+VERSION=$(grep -oE '<AssemblyVersion>[^<]+' "${PROJECT}" | head -1 | sed 's/<AssemblyVersion>//')
+if [ -z "${VERSION}" ]; then
+    echo "ERROR: Could not determine version from ${PROJECT}" >&2
+    exit 1
+fi
+APP_NAME="DirOpusReImagined"
 
 TARGETS=(
-    "win-x64:Windows Intel/AMD"
+    "win-x64:Windows Intel/AMD 64-bit"
+    "win-x86:Windows Intel/AMD 32-bit"
     "win-arm64:Windows ARM"
     "osx-x64:macOS Intel"
     "osx-arm64:macOS Apple Silicon"
@@ -19,14 +28,18 @@ TARGETS=(
 )
 
 echo "============================================"
-echo " DirOpusReImagined - Multi-Platform Publish"
+echo " DirOpusReImagined v${VERSION} - Multi-Platform Publish"
 echo "============================================"
 echo ""
+
+mkdir -p "${DIST_BASE}"
 
 for entry in "${TARGETS[@]}"; do
     RID="${entry%%:*}"
     LABEL="${entry##*:}"
     OUTDIR="${OUT_BASE}/${RID}"
+    ZIP_NAME="${APP_NAME}-${VERSION}-${RID}.zip"
+    ZIP_PATH="${DIST_BASE}/${ZIP_NAME}"
 
     echo "Building ${LABEL} (${RID})..."
 
@@ -40,11 +53,17 @@ for entry in "${TARGETS[@]}"; do
         -o "${OUTDIR}"
 
     echo "  -> ${OUTDIR}/"
+
+    rm -f "${ZIP_PATH}"
+    (cd "${OUT_BASE}" && zip -rq "../${ZIP_PATH}" "${RID}")
+    echo "  -> ${ZIP_PATH} ($(du -h "${ZIP_PATH}" | cut -f1))"
     echo ""
 done
 
 echo "============================================"
-echo " All builds complete. Output in ${OUT_BASE}/"
+echo " All builds complete."
+echo "   Binaries: ${OUT_BASE}/"
+echo "   Release zips: ${DIST_BASE}/"
 echo "============================================"
 echo ""
-ls -d ${OUT_BASE}/*/
+ls -lh "${DIST_BASE}"/*.zip
