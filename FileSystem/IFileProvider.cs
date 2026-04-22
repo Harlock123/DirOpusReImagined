@@ -7,6 +7,13 @@ public interface IFileProvider
 {
     bool CanHandle(string path);
 
+    /// <summary>
+    /// True if operations have high per-call latency (network). UI-layer code uses
+    /// this to skip expensive per-item calls (counts, recursive size) and to dispatch
+    /// listings to a background thread instead of freezing the UI.
+    /// </summary>
+    bool IsRemote { get; }
+
     bool FileExists(string path);
     bool DirectoryExists(string path);
 

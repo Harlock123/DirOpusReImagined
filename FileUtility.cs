@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using DirOpusReImagined.FileSystem;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -313,59 +315,19 @@ namespace DirOpusReImagined
             }
             
             
+            var provider = ProviderRegistry.For(PATHNAME);
+
+            if (provider.IsRemote)
+            {
+                PopulateFilePanelAsync(ThePanel, PATHNAME, ShowHidden, SortByName, provider);
+                return;
+            }
+
             try
             {
-                var provider = ProviderRegistry.For(PATHNAME);
-
-                var directoryEntries = provider.EnumerateDirectories(PATHNAME)
-                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
                 ThePanel.SuspendRendering = true;
                 ThePanel.Items.Clear();
-                List<AFileEntry> FileList = new List<AFileEntry>();
-
-                foreach (var entry in directoryEntries)
-                {
-                    try
-                    {
-                        if (entry.Flags.HasFlag(FileEntryFlags.System)) continue;
-                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
-
-                        var ds = provider.EnumerateDirectories(entry.Path).Count();
-                        var fs = provider.EnumerateFiles(entry.Path).Count();
-                        long dirSize = provider.GetDirectorySize(entry.Path, recursive: false);
-
-                        FileList.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
-                    }
-                    catch
-                    {
-                        try { FileList.Add(new AFileEntry(entry.Name, 0, true, 0, 0, "")); }
-                        catch { }
-                    }
-                }
-
-                var fileEntries = provider.EnumerateFiles(PATHNAME)
-                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                foreach (var entry in fileEntries)
-                {
-                    try
-                    {
-                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
-
-                        string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
-                        FileList.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
-                    }
-                    catch { }
-                }
-
-                FileList = SortByName
-                    ? FileList.OrderBy(fe => fe.Name).ToList()
-                    : FileList.OrderBy(fe => fe.FileSize).ToList();
-
-                ThePanel.Items = FileList.OfType<object>().ToList();
+                ThePanel.Items = BuildFileList(provider, PATHNAME, ShowHidden, SortByName).OfType<object>().ToList();
             }
             catch (Exception e)
             {
@@ -374,6 +336,103 @@ namespace DirOpusReImagined
             }
 
             ThePanel.SuspendRendering = false;
+        }
+
+        private static void PopulateFilePanelAsync(
+            TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, bool SortByName, IFileProvider provider)
+        {
+            ThePanel.SuspendRendering = true;
+            ThePanel.Items = new List<object>
+            {
+                new AFileEntry("Loading…", 0, true, 0, 0, ""),
+            };
+            ThePanel.SuspendRendering = false;
+
+            Task.Run(() =>
+            {
+                List<AFileEntry>? list = null;
+                Exception? error = null;
+                try { list = BuildFileList(provider, PATHNAME, ShowHidden, SortByName); }
+                catch (Exception ex) { error = ex; }
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ThePanel.SuspendRendering = true;
+                    if (error is not null)
+                    {
+                        ThePanel.Items = new List<object>();
+                        new MessageBox(error.Message).ShowDialog(GetMainWindow());
+                    }
+                    else
+                    {
+                        ThePanel.Items = list!.OfType<object>().ToList();
+                    }
+                    ThePanel.SuspendRendering = false;
+                });
+            });
+        }
+
+        private static List<AFileEntry> BuildFileList(IFileProvider provider, string PATHNAME, bool ShowHidden, bool SortByName)
+        {
+            var list = BuildFileListCore(provider, PATHNAME, ShowHidden);
+            return SortByName
+                ? list.OrderBy(fe => fe.Name).ToList()
+                : list.OrderBy(fe => fe.FileSize).ToList();
+        }
+
+        private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden)
+        {
+            var directoryEntries = provider.EnumerateDirectories(PATHNAME)
+                .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var fileEntries = provider.EnumerateFiles(PATHNAME)
+                .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var result = new List<AFileEntry>();
+
+            foreach (var entry in directoryEntries)
+            {
+                try
+                {
+                    if (entry.Flags.HasFlag(FileEntryFlags.System)) continue;
+                    if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
+
+                    int ds = 0, fs = 0;
+                    long dirSize = 0;
+                    if (!provider.IsRemote)
+                    {
+                        try
+                        {
+                            ds = provider.EnumerateDirectories(entry.Path).Count();
+                            fs = provider.EnumerateFiles(entry.Path).Count();
+                            dirSize = provider.GetDirectorySize(entry.Path, recursive: false);
+                        }
+                        catch { }
+                    }
+
+                    result.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
+                }
+                catch
+                {
+                    try { result.Add(new AFileEntry(entry.Name, 0, true, 0, 0, "")); }
+                    catch { }
+                }
+            }
+
+            foreach (var entry in fileEntries)
+            {
+                try
+                {
+                    if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
+                    string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
+                    result.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
+                }
+                catch { }
+            }
+
+            return result;
         }
 
 /// <summary>
@@ -396,55 +455,19 @@ namespace DirOpusReImagined
             }
             
             
+            var provider = ProviderRegistry.For(PATHNAME);
+
+            if (provider.IsRemote)
+            {
+                PopulateFilePanelAsync2(ThePanel, PATHNAME, ShowHidden, provider);
+                return;
+            }
+
             try
             {
-                var provider = ProviderRegistry.For(PATHNAME);
-
-                var directoryEntries = provider.EnumerateDirectories(PATHNAME)
-                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
                 ThePanel.SuspendRendering = true;
                 ThePanel.Items.Clear();
-                List<Object> FileList = new List<Object>();
-
-                foreach (var entry in directoryEntries)
-                {
-                    try
-                    {
-                        if (entry.Flags.HasFlag(FileEntryFlags.System)) continue;
-                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
-
-                        var ds = provider.EnumerateDirectories(entry.Path).Count();
-                        var fs = provider.EnumerateFiles(entry.Path).Count();
-                        long dirSize = provider.GetDirectorySize(entry.Path, recursive: false);
-
-                        FileList.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
-                    }
-                    catch
-                    {
-                        try { FileList.Add(new AFileEntry(entry.Name, 0, true, 0, 0, "")); }
-                        catch { }
-                    }
-                }
-
-                var fileEntries = provider.EnumerateFiles(PATHNAME)
-                    .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                foreach (var entry in fileEntries)
-                {
-                    try
-                    {
-                        if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
-
-                        string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
-                        FileList.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
-                    }
-                    catch { }
-                }
-
-                ThePanel.Items = FileList.OfType<object>().ToList();
+                ThePanel.Items = BuildFileListCore(provider, PATHNAME, ShowHidden).OfType<object>().ToList();
             }
             catch (Exception e)
             {
@@ -453,6 +476,40 @@ namespace DirOpusReImagined
             }
 
             ThePanel.SuspendRendering = false;
+        }
+
+        private static void PopulateFilePanelAsync2(
+            TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, IFileProvider provider)
+        {
+            ThePanel.SuspendRendering = true;
+            ThePanel.Items = new List<object>
+            {
+                new AFileEntry("Loading…", 0, true, 0, 0, ""),
+            };
+            ThePanel.SuspendRendering = false;
+
+            Task.Run(() =>
+            {
+                List<AFileEntry>? list = null;
+                Exception? error = null;
+                try { list = BuildFileListCore(provider, PATHNAME, ShowHidden); }
+                catch (Exception ex) { error = ex; }
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ThePanel.SuspendRendering = true;
+                    if (error is not null)
+                    {
+                        ThePanel.Items = new List<object>();
+                        new MessageBox(error.Message).ShowDialog(GetMainWindow());
+                    }
+                    else
+                    {
+                        ThePanel.Items = list!.OfType<object>().ToList();
+                    }
+                    ThePanel.SuspendRendering = false;
+                });
+            });
         }
 
         /// <summary>

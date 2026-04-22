@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        Width="800" Height="600" WindowStartupLocation="CenterOwner"
+        x:Class="DirOpusReImagined.RcloneDiagnosticsDialog"
+        Title="rclone Diagnostics"
+        CanResize="True">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="rclone Diagnostics" FontWeight="Bold" FontSize="16"/>
+
+        <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8">
+            <StackPanel x:Name="StatusPanel" Spacing="3"/>
+        </Border>
+
+        <Border Grid.Row="4" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8">
+            <StackPanel x:Name="RemotesPanel" Spacing="3"/>
+        </Border>
+
+        <Border Grid.Row="6" BorderBrush="Gray" BorderThickness="1" CornerRadius="3"
+                Background="#111" ClipToBounds="True">
+            <ScrollViewer x:Name="LogScroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBox x:Name="LogBox"
+                         Background="Transparent" Foreground="#DDD"
+                         FontFamily="Menlo,Consolas,monospace"
+                         FontSize="12"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         BorderThickness="0"/>
+            </ScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="InstallButton" Content="Install rclone" Width="140" IsVisible="False"/>
+            <Button x:Name="RefreshButton" Content="Refresh" Width="90"/>
+            <Button x:Name="CloseButton"   Content="Close"   Width="90"/>
+        </StackPanel>
+    </Grid>
+</Window>

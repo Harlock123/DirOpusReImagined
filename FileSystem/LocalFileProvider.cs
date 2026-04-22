@@ -7,6 +7,7 @@ namespace DirOpusReImagined.FileSystem;
 public sealed class LocalFileProvider : IFileProvider
 {
     public bool CanHandle(string path) => true;
+    public bool IsRemote => false;
 
     public bool FileExists(string path) => File.Exists(path);
     public bool DirectoryExists(string path) => Directory.Exists(path);

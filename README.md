@@ -54,11 +54,19 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
 - Configurable via the `<UseIntegratedImageViewer>` setting
 
+### Cloud Storage Access
+- Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via [rclone](https://rclone.org/)
+- Access any configured remote with `cloud://<remote-name>/<path>` in the panel path box
+- Automatic rclone download on first use, with live progress UI
+- Lazy daemon startup — no overhead until you actually use cloud storage
+- Dedicated diagnostics dialog showing binary location, configured remotes, live daemon log, and recent API requests
+
 ### Navigation
 - Path text box with Enter key navigation
 - Back button to go up one directory level
 - Drive button for drive/volume selection
 - Panel swap and clone buttons for quick path synchronization
+- Cloud paths fully integrated alongside local — same double-click / breadcrumb / back behavior
 
 ### Display Options
 - Toggle hidden file visibility with the "Show Hidden" checkbox
@@ -84,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.0.5.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.0.6.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -341,6 +349,137 @@ There are a number of special variables that can be used in the path specificati
        Home folder for a Documents, documents, DOCUMENTS folder and if found will return that.
 - $PICTURES - The users pictures directory
 
+## Cloud Storage (rclone)
+
+DORI can browse cloud storage — Google Drive, OneDrive, Dropbox, S3, Box, and ~40 other providers — through [rclone](https://rclone.org/). Remotes you've configured in rclone appear as `cloud://<remote>/<path>` URIs you can type into any panel's path box just like a local path.
+
+### How it works
+
+- DORI launches a local `rclone rcd` daemon on a random `127.0.0.1` port and talks to it over HTTP with a per-session user/password.
+- All provider authentication (OAuth tokens, API keys) is stored by rclone in its own config file — DORI never handles credentials directly.
+- The daemon is launched lazily on the first cloud-path operation and shut down automatically when DORI closes.
+
+### Step 1 — Install rclone
+
+DORI can download a pinned rclone binary (v1.68.2) for your platform into its private data directory — no admin rights needed. Alternatively, install rclone system-wide; DORI uses whichever it finds first.
+
+**macOS** — `brew install rclone` or use DORI's built-in installer.
+
+**Linux** —
+```bash
+sudo apt install rclone           # Debian/Ubuntu
+sudo dnf install rclone           # Fedora
+curl https://rclone.org/install.sh | sudo bash   # any distro
+```
+…or use DORI's built-in installer.
+
+**Windows** —
+```powershell
+winget install Rclone.Rclone
+```
+…or download the zip from [rclone.org/downloads](https://rclone.org/downloads/) and put `rclone.exe` on your `PATH`, or use DORI's built-in installer.
+
+**Using DORI's built-in installer:** open the rclone Diagnostics dialog (see below) and click **Install rclone**. A progress bar tracks the download and extraction.
+
+### Step 2 — Configure a remote
+
+Remotes are set up interactively by running `rclone config` in a terminal. Each remote gets a short name — that's what you'll use in DORI as `cloud://<name>/`.
+
+**Example: Google Drive**
+
+```bash
+rclone config
+```
+
+Answer the prompts:
+
+| Prompt | Answer |
+|---|---|
+| e/n/d/r/c/s/q | `n` — new remote |
+| name | `gdrive` (or whatever you'd like; remember, it's case-sensitive) |
+| Storage | select **Google Drive** (usually `drive`) |
+| client_id | blank (uses rclone's default) |
+| client_secret | blank |
+| scope | `1` (full access) |
+| service_account_file | blank |
+| Edit advanced config? | `n` |
+| Use auto config? | `y` — opens your browser for OAuth |
+| Configure this as a Shared Drive? | `n` (unless it is) |
+| Keep this "gdrive" remote? | `y` |
+| e/n/d/r/c/s/q | `q` |
+
+rclone's [Google Drive docs](https://rclone.org/drive/) cover edge cases like shared drives, service accounts, and using your own OAuth client ID.
+
+**Other providers:** rclone supports a long list. Setup follows the same shape — run `rclone config`, pick the provider, fill in provider-specific details. See:
+- [OneDrive](https://rclone.org/onedrive/)
+- [Dropbox](https://rclone.org/dropbox/)
+- [S3](https://rclone.org/s3/)
+- [Full provider list](https://rclone.org/overview/)
+
+### Step 3 — Where `rclone.conf` lives
+
+| Platform | Default config path |
+|---|---|
+| macOS / Linux | `~/.config/rclone/rclone.conf` |
+| Windows | `%APPDATA%\rclone\rclone.conf` |
+
+If `RCLONE_CONFIG` is set, rclone uses that path instead. DORI's embedded binary reads the same file as a system-installed rclone, so setup done with either works everywhere.
+
+**If you only have DORI's embedded rclone** (no system install), invoke it directly:
+- macOS: `~/Library/Application\ Support/DirOpusReImagined/rclone/rclone config`
+- Linux: `~/.local/share/DirOpusReImagined/rclone/rclone config`
+- Windows: `%LOCALAPPDATA%\DirOpusReImagined\rclone\rclone.exe config`
+
+The Diagnostics dialog's **Binary** row shows the exact path on your system.
+
+### Step 4 — Access cloud resources in DORI
+
+1. Click either panel's path text box.
+2. Type `cloud://<remote-name>/` — the leading part must match the remote name in `rclone.conf` exactly (case-sensitive).
+3. Press Enter.
+4. Browse as you would any local folder — double-click directories, use breadcrumbs, use the back button.
+
+**Examples:**
+
+| URI | Opens |
+|---|---|
+| `cloud://gdrive/` | Root of the `gdrive` remote |
+| `cloud://gdrive/Photos/2024` | A subfolder |
+| `cloud://dropbox/Work` | A different remote |
+| `cloud://onedrive/Documents` | Yet another |
+
+You can have one panel on a local path and the other on a cloud path — copy between them as usual.
+
+### Diagnostics dialog
+
+Bind a custom button in `Configuration.xml` to open the rclone diagnostics dialog:
+
+```xml
+<Button>
+    <Name>LPButton1</Name>
+    <Content>%RCLONEDIAG%</Content>
+    <Background>DarkBlue</Background>
+    <Foreground>White</Foreground>
+</Button>
+```
+
+(`%RCLONEDIAG%` is a built-in command — any button whose `<Content>` is exactly that string triggers the dialog.)
+
+The dialog shows:
+- **Binary** — path to rclone (or "not installed"), with an Install button when missing
+- **Running** / **Endpoint** — daemon state and local URL
+- **Config** — path to `rclone.conf`
+- **Configured remotes** — list of remote names with their `cloud://` URIs, read via rclone's `config/listremotes` API
+- **Recent rc requests** — last 100 outgoing API calls (method, endpoint, JSON body, any error responses)
+- **rclone daemon log** — live stdout/stderr from the background `rclone rcd` process
+
+### Caveats
+
+- Cloud listings have network latency — expect ~200 ms–1 s per directory hop depending on provider. The UI stays responsive during these calls.
+- Subdirectory count and directory size columns are blank for cloud entries to avoid a round-trip per row (local entries still show these).
+- Double-clicking a cloud **file** to launch it is not yet supported (download-to-temp-and-launch is planned).
+- ZIP archive creation targeting a cloud path is not yet supported.
+
 ## Building
 
 ### Prerequisites
@@ -404,12 +543,15 @@ Output goes to `publish/<platform>/`:
 
 | Platform | Runtime ID | Output |
 |---|---|---|
-| Windows Intel/AMD | `win-x64` | `publish/win-x64/DirOpusReImagined.exe` |
+| Windows Intel/AMD 64-bit | `win-x64` | `publish/win-x64/DirOpusReImagined.exe` |
+| Windows Intel/AMD 32-bit | `win-x86` | `publish/win-x86/DirOpusReImagined.exe` |
 | Windows ARM | `win-arm64` | `publish/win-arm64/DirOpusReImagined.exe` |
 | macOS Intel | `osx-x64` | `publish/osx-x64/DirOpusReImagined` |
 | macOS Apple Silicon | `osx-arm64` | `publish/osx-arm64/DirOpusReImagined` |
 | Linux Intel/AMD | `linux-x64` | `publish/linux-x64/DirOpusReImagined` |
 | Linux ARM | `linux-arm64` | `publish/linux-arm64/DirOpusReImagined` |
+
+The `publish-all.sh` and `publish-all.ps1` scripts also produce per-platform zip files in `dist/` suitable for attaching to a GitHub release (`DirOpusReImagined-<version>-<rid>.zip`).
 
 ### Publish a Single Platform
 
@@ -423,7 +565,7 @@ dotnet publish -c Release -r <runtime-id> --self-contained true \
     -o publish/<runtime-id>
 ```
 
-Replace `<runtime-id>` with one of: `win-x64`, `win-arm64`, `osx-x64`, `osx-arm64`, `linux-x64`, `linux-arm64`.
+Replace `<runtime-id>` with one of: `win-x64`, `win-x86`, `win-arm64`, `osx-x64`, `osx-arm64`, `linux-x64`, `linux-arm64`.
 
 ### Configuration
 

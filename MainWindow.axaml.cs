@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
 using DirOpusReImagined.FileSystem;
+using DirOpusReImagined.FileSystem.Rclone;
 using NickStrupat;
 using Tomlyn;
 //using NickStrupat.ComputerInfo;
@@ -66,7 +67,10 @@ namespace DirOpusReImagined
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            ProviderRegistry.Register(new RcloneFileProvider());
+            Closing += (_, _) => RcloneService.Shutdown();
+
             var cinf = new ComputerInfo();
             
             var globalMEM = cinf.TotalPhysicalMemory;
@@ -1094,6 +1098,11 @@ namespace DirOpusReImagined
                         DI.ShowDialog(this);
                         break;
                     }
+                    if (item.Bcontent.ToUpper().Trim() == "%RCLONEDIAG%")
+                    {
+                        ShowRcloneDiagnostics();
+                        break;
+                    }
                     string newaction = ParseTheArgs(item.Bargs);
 
                     if (newaction != "%ERROR%")
@@ -2033,7 +2042,7 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     _rpHistory.Push(RPpath.Text);
-                    RPpath.Text = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                    RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
                 else
@@ -2063,7 +2072,7 @@ namespace DirOpusReImagined
                 {
                     _rpHistory.Push(RPpath.Text);
 
-                    RPpath.Text = (RPpath.Text + "/" + it.Name).Replace(@"//", @"/");
+                    RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
                     if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
@@ -2104,7 +2113,7 @@ namespace DirOpusReImagined
                 if (it.Typ)
                 {
                     _lpHistory.Push(LPpath.Text);
-                    LPpath.Text = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                    LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
                     if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
                 }
@@ -2135,7 +2144,7 @@ namespace DirOpusReImagined
                 {
                     _lpHistory.Push(LPpath.Text);
 
-                    LPpath.Text = (LPpath.Text + "/" + it.Name).Replace(@"//", @"/");
+                    LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
                 }
                 else
@@ -2281,6 +2290,12 @@ namespace DirOpusReImagined
         {
             if (string.IsNullOrEmpty(path)) return;
 
+            if (CloudPath.IsCloudUri(path))
+            {
+                UpdateCloudBreadcrumbs(path, breadcrumbs, side);
+                return;
+            }
+
             var items = new List<Control>();
 
             var separator = Path.DirectorySeparatorChar;
@@ -2328,6 +2343,40 @@ namespace DirOpusReImagined
 
                 var segButton = CreateBreadcrumbButton(segments[i], cumulativePath, side);
                 items.Add(segButton);
+            }
+
+            breadcrumbs.Items = items;
+        }
+
+        private void UpdateCloudBreadcrumbs(string path, ItemsControl breadcrumbs, string side)
+        {
+            var items = new List<Control>();
+            var cp = CloudPath.Parse(path);
+
+            var rootPath = new CloudPath(cp.Remote, "").FullUri;
+            items.Add(CreateBreadcrumbButton($"cloud://{cp.Remote}", rootPath, side));
+
+            if (string.IsNullOrEmpty(cp.Path))
+            {
+                breadcrumbs.Items = items;
+                return;
+            }
+
+            var segments = cp.Path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var cumulative = "";
+            foreach (var seg in segments)
+            {
+                items.Add(new TextBlock
+                {
+                    Text = " \u203a ",
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Foreground = new SolidColorBrush(Colors.Gray),
+                    FontSize = 13,
+                });
+
+                cumulative = string.IsNullOrEmpty(cumulative) ? seg : $"{cumulative}/{seg}";
+                var fullUri = new CloudPath(cp.Remote, cumulative).FullUri;
+                items.Add(CreateBreadcrumbButton(seg, fullUri, side));
             }
 
             breadcrumbs.Items = items;
@@ -3224,10 +3273,25 @@ namespace DirOpusReImagined
             else
             {
                 // Look in the alternate places here based on OS
-                
+
             }
         }
-        
+
+        private void ShowRcloneDiagnostics()
+        {
+            new RcloneDiagnosticsDialog().ShowDialog(this);
+        }
+
+        private static string JoinChildPath(string parent, string childName)
+        {
+            if (CloudPath.IsCloudUri(parent))
+                return CloudPath.Parse(parent).Join(childName).FullUri;
+
+            var sep = Environment.OSVersion.Platform == PlatformID.Win32NT ? "\\" : "/";
+            if (parent.EndsWith(sep)) return parent + childName;
+            return parent + sep + childName;
+        }
+
     }
     
     public class DriveButtonEntry
