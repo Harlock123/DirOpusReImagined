@@ -361,25 +361,59 @@ DORI can browse cloud storage — Google Drive, OneDrive, Dropbox, S3, Box, and 
 
 ### Step 1 — Install rclone
 
-DORI can download a pinned rclone binary (v1.68.2) for your platform into its private data directory — no admin rights needed. Alternatively, install rclone system-wide; DORI uses whichever it finds first.
+You have three broad choices for getting rclone onto your system. Pick whichever is easiest — DORI uses whichever it finds first on your PATH, falling back to its own private copy.
 
-**macOS** — `brew install rclone` or use DORI's built-in installer.
+1. **Install system-wide with a package manager** (recommended if you already use one).
+2. **Download the official binary** from rclone.org and put it on your PATH manually.
+3. **Let DORI download it for you** — opens the rclone Diagnostics dialog and click **Install rclone**. DORI downloads the pinned version (v1.68.2) into its private data directory. No admin rights needed; doesn't affect anything else on your system.
 
-**Linux** —
+#### macOS
+
+| Method | Command |
+|---|---|
+| Homebrew | `brew install rclone` |
+| MacPorts | `sudo port install rclone` |
+| Official install script | `curl https://rclone.org/install.sh \| sudo bash` |
+| Manual zip | [rclone.org/downloads](https://rclone.org/downloads/) → pick `rclone-vX.Y.Z-osx-amd64.zip` (Intel) or `rclone-vX.Y.Z-osx-arm64.zip` (Apple Silicon), extract, move `rclone` to `/usr/local/bin/` and `chmod +x` it |
+
+#### Linux
+
+| Distribution | Command |
+|---|---|
+| Debian / Ubuntu | `sudo apt install rclone` |
+| Fedora / RHEL | `sudo dnf install rclone` |
+| Arch / Manjaro | `sudo pacman -S rclone` |
+| openSUSE | `sudo zypper install rclone` |
+| Alpine | `sudo apk add rclone` |
+| Any distro (always current) | `curl https://rclone.org/install.sh \| sudo bash` |
+| Snap | `sudo snap install rclone` |
+
+Distro packages can lag the upstream release by months. If you need the latest features, use the official install script or manual zip.
+
+#### Windows
+
+| Method | Command |
+|---|---|
+| winget | `winget install Rclone.Rclone` |
+| Chocolatey | `choco install rclone` |
+| Scoop | `scoop install rclone` |
+| Manual zip | [rclone.org/downloads](https://rclone.org/downloads/) → pick `rclone-vX.Y.Z-windows-amd64.zip` (64-bit) or `rclone-vX.Y.Z-windows-386.zip` (32-bit), extract, copy `rclone.exe` somewhere on your `PATH` (e.g. `C:\Program Files\rclone\`) |
+
+After a manual install on Windows, add the folder containing `rclone.exe` to your `PATH` environment variable (System Properties → Advanced → Environment Variables), then open a fresh terminal so it picks up the change.
+
+#### Verify the install
+
+Open a terminal and run:
+
 ```bash
-sudo apt install rclone           # Debian/Ubuntu
-sudo dnf install rclone           # Fedora
-curl https://rclone.org/install.sh | sudo bash   # any distro
+rclone version
 ```
-…or use DORI's built-in installer.
 
-**Windows** —
-```powershell
-winget install Rclone.Rclone
-```
-…or download the zip from [rclone.org/downloads](https://rclone.org/downloads/) and put `rclone.exe` on your `PATH`, or use DORI's built-in installer.
+You should see output like `rclone v1.68.2` — the exact version will depend on your install method. If you get "command not found", either rclone isn't installed, or its location isn't on your `PATH`. DORI will still work in that case — just use the **Install rclone** button in the Diagnostics dialog to get a private copy.
 
-**Using DORI's built-in installer:** open the rclone Diagnostics dialog (see below) and click **Install rclone**. A progress bar tracks the download and extraction.
+#### Using DORI's built-in installer
+
+If you skip the above and open a panel with `cloud://…`, DORI will throw a clear error telling you rclone isn't installed. Open the diagnostics dialog (bind any button's `<Content>` to `%RCLONEDIAG%`), click **Install rclone**, and watch the progress bar — DORI downloads the pinned binary for your OS and architecture, extracts it, and sets it up. Subsequent cloud operations work normally.
 
 ### Step 2 — Configure a remote
 
