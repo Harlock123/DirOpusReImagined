@@ -69,6 +69,7 @@ namespace DirOpusReImagined
             InitializeComponent();
 
             ProviderRegistry.Register(new RcloneFileProvider());
+            FileUtility.PanelPopulated += _ => UpdateStatusBar();
             Closing += (_, _) => RcloneService.Shutdown();
 
             var cinf = new ComputerInfo();
@@ -1101,6 +1102,11 @@ namespace DirOpusReImagined
                     if (item.Bcontent.ToUpper().Trim() == "%RCLONEDIAG%")
                     {
                         ShowRcloneDiagnostics();
+                        break;
+                    }
+                    if (item.Bcontent.ToUpper().Trim() == "%RCLONECONFIG%")
+                    {
+                        ShowRcloneConfig();
                         break;
                     }
                     string newaction = ParseTheArgs(item.Bargs);
@@ -3280,6 +3286,18 @@ namespace DirOpusReImagined
         private void ShowRcloneDiagnostics()
         {
             new RcloneDiagnosticsDialog().ShowDialog(this);
+        }
+
+        private async void ShowRcloneConfig()
+        {
+            if (!RcloneService.IsInstalled())
+            {
+                await new MessageBox(
+                    "rclone is not installed. Open the rclone Diagnostics dialog (%RCLONEDIAG%) to install it first.")
+                    .ShowDialog(this);
+                return;
+            }
+            await new RcloneAddRemoteDialog().ShowDialog(this);
         }
 
         private static string JoinChildPath(string parent, string childName)

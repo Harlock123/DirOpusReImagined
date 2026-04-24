@@ -45,9 +45,10 @@
         </Border>
 
         <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <Button x:Name="InstallButton" Content="Install rclone" Width="140" IsVisible="False"/>
-            <Button x:Name="RefreshButton" Content="Refresh" Width="90"/>
-            <Button x:Name="CloseButton"   Content="Close"   Width="90"/>
+            <Button x:Name="InstallButton"  Content="Install rclone" Width="140" IsVisible="False"/>
+            <Button x:Name="AddRemoteButton" Content="Add Remote…"   Width="120"/>
+            <Button x:Name="RefreshButton"  Content="Refresh"        Width="90"/>
+            <Button x:Name="CloseButton"    Content="Close"          Width="90"/>
         </StackPanel>
     </Grid>
 </Window>

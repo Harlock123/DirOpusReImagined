@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="560"
+        Width="640" Height="560" WindowStartupLocation="CenterOwner"
+        x:Class="DirOpusReImagined.RcloneAddRemoteDialog"
+        Title="Add rclone Remote"
+        CanResize="True">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Add Cloud Storage Remote" FontWeight="Bold" FontSize="16"/>
+
+        <Grid Grid.Row="2" ColumnDefinitions="100,8,*,12,140,8,*">
+            <TextBlock Grid.Column="0" Text="Name:" VerticalAlignment="Center" FontWeight="Bold"/>
+            <TextBox  Grid.Column="2" x:Name="NameBox" Watermark="e.g. gdrive"/>
+            <TextBlock Grid.Column="4" Text="Provider type:" VerticalAlignment="Center" FontWeight="Bold"/>
+            <ComboBox Grid.Column="6" x:Name="TypeBox" HorizontalAlignment="Stretch"/>
+        </Grid>
+
+        <Border Grid.Row="4" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="FieldsPanel" Spacing="6"/>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Row="6" x:Name="StatusText"
+                   TextWrapping="Wrap" Foreground="Gray"
+                   MaxHeight="80"/>
+
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="AddButton"    Content="Add"    Width="100"/>
+            <Button x:Name="CancelButton" Content="Cancel" Width="100"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -17,6 +17,13 @@ namespace DirOpusReImagined
     /// </summary>
     public static class FileUtility
     {
+        /// <summary>
+        /// Fired on the UI thread after a panel's items have been replaced with
+        /// a freshly-enumerated list. Subscribers typically refresh dependent UI
+        /// (status bar counts, breadcrumbs) that read from the grid's Items.
+        /// </summary>
+        public static event Action<TaiDataGrid>? PanelPopulated;
+
         private static Window? GetMainWindow()
         {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -336,6 +343,7 @@ namespace DirOpusReImagined
             }
 
             ThePanel.SuspendRendering = false;
+            PanelPopulated?.Invoke(ThePanel);
         }
 
         private static void PopulateFilePanelAsync(
@@ -368,6 +376,7 @@ namespace DirOpusReImagined
                         ThePanel.Items = list!.OfType<object>().ToList();
                     }
                     ThePanel.SuspendRendering = false;
+                    PanelPopulated?.Invoke(ThePanel);
                 });
             });
         }
@@ -476,6 +485,7 @@ namespace DirOpusReImagined
             }
 
             ThePanel.SuspendRendering = false;
+            PanelPopulated?.Invoke(ThePanel);
         }
 
         private static void PopulateFilePanelAsync2(
@@ -508,6 +518,7 @@ namespace DirOpusReImagined
                         ThePanel.Items = list!.OfType<object>().ToList();
                     }
                     ThePanel.SuspendRendering = false;
+                    PanelPopulated?.Invoke(ThePanel);
                 });
             });
         }

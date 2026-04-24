@@ -299,7 +299,28 @@ The `<Name></Name>` Parameter is the name of the button. It is used to identify 
 There are 36 buttons available in the interface numbered 1 to 36. The buttons are numbered from left to right
 top to bottom. The first button is LPButton1 and the last button is LPButton36.
 
-The `<Content></Content>` Parameter is the text that will appear on the button itself
+The `<Content></Content>` Parameter is the text that will appear on the button itself.
+
+**Built-in command tokens** — if `<Content>` is set to one of the special tokens below, the button opens a built-in dialog instead of launching an external command. `<Action>`, `<Args>`, `<Shell>`, and `<Window>` are ignored for these buttons.
+
+| Token | What the button does |
+|---|---|
+| `%BUTTONCONFIG%` | Opens the button-definition editor for the 36 action buttons |
+| `%DRIVEINFO%` | Opens the Drive Information dialog showing mounted volumes |
+| `%RCLONEDIAG%` | Opens the rclone Diagnostics dialog — binary location, daemon state, configured remotes (with Delete), live log, and an **Install rclone** button if it's missing |
+| `%RCLONECONFIG%` | Opens the Add Remote dialog directly — pick a provider, fill the form (OAuth handled automatically for Google Drive / OneDrive / Dropbox / etc.), and the new remote appears as `cloud://<name>/` in any panel |
+
+Example — adding a button that opens the cloud configuration dialog:
+
+```xml
+<Button>
+    <Name>LPButton3</Name>
+    <Content>%RCLONECONFIG%</Content>
+    <Background>DarkGreen</Background>
+    <Foreground>White</Foreground>
+    <ToolTip>Add a new cloud storage remote</ToolTip>
+</Button>
+```
 
 The `<Background></Background>` Parameter is the background color of the button
 

@@ -17,9 +17,39 @@ public partial class RcloneDiagnosticsDialog : Window
     {
         InitializeComponent();
         Opened += async (_, _) => await RefreshAsync();
-        RefreshButton.Click += async (_, _) => await RefreshAsync();
-        InstallButton.Click += async (_, _) => await OnInstallClicked();
-        CloseButton.Click   += (_, _) => Close();
+        RefreshButton.Click   += async (_, _) => await RefreshAsync();
+        InstallButton.Click   += async (_, _) => await OnInstallClicked();
+        AddRemoteButton.Click += async (_, _) => await OnAddRemoteClicked();
+        CloseButton.Click     += (_, _) => Close();
+    }
+
+    private async Task OnAddRemoteClicked()
+    {
+        if (!RcloneService.IsInstalled())
+        {
+            LogBox.Text = "Install rclone first before adding remotes.";
+            return;
+        }
+
+        var dlg = new RcloneAddRemoteDialog();
+        await dlg.ShowDialog(this);
+        if (dlg.RemoteAdded) await RefreshAsync();
+    }
+
+    private async Task OnDeleteRemoteClicked(string name)
+    {
+        var confirm = new MessageBox($"Delete remote '{name}'? This only removes it from rclone.conf — files on the cloud are not affected.");
+        await confirm.ShowDialog(this);
+
+        try
+        {
+            await RcloneRemoteManager.DeleteAsync(name);
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            await new MessageBox($"Delete failed: {ex.Message}").ShowDialog(this);
+        }
     }
 
     private async Task RefreshAsync()
@@ -156,7 +186,28 @@ public partial class RcloneDiagnosticsDialog : Window
         {
             foreach (var r in remotes)
             {
-                var row = new TextBlock { Text = $"  • {r}    →    cloud://{r}/", FontFamily = "Menlo,Consolas,monospace" };
+                var row = new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    Spacing = 8,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                };
+                row.Children.Add(new TextBlock
+                {
+                    Text = $"  • {r}    →    cloud://{r}/",
+                    FontFamily = "Menlo,Consolas,monospace",
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                });
+                var deleteBtn = new Button
+                {
+                    Content = "Delete",
+                    Padding = new Avalonia.Thickness(6, 2),
+                    FontSize = 11,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                };
+                var name = r;
+                deleteBtn.Click += async (_, _) => await OnDeleteRemoteClicked(name);
+                row.Children.Add(deleteBtn);
                 RemotesPanel.Children.Add(row);
             }
         }
