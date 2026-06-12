@@ -69,7 +69,7 @@ namespace DirOpusReImagined
             InitializeComponent();
 
             ProviderRegistry.Register(new RcloneFileProvider());
-            FileUtility.PanelPopulated += _ => UpdateStatusBar();
+            FileUtility.PanelPopulated += OnPanelPopulated;
             Closing += (_, _) => RcloneService.Shutdown();
 
             var cinf = new ComputerInfo();
@@ -2266,6 +2266,27 @@ namespace DirOpusReImagined
             ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
             UpdateStatusBar();
             UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
+        }
+
+        /// <summary>
+        /// Fires when a panel has finished (re)populating — including the asynchronous completion of
+        /// a remote/cloud listing. Captures the *real* item list as the unfiltered baseline and
+        /// re-applies the active filter, so the snapshot is never the transient "Loading…" row that
+        /// a synchronous post-action would otherwise grab from an async populate.
+        /// </summary>
+        private void OnPanelPopulated(TaiDataGrid grid)
+        {
+            if (ReferenceEquals(grid, LPgrid))
+            {
+                CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
+                ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
+            }
+            else if (ReferenceEquals(grid, RPgrid))
+            {
+                CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
+                ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
+            }
+            UpdateStatusBar();
         }
 
         private void CaptureUnfilteredItems(TaiDataGrid grid, ref List<object> store)

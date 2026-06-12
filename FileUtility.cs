@@ -208,15 +208,28 @@ namespace DirOpusReImagined
             if (!overwrite && dstP.FileExists(dst))
                 throw new IOException($"Destination exists: {dst}");
 
-            // Cross-provider (e.g. local↔cloud): stream copy. Byte-level progress for this leg
-            // arrives in Phase 4 (a counting stream); for now it completes without intermediate ticks.
-            await Task.Run(() =>
+            // Cross-provider is always local<->cloud (only one remote provider exists). Let the
+            // remote provider own the rclone leg so the slow network transfer reports real progress,
+            // rather than streaming through OpenRead/OpenWrite's temp-file round-trip.
+            if (srcP.IsRemote && !dstP.IsRemote)
             {
-                ct.ThrowIfCancellationRequested();
-                using var inStream = srcP.OpenRead(src);
-                using var outStream = dstP.OpenWrite(dst);
-                inStream.CopyTo(outStream);
-            }, ct).ConfigureAwait(false);
+                await srcP.CopyToLocalAsync(src, dst, progress, ct).ConfigureAwait(false);
+            }
+            else if (!srcP.IsRemote && dstP.IsRemote)
+            {
+                await dstP.CopyFromLocalAsync(src, dst, overwrite, progress, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                // Unreachable with today's providers (e.g. two distinct remotes); stream safely.
+                await Task.Run(() =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    using var inStream = srcP.OpenRead(src);
+                    using var outStream = dstP.OpenWrite(dst);
+                    inStream.CopyTo(outStream);
+                }, ct).ConfigureAwait(false);
+            }
         }
 
         private sealed class ByteCounter { public long Total; }
@@ -524,21 +537,24 @@ namespace DirOpusReImagined
         }
 
         private static List<AFileEntry> BuildFileList(IFileProvider provider, string PATHNAME, bool ShowHidden, bool SortByName)
-        {
-            var list = BuildFileListCore(provider, PATHNAME, ShowHidden);
-            return SortByName
-                ? list.OrderBy(fe => fe.Name).ToList()
-                : list.OrderBy(fe => fe.FileSize).ToList();
-        }
+            => BuildFileListCore(provider, PATHNAME, ShowHidden, SortByName);
 
         private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden)
+            => BuildFileListCore(provider, PATHNAME, ShowHidden, sortByName: true);
+
+        // Folders always come first, sorted alphabetically; files follow. Files sort by name, or —
+        // in size mode — by actual byte count. (AFileEntry.FileSize is a display string like
+        // "1.2 MB", so the old list.OrderBy(fe => fe.FileSize) sorted on text, not size, and the
+        // flat OrderBy over the combined list interleaved folders with files. Both are fixed here.)
+        private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden, bool sortByName)
         {
             var directoryEntries = provider.EnumerateDirectories(PATHNAME)
-                .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            var fileEntries = provider.EnumerateFiles(PATHNAME)
-                .OrderBy(e => e.Path, StringComparer.OrdinalIgnoreCase)
+            var fileEntries = (sortByName
+                    ? provider.EnumerateFiles(PATHNAME).OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                    : provider.EnumerateFiles(PATHNAME).OrderByDescending(e => e.Size))
                 .ToList();
 
             var result = new List<AFileEntry>();

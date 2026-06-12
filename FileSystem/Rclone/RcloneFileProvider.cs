@@ -15,6 +15,10 @@ public sealed class RcloneFileProvider : IFileProvider
     /// <summary>How often to poll rclone for transfer stats/status during a copy job.</summary>
     private const int PollIntervalMs = 300;
 
+    /// <summary>Total attempts for a directory listing before surfacing the error to the UI.</summary>
+    private const int ListMaxAttempts = 3;
+    private const int ListRetryDelayMs = 250;
+
     public bool FileExists(string path)
     {
         if (!CloudPath.IsCloudUri(path)) return false;
@@ -114,17 +118,67 @@ public sealed class RcloneFileProvider : IFileProvider
     /// Handles same-remote and cross-remote (e.g. gdrive→dropbox) copies — rclone routes bytes
     /// server-side either way, so nothing flows through this machine.
     /// </summary>
-    public async Task CopyFileAsync(string src, string dst, bool overwrite,
-                                    IProgress<TransferProgress>? progress, CancellationToken ct = default)
+    public Task CopyFileAsync(string src, string dst, bool overwrite,
+                              IProgress<TransferProgress>? progress, CancellationToken ct = default)
     {
         var s = CloudPath.Parse(src);
         var d = CloudPath.Parse(dst);
-        var fallbackName = string.IsNullOrEmpty(d.Path) ? d.Remote : Path.GetFileName(d.Path);
+        return RunCopyJobAsync(SrcDst(s, d), NameOfCloud(d), progress, ct);
+    }
 
+    /// <summary>
+    /// Cross-provider download: copies a cloud file straight to a local path via a single rclone
+    /// job, so the (slow) network transfer reports real progress — unlike streaming through the
+    /// temp-file round-trip in OpenRead.
+    /// </summary>
+    public Task CopyToLocalAsync(string src, string localDst,
+                                 IProgress<TransferProgress>? progress, CancellationToken ct = default)
+    {
+        var s = CloudPath.Parse(src);
+        var body = new Dictionary<string, object>
+        {
+            ["srcFs"]     = s.Fs,
+            ["srcRemote"] = s.Path,
+            ["dstFs"]     = Path.GetDirectoryName(localDst) ?? "",
+            ["dstRemote"] = Path.GetFileName(localDst),
+        };
+        return RunCopyJobAsync(body, Path.GetFileName(localDst), progress, ct);
+    }
+
+    /// <summary>
+    /// Cross-provider upload: copies a local file straight to this remote via a single rclone job,
+    /// reporting real network progress (vs. the upload-on-close temp stream in OpenWrite).
+    /// </summary>
+    public Task CopyFromLocalAsync(string localSrc, string dst, bool overwrite,
+                                   IProgress<TransferProgress>? progress, CancellationToken ct = default)
+    {
+        var d = CloudPath.Parse(dst);
+        var body = new Dictionary<string, object>
+        {
+            ["srcFs"]     = Path.GetDirectoryName(localSrc) ?? "",
+            ["srcRemote"] = Path.GetFileName(localSrc),
+            ["dstFs"]     = d.Fs,
+            ["dstRemote"] = d.Path,
+        };
+        return RunCopyJobAsync(body, NameOfCloud(d), progress, ct);
+    }
+
+    private static string NameOfCloud(CloudPath d)
+        => string.IsNullOrEmpty(d.Path) ? d.Remote : Path.GetFileName(d.Path);
+
+    /// <summary>
+    /// Fires operations/copyfile as an async rclone job and polls core/stats + job/status until it
+    /// finishes, translating each snapshot into a <see cref="TransferProgress"/>. Cancellation stops
+    /// the in-flight job. Works for cloud→cloud, cloud→local, and local→cloud (rclone addresses the
+    /// local filesystem as a remote), so the slow leg always reports real bytes.
+    /// </summary>
+    private async Task RunCopyJobAsync(Dictionary<string, object> body, string fallbackName,
+                                       IProgress<TransferProgress>? progress, CancellationToken ct)
+    {
         var client = await RcloneService.GetClientAsync().ConfigureAwait(false);
 
         var group = "diropus/" + Guid.NewGuid().ToString("N");
-        var jobid = await client.StartAsyncJobAsync("operations/copyfile", SrcDst(s, d), group, ct)
+        var jobid = await client.StartAsyncJobAsync("operations/copyfile", body, group, ct)
             .ConfigureAwait(false);
 
         try
@@ -222,38 +276,50 @@ public sealed class RcloneFileProvider : IFileProvider
         if (!CloudPath.IsCloudUri(path)) yield break;
         var cp = CloudPath.Parse(path);
 
-        JsonDocument? doc = null;
-        try
-        {
-            var opt = new Dictionary<string, object>();
-            if (dirsOnly)  opt["dirsOnly"]  = true;
-            if (filesOnly) opt["filesOnly"] = true;
+        // Throws on persistent failure (after retries) rather than silently yielding nothing, so a
+        // transient network/daemon hiccup surfaces as a "couldn't load" error in the UI instead of
+        // an empty grid that looks like an empty folder. A genuinely empty folder still lists fine.
+        using var doc = ListWithRetry(cp, dirsOnly, filesOnly);
 
-            var body = new Dictionary<string, object>
-            {
-                ["fs"]     = cp.Fs,
-                ["remote"] = cp.Path,
-                ["opt"]    = opt,
-            };
-            doc = Post("operations/list", body);
-        }
-        catch
+        if (!doc.RootElement.TryGetProperty("list", out var list)) yield break;
+        foreach (var el in list.EnumerateArray())
         {
-            doc?.Dispose();
-            yield break;
+            FileEntry? entry;
+            try { entry = ToEntry(cp, el); }
+            catch { entry = null; }
+            if (entry is not null) yield return entry;
         }
+    }
 
-        using (doc)
+    private static JsonDocument ListWithRetry(CloudPath cp, bool dirsOnly, bool filesOnly)
+    {
+        var opt = new Dictionary<string, object>();
+        if (dirsOnly)  opt["dirsOnly"]  = true;
+        if (filesOnly) opt["filesOnly"] = true;
+
+        var body = new Dictionary<string, object>
         {
-            if (!doc.RootElement.TryGetProperty("list", out var list)) yield break;
-            foreach (var el in list.EnumerateArray())
+            ["fs"]     = cp.Fs,
+            ["remote"] = cp.Path,
+            ["opt"]    = opt,
+        };
+
+        Exception? last = null;
+        for (int attempt = 1; attempt <= ListMaxAttempts; attempt++)
+        {
+            try
             {
-                FileEntry? entry;
-                try { entry = ToEntry(cp, el); }
-                catch { entry = null; }
-                if (entry is not null) yield return entry;
+                return Post("operations/list", body);
+            }
+            catch (Exception ex)
+            {
+                last = ex;
+                if (attempt < ListMaxAttempts) Thread.Sleep(ListRetryDelayMs);
             }
         }
+
+        throw new IOException(
+            $"Could not list {cp.FullUri} after {ListMaxAttempts} attempts: {last?.Message}", last);
     }
 
     private JsonElement? StatRaw(CloudPath cp)

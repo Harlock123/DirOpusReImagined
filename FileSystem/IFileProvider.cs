@@ -51,5 +51,22 @@ public interface IFileProvider
             CopyFile(src, dst, overwrite);
         }, ct);
 
+    /// <summary>
+    /// Uploads a local file into this provider (cross-provider local→remote leg), reporting
+    /// progress. The default streams the bytes; remote providers override to drive a native
+    /// transfer so the slow network leg reports real progress instead of the temp-file copy.
+    /// </summary>
+    Task CopyFromLocalAsync(string localSrc, string dst, bool overwrite,
+                            IProgress<TransferProgress>? progress, CancellationToken ct = default)
+        => StreamCopy.LocalToProviderAsync(this, localSrc, dst, progress, ct);
+
+    /// <summary>
+    /// Downloads a file from this provider to a local path (cross-provider remote→local leg),
+    /// reporting progress. The default streams the bytes; remote providers override for native progress.
+    /// </summary>
+    Task CopyToLocalAsync(string src, string localDst,
+                          IProgress<TransferProgress>? progress, CancellationToken ct = default)
+        => StreamCopy.ProviderToLocalAsync(this, src, localDst, progress, ct);
+
     long GetDirectorySize(string path, bool recursive);
 }

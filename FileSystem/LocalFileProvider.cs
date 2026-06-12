@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DirOpusReImagined.FileSystem;
 
@@ -69,6 +71,10 @@ public sealed class LocalFileProvider : IFileProvider
     public void DeleteDirectory(string path, bool recursive) => Directory.Delete(path, recursive);
 
     public void CopyFile(string src, string dst, bool overwrite) => File.Copy(src, dst, overwrite);
+
+    public Task CopyFileAsync(string src, string dst, bool overwrite,
+                              IProgress<TransferProgress>? progress, CancellationToken ct = default)
+        => StreamCopy.LocalToLocalAsync(src, dst, overwrite, progress, ct);
     public void MoveFile(string src, string dst) => File.Move(src, dst);
     public void MoveDirectory(string src, string dst) => Directory.Move(src, dst);
 
