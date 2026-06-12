@@ -11,7 +11,9 @@ namespace DirOpusReImagined.FileSystem.Rclone;
 
 public sealed class RcloneBinaryManager
 {
-    public const string PinnedVersion = "v1.68.2";
+    // Keep current: older rclone builds SIGSEGV during cgo on recent macOS, so a stale
+    // pin strands users on a binary that crashes on every call.
+    public const string PinnedVersion = "v1.74.1";
 
     private readonly string _appDataDir;
 
@@ -28,9 +30,51 @@ public sealed class RcloneBinaryManager
     public string? FindInstalled()
     {
         var local = Path.Combine(_appDataDir, BinaryName);
-        if (File.Exists(local)) return local;
 
-        return FindOnPath("rclone");
+        // Prefer the bundled binary, but only if it actually runs — an older pinned rclone
+        // can SIGSEGV (cgo crash) on newer macOS, in which case we fall back to a working
+        // rclone on PATH instead of handing back a binary that crashes on every call.
+        if (File.Exists(local) && RunsOk(local)) return local;
+
+        var onPath = FindOnPath("rclone");
+        if (onPath is not null && RunsOk(onPath)) return onPath;
+
+        // Nothing verified clean: surface whatever exists so diagnostics can report a real
+        // error rather than a misleading "not installed".
+        return File.Exists(local) ? local : onPath;
+    }
+
+    /// <summary>
+    /// Smoke-tests a binary with `rclone version`. False if it can't start, times out, or
+    /// exits non-zero (a SIGSEGV crash exits 2), so a broken binary is never selected.
+    /// </summary>
+    private static bool RunsOk(string binary)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = binary,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+            psi.ArgumentList.Add("version");
+
+            using var p = Process.Start(psi);
+            if (p is null) return false;
+            if (!p.WaitForExit(4000))
+            {
+                try { p.Kill(entireProcessTree: true); } catch { }
+                return false;
+            }
+            return p.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<string> EnsureInstalledAsync(IProgress<double>? progress = null)

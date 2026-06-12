@@ -1664,79 +1664,51 @@ namespace DirOpusReImagined
             //RPgrid.ReRender();
         }
 
-        private void MoveRightButton_Click(object? sender, RoutedEventArgs e)
+        private async void MoveRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (LPgrid.SelectedItems.Count > 0)
+            ToolTip.SetIsOpen(B, false);
+
+            await RunPanelTransferAsync(LPgrid.SelectedItems, LPpath.Text, RPpath.Text, move: true);
+        }
+
+        /// <summary>
+        /// Builds a transfer batch from the selected entries and runs it through a modal
+        /// <see cref="TransferProgressWindow"/> (off-thread, with live progress and Cancel),
+        /// then refreshes both panels and surfaces any error.
+        /// </summary>
+        private async Task RunPanelTransferAsync(IList<object> selected, string sourcePathRaw, string targetPathRaw, bool move)
+        {
+            if (selected == null || selected.Count == 0) return;
+
+            string spath = AppendSeparator(sourcePathRaw.Replace(@"\\", @"\"));
+            string tpath = AppendSeparator(targetPathRaw.Replace(@"\\", @"\"));
+
+            var items = new List<TransferItem>();
+            foreach (var obj in selected)
             {
-                string spath = LPpath.Text.Replace(@"\\", @"\");
-                string tpath = RPpath.Text.Replace(@"\\", @"\");
-
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    if (!spath.EndsWith(@"\"))
-                    {
-                        spath += @"\";
-
-                    }
-
-                    if (!tpath.EndsWith(@"\"))
-                    {
-                        tpath += @"\";
-
-                    }
-                }
-                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                {
-                    if (!spath.EndsWith(@"/"))
-                    {
-                        spath += @"/";
-
-                    }
-                    if (!tpath.EndsWith(@"/"))
-                    {
-                        tpath += @"/";
-
-                    }
-                }
-
-                List<object> Sellist = LPgrid.SelectedItems;
-
-                foreach (AFileEntry item in Sellist)
-                {
-                    if (item.Typ)
-                    {
-                        string FullPath = spath + item.Name;
-
-                        string NewPath = tpath + item.Name;
-
-                        //Directory.CreateDirectory(NewPath);
-
-                        FileUtility.MoveDirectory(FullPath, NewPath);
-
-                        RefreshRPGrid();
-                        
-                    }
-                    else
-                    {
-                        string FullPath = spath + item.Name;
-
-                        FileUtility.MoveFile(FullPath, tpath);
-
-                        RefreshRPGrid();
-
-                    }
-                    //Console.WriteLine(item);
-                }
+                if (obj is not AFileEntry item) continue;
+                string source = spath + item.Name;
+                string targetPath = tpath + item.Name;
+                items.Add(new TransferItem(source, tpath, targetPath, item.Typ));
             }
-            else
-            {
-                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
-            }
+            if (items.Count == 0) return;
+
+            var win = new TransferProgressWindow(move ? "Moving" : "Copying", items, move);
+            await win.ShowDialog(this);
 
             RefreshLPGrid();
+            RefreshRPGrid();
+
+            if (win.Error != null)
+                await new MessageBox($"Transfer failed: {win.Error.Message}").ShowDialog(this);
+        }
+
+        private static string AppendSeparator(string p)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                return p.EndsWith(@"\") ? p : p + @"\";
+            return p.EndsWith("/") ? p : p + "/";
         }
 
         private string MakePathEnvSafe(string path)
@@ -1768,223 +1740,28 @@ namespace DirOpusReImagined
 
         }
 
-        private void MoveLeftButton_Click(object? sender, RoutedEventArgs e)
+        private async void MoveLeftButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (RPgrid.SelectedItems.Count > 0)
-            {
-                string spath = RPpath.Text.Replace(@"\\", @"\");
-                string tpath = LPpath.Text.Replace(@"\\", @"\");
+            ToolTip.SetIsOpen(B, false);
 
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    if (!spath.EndsWith(@"\"))
-                    {
-                        spath += @"\";
-
-                    }
-
-                    if (!tpath.EndsWith(@"\"))
-                    {
-                        tpath += @"\";
-
-                    }
-                }
-                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                {
-                    if (!spath.EndsWith(@"/"))
-                    {
-                        spath += @"/";
-
-                    }
-                    if (!tpath.EndsWith(@"/"))
-                    {
-                        tpath += @"/";
-
-                    }
-                }
-
-                List<object> Sellist = RPgrid.SelectedItems;
-
-                foreach (AFileEntry item in Sellist)
-                {
-                    if (item.Typ)
-                    {
-                        string FullPath = spath + item.Name;
-
-                        string NewPath = tpath + item.Name;
-
-                        //Directory.CreateDirectory(NewPath);
-
-                        FileUtility.MoveDirectory(FullPath, NewPath);
-
-                        RefreshLPGrid();
-
-                    }
-                    else
-                    {
-                        string FullPath = spath + item.Name;
-
-                        FileUtility.MoveFile(FullPath, tpath);
-
-                        RefreshLPGrid();
-
-                    }
-                    //Console.WriteLine(item);
-                }
-            }
-            else
-            {
-                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
-            }
-
-            RefreshRPGrid();
+            await RunPanelTransferAsync(RPgrid.SelectedItems, RPpath.Text, LPpath.Text, move: true);
         }
 
-        private void CopyRightButton_Click(object? sender, RoutedEventArgs e)
+        private async void CopyRightButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (LPgrid.SelectedItems.Count > 0)
-            {
-                string spath = LPpath.Text.Replace(@"\\",@"\");
-                string tpath = RPpath.Text.Replace(@"\\", @"\");
+            ToolTip.SetIsOpen(B, false);
 
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    if (!spath.EndsWith(@"\"))
-                    {
-                        spath += @"\";
-
-                    }
-
-                    if (!tpath.EndsWith(@"\"))
-                    {
-                        tpath += @"\";
-
-                    }
-                }
-                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                {
-                    if (!spath.EndsWith(@"/"))
-                    {
-                        spath += @"/";
-
-                    }
-                    if (!tpath.EndsWith(@"/"))
-                    {
-                        tpath += @"/";
-
-                    }
-                }
-
-                List<object> Sellist = LPgrid.SelectedItems;
-
-                foreach (AFileEntry item in Sellist)
-                {
-                    if (item.Typ)
-                    {
-                        string FullPath = spath + item.Name;
-
-                        string NewPath = tpath + item.Name;
-
-                        ProviderRegistry.For(NewPath).CreateDirectory(NewPath);
-
-                        FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
-
-                        RefreshRPGrid();
-                    }
-                    else
-                    {
-                        string FullPath = spath + item.Name;
-
-                        FileUtility.CopyFileToFolder(FullPath, tpath);
-
-                        RefreshRPGrid();
-
-                    }
-                    //Console.WriteLine(item);
-                }
-            }
-            else
-            {
-                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
-            }
+            await RunPanelTransferAsync(LPgrid.SelectedItems, LPpath.Text, RPpath.Text, move: false);
         }
 
-        private void CopyLeftButton_Click(object? sender, RoutedEventArgs e)
+        private async void CopyLeftButton_Click(object? sender, RoutedEventArgs e)
         {
             Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (RPgrid.SelectedItems.Count > 0)
-            {
-                string spath = RPpath.Text.Replace(@"\\", @"\");
-                string tpath = LPpath.Text.Replace(@"\\", @"\");
+            ToolTip.SetIsOpen(B, false);
 
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    if (!spath.EndsWith(@"\"))
-                    {
-                        spath += @"\";
-
-                    }
-
-                    if (!tpath.EndsWith(@"\"))
-                    {
-                        tpath += @"\";
-
-                    }
-                }
-                else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                {
-                    if (!spath.EndsWith(@"/"))
-                    {
-                        spath += @"/";
-
-                    }
-                    if (!tpath.EndsWith(@"/"))
-                    {
-                        tpath += @"/";
-
-                    }
-                }
-
-                List<object> Sellist = RPgrid.SelectedItems;
-
-                foreach (AFileEntry item in Sellist)
-                {
-                    if (item.Typ)
-                    {
-                        string FullPath = spath + item.Name;
-
-                        string NewPath = tpath + item.Name;
-
-                        ProviderRegistry.For(NewPath).CreateDirectory(NewPath);
-
-                        FileUtility.CopyDirectoryToFolder(FullPath, NewPath);
-
-                        RefreshLPGrid();
-                    }
-                    else
-                    {
-                        string FullPath = spath + item.Name;
-
-                        FileUtility.CopyFileToFolder(FullPath, tpath);
-
-                        RefreshLPGrid();
-
-                    }
-                    //Console.WriteLine(item);
-                }
-            }
-            else
-            {
-                //FileUtility.CopyDirectoryToFolder(LPpath.Text, RPpath.Text);
-            }
+            await RunPanelTransferAsync(RPgrid.SelectedItems, RPpath.Text, LPpath.Text, move: false);
         }
 
         private Bitmap LoadImage(string base64)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DirOpusReImagined.FileSystem.Rclone;
@@ -10,6 +11,9 @@ public sealed class RcloneFileProvider : IFileProvider
 {
     public bool CanHandle(string path) => CloudPath.IsCloudUri(path);
     public bool IsRemote => true;
+
+    /// <summary>How often to poll rclone for transfer stats/status during a copy job.</summary>
+    private const int PollIntervalMs = 300;
 
     public bool FileExists(string path)
     {
@@ -101,6 +105,75 @@ public sealed class RcloneFileProvider : IFileProvider
         var s = CloudPath.Parse(src);
         var d = CloudPath.Parse(dst);
         Post("operations/copyfile", SrcDst(s, d)).Dispose();
+    }
+
+    /// <summary>
+    /// Server-side cloud copy with live progress. Fires operations/copyfile as an async rclone
+    /// job, then polls core/stats + job/status until it finishes, translating each stats
+    /// snapshot into a <see cref="TransferProgress"/>. Cancellation stops the in-flight job.
+    /// Handles same-remote and cross-remote (e.g. gdrive→dropbox) copies — rclone routes bytes
+    /// server-side either way, so nothing flows through this machine.
+    /// </summary>
+    public async Task CopyFileAsync(string src, string dst, bool overwrite,
+                                    IProgress<TransferProgress>? progress, CancellationToken ct = default)
+    {
+        var s = CloudPath.Parse(src);
+        var d = CloudPath.Parse(dst);
+        var fallbackName = string.IsNullOrEmpty(d.Path) ? d.Remote : Path.GetFileName(d.Path);
+
+        var client = await RcloneService.GetClientAsync().ConfigureAwait(false);
+
+        var group = "diropus/" + Guid.NewGuid().ToString("N");
+        var jobid = await client.StartAsyncJobAsync("operations/copyfile", SrcDst(s, d), group, ct)
+            .ConfigureAwait(false);
+
+        try
+        {
+            while (true)
+            {
+                // Stats are best-effort: a hiccup reading them shouldn't abort the copy,
+                // so only cancellation propagates out of this block.
+                try
+                {
+                    var stats = await client.GetStatsAsync(group, ct).ConfigureAwait(false);
+                    progress?.Report(new TransferProgress(
+                        CurrentFile:    string.IsNullOrEmpty(stats.CurrentFile) ? fallbackName : stats.CurrentFile!,
+                        FileIndex:      1,
+                        FileCount:      1,
+                        BytesDone:      stats.Bytes,
+                        BytesTotal:     stats.TotalBytes,
+                        BytesPerSecond: stats.Speed));
+                }
+                catch (OperationCanceledException) { throw; }
+                catch { /* ignore transient stats errors */ }
+
+                var status = await client.GetJobStatusAsync(jobid, ct).ConfigureAwait(false);
+                if (status.Finished)
+                {
+                    if (!status.Success)
+                        throw new IOException($"rclone copy failed: {status.Error}");
+
+                    // Emit a final 100% snapshot so the bar lands cleanly on completion.
+                    long total = 0;
+                    try
+                    {
+                        var fin = await client.GetStatsAsync(group, CancellationToken.None).ConfigureAwait(false);
+                        total = fin.TotalBytes > 0 ? fin.TotalBytes : fin.Bytes;
+                    }
+                    catch { }
+                    progress?.Report(new TransferProgress(fallbackName, 1, 1, total, total, 0));
+                    return;
+                }
+
+                await Task.Delay(PollIntervalMs, ct).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Best-effort stop of the running rclone job (don't reuse the cancelled token), then rethrow.
+            try { await client.StopJobAsync(jobid, CancellationToken.None).ConfigureAwait(false); } catch { }
+            throw;
+        }
     }
 
     public void MoveFile(string src, string dst)

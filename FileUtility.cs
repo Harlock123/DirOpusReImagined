@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -78,6 +79,147 @@ namespace DirOpusReImagined
             using var outStream = dstP.OpenWrite(dst);
             inStream.CopyTo(outStream);
         }
+
+        // ---- Async, progress-reporting, cancellable transfer variants ------------------------
+        //
+        // These mirror the synchronous methods above (same provider branching) but thread an
+        // IProgress<TransferProgress> and CancellationToken through, and use the provider's
+        // CopyFileAsync for the byte-moving leg so remote (rclone) copies report real progress.
+
+        /// <summary>Copies a single file into a folder, reporting byte-level progress.</summary>
+        public static async Task CopyFileToFolderAsync(string sourceFile, string targetFolder,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var dstP = ProviderRegistry.For(targetFolder);
+            dstP.CreateDirectory(targetFolder);
+
+            string targetFile = Path.Combine(targetFolder, Path.GetFileName(sourceFile));
+            await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: true, progress, ct)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>Recursively copies a directory, reporting cumulative byte progress for the tree.</summary>
+        public static async Task CopyDirectoryToFolderAsync(string sourceDirectory, string targetDirectory,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var counter = new ByteCounter();
+            await CopyDirectoryInternalAsync(sourceDirectory, targetDirectory, progress, counter, ct)
+                .ConfigureAwait(false);
+        }
+
+        private static async Task CopyDirectoryInternalAsync(string sourceDirectory, string targetDirectory,
+            IProgress<TransferProgress>? progress, ByteCounter counter, CancellationToken ct)
+        {
+            var srcP = ProviderRegistry.For(sourceDirectory);
+            var dstP = ProviderRegistry.For(targetDirectory);
+            dstP.CreateDirectory(targetDirectory);
+
+            foreach (var fileEntry in srcP.EnumerateFiles(sourceDirectory))
+            {
+                ct.ThrowIfCancellationRequested();
+                string targetFile = Path.Combine(targetDirectory, fileEntry.Name);
+
+                // Offset this file's bytes by what the tree has already transferred.
+                long baseDone = counter.Total;
+                var fileProgress = new SyncProgress<TransferProgress>(tp =>
+                    progress?.Report(new TransferProgress(
+                        string.IsNullOrEmpty(tp.CurrentFile) ? fileEntry.Name : tp.CurrentFile,
+                        0, 0, baseDone + tp.BytesDone, 0, tp.BytesPerSecond)));
+
+                await CopyFileAcrossProvidersAsync(fileEntry.Path, targetFile, overwrite: true, fileProgress, ct)
+                    .ConfigureAwait(false);
+
+                counter.Total += fileEntry.Size;
+                progress?.Report(new TransferProgress(fileEntry.Name, 0, 0, counter.Total, 0, 0));
+            }
+
+            foreach (var dirEntry in srcP.EnumerateDirectories(sourceDirectory))
+            {
+                ct.ThrowIfCancellationRequested();
+                string targetDir = Path.Combine(targetDirectory, dirEntry.Name);
+                await CopyDirectoryInternalAsync(dirEntry.Path, targetDir, progress, counter, ct)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>Moves a single file into a folder; server-side rename when possible, else copy+delete.</summary>
+        public static async Task MoveFileAsync(string sourceFile, string targetDirectory,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var srcP = ProviderRegistry.For(sourceFile);
+            var dstP = ProviderRegistry.For(targetDirectory);
+
+            dstP.CreateDirectory(targetDirectory);
+            string targetFile = Path.Combine(targetDirectory, Path.GetFileName(sourceFile));
+
+            if (ReferenceEquals(srcP, dstP))
+            {
+                await Task.Run(() =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    srcP.MoveFile(sourceFile, targetFile);
+                }, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: false, progress, ct)
+                    .ConfigureAwait(false);
+                srcP.DeleteFile(sourceFile);
+            }
+        }
+
+        /// <summary>Moves a directory; server-side move when possible, else recursive copy+delete.</summary>
+        public static async Task MoveDirectoryAsync(string sourceDirectory, string targetDirectory,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var srcP = ProviderRegistry.For(sourceDirectory);
+            var dstP = ProviderRegistry.For(targetDirectory);
+
+            if (ReferenceEquals(srcP, dstP))
+            {
+                await Task.Run(() =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    srcP.MoveDirectory(sourceDirectory, targetDirectory);
+                }, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                await CopyDirectoryToFolderAsync(sourceDirectory, targetDirectory, progress, ct)
+                    .ConfigureAwait(false);
+                srcP.DeleteDirectory(sourceDirectory, recursive: true);
+            }
+        }
+
+        private static async Task CopyFileAcrossProvidersAsync(string src, string dst, bool overwrite,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var srcP = ProviderRegistry.For(src);
+            var dstP = ProviderRegistry.For(dst);
+
+            if (ReferenceEquals(srcP, dstP))
+            {
+                // Same provider: local→local falls back to File.Copy; cloud→cloud drives a
+                // server-side rclone job with real progress (RcloneFileProvider.CopyFileAsync).
+                await srcP.CopyFileAsync(src, dst, overwrite, progress, ct).ConfigureAwait(false);
+                return;
+            }
+
+            if (!overwrite && dstP.FileExists(dst))
+                throw new IOException($"Destination exists: {dst}");
+
+            // Cross-provider (e.g. local↔cloud): stream copy. Byte-level progress for this leg
+            // arrives in Phase 4 (a counting stream); for now it completes without intermediate ticks.
+            await Task.Run(() =>
+            {
+                ct.ThrowIfCancellationRequested();
+                using var inStream = srcP.OpenRead(src);
+                using var outStream = dstP.OpenWrite(dst);
+                inStream.CopyTo(outStream);
+            }, ct).ConfigureAwait(false);
+        }
+
+        private sealed class ByteCounter { public long Total; }
 
         /// <summary>
         /// Copies the contents of a directory to another directory, including subdirectories.
