@@ -644,6 +644,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
+### 2026-06-12 — Cloud transfer progress, quick-pick remotes & listing fixes
+- **Transfer progress dialog** — copy and move now run off the UI thread behind a progress window showing the current file, an overall progress bar, transfer speed, and ETA, with a **Cancel** button. Byte-level progress is reported across every path: local→local (a buffered counting stream), and cloud→cloud, cloud→local, and local→cloud (driven by rclone's async job with live `core/stats` polling, so the slow network leg reports real bytes instead of freezing).
+- **Cloud remotes quick-pick** — a ☁ button on each panel's path bar lists the cloud remotes configured in rclone; selecting one navigates that panel straight to `cloud://<remote>/`, so there's no need to type the URI by hand. Includes friendly prompts when rclone isn't installed or no remotes are configured yet.
+- **rclone crash fix (macOS)** — bumped the bundled rclone from `v1.68.2` to `v1.74.1` (older builds segfault during cgo on recent macOS). The binary resolver now smoke-tests rclone before using it and falls back to a working copy on your `PATH` instead of handing back one that crashes on every call.
+- **Cloud listing reliability** — folders no longer intermittently disappear when browsing a remote: the filter baseline now captures the real listing rather than the transient "Loading…" placeholder from an async load. Folder/file ordering is now consistent regardless of how you navigated (folders first, then files by name — or by actual byte size in size mode, which previously sorted on the formatted size string). A transient `operations/list` failure now retries briefly and then surfaces a clear error instead of silently showing an empty folder.
+
 ### 2026-06-12 — Avalonia 11.3 upgrade & Linux HiDPI scaling
 - Upgraded Avalonia from `11.0.0-preview4` to the current stable `11.3.17`, which scales natively to the desktop's fractional scaling on Linux (Wayland/X11) — the app now follows the system scale (e.g. 180%) correctly.
 - Migrated the breaking APIs the upgrade introduced: `ItemsControl.Items` → `ItemsSource`, `Application.Current.Clipboard` → `TopLevel.Clipboard`, `PointerPoint.GetCurrentPoint(Visual)`, and `FluentTheme Mode` → `RequestedThemeVariant`.

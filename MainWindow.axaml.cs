@@ -467,6 +467,9 @@ namespace DirOpusReImagined
 
             RpBackButton.Click += RPBackButton_Click;
             LpBackButton.Click += LPBackButton_Click;
+
+            LpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(LpCloudButton, "LP");
+            RpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(RpCloudButton, "RP");
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
@@ -2251,6 +2254,78 @@ namespace DirOpusReImagined
         }
 
         #endregion
+
+        /// <summary>
+        /// Shows a flyout listing the configured rclone cloud remotes; selecting one navigates the
+        /// given panel to cloud://&lt;remote&gt;/ so the user doesn't have to type the URI by hand.
+        /// </summary>
+        private async Task ShowCloudRemotesAsync(Button anchor, string side)
+        {
+            if (!RcloneService.IsInstalled())
+            {
+                await new MessageBox(
+                    "rclone is not installed. Use the %RCLONECONFIG% button to add a cloud remote first.")
+                    .ShowDialog(this);
+                return;
+            }
+
+            List<string> remotes;
+            try
+            {
+                remotes = await RcloneRemoteManager.ListRemotesAsync();
+            }
+            catch (Exception ex)
+            {
+                await new MessageBox($"Could not list cloud remotes: {ex.Message}").ShowDialog(this);
+                return;
+            }
+
+            if (remotes.Count == 0)
+            {
+                await new MessageBox(
+                    "No cloud remotes are configured yet. Use the %RCLONECONFIG% button to add one.")
+                    .ShowDialog(this);
+                return;
+            }
+
+            var items = new List<MenuItem>();
+            foreach (var name in remotes)
+            {
+                var remote = name; // capture per-iteration for the closure
+                var mi = new MenuItem { Header = $"{CloudPath.Scheme}{remote}/" };
+                mi.Click += (_, _) => NavigatePanelToCloud(side, remote);
+                items.Add(mi);
+            }
+
+            var flyout = new MenuFlyout { ItemsSource = items };
+            flyout.ShowAt(anchor);
+        }
+
+        /// <summary>Navigates a panel to the root of a cloud remote, mirroring a typed-path Enter.</summary>
+        private void NavigatePanelToCloud(string side, string remote)
+        {
+            string path = $"{CloudPath.Scheme}{remote}/";
+            bool showHidden = ChkShowHidden?.IsChecked ?? false;
+
+            if (side == "LP")
+            {
+                if (!string.IsNullOrEmpty(LPpath.Text)) _lpHistory.Push(LPpath.Text);
+                LPpath.Text = path;
+                LPfilter.Text = "";
+                FileUtility.PopulateFilePanel(LPgrid, path, showHidden);
+                RefreshLPGridPostActions();
+                ExitPathEditMode("LP");
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(RPpath.Text)) _rpHistory.Push(RPpath.Text);
+                RPpath.Text = path;
+                RPfilter.Text = "";
+                FileUtility.PopulateFilePanel(RPgrid, path, showHidden);
+                RefreshRPGridPostActions();
+                ExitPathEditMode("RP");
+            }
+        }
 
         private void RefreshLPGridPostActions()
         {
