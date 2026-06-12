@@ -34,7 +34,7 @@ public partial class RcloneAddRemoteDialog : Window
         try
         {
             _providers = await RcloneRemoteManager.GetProvidersAsync();
-            TypeBox.Items = _providers
+            TypeBox.ItemsSource = _providers
                 .Select(p => $"{p.Description}  ({p.Name})")
                 .ToList();
             if (_providers.Count > 0) TypeBox.SelectedIndex = 0;
@@ -98,7 +98,7 @@ public partial class RcloneAddRemoteDialog : Window
                 var combo = new ComboBox
                 {
                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                    Items = opt.Examples.Select(e => string.IsNullOrEmpty(e.Help) ? e.Value : $"{e.Value} — {e.Help}").ToList(),
+                    ItemsSource = opt.Examples.Select(e => string.IsNullOrEmpty(e.Help) ? e.Value : $"{e.Value} — {e.Help}").ToList(),
                 };
                 input = combo;
             }

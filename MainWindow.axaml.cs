@@ -302,8 +302,8 @@ namespace DirOpusReImagined
             var grid = sender as TaiDataGrid;
             var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
 
-            if (Application.Current?.Clipboard != null)
-                await Application.Current.Clipboard.SetTextAsync(currentPath);
+            if (this.Clipboard != null)
+                await this.Clipboard.SetTextAsync(currentPath);
         }
 
         private async void Handle_CopyFullPath(object? sender, GridHoverItem e)
@@ -315,8 +315,8 @@ namespace DirOpusReImagined
             var separator = Path.DirectorySeparatorChar;
             var fullPath = currentPath.TrimEnd(separator) + separator + entry.Name;
 
-            if (Application.Current?.Clipboard != null)
-                await Application.Current.Clipboard.SetTextAsync(fullPath);
+            if (this.Clipboard != null)
+                await this.Clipboard.SetTextAsync(fullPath);
         }
 
         /// <summary>
@@ -2315,7 +2315,7 @@ namespace DirOpusReImagined
             {
                 var rootOnlyButton = CreateBreadcrumbButton("/", separator.ToString(), side);
                 items.Add(rootOnlyButton);
-                breadcrumbs.Items = items;
+                breadcrumbs.ItemsSource = items;
                 return;
             }
 
@@ -2351,7 +2351,7 @@ namespace DirOpusReImagined
                 items.Add(segButton);
             }
 
-            breadcrumbs.Items = items;
+            breadcrumbs.ItemsSource = items;
         }
 
         private void UpdateCloudBreadcrumbs(string path, ItemsControl breadcrumbs, string side)
@@ -2364,7 +2364,7 @@ namespace DirOpusReImagined
 
             if (string.IsNullOrEmpty(cp.Path))
             {
-                breadcrumbs.Items = items;
+                breadcrumbs.ItemsSource = items;
                 return;
             }
 
@@ -2385,7 +2385,7 @@ namespace DirOpusReImagined
                 items.Add(CreateBreadcrumbButton(seg, fullUri, side));
             }
 
-            breadcrumbs.Items = items;
+            breadcrumbs.ItemsSource = items;
         }
 
         private Button CreateBreadcrumbButton(string label, string fullPath, string side)

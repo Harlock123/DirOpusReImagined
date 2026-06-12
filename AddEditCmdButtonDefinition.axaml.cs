@@ -335,11 +335,11 @@ public partial class AddEditCmdButtonDefinition : Window
             thecolors.Add(it.Name);
         }
         
-        this.FindControl<ComboBox>("cbHorizontal").Items = theHorzalignments;
-        this.FindControl<ComboBox>("cbVertical").Items = theVertalignments;
-        
-        this.FindControl<ComboBox>("cbBACKGROUND").Items = thecolors;
-        this.FindControl<ComboBox>("cbFOREGROUND").Items = thecolors;
+        this.FindControl<ComboBox>("cbHorizontal").ItemsSource = theHorzalignments;
+        this.FindControl<ComboBox>("cbVertical").ItemsSource = theVertalignments;
+
+        this.FindControl<ComboBox>("cbBACKGROUND").ItemsSource = thecolors;
+        this.FindControl<ComboBox>("cbFOREGROUND").ItemsSource = thecolors;
         
     }
 

@@ -2043,7 +2043,7 @@ namespace DirOpusReImagined
             //Point position = e.GetPosition(this);
             // Do something with this 411
 
-            if (e.GetCurrentPoint(sender as IInputElement).Properties.PointerUpdateKind ==
+            if (e.GetCurrentPoint(sender as Visual).Properties.PointerUpdateKind ==
                 PointerUpdateKind.RightButtonPressed)
             {
                 // Right mouse button was pressed

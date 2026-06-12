@@ -640,3 +640,46 @@ The `Assets` folder (containing button icons) must also be present alongside the
 - **Visual Studio**: Open `DirOpusReImagined.sln`
 - **VS Code**: Open the project folder and install the C# Dev Kit extension
 
+## Changelog
+
+Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 2026-06-12 — Avalonia 11.3 upgrade & Linux HiDPI scaling
+- Upgraded Avalonia from `11.0.0-preview4` to the current stable `11.3.17`, which scales natively to the desktop's fractional scaling on Linux (Wayland/X11) — the app now follows the system scale (e.g. 180%) correctly.
+- Migrated the breaking APIs the upgrade introduced: `ItemsControl.Items` → `ItemsSource`, `Application.Current.Clipboard` → `TopLevel.Clipboard`, `PointerPoint.GetCurrentPoint(Visual)`, and `FluentTheme Mode` → `RequestedThemeVariant`.
+- Removed the now-redundant `XamlNameReferenceGenerator` package (Avalonia 11.3 ships its own XAML name generator).
+- Cleaned up stale `bin/Debug/net7.0` and duplicate asset entries from the project file.
+- Note: an earlier same-day workaround that set `AVALONIA_GLOBAL_SCALE_FACTOR` from the system DPI was removed, as the upgrade makes it unnecessary (and it would otherwise double-scale).
+
+### 2026-04-24 — Cloud "Add Remote"
+- Added in-app "Add Remote" functionality and further rclone cloud integration enhancements.
+
+### 2026-04-22 — rclone cloud provider & diagnostics
+- Introduced an rclone-based cloud file provider and a diagnostics UI for inspecting remotes and logs.
+- Expanded the README with detailed rclone installation instructions across macOS, Linux, and Windows.
+
+### 2026-04-21 — File system abstraction & release packaging
+- Introduced an extensible file system abstraction and updated file operations to use it.
+- Added versioning and multi-platform release packaging to the publish scripts.
+
+### 2026-04-19 — Navigation & path tools
+- Added "Copy Path" and "Copy Full Path" context-menu options.
+- Added a DriveInfo dialog for viewing mounted volumes and their details.
+- Implemented path-history tracking for navigation, with cross-platform path handling and safer file execution.
+
+### 2026-04-17 — Permissions & folder size
+- Added a file permissions dialog with context-menu integration.
+- Added a "Calculate Folder Size" context-menu option and improved file-execution checks.
+
+### 2026-04-16 — Breadcrumb navigation
+- Added breadcrumb navigation for the path bars and enhanced keyboard interactions.
+
+### 2026-04-15 — Cross-platform config & publishing
+- Centralized configuration/asset loading (`FindConfigurationFile`, `FindAssetsDirectory`) for cross-platform support.
+- Added cross-platform publish scripts for single-file executables and documented their usage.
+- Adjusted UI margins, heights, and padding for consistent spacing.
+
+### 2026-04-13 — Cross-platform execution
+- Refactored file handling for cross-platform execution and added human-readable file-size formatting.
+- Expanded the README with setup, build, and deployment instructions.
+

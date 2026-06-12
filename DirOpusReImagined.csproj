@@ -16,25 +16,18 @@
       </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\net7.0\Configuration.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
+    <PackageReference Include="Avalonia" Version="11.3.17" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.17" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.17" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.17" />
     <PackageReference Include="ComputerInfo" Version="0.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0-2.final" />
     <PackageReference Include="Tomlyn" Version="0.17.0" />
-    <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
     <PackageReference Include="YamlDotNet" Version="13.1.0" />
   </ItemGroup>
 
@@ -46,23 +39,5 @@
 
   <ItemGroup>
     <Folder Include="Images\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\BackFolder.png" />
-    <Content Include="Assets\Drives.png" />
-    <Content Include="Assets\LeftArrow.png" />
-    <Content Include="Assets\LeftRightArrows.png" />
-    <Content Include="Assets\RightArrow.png" />
-    <Content Include="bin\Debug\net7.0\Assets\BackFolder.png" />
-    <Content Include="bin\Debug\net7.0\Assets\Drives.png" />
-    <Content Include="bin\Debug\net7.0\Assets\LeftArrow.png" />
-    <Content Include="bin\Debug\net7.0\Assets\LeftRightArrows.png" />
-    <Content Include="bin\Debug\net7.0\Assets\RightArrow.png" />
-    <Content Include="bin\Debug\net8.0\Assets\BackFolder.png" />
-    <Content Include="bin\Debug\net8.0\Assets\Drives.png" />
-    <Content Include="bin\Debug\net8.0\Assets\LeftArrow.png" />
-    <Content Include="bin\Debug\net8.0\Assets\LeftRightArrows.png" />
-    <Content Include="bin\Debug\net8.0\Assets\RightArrow.png" />
   </ItemGroup>
 </Project>
