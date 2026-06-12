@@ -322,6 +322,11 @@ namespace DirOpusReImagined
 
         /// The Backing Canvas as an attempt to double buffer rendering
         private Canvas BackingCanvas = null;
+
+        /// True while the grid's context menu is open. The menu is anchored to TheCanvas, so any
+        /// ReRender (which clears+rebuilds TheCanvas.Children) while it's open dismisses it — the
+        /// menu flashes open then shut, most visibly on macOS. Pointer handlers skip ReRender while set.
+        private bool _contextMenuOpen;
         
         #endregion
 
@@ -352,6 +357,11 @@ namespace DirOpusReImagined
             
             
             TheCanvas.PointerExited += OnPointerExited;
+
+            // Track context-menu visibility so the pointer handlers below don't rebuild the canvas
+            // out from under the open popup. Redraw once when it closes to restore hover state.
+            GridContextMenu.Opened += (_, _) => _contextMenuOpen = true;
+            GridContextMenu.Closed += (_, _) => { _contextMenuOpen = false; ReRender(); };
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _doubleClickTimer.Tick += DoubleClickTimer_Tick;
@@ -1982,8 +1992,8 @@ namespace DirOpusReImagined
            
             if (_showCrossHairs && TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
             {
-                if (TheItemUnderTheMouse.rowID > -1)
-                { 
+                if (TheItemUnderTheMouse.rowID > -1 && !_contextMenuOpen)
+                {
                     //TheItemUnderTheMouseLast = null;
                     //Console.WriteLine("OldRow: " + TheItemUnderTheMouseLast.rowID + " NewRow: " + TheItemUnderTheMouse.rowID);
                     ReRender();
@@ -2320,7 +2330,7 @@ namespace DirOpusReImagined
             //this.ShowCrossHairs = true;
 
             _mouseInControl = true;
-            ReRender();
+            if (!_contextMenuOpen) ReRender();
 
             e.Handled = true;
         }
@@ -2341,7 +2351,7 @@ namespace DirOpusReImagined
             _mouseInControl = false;
             _curMouseX = -1;
             _curMouseY = -1;
-            ReRender();
+            if (!_contextMenuOpen) ReRender();
 
             e.Handled = true;
         }
