@@ -56,10 +56,10 @@ public sealed class RcloneFileProvider : IFileProvider
     }
 
     public IEnumerable<FileEntry> EnumerateDirectories(string path)
-        => ListInternal(path, dirsOnly: true);
+        => ListEntries(path, dirsOnly: true);
 
     public IEnumerable<FileEntry> EnumerateFiles(string path)
-        => ListInternal(path, filesOnly: true);
+        => ListEntries(path, filesOnly: true);
 
     public Stream OpenRead(string path)
     {
@@ -89,12 +89,14 @@ public sealed class RcloneFileProvider : IFileProvider
         var cp = CloudPath.Parse(path);
         if (string.IsNullOrEmpty(cp.Path)) return;
         Post("operations/mkdir", FsRemote(cp)).Dispose();
+        RcloneListCache.Clear();
     }
 
     public void DeleteFile(string path)
     {
         var cp = CloudPath.Parse(path);
         Post("operations/deletefile", FsRemote(cp)).Dispose();
+        RcloneListCache.Clear();
     }
 
     public void DeleteDirectory(string path, bool recursive)
@@ -102,6 +104,7 @@ public sealed class RcloneFileProvider : IFileProvider
         var cp = CloudPath.Parse(path);
         var endpoint = recursive ? "operations/purge" : "operations/rmdir";
         Post(endpoint, FsRemote(cp)).Dispose();
+        RcloneListCache.Clear();
     }
 
     public void CopyFile(string src, string dst, bool overwrite)
@@ -109,6 +112,7 @@ public sealed class RcloneFileProvider : IFileProvider
         var s = CloudPath.Parse(src);
         var d = CloudPath.Parse(dst);
         Post("operations/copyfile", SrcDst(s, d)).Dispose();
+        RcloneListCache.Clear();
     }
 
     /// <summary>
@@ -216,6 +220,7 @@ public sealed class RcloneFileProvider : IFileProvider
                     }
                     catch { }
                     progress?.Report(new TransferProgress(fallbackName, 1, 1, total, total, 0));
+                    RcloneListCache.Clear(); // job wrote to a remote (cloud→cloud / local→cloud)
                     return;
                 }
 
@@ -235,6 +240,7 @@ public sealed class RcloneFileProvider : IFileProvider
         var s = CloudPath.Parse(src);
         var d = CloudPath.Parse(dst);
         Post("operations/movefile", SrcDst(s, d)).Dispose();
+        RcloneListCache.Clear();
     }
 
     public void MoveDirectory(string src, string dst)
@@ -247,6 +253,7 @@ public sealed class RcloneFileProvider : IFileProvider
             ["dstFs"] = $"{d.Fs}{d.Path}",
             ["createEmptySrcDirs"] = true,
         }).Dispose();
+        RcloneListCache.Clear();
     }
 
     public long GetDirectorySize(string path, bool recursive)
@@ -271,24 +278,35 @@ public sealed class RcloneFileProvider : IFileProvider
         catch { return 0; }
     }
 
-    private IEnumerable<FileEntry> ListInternal(string path, bool dirsOnly = false, bool filesOnly = false)
+    private List<FileEntry> ListEntries(string path, bool dirsOnly = false, bool filesOnly = false)
     {
-        if (!CloudPath.IsCloudUri(path)) yield break;
+        if (!CloudPath.IsCloudUri(path)) return new List<FileEntry>();
         var cp = CloudPath.Parse(path);
 
-        // Throws on persistent failure (after retries) rather than silently yielding nothing, so a
-        // transient network/daemon hiccup surfaces as a "couldn't load" error in the UI instead of
-        // an empty grid that looks like an empty folder. A genuinely empty folder still lists fine.
-        using var doc = ListWithRetry(cp, dirsOnly, filesOnly);
+        // Serve repeat listings (revisits, post-operation refreshes) from the short-TTL cache.
+        var cacheKey = $"{cp.Fs} {cp.Path} {(dirsOnly ? 'd' : '-')}{(filesOnly ? 'f' : '-')}";
+        if (RcloneListCache.TryGet(cacheKey, out var cached)) return cached;
 
-        if (!doc.RootElement.TryGetProperty("list", out var list)) yield break;
-        foreach (var el in list.EnumerateArray())
+        // ListWithRetry throws on persistent failure (after retries) rather than returning nothing,
+        // so a transient network/daemon hiccup surfaces as a "couldn't load" error in the UI instead
+        // of an empty grid. A genuinely empty folder still lists fine. Failures are not cached.
+        var result = new List<FileEntry>();
+        using (var doc = ListWithRetry(cp, dirsOnly, filesOnly))
         {
-            FileEntry? entry;
-            try { entry = ToEntry(cp, el); }
-            catch { entry = null; }
-            if (entry is not null) yield return entry;
+            if (doc.RootElement.TryGetProperty("list", out var list))
+            {
+                foreach (var el in list.EnumerateArray())
+                {
+                    FileEntry? entry;
+                    try { entry = ToEntry(cp, el); }
+                    catch { entry = null; }
+                    if (entry is not null) result.Add(entry);
+                }
+            }
         }
+
+        RcloneListCache.Set(cacheKey, result);
+        return result;
     }
 
     private static JsonDocument ListWithRetry(CloudPath cp, bool dirsOnly, bool filesOnly)
@@ -410,6 +428,7 @@ public sealed class RcloneFileProvider : IFileProvider
                         ["dstFs"]     = _dst.Fs,
                         ["dstRemote"] = _dst.Path,
                     }).Dispose();
+                    RcloneListCache.Clear();
                 }
                 catch { }
                 try { File.Delete(tempPath); } catch { }
