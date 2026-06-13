@@ -181,6 +181,9 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# DirOpusReImagined multi-platform build output (publish-all.sh / publish-all.ps1)
+dist/
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
