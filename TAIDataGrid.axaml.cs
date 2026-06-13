@@ -1028,6 +1028,42 @@ namespace DirOpusReImagined
         /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions are
         /// logged for debugging purposes.
         /// </summary>
+        /// <summary>Maps a directory-compare state to the row background brush used while marked.</summary>
+        private static IBrush CompareBrush(RowCompareState state) => state switch
+        {
+            RowCompareState.Unique    => Brushes.LightGreen,
+            RowCompareState.Newer     => Brushes.LightSkyBlue,
+            RowCompareState.Older     => Brushes.Gainsboro,
+            RowCompareState.Different => Brushes.Khaki,
+            _                         => Brushes.Transparent,
+        };
+
+        /// <summary>Applies per-name compare states to the current rows and repaints.</summary>
+        public void SetCompareStates(IReadOnlyDictionary<string, RowCompareState> states)
+        {
+            foreach (var obj in _items)
+            {
+                if (obj is AFileEntry af)
+                    af.CompareState = states.TryGetValue(af.Name, out var s) ? s : RowCompareState.None;
+            }
+            ReRender();
+        }
+
+        /// <summary>Clears all compare marking and repaints.</summary>
+        public void ClearCompareStates()
+        {
+            bool any = false;
+            foreach (var obj in _items)
+            {
+                if (obj is AFileEntry af && af.CompareState != RowCompareState.None)
+                {
+                    af.CompareState = RowCompareState.None;
+                    any = true;
+                }
+            }
+            if (any) ReRender();
+        }
+
         public void ReRender()
         {
             try
@@ -1285,6 +1321,11 @@ namespace DirOpusReImagined
 
                                 IBrush tbb = _gridCellBrush;
                                 IBrush tcb = _gridCellContentBrush;
+
+                                if (item is AFileEntry cmpEntry && cmpEntry.CompareState != RowCompareState.None)
+                                {
+                                    tbb = CompareBrush(cmpEntry.CompareState);
+                                }
 
                                 if (_selecteditems.Contains(item))
                                 {
@@ -3285,6 +3326,10 @@ namespace DirOpusReImagined
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
+
+        // Directory-compare colour state. Deliberately a FIELD, not a property: the grid renders one
+        // column per public property (reflection), so a property here would show as a stray column.
+        public RowCompareState CompareState;
 
         //public bool FileSizeCollapsedNumber { get; set; } = false;
         

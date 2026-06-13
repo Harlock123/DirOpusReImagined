@@ -62,6 +62,9 @@ namespace DirOpusReImagined
         private List<object> _lpUnfilteredItems = new List<object>();
         private List<object> _rpUnfilteredItems = new List<object>();
 
+        // True while the panels are showing a directory comparison (Cmp button toggles it).
+        private bool _comparing;
+
         #endregion
         
         public MainWindow()
@@ -470,6 +473,10 @@ namespace DirOpusReImagined
 
             LpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(LpCloudButton, "LP");
             RpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(RpCloudButton, "RP");
+
+            CompareButton.Click += CompareButton_Click;
+            SyncRightButton.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text);
+            SyncLeftButton.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text);
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
@@ -1714,6 +1721,121 @@ namespace DirOpusReImagined
             return p.EndsWith("/") ? p : p + "/";
         }
 
+        /// <summary>
+        /// Compares the two panels by entry name and colour-codes each row (green = only here,
+        /// blue = newer, gray = older, khaki = same time but different size). Clicking again clears.
+        /// </summary>
+        private async void CompareButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button b) ToolTip.SetIsOpen(b, false);
+
+            if (_comparing)
+            {
+                LPgrid.ClearCompareStates();
+                RPgrid.ClearCompareStates();
+                _comparing = false;
+                return;
+            }
+
+            string lp = LPpath.Text ?? "";
+            string rp = RPpath.Text ?? "";
+            if (string.IsNullOrEmpty(lp) || string.IsNullOrEmpty(rp)) return;
+
+            // Deep/recursive compare can take a while on large (especially cloud) trees, so run it
+            // off-thread with a brief busy indicator on the button.
+            DirectoryComparer.CompareResult result;
+            var prevContent = CompareButton.Content;
+            CompareButton.IsEnabled = false;
+            CompareButton.Content = "…";
+            try
+            {
+                result = await Task.Run(() => DirectoryComparer.Compare(lp, rp, recursive: true));
+            }
+            catch (Exception ex)
+            {
+                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                return;
+            }
+            finally
+            {
+                CompareButton.Content = prevContent;
+                CompareButton.IsEnabled = true;
+            }
+
+            LPgrid.SetCompareStates(result.Left);
+            RPgrid.SetCompareStates(result.Right);
+            _comparing = true;
+        }
+
+        /// <summary>
+        /// One-way sync: copies new, newer, and changed items from the source folder to the
+        /// destination (never overwrites a newer destination file). With the mirror option, also
+        /// deletes items that exist only in the destination. Reuses the transfer progress dialog
+        /// and works for local and cloud paths alike.
+        /// </summary>
+        private async Task SyncAsync(string sourcePathRaw, string destPathRaw)
+        {
+            string src = sourcePathRaw ?? "";
+            string dst = destPathRaw ?? "";
+            if (string.IsNullOrEmpty(src) || string.IsNullOrEmpty(dst)) return;
+
+            DirectoryComparer.SyncPlan plan;
+            try
+            {
+                plan = await Task.Run(() => DirectoryComparer.PlanSync(src, dst));
+            }
+            catch (Exception ex)
+            {
+                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                return;
+            }
+
+            if (plan.Copies.Count == 0 && plan.Deletes.Count == 0)
+            {
+                await new MessageBox("The destination is already up to date.").ShowDialog(this);
+                return;
+            }
+
+            var dlg = new SyncOptionsDialog(src, dst, plan.Copies.Count, plan.Deletes.Count);
+            if (!await dlg.ShowDialog<bool>(this)) return;
+
+            // Deletes first (mirror only), off the UI thread.
+            Exception? deleteError = null;
+            if (dlg.DeleteExtras && plan.Deletes.Count > 0)
+            {
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        foreach (var (path, isDir) in plan.Deletes)
+                        {
+                            var p = ProviderRegistry.For(path);
+                            if (isDir) p.DeleteDirectory(path, recursive: true);
+                            else p.DeleteFile(path);
+                        }
+                    });
+                }
+                catch (Exception ex) { deleteError = ex; }
+            }
+
+            // Copies (recursive, file-level) via the transfer progress dialog.
+            Exception? copyError = null;
+            if (plan.Copies.Count > 0)
+            {
+                var win = new TransferProgressWindow("Syncing", plan.Copies, move: false);
+                await win.ShowDialog(this);
+                copyError = win.Error;
+            }
+
+            RefreshLPGrid();
+            RefreshRPGrid();
+
+            if (copyError != null)
+                await new MessageBox($"Sync failed: {copyError.Message}").ShowDialog(this);
+            else if (deleteError != null)
+                await new MessageBox($"Some deletions failed: {deleteError.Message}").ShowDialog(this);
+        }
+
         private string MakePathEnvSafe(string path)
         {
             string result = path.Replace(@"\\", @"\");
@@ -2351,6 +2473,9 @@ namespace DirOpusReImagined
         /// </summary>
         private void OnPanelPopulated(TaiDataGrid grid)
         {
+            // A fresh listing invalidates any active comparison (rows are rebuilt unmarked).
+            _comparing = false;
+
             if (ReferenceEquals(grid, LPgrid))
             {
                 CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);

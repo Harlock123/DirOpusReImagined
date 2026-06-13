@@ -19,7 +19,7 @@
 	>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="auto" MaxWidth="140"/>
+			<ColumnDefinition Width="auto" MaxWidth="150"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
@@ -461,6 +461,22 @@
 			<Button Name="RpDriveButton" Background="Goldenrod"
 			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"/>
 		</Grid>
+
+		<!-- Compare / Sync controls — placed in the middle column's filter row so they don't
+		     overflow the narrow nav strip above and obscure the right panel. -->
+		<StackPanel Grid.Column="1" Grid.Row="1"
+		            Orientation="Horizontal" Spacing="2"
+		            HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Button Name="CompareButton" Background="Goldenrod" Content="Cmp"
+			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+			        ToolTip.Tip="Compare the two panels: green = only here, blue = newer, gray = older, khaki = same time/different size (recursive). Click again to clear."/>
+			<Button Name="SyncRightButton" Background="Goldenrod" Content="Sync&#x2192;"
+			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in)."/>
+			<Button Name="SyncLeftButton" Background="Goldenrod" Content="Sync&#x2190;"
+			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+			        ToolTip.Tip="Copy new, newer, and changed items from the RIGHT panel to the LEFT (mirror/delete is opt-in)."/>
+		</StackPanel>
 
 		<cons:TaiDataGrid  Margin="4,4,4,4" Name="LPgrid" Grid.Column="0" Grid.Row="2" />
 

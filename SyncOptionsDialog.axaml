@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.SyncOptionsDialog"
+        Width="470" Height="260" Title="Sync Options"
+        CanResize="False" WindowStartupLocation="CenterOwner">
+    <Grid Margin="16" RowDefinitions="auto,auto,*,auto">
+        <TextBlock x:Name="summaryText" Grid.Row="0" TextWrapping="Wrap"/>
+        <CheckBox x:Name="deleteCheck" Grid.Row="1" Margin="0,12,0,0"
+                  Content="Also delete items that exist only in the destination (mirror)"/>
+        <TextBlock x:Name="warnText" Grid.Row="2" Foreground="OrangeRed" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="okButton" Content="Sync" Width="90"/>
+            <Button x:Name="cancelButton" Content="Cancel" Width="90"/>
+        </StackPanel>
+    </Grid>
+</Window>

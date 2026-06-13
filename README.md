@@ -644,6 +644,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
+### 2026-06-13 — Directory compare & sync
+- **Compare panels** — a **Cmp** button colour-codes the two panels against each other: green = only on this side, blue = newer, gray = older, khaki = same time but different size (or, for a folder, a subtree that differs). The comparison is **recursive** — a folder that looks identical at the top level but differs deep inside is flagged. Click **Cmp** again, or navigate, to clear.
+- **One-way sync / mirror** — **Sync→** and **Sync←** buttons bring the destination panel up to date with the source. By default this copies only new, newer, and changed items and never overwrites a newer destination file; an options dialog adds an opt-in **mirror** mode that also deletes items existing only in the destination (with a permanent-deletion warning). Sync is **recursive and file-level**: it descends into shared folders and copies just the differing files rather than overwriting whole folders. It reuses the transfer progress dialog (current file, speed, ETA, cancel) and works for local, cloud, and cross-provider paths.
+- **Cloud listing cache** — cloud directory listings are cached for 30 seconds, so revisiting a folder, hitting back, or refreshing after an operation is instant instead of re-fetching over the network. In-app changes (copy/move/delete/mkdir) clear the cache so your own edits show immediately.
+- **Context-menu fix (macOS)** — the right-click menu on the file grid no longer flashes open and immediately closes; the grid now skips its canvas rebuild while the menu is showing.
+
 ### 2026-06-12 — Cloud transfer progress, quick-pick remotes & listing fixes
 - **Transfer progress dialog** — copy and move now run off the UI thread behind a progress window showing the current file, an overall progress bar, transfer speed, and ETA, with a **Cancel** button. Byte-level progress is reported across every path: local→local (a buffered counting stream), and cloud→cloud, cloud→local, and local→cloud (driven by rclone's async job with live `core/stats` polling, so the slow network leg reports real bytes instead of freezing).
 - **Cloud remotes quick-pick** — a ☁ button on each panel's path bar lists the cloud remotes configured in rclone; selecting one navigates that panel straight to `cloud://<remote>/`, so there's no need to type the URI by hand. Includes friendly prompts when rclone isn't installed or no remotes are configured yet.
