@@ -1722,7 +1722,7 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
-        /// Compares the two panels by entry name and colour-codes each row (green = only here,
+        /// Compares the two panels by entry name and color-codes each row (green = only here,
         /// blue = newer, gray = older, khaki = same time but different size). Clicking again clears.
         /// </summary>
         private async void CompareButton_Click(object? sender, RoutedEventArgs e)

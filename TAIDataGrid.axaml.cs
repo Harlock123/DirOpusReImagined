@@ -3327,7 +3327,7 @@ namespace DirOpusReImagined
         public string Files { get; set; }
         public string Flags { get; set; }
 
-        // Directory-compare colour state. Deliberately a FIELD, not a property: the grid renders one
+        // Directory-compare color state. Deliberately a FIELD, not a property: the grid renders one
         // column per public property (reflection), so a property here would show as a stray column.
         public RowCompareState CompareState;
 

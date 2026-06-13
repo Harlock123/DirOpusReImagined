@@ -468,8 +468,34 @@
 		            Orientation="Horizontal" Spacing="2"
 		            HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Button Name="CompareButton" Background="Goldenrod" Content="Cmp"
-			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-			        ToolTip.Tip="Compare the two panels: green = only here, blue = newer, gray = older, khaki = same time/different size (recursive). Click again to clear."/>
+			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+				<ToolTip.Tip>
+					<StackPanel Spacing="4" Margin="2" MaxWidth="300">
+						<TextBlock Text="Compare the two panels (recursive)." FontWeight="Bold" TextWrapping="Wrap"/>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="LightGreen" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="exists only on this side"/>
+						</Grid>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="LightSkyBlue" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="newer than the other side"/>
+						</Grid>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="Gainsboro" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="older than the other side"/>
+						</Grid>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="Khaki" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="same time, different size — or a folder whose contents differ"/>
+						</Grid>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="Transparent" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="identical on both sides (no color)"/>
+						</Grid>
+						<TextBlock Text="Click Cmp again to clear." FontStyle="Italic" Margin="0,3,0,0" TextWrapping="Wrap"/>
+					</StackPanel>
+				</ToolTip.Tip>
+			</Button>
 			<Button Name="SyncRightButton" Background="Goldenrod" Content="Sync&#x2192;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in)."/>
