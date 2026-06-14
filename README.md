@@ -92,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.0.6.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.0.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
