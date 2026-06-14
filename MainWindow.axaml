@@ -423,7 +423,8 @@
 			        Grid.Column="2" Grid.Row="0" Content="&#x2601;" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Browse configured cloud remotes"/>
 			<Button Name="LpDriveButton" Background="Goldenrod"
-			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"/>
+			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"
+			        ToolTip.Tip="Jump to a drive / mounted volume"/>
 		</Grid>
 		
 		<Grid Grid.Column="2" Grid.Row="0" x:Name="RightPanelNavigation">
@@ -459,7 +460,8 @@
 			        Grid.Column="2" Grid.Row="0" Content="&#x2601;" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Browse configured cloud remotes"/>
 			<Button Name="RpDriveButton" Background="Goldenrod"
-			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"/>
+			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"
+			        ToolTip.Tip="Jump to a drive / mounted volume"/>
 		</Grid>
 
 		<!-- Compare / Sync controls — placed in the middle column's filter row so they don't

@@ -474,6 +474,9 @@ namespace DirOpusReImagined
             LpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(LpCloudButton, "LP");
             RpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(RpCloudButton, "RP");
 
+            LpDriveButton.Click += (_, _) => ShowDrives(LpDriveButton, "LP");
+            RpDriveButton.Click += (_, _) => ShowDrives(RpDriveButton, "RP");
+
             CompareButton.Click += CompareButton_Click;
             SyncRightButton.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text);
             SyncLeftButton.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text);
@@ -2425,8 +2428,15 @@ namespace DirOpusReImagined
 
         /// <summary>Navigates a panel to the root of a cloud remote, mirroring a typed-path Enter.</summary>
         private void NavigatePanelToCloud(string side, string remote)
+            => NavigatePanelTo(side, $"{CloudPath.Scheme}{remote}/");
+
+        /// <summary>
+        /// Navigates a panel to the given path exactly like a typed-path Enter: pushes the current
+        /// path onto the back-history, clears the filter, populates the grid, and switches to the
+        /// breadcrumb display. Works for local paths and cloud:// URIs alike.
+        /// </summary>
+        private void NavigatePanelTo(string side, string path)
         {
-            string path = $"{CloudPath.Scheme}{remote}/";
             bool showHidden = ChkShowHidden?.IsChecked ?? false;
 
             if (side == "LP")
@@ -2447,6 +2457,74 @@ namespace DirOpusReImagined
                 RefreshRPGridPostActions();
                 ExitPathEditMode("RP");
             }
+        }
+
+        /// <summary>
+        /// Shows a flyout of the machine's ready drives / mounted volumes; selecting one navigates
+        /// the given panel to that drive's root (a Windows drive letter, or a Unix mount point).
+        /// </summary>
+        private void ShowDrives(Button anchor, string side)
+        {
+            var items = new List<MenuItem>();
+            try
+            {
+                foreach (var d in DriveInfo.GetDrives())
+                {
+                    try
+                    {
+                        if (!IsUserDrive(d)) continue;
+
+                        string root = d.Name;
+                        string label = root;
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(d.VolumeLabel)) label += $"   ({d.VolumeLabel})";
+                        }
+                        catch { }
+
+                        var mi = new MenuItem { Header = label };
+                        mi.Click += (_, _) => NavigatePanelTo(side, root);
+                        items.Add(mi);
+                    }
+                    catch { /* skip a drive that errors while being inspected */ }
+                }
+            }
+            catch { }
+
+            if (items.Count == 0)
+            {
+                _ = new MessageBox("No ready drives or volumes were found.").ShowDialog(this);
+                return;
+            }
+
+            var flyout = new MenuFlyout { ItemsSource = items };
+            flyout.ShowAt(anchor);
+        }
+
+        /// <summary>
+        /// Whether a drive is worth offering in the picker. On Windows that's any ready fixed,
+        /// removable, network, or optical drive. On Unix it's the root plus genuine user mounts
+        /// (under /Volumes, /media, /mnt) and network shares — hiding synthetic system volumes
+        /// like /dev and /System/Volumes/* that DriveInfo otherwise enumerates.
+        /// </summary>
+        private static bool IsUserDrive(DriveInfo d)
+        {
+            if (!d.IsReady) return false;
+
+            if (OperatingSystem.IsWindows())
+            {
+                return d.DriveType is DriveType.Fixed or DriveType.Removable
+                                   or DriveType.Network or DriveType.CDRom;
+            }
+
+            string name = d.Name;
+            if (name == "/") return true;
+            if (d.DriveType == DriveType.Network) return true;
+
+            foreach (var prefix in new[] { "/Volumes/", "/media/", "/mnt/", "/run/media/" })
+                if (name.StartsWith(prefix, StringComparison.Ordinal)) return true;
+
+            return false;
         }
 
         private void RefreshLPGridPostActions()
