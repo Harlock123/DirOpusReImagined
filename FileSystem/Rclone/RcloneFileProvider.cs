@@ -340,6 +340,42 @@ public sealed class RcloneFileProvider : IFileProvider
             $"Could not list {cp.FullUri} after {ListMaxAttempts} attempts: {last?.Message}", last);
     }
 
+    public string? ComputeHash(string path)
+    {
+        if (!CloudPath.IsCloudUri(path)) return null;
+        var cp = CloudPath.Parse(path);
+        try
+        {
+            // Ask rclone for the file's MD5 (many backends expose one server-side, so no download).
+            using var doc = Post("operations/stat", new Dictionary<string, object>
+            {
+                ["fs"]     = cp.Fs,
+                ["remote"] = cp.Path,
+                ["opt"]    = new Dictionary<string, object>
+                {
+                    ["showHash"]  = true,
+                    ["hashTypes"] = new[] { "md5" },
+                },
+            });
+
+            if (!doc.RootElement.TryGetProperty("item", out var item) || item.ValueKind == JsonValueKind.Null)
+                return null;
+            if (!item.TryGetProperty("Hashes", out var hashes) || hashes.ValueKind != JsonValueKind.Object)
+                return null;
+
+            foreach (var prop in hashes.EnumerateObject())
+            {
+                if (string.Equals(prop.Name, "md5", StringComparison.OrdinalIgnoreCase))
+                {
+                    var v = prop.Value.GetString();
+                    return string.IsNullOrEmpty(v) ? null : v;
+                }
+            }
+            return null;
+        }
+        catch { return null; }
+    }
+
     private JsonElement? StatRaw(CloudPath cp)
     {
         using var doc = Post("operations/stat", FsRemote(cp));

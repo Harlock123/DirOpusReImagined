@@ -69,4 +69,11 @@ public interface IFileProvider
         => StreamCopy.ProviderToLocalAsync(this, src, localDst, progress, ct);
 
     long GetDirectorySize(string path, bool recursive);
+
+    /// <summary>
+    /// Returns a hex content hash (MD5) for a file, or null if one can't be produced — e.g. a
+    /// remote that exposes no usable hash. Used by content-mode directory compare; it must be the
+    /// same algorithm across providers so values are comparable. Default: not supported (null).
+    /// </summary>
+    string? ComputeHash(string path) => null;
 }

@@ -478,6 +478,8 @@ namespace DirOpusReImagined
             RpDriveButton.Click += (_, _) => ShowDrives(RpDriveButton, "RP");
 
             CompareButton.Click += CompareButton_Click;
+            CmpQuickItem.Click += async (_, _) => await RunCompareAsync(content: false);
+            CmpContentItem.Click += async (_, _) => await RunCompareAsync(content: true);
             SyncRightButton.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text);
             SyncLeftButton.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text);
             
@@ -1732,27 +1734,39 @@ namespace DirOpusReImagined
         {
             if (sender is Button b) ToolTip.SetIsOpen(b, false);
 
-            if (_comparing)
-            {
-                LPgrid.ClearCompareStates();
-                RPgrid.ClearCompareStates();
-                _comparing = false;
-                return;
-            }
+            // Left-click toggles the default (quick) compare on/off.
+            if (_comparing) { ClearCompare(); return; }
+            await RunCompareAsync(content: false);
+        }
+
+        private void ClearCompare()
+        {
+            LPgrid.ClearCompareStates();
+            RPgrid.ClearCompareStates();
+            _comparing = false;
+        }
+
+        /// <summary>
+        /// Runs a recursive compare between the two panels and marks the rows. <paramref name="content"/>
+        /// selects hash/content comparison (slower) instead of the quick name/size/time comparison.
+        /// </summary>
+        private async Task RunCompareAsync(bool content)
+        {
+            ClearCompare();
 
             string lp = LPpath.Text ?? "";
             string rp = RPpath.Text ?? "";
             if (string.IsNullOrEmpty(lp) || string.IsNullOrEmpty(rp)) return;
 
-            // Deep/recursive compare can take a while on large (especially cloud) trees, so run it
-            // off-thread with a brief busy indicator on the button.
+            // Recursive (and especially content) compare can take a while, so run it off-thread with
+            // a brief busy indicator on the button.
             DirectoryComparer.CompareResult result;
             var prevContent = CompareButton.Content;
             CompareButton.IsEnabled = false;
             CompareButton.Content = "…";
             try
             {
-                result = await Task.Run(() => DirectoryComparer.Compare(lp, rp, recursive: true));
+                result = await Task.Run(() => DirectoryComparer.Compare(lp, rp, recursive: true, content: content));
             }
             catch (Exception ex)
             {

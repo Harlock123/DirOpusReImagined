@@ -78,6 +78,17 @@ public sealed class LocalFileProvider : IFileProvider
     public void MoveFile(string src, string dst) => File.Move(src, dst);
     public void MoveDirectory(string src, string dst) => Directory.Move(src, dst);
 
+    public string? ComputeHash(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            return Convert.ToHexString(md5.ComputeHash(stream));
+        }
+        catch { return null; }
+    }
+
     public long GetDirectorySize(string path, bool recursive)
     {
         long size = 0;

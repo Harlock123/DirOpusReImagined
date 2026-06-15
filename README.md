@@ -92,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.1.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.2.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -645,6 +645,7 @@ The `Assets` folder (containing button icons) must also be present alongside the
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
 ### 2026-06-15 — Inaccessible-folder handling & drive picker
+- **Content (hash) compare** — **right-click the Cmp button** for a menu offering *Quick compare* (name, size, time — the default left-click behavior) or *Content compare (hash)*. Content mode compares files by MD5 hash instead of size + timestamp, so a file edited and re-saved at the same size and time is correctly detected as changed. It's slower (it reads/hashes file contents); for cloud files it uses a server-side hash when the remote exposes one (e.g. Google Drive) and otherwise falls back to size + time for that file.
 - **Compare survives locked folders** — a recursive **Cmp** that hits a folder it can't read (permissions) no longer aborts with an error dialog. That folder is now colored **coral** and the rest of the comparison continues. The new color is documented in the Cmp button's legend tooltip, and one-way sync likewise skips any subfolder it can't read instead of failing the whole operation.
 - **Drive / volume picker** — the drive button on each panel's path bar (to the right of the cloud button) now works: it lists the machine's ready drives and mounted volumes, and selecting one jumps that panel to its root. On Windows it shows drive letters; on macOS/Linux it shows `/` and real mounts (under `/Volumes`, `/media`, `/mnt`) while hiding synthetic system volumes.
 

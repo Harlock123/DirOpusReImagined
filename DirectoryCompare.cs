@@ -38,7 +38,13 @@ namespace DirOpusReImagined
         /// When true, a folder present on both sides is marked Same only if its entire subtree
         /// matches, otherwise Different. When false, such folders are always Same (shallow).
         /// </param>
-        public static CompareResult Compare(string leftPath, string rightPath, bool recursive = false)
+        /// <param name="content">
+        /// When true, files are compared by content hash (MD5) rather than size + modification time,
+        /// so a file edited and saved at the same size/time is still detected as changed. Slower:
+        /// it reads/hashes file contents (cloud uses a server-side hash when the remote exposes one,
+        /// otherwise falls back to size + time for that file).
+        /// </param>
+        public static CompareResult Compare(string leftPath, string rightPath, bool recursive = false, bool content = false)
         {
             var left = Snapshot(leftPath);
             var right = Snapshot(rightPath);
@@ -59,7 +65,7 @@ namespace DirOpusReImagined
                     RowCompareState s = RowCompareState.Same;
                     if (recursive)
                     {
-                        s = CompareSubtree(Child(leftPath, name), Child(rightPath, name)) switch
+                        s = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content) switch
                         {
                             SubtreeResult.Different    => RowCompareState.Different,
                             SubtreeResult.Inaccessible => RowCompareState.Inaccessible,
@@ -77,7 +83,7 @@ namespace DirOpusReImagined
                 }
                 else
                 {
-                    var (ls, rs) = ClassifyFiles(l, r);
+                    var (ls, rs) = ClassifyFiles(l, r, content, Child(leftPath, name), Child(rightPath, name));
                     leftStates[name] = ls;
                     rightStates[name] = rs;
                 }
@@ -167,7 +173,7 @@ namespace DirOpusReImagined
         // Recursively determine whether two directory subtrees match. A folder that cannot be listed
         // (permissions) yields Inaccessible instead of throwing, so a single locked folder no longer
         // aborts the whole comparison.
-        private static SubtreeResult CompareSubtree(string leftPath, string rightPath)
+        private static SubtreeResult CompareSubtree(string leftPath, string rightPath, bool content)
         {
             Dictionary<string, Item> left, right;
             try
@@ -189,10 +195,10 @@ namespace DirOpusReImagined
 
                 if (l.IsDir)
                 {
-                    var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name));
+                    var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content);
                     if (sub != SubtreeResult.Equal) return sub; // propagate Different or Inaccessible
                 }
-                else if (!FilesEqual(l, r))
+                else if (!FilesEqual(l, r, content, Child(leftPath, name), Child(rightPath, name)))
                 {
                     return SubtreeResult.Different;
                 }
@@ -200,22 +206,53 @@ namespace DirOpusReImagined
             return SubtreeResult.Equal;
         }
 
-        private static (RowCompareState left, RowCompareState right) ClassifyFiles(Item l, Item r)
+        private static (RowCompareState left, RowCompareState right) ClassifyFiles(
+            Item l, Item r, bool content, string leftPath, string rightPath)
         {
+            // Identical content (content mode) means Same regardless of timestamps.
+            if (content && ContentEqual(l, r, leftPath, rightPath))
+                return (RowCompareState.Same, RowCompareState.Same);
+
             var delta = l.Modified - r.Modified;
             if (delta > TimeTolerance)  return (RowCompareState.Newer, RowCompareState.Older);
             if (delta < -TimeTolerance) return (RowCompareState.Older, RowCompareState.Newer);
 
+            // Same modification time. In content mode we already know the content differs here;
+            // in metadata mode, equal size means equal.
+            if (content) return (RowCompareState.Different, RowCompareState.Different);
             return l.Size == r.Size
                 ? (RowCompareState.Same, RowCompareState.Same)
                 : (RowCompareState.Different, RowCompareState.Different);
         }
 
-        private static bool FilesEqual(Item l, Item r)
+        private static bool FilesEqual(Item l, Item r, bool content, string leftPath, string rightPath)
+            => content ? ContentEqual(l, r, leftPath, rightPath) : FilesEqualByMeta(l, r);
+
+        private static bool FilesEqualByMeta(Item l, Item r)
         {
             var delta = l.Modified - r.Modified;
             if (delta > TimeTolerance || delta < -TimeTolerance) return false;
             return l.Size == r.Size;
+        }
+
+        // Content equality by hash. Different sizes can't match (skip hashing). When a hash isn't
+        // available on one side (e.g. a cloud remote with no MD5), fall back to a metadata check.
+        private static bool ContentEqual(Item l, Item r, string leftPath, string rightPath)
+        {
+            if (l.Size != r.Size) return false;
+
+            var lh = SafeHash(leftPath);
+            var rh = SafeHash(rightPath);
+            if (lh != null && rh != null)
+                return string.Equals(lh, rh, StringComparison.OrdinalIgnoreCase);
+
+            return FilesEqualByMeta(l, r);
+        }
+
+        private static string? SafeHash(string path)
+        {
+            try { return ProviderRegistry.For(path).ComputeHash(path); }
+            catch { return null; }
         }
 
         // Source should be copied over dest when it is newer, or the same age but a different size.
