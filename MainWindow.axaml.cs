@@ -480,8 +480,12 @@ namespace DirOpusReImagined
             CompareButton.Click += CompareButton_Click;
             CmpQuickItem.Click += async (_, _) => await RunCompareAsync(content: false);
             CmpContentItem.Click += async (_, _) => await RunCompareAsync(content: true);
-            SyncRightButton.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text);
-            SyncLeftButton.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text);
+            SyncRightButton.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text, content: false);
+            SyncLeftButton.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text, content: false);
+            SyncRightQuickItem.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text, content: false);
+            SyncRightContentItem.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text, content: true);
+            SyncLeftQuickItem.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text, content: false);
+            SyncLeftContentItem.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text, content: true);
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
@@ -1790,7 +1794,7 @@ namespace DirOpusReImagined
         /// deletes items that exist only in the destination. Reuses the transfer progress dialog
         /// and works for local and cloud paths alike.
         /// </summary>
-        private async Task SyncAsync(string sourcePathRaw, string destPathRaw)
+        private async Task SyncAsync(string sourcePathRaw, string destPathRaw, bool content = false)
         {
             string src = sourcePathRaw ?? "";
             string dst = destPathRaw ?? "";
@@ -1799,7 +1803,7 @@ namespace DirOpusReImagined
             DirectoryComparer.SyncPlan plan;
             try
             {
-                plan = await Task.Run(() => DirectoryComparer.PlanSync(src, dst));
+                plan = await Task.Run(() => DirectoryComparer.PlanSync(src, dst, content));
             }
             catch (Exception ex)
             {

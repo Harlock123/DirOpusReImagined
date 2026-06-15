@@ -106,16 +106,20 @@ namespace DirOpusReImagined
         /// new, newer, and changed items (recursing into shared folders); records destination-only
         /// items as deletion candidates (the caller decides whether to apply them).
         /// </summary>
-        public static SyncPlan PlanSync(string source, string dest)
+        /// <param name="content">
+        /// When true, decide what to copy by content hash rather than size + modification time, so a
+        /// content-identical file with a newer timestamp is not needlessly recopied. Slower.
+        /// </param>
+        public static SyncPlan PlanSync(string source, string dest, bool content = false)
         {
             var copies = new List<TransferItem>();
             var deletes = new List<(string, bool)>();
-            PlanInto(source, dest, copies, deletes);
+            PlanInto(source, dest, copies, deletes, content);
             return new SyncPlan(copies, deletes);
         }
 
         private static void PlanInto(string src, string dst,
-            List<TransferItem> copies, List<(string, bool)> deletes)
+            List<TransferItem> copies, List<(string, bool)> deletes, bool content)
         {
             var left = Snapshot(src);
             var right = Snapshot(dst);
@@ -133,14 +137,14 @@ namespace DirOpusReImagined
                 else if (l.IsDir && r.IsDir)
                 {
                     // Descend into shared folders; skip any that can't be read rather than aborting.
-                    try { PlanInto(sChild, dChild, copies, deletes); }
+                    try { PlanInto(sChild, dChild, copies, deletes, content); }
                     catch { /* inaccessible subfolder (permissions) — leave it untouched */ }
                 }
                 else if (l.IsDir != r.IsDir)
                 {
                     // Type mismatch (dir vs file) — skip rather than guess.
                 }
-                else if (IsNewerOrDifferent(l, r))
+                else if (ShouldCopy(l, r, content, sChild, dChild))
                 {
                     copies.Add(new TransferItem(sChild, dst, dChild, false));
                 }
@@ -253,6 +257,17 @@ namespace DirOpusReImagined
         {
             try { return ProviderRegistry.For(path).ComputeHash(path); }
             catch { return null; }
+        }
+
+        // Whether the source file should be copied over the destination.
+        private static bool ShouldCopy(Item src, Item dst, bool content, string srcPath, string dstPath)
+        {
+            if (!content) return IsNewerOrDifferent(src, dst);
+
+            // Content mode: only copy when the content actually differs, and still never overwrite a
+            // newer destination (source must be newer than, or the same age as, the destination).
+            if (ContentEqual(src, dst, srcPath, dstPath)) return false;
+            return (src.Modified - dst.Modified) >= -TimeTolerance;
         }
 
         // Source should be copied over dest when it is newer, or the same age but a different size.

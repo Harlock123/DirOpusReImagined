@@ -510,10 +510,24 @@
 			</Button>
 			<Button Name="SyncRightButton" Background="Goldenrod" Content="Sync&#x2192;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in)."/>
+			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in). Right-click for content (hash) sync.">
+				<Button.ContextFlyout>
+					<MenuFlyout>
+						<MenuItem Name="SyncRightQuickItem" Header="Quick sync → (name · size · time)"/>
+						<MenuItem Name="SyncRightContentItem" Header="Content sync → (hash) — slower"/>
+					</MenuFlyout>
+				</Button.ContextFlyout>
+			</Button>
 			<Button Name="SyncLeftButton" Background="Goldenrod" Content="Sync&#x2190;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-			        ToolTip.Tip="Copy new, newer, and changed items from the RIGHT panel to the LEFT (mirror/delete is opt-in)."/>
+			        ToolTip.Tip="Copy new, newer, and changed items from the RIGHT panel to the LEFT (mirror/delete is opt-in). Right-click for content (hash) sync.">
+				<Button.ContextFlyout>
+					<MenuFlyout>
+						<MenuItem Name="SyncLeftQuickItem" Header="Quick sync ← (name · size · time)"/>
+						<MenuItem Name="SyncLeftContentItem" Header="Content sync ← (hash) — slower"/>
+					</MenuFlyout>
+				</Button.ContextFlyout>
+			</Button>
 		</StackPanel>
 
 		<cons:TaiDataGrid  Margin="4,4,4,4" Name="LPgrid" Grid.Column="0" Grid.Row="2" />
