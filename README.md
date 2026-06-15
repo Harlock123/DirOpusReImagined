@@ -92,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.4.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.5.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -645,6 +645,7 @@ The `Assets` folder (containing button icons) must also be present alongside the
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
 ### 2026-06-15 — Inaccessible-folder handling & drive picker
+- **Compare progress dialog** — a recursive (and especially content/cloud) compare now runs behind a small modal dialog with an animated progress bar, a live "current folder" line, and a **Cancel** button, instead of only changing the Cmp button to "…". (Also fixed a crash in the new dialog and the sync options dialog where their controls weren't being initialized.)
 - **Content (hash) compare** — **right-click the Cmp button** for a menu offering *Quick compare* (name, size, time — the default left-click behavior) or *Content compare (hash)*. Content mode compares files by MD5 hash instead of size + timestamp, so a file edited and re-saved at the same size and time is correctly detected as changed. It's slower (it reads/hashes file contents); for cloud files it uses a server-side hash when the remote exposes one (e.g. Google Drive) and otherwise falls back to size + time for that file.
 - **Content (hash) sync** — **right-click either Sync button** for *Quick sync* (the default left-click behavior) or *Content sync (hash)*. Content sync uses the same hash comparison to decide what to copy, so a content-identical file with only a newer timestamp is no longer recopied. The "never overwrite a newer destination" and opt-in mirror/delete rules are unchanged.
 - **Two-way "newer wins" sync** — a new **⇄** button in the toolbar merges both panels in both directions: each file's newer version is copied to whichever side has the older (or missing) copy, recursively, and items present on only one side are copied to the other. Nothing is ever deleted, and files that exist on both sides with the same timestamp but different content are left untouched as conflicts. Left-click runs it; right-click offers a content (hash) variant.
