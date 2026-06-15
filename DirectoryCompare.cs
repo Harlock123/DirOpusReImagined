@@ -157,6 +157,82 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>A two-way (newer-wins) plan: combined copies, plus per-direction counts.</summary>
+        public sealed record TwoWayPlan(List<TransferItem> Copies, int ToRight, int ToLeft);
+
+        /// <summary>
+        /// Plans a two-way "newer wins" merge between two folders: each file's newer version is
+        /// copied to the side that has the older (or missing) copy, recursively. Nothing is deleted.
+        /// Files that exist on both sides with the same timestamp but different content are treated as
+        /// conflicts and left untouched. <paramref name="content"/> uses hashes to skip identical files.
+        /// </summary>
+        public static TwoWayPlan PlanTwoWay(string left, string right, bool content)
+        {
+            var toRight = new List<TransferItem>();
+            var toLeft = new List<TransferItem>();
+            PlanTwoWayInto(left, right, toRight, toLeft, content);
+
+            var all = new List<TransferItem>(toRight);
+            all.AddRange(toLeft);
+            return new TwoWayPlan(all, toRight.Count, toLeft.Count);
+        }
+
+        private static void PlanTwoWayInto(string leftPath, string rightPath,
+            List<TransferItem> toRight, List<TransferItem> toLeft, bool content)
+        {
+            Dictionary<string, Item> left, right;
+            try
+            {
+                left = Snapshot(leftPath);
+                right = Snapshot(rightPath);
+            }
+            catch
+            {
+                return; // inaccessible folder — skip it rather than aborting the whole merge
+            }
+
+            foreach (var (name, l) in left)
+            {
+                string lChild = Child(leftPath, name);
+                string rChild = Child(rightPath, name);
+
+                if (!right.TryGetValue(name, out var r))
+                {
+                    // Only on the left — send it (file or whole folder) to the right.
+                    toRight.Add(new TransferItem(lChild, rightPath, rChild, l.IsDir));
+                }
+                else if (l.IsDir && r.IsDir)
+                {
+                    PlanTwoWayInto(lChild, rChild, toRight, toLeft, content);
+                }
+                else if (l.IsDir != r.IsDir)
+                {
+                    // Type mismatch (dir vs file) — skip.
+                }
+                else
+                {
+                    // Both are files: newer wins; identical (or same-time conflict) is left alone.
+                    if (content && ContentEqual(l, r, lChild, rChild)) continue;
+
+                    var delta = l.Modified - r.Modified;
+                    if (delta > TimeTolerance)
+                        toRight.Add(new TransferItem(lChild, rightPath, rChild, false));
+                    else if (delta < -TimeTolerance)
+                        toLeft.Add(new TransferItem(rChild, leftPath, lChild, false));
+                    // same timestamp → conflict (can't tell which is newer) → skip
+                }
+            }
+
+            foreach (var (name, r) in right)
+            {
+                if (!left.ContainsKey(name))
+                {
+                    // Only on the right — send it to the left.
+                    toLeft.Add(new TransferItem(Child(rightPath, name), leftPath, Child(leftPath, name), r.IsDir));
+                }
+            }
+        }
+
         private readonly record struct Item(bool IsDir, long Size, DateTime Modified);
 
         private static Dictionary<string, Item> Snapshot(string path)

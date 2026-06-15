@@ -486,6 +486,9 @@ namespace DirOpusReImagined
             SyncRightContentItem.Click += async (_, _) => await SyncAsync(LPpath.Text, RPpath.Text, content: true);
             SyncLeftQuickItem.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text, content: false);
             SyncLeftContentItem.Click += async (_, _) => await SyncAsync(RPpath.Text, LPpath.Text, content: true);
+            SyncBothButton.Click += async (_, _) => await TwoWaySyncAsync(content: false);
+            SyncBothQuickItem.Click += async (_, _) => await TwoWaySyncAsync(content: false);
+            SyncBothContentItem.Click += async (_, _) => await TwoWaySyncAsync(content: true);
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
@@ -1817,7 +1820,8 @@ namespace DirOpusReImagined
                 return;
             }
 
-            var dlg = new SyncOptionsDialog(src, dst, plan.Copies.Count, plan.Deletes.Count);
+            var summary = $"Sync from\n{src}\nto\n{dst}\n\nCopy {plan.Copies.Count} new/newer/changed item(s).";
+            var dlg = new SyncOptionsDialog(summary, plan.Deletes.Count);
             if (!await dlg.ShowDialog<bool>(this)) return;
 
             // Deletes first (mirror only), off the UI thread.
@@ -1855,6 +1859,49 @@ namespace DirOpusReImagined
                 await new MessageBox($"Sync failed: {copyError.Message}").ShowDialog(this);
             else if (deleteError != null)
                 await new MessageBox($"Some deletions failed: {deleteError.Message}").ShowDialog(this);
+        }
+
+        /// <summary>
+        /// Two-way "newer wins" merge: copies the newer version of each file to both panels (and any
+        /// item missing on one side to the other), recursively. Never deletes; same-timestamp/different
+        /// content files are left as conflicts. <paramref name="content"/> uses hashes to skip identical files.
+        /// </summary>
+        private async Task TwoWaySyncAsync(bool content)
+        {
+            string lp = LPpath.Text ?? "";
+            string rp = RPpath.Text ?? "";
+            if (string.IsNullOrEmpty(lp) || string.IsNullOrEmpty(rp)) return;
+
+            DirectoryComparer.TwoWayPlan plan;
+            try
+            {
+                plan = await Task.Run(() => DirectoryComparer.PlanTwoWay(lp, rp, content));
+            }
+            catch (Exception ex)
+            {
+                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                return;
+            }
+
+            if (plan.Copies.Count == 0)
+            {
+                await new MessageBox("Both panels are already in sync.").ShowDialog(this);
+                return;
+            }
+
+            var summary = $"Two-way sync (newer wins) between\n{lp}\nand\n{rp}\n\n" +
+                          $"Copy {plan.ToRight} item(s) →  and  {plan.ToLeft} item(s) ←.\nNothing is deleted.";
+            var dlg = new SyncOptionsDialog(summary, 0);
+            if (!await dlg.ShowDialog<bool>(this)) return;
+
+            var win = new TransferProgressWindow("Two-way sync", plan.Copies, move: false);
+            await win.ShowDialog(this);
+
+            RefreshLPGrid();
+            RefreshRPGrid();
+
+            if (win.Error != null)
+                await new MessageBox($"Sync failed: {win.Error.Message}").ShowDialog(this);
         }
 
         private string MakePathEnvSafe(string path)

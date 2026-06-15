@@ -19,7 +19,7 @@
 	>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="auto" MaxWidth="150"/>
+			<ColumnDefinition Width="auto" MaxWidth="178"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
@@ -525,6 +525,16 @@
 					<MenuFlyout>
 						<MenuItem Name="SyncLeftQuickItem" Header="Quick sync ← (name · size · time)"/>
 						<MenuItem Name="SyncLeftContentItem" Header="Content sync ← (hash) — slower"/>
+					</MenuFlyout>
+				</Button.ContextFlyout>
+			</Button>
+			<Button Name="SyncBothButton" Background="Goldenrod" Content="&#x21C4;"
+			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+			        ToolTip.Tip="Two-way sync (newer wins): copy the newer version of each file to both panels, and any item missing on one side to the other. Nothing is deleted. Right-click for content (hash) mode.">
+				<Button.ContextFlyout>
+					<MenuFlyout>
+						<MenuItem Name="SyncBothQuickItem" Header="Two-way sync (newer wins)"/>
+						<MenuItem Name="SyncBothContentItem" Header="Two-way content sync (newer wins, hash) — slower"/>
 					</MenuFlyout>
 				</Button.ContextFlyout>
 			</Button>

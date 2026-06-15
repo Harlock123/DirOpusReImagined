@@ -4,8 +4,10 @@ using Avalonia.Markup.Xaml;
 namespace DirOpusReImagined;
 
 /// <summary>
-/// Options for a one-way sync. Await <c>ShowDialog&lt;bool&gt;(owner)</c> (true = Sync, false = Cancel),
-/// then read <see cref="DeleteExtras"/> for whether destination-only items should be deleted (mirror).
+/// Confirmation + options for a sync. Await <c>ShowDialog&lt;bool&gt;(owner)</c> (true = Sync,
+/// false = Cancel), then read <see cref="DeleteExtras"/> for whether destination-only items should be
+/// deleted (mirror). Pass a <paramref name="deleteCount"/> of 0 to hide the mirror option entirely
+/// (e.g. for two-way sync, which never deletes).
 /// </summary>
 public partial class SyncOptionsDialog : Window
 {
@@ -16,12 +18,11 @@ public partial class SyncOptionsDialog : Window
         InitializeComponent();
     }
 
-    public SyncOptionsDialog(string source, string dest, int copyCount, int deleteCount)
+    public SyncOptionsDialog(string summary, int deleteCount)
     {
         InitializeComponent();
 
-        summaryText.Text =
-            $"Sync from\n{source}\nto\n{dest}\n\nCopy {copyCount} new/newer/changed item(s).";
+        summaryText.Text = summary;
 
         if (deleteCount > 0)
         {
