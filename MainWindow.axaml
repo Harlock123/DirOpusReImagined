@@ -494,6 +494,10 @@
 							<Border Grid.Column="0" Width="16" Height="12" Background="Transparent" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="identical on both sides (no color)"/>
 						</Grid>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="16" Height="12" Background="LightCoral" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="could not be read (permissions) — not fully compared"/>
+						</Grid>
 						<TextBlock Text="Click Cmp again to clear." FontStyle="Italic" Margin="0,3,0,0" TextWrapping="Wrap"/>
 					</StackPanel>
 				</ToolTip.Tip>

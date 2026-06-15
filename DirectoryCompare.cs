@@ -14,6 +14,7 @@ namespace DirOpusReImagined
         Newer,     // file is newer than the other side's copy
         Older,     // file is older than the other side's copy
         Different, // file: same time, different size — or folder whose subtree differs
+        Inaccessible, // could not be read (permissions) — comparison left incomplete here
     }
 
     /// <summary>
@@ -55,9 +56,16 @@ namespace DirOpusReImagined
 
                 if (l.IsDir && r.IsDir)
                 {
-                    var s = recursive && !SubtreesEqual(Child(leftPath, name), Child(rightPath, name))
-                        ? RowCompareState.Different
-                        : RowCompareState.Same;
+                    RowCompareState s = RowCompareState.Same;
+                    if (recursive)
+                    {
+                        s = CompareSubtree(Child(leftPath, name), Child(rightPath, name)) switch
+                        {
+                            SubtreeResult.Different    => RowCompareState.Different,
+                            SubtreeResult.Inaccessible => RowCompareState.Inaccessible,
+                            _                          => RowCompareState.Same,
+                        };
+                    }
                     leftStates[name] = s;
                     rightStates[name] = s;
                 }
@@ -118,7 +126,9 @@ namespace DirOpusReImagined
                 }
                 else if (l.IsDir && r.IsDir)
                 {
-                    PlanInto(sChild, dChild, copies, deletes); // descend into shared folders
+                    // Descend into shared folders; skip any that can't be read rather than aborting.
+                    try { PlanInto(sChild, dChild, copies, deletes); }
+                    catch { /* inaccessible subfolder (permissions) — leave it untouched */ }
                 }
                 else if (l.IsDir != r.IsDir)
                 {
@@ -152,27 +162,42 @@ namespace DirOpusReImagined
             return map;
         }
 
-        private static bool SubtreesEqual(string leftPath, string rightPath)
+        private enum SubtreeResult { Equal, Different, Inaccessible }
+
+        // Recursively determine whether two directory subtrees match. A folder that cannot be listed
+        // (permissions) yields Inaccessible instead of throwing, so a single locked folder no longer
+        // aborts the whole comparison.
+        private static SubtreeResult CompareSubtree(string leftPath, string rightPath)
         {
-            var left = Snapshot(leftPath);
-            var right = Snapshot(rightPath);
-            if (left.Count != right.Count) return false;
+            Dictionary<string, Item> left, right;
+            try
+            {
+                left = Snapshot(leftPath);
+                right = Snapshot(rightPath);
+            }
+            catch
+            {
+                return SubtreeResult.Inaccessible;
+            }
+
+            if (left.Count != right.Count) return SubtreeResult.Different;
 
             foreach (var (name, l) in left)
             {
-                if (!right.TryGetValue(name, out var r)) return false;
-                if (l.IsDir != r.IsDir) return false;
+                if (!right.TryGetValue(name, out var r)) return SubtreeResult.Different;
+                if (l.IsDir != r.IsDir) return SubtreeResult.Different;
 
                 if (l.IsDir)
                 {
-                    if (!SubtreesEqual(Child(leftPath, name), Child(rightPath, name))) return false;
+                    var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name));
+                    if (sub != SubtreeResult.Equal) return sub; // propagate Different or Inaccessible
                 }
                 else if (!FilesEqual(l, r))
                 {
-                    return false;
+                    return SubtreeResult.Different;
                 }
             }
-            return true;
+            return SubtreeResult.Equal;
         }
 
         private static (RowCompareState left, RowCompareState right) ClassifyFiles(Item l, Item r)

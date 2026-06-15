@@ -92,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.0.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.1.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -643,6 +643,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 2026-06-15 — Inaccessible-folder handling & drive picker
+- **Compare survives locked folders** — a recursive **Cmp** that hits a folder it can't read (permissions) no longer aborts with an error dialog. That folder is now colored **coral** and the rest of the comparison continues. The new color is documented in the Cmp button's legend tooltip, and one-way sync likewise skips any subfolder it can't read instead of failing the whole operation.
+- **Drive / volume picker** — the drive button on each panel's path bar (to the right of the cloud button) now works: it lists the machine's ready drives and mounted volumes, and selecting one jumps that panel to its root. On Windows it shows drive letters; on macOS/Linux it shows `/` and real mounts (under `/Volumes`, `/media`, `/mnt`) while hiding synthetic system volumes.
 
 ### 2026-06-13 — Directory compare & sync
 - **Compare panels** — a **Cmp** button color-codes the two panels against each other: green = only on this side, blue = newer, gray = older, khaki = same time but different size (or, for a folder, a subtree that differs). The comparison is **recursive** — a folder that looks identical at the top level but differs deep inside is flagged. Click **Cmp** again, or navigate, to clear.

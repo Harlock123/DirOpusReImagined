@@ -1033,9 +1033,10 @@ namespace DirOpusReImagined
         {
             RowCompareState.Unique    => Brushes.LightGreen,
             RowCompareState.Newer     => Brushes.LightSkyBlue,
-            RowCompareState.Older     => Brushes.Gainsboro,
-            RowCompareState.Different => Brushes.Khaki,
-            _                         => Brushes.Transparent,
+            RowCompareState.Older        => Brushes.Gainsboro,
+            RowCompareState.Different    => Brushes.Khaki,
+            RowCompareState.Inaccessible => Brushes.LightCoral,
+            _                            => Brushes.Transparent,
         };
 
         /// <summary>Applies per-name compare states to the current rows and repaints.</summary>
