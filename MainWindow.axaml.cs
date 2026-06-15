@@ -1765,29 +1765,21 @@ namespace DirOpusReImagined
             string rp = RPpath.Text ?? "";
             if (string.IsNullOrEmpty(lp) || string.IsNullOrEmpty(rp)) return;
 
-            // Recursive (and especially content) compare can take a while, so run it off-thread with
-            // a brief busy indicator on the button.
-            DirectoryComparer.CompareResult result;
-            var prevContent = CompareButton.Content;
-            CompareButton.IsEnabled = false;
-            CompareButton.Content = "…";
-            try
+            // Recursive (and especially content/cloud) compare can take a while; run it behind a modal
+            // busy dialog with an animated bar, a live "current folder" line, and a Cancel button.
+            var dlg = new CompareBusyDialog(lp, rp, recursive: true, content: content);
+            await dlg.ShowDialog(this);
+
+            if (dlg.Canceled) return;
+            if (dlg.Error != null)
             {
-                result = await Task.Run(() => DirectoryComparer.Compare(lp, rp, recursive: true, content: content));
-            }
-            catch (Exception ex)
-            {
-                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                await new MessageBox($"Compare failed: {dlg.Error.Message}").ShowDialog(this);
                 return;
             }
-            finally
-            {
-                CompareButton.Content = prevContent;
-                CompareButton.IsEnabled = true;
-            }
+            if (dlg.Result is null) return;
 
-            LPgrid.SetCompareStates(result.Left);
-            RPgrid.SetCompareStates(result.Right);
+            LPgrid.SetCompareStates(dlg.Result.Left);
+            RPgrid.SetCompareStates(dlg.Result.Right);
             _comparing = true;
         }
 

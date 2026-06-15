@@ -1,0 +1,12 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.CompareBusyDialog"
+        Width="400" Height="160" Title="Comparing"
+        CanResize="False" WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock x:Name="headerText" FontWeight="SemiBold" Text="Comparing panels…"/>
+        <ProgressBar x:Name="bar" IsIndeterminate="True" Height="18"/>
+        <TextBlock x:Name="statusText" Foreground="Gray" TextTrimming="CharacterEllipsis" Text=""/>
+        <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" Width="90"/>
+    </StackPanel>
+</Window>

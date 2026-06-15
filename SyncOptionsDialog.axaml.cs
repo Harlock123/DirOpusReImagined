@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 
 namespace DirOpusReImagined;
 
@@ -42,6 +41,4 @@ public partial class SyncOptionsDialog : Window
         okButton.Click += (_, _) => { DeleteExtras = deleteCheck.IsChecked == true; Close(true); };
         cancelButton.Click += (_, _) => Close(false);
     }
-
-    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

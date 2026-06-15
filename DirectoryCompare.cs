@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using DirOpusReImagined.FileSystem;
 using DirOpusReImagined.FileSystem.Rclone;
 
@@ -44,7 +45,8 @@ namespace DirOpusReImagined
         /// it reads/hashes file contents (cloud uses a server-side hash when the remote exposes one,
         /// otherwise falls back to size + time for that file).
         /// </param>
-        public static CompareResult Compare(string leftPath, string rightPath, bool recursive = false, bool content = false)
+        public static CompareResult Compare(string leftPath, string rightPath, bool recursive = false,
+            bool content = false, CancellationToken ct = default, IProgress<string>? progress = null)
         {
             var left = Snapshot(leftPath);
             var right = Snapshot(rightPath);
@@ -54,6 +56,9 @@ namespace DirOpusReImagined
 
             foreach (var (name, l) in left)
             {
+                ct.ThrowIfCancellationRequested();
+                progress?.Report(name);
+
                 if (!right.TryGetValue(name, out var r))
                 {
                     leftStates[name] = RowCompareState.Unique;
@@ -65,7 +70,7 @@ namespace DirOpusReImagined
                     RowCompareState s = RowCompareState.Same;
                     if (recursive)
                     {
-                        s = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content) switch
+                        s = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content, ct) switch
                         {
                             SubtreeResult.Different    => RowCompareState.Different,
                             SubtreeResult.Inaccessible => RowCompareState.Inaccessible,
@@ -253,8 +258,10 @@ namespace DirOpusReImagined
         // Recursively determine whether two directory subtrees match. A folder that cannot be listed
         // (permissions) yields Inaccessible instead of throwing, so a single locked folder no longer
         // aborts the whole comparison.
-        private static SubtreeResult CompareSubtree(string leftPath, string rightPath, bool content)
+        private static SubtreeResult CompareSubtree(string leftPath, string rightPath, bool content, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             Dictionary<string, Item> left, right;
             try
             {
@@ -275,7 +282,7 @@ namespace DirOpusReImagined
 
                 if (l.IsDir)
                 {
-                    var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content);
+                    var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content, ct);
                     if (sub != SubtreeResult.Equal) return sub; // propagate Different or Inaccessible
                 }
                 else if (!FilesEqual(l, r, content, Child(leftPath, name), Child(rightPath, name)))
