@@ -489,6 +489,9 @@ namespace DirOpusReImagined
             SyncBothButton.Click += async (_, _) => await TwoWaySyncAsync(content: false);
             SyncBothQuickItem.Click += async (_, _) => await TwoWaySyncAsync(content: false);
             SyncBothContentItem.Click += async (_, _) => await TwoWaySyncAsync(content: true);
+
+            LPfindButton.Click += (_, _) => OpenSearch("LP");
+            RPfindButton.Click += (_, _) => OpenSearch("RP");
             
             RenameRightButton.Click += RenameRightButton_Click;
             RenameLeftButton.Click += RenameLeftButton_Click;
@@ -2218,7 +2221,9 @@ namespace DirOpusReImagined
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
 
-            double centerWidth = 150;
+            // Must match the middle ColumnDefinition's MaxWidth in MainWindow.axaml; otherwise the
+            // grids are sized wrong and the right panel spills past the window edge.
+            double centerWidth = 178;
             double nwidth = (e.NewSize.Width - centerWidth - 24) / 2;
 
             double nheight = ((e.NewSize.Height) - 30 - 26 - 24) * .7;
@@ -2483,6 +2488,22 @@ namespace DirOpusReImagined
             flyout.ShowAt(anchor);
         }
 
+        /// <summary>Opens a non-modal recursive search window rooted at the given panel's current folder.</summary>
+        private void OpenSearch(string side)
+        {
+            string root = (side == "LP" ? LPpath.Text : RPpath.Text) ?? "";
+            if (string.IsNullOrEmpty(root)) return;
+
+            var win = new SearchWindow(root, hit => NavigateToHit(side, hit));
+            win.Show(this);
+        }
+
+        /// <summary>Navigates the originating panel to a search hit — into a folder hit, or to a file's folder.</summary>
+        private void NavigateToHit(string side, SearchHit hit)
+        {
+            NavigatePanelTo(side, hit.IsDir ? hit.FullPath : hit.Folder);
+        }
+
         /// <summary>Navigates a panel to the root of a cloud remote, mirroring a typed-path Enter.</summary>
         private void NavigatePanelToCloud(string side, string remote)
             => NavigatePanelTo(side, $"{CloudPath.Scheme}{remote}/");
@@ -2641,10 +2662,12 @@ namespace DirOpusReImagined
                 return;
             }
 
+            // Wildcard match (e.g. *.jpg) when the text contains * or ?, otherwise substring (e.g. jpg).
+            var matcher = FileSearch.MakeNameMatcher(filterText, matchCase: false);
             var filtered = unfilteredItems.Where(item =>
             {
                 if (item is AFileEntry af)
-                    return af.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase);
+                    return matcher.IsMatch(af.Name);
                 return true;
             }).ToList();
 

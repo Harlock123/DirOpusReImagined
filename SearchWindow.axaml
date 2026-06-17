@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.SearchWindow"
+        Width="640" Height="470" Title="Search"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="12" RowDefinitions="auto,auto,auto,*,auto">
+        <TextBlock x:Name="rootText" Grid.Row="0" FontSize="11" Foreground="Gray"
+                   TextTrimming="CharacterEllipsis" Text=""/>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto" Margin="0,8,0,0">
+            <TextBox x:Name="patternBox" Grid.Column="0"
+                     Watermark="Name pattern — substring, or *.txt / report?"/>
+            <Button x:Name="findButton" Grid.Column="1" Content="Find" Width="80" Margin="6,0,0,0"/>
+            <Button x:Name="cancelButton" Grid.Column="2" Content="Cancel" Width="80" Margin="6,0,0,0" IsEnabled="False"/>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
+            <CheckBox x:Name="matchCaseCheck" Content="Match case"/>
+            <CheckBox x:Name="includeFoldersCheck" Content="Include folders"/>
+            <TextBlock x:Name="statusText" VerticalAlignment="Center" Foreground="Gray" Text=""/>
+        </StackPanel>
+
+        <ListBox x:Name="resultsList" Grid.Row="3" Margin="0,8,0,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0,1">
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Folder}" FontSize="11" Foreground="Gray"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Grid.Row="4" FontSize="11" Foreground="Gray" Margin="0,6,0,0"
+                   Text="Double-click a result to open its folder in the panel."/>
+    </Grid>
+</Window>

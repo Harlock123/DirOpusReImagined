@@ -365,10 +365,16 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<TextBox Name="LPfilter" Grid.Column="0"
 			         Margin="4,4,0,4" Watermark="Filter files..." FontSize="11" Height="22"/>
-			<Button Name="LPfilterClear" Grid.Column="1"
+			<Button Name="LPfindButton" Grid.Column="1"
+			        Content="Find" FontSize="10" FontWeight="Bold"
+			        Height="22" Margin="2,4,0,4" Padding="6,0"
+			        VerticalContentAlignment="Center"
+			        ToolTip.Tip="Search this folder recursively (local or cloud)"/>
+			<Button Name="LPfilterClear" Grid.Column="2"
 			        Content="X" FontSize="9" FontWeight="Bold"
 			        Width="22" Height="22" Margin="2,4,4,4"
 			        Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
@@ -378,10 +384,16 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<TextBox Name="RPfilter" Grid.Column="0"
 			         Margin="4,4,0,4" Watermark="Filter files..." FontSize="11" Height="22"/>
-			<Button Name="RPfilterClear" Grid.Column="1"
+			<Button Name="RPfindButton" Grid.Column="1"
+			        Content="Find" FontSize="10" FontWeight="Bold"
+			        Height="22" Margin="2,4,0,4" Padding="6,0"
+			        VerticalContentAlignment="Center"
+			        ToolTip.Tip="Search this folder recursively (local or cloud)"/>
+			<Button Name="RPfilterClear" Grid.Column="2"
 			        Content="X" FontSize="9" FontWeight="Bold"
 			        Width="22" Height="22" Margin="2,4,4,4"
 			        Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"

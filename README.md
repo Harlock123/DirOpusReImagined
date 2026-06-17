@@ -92,7 +92,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.5.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.6.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -643,6 +643,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 2026-06-17 — Recursive search & filter patterns
+- **Recursive search** — a **Find** button on each panel's filter row opens a search window that recursively searches that panel's folder (local or cloud) for a name pattern. The pattern is a substring by default, or a wildcard (`*.jpg`, `report?`) when it contains `*`/`?`; options for match-case and including folders. The search runs off-thread with a live result count, current-folder status, and a **Cancel** button, and skips folders it can't read. Double-click a result to jump the panel to its folder.
+- **Filter box now supports patterns** — the per-panel "Filter files…" box previously matched substrings only, so `*.jpg` matched nothing. It now uses the same matcher as search: wildcards (`*.jpg`, `report?`) when present, substring otherwise (`jpg` still works).
+- **Right-panel layout fix** — corrected the panel width calculation that had drifted out of sync with the toolbar width, which was letting the right panel's clear-filter (X) button and scroll bar spill slightly past the window edge.
 
 ### 2026-06-15 — Inaccessible-folder handling & drive picker
 - **Compare progress dialog** — a recursive (and especially content/cloud) compare now runs behind a small modal dialog with an animated progress bar, a live "current folder" line, and a **Cancel** button, instead of only changing the Cmp button to "…". (Also fixed a crash in the new dialog and the sync options dialog where their controls weren't being initialized.)
