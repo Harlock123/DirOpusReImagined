@@ -102,7 +102,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.6.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.7.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -654,9 +654,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
-### 2026-07-03 — Drag-and-drop between panels
+### 0.1.7.0 (2026-07-06) — Drag-and-drop, overwrite confirmation & dialog titles
 - **Drag and drop** — drag the selected files/folders from one panel and drop them on the other to transfer them; drop **onto a folder row** (highlighted gold while hovered) to drop into that folder instead of the panel's current directory. **Copy** by default; hold **Shift** to **Move**. A multi-item selection drags as a set. Built on Avalonia's cross-platform drag/drop, so it works on Windows, macOS, and Linux, and reuses the same transfer pipeline as the Copy/Move buttons (progress, cancel, and local/cloud/cross-provider paths). Dropping a folder into itself or its own subtree, or back into the folder it already lives in, is refused. A floating **Copy/Move badge** follows the cursor during the drag so the current action (which flips as you hold/release Shift) is always visible. (Internal panel-to-panel only; dragging to/from the OS desktop is not included.)
 - **Overwrite warning** — Copy, Move, and drag-and-drop now check the destination first and, if anything would be overwritten, ask for confirmation ("*N items already exist in the destination and will be overwritten. Copy anyway?*") before transferring. The existence check runs off the UI thread so it stays responsive for cloud targets.
+- **Shift-to-Move fix** — holding Shift from the start of a drag now correctly begins a **Move** instead of doing nothing; the grid no longer blocks the drag when a modifier is held, and the drop's Copy/Move result matches the badge shown at release.
+- **Read-only destination fix** — a drag-drop transfer could fail with "Read-only file system" when the drop panel's cached path was empty (the destination resolved to the filesystem root). Drops now resolve the destination from the panel's own path box — the same authoritative path the Copy/Move buttons use — and refuse to run against an empty base.
+- **Dialog titles** — message and confirmation dialogs now show a meaningful window title (e.g. *Error*, *Selection Required*, *Confirm Overwrite*, *Program Not Found*) instead of "MessageBox". The rclone "Delete remote?" prompt is now a real confirmation that actually cancels when you decline.
 
 ### 2026-06-17 — Recursive search & filter patterns
 - **Recursive search** — a **Find** button on each panel's filter row opens a search window that recursively searches that panel's folder (local or cloud) for a name pattern. The pattern is a substring by default, or a wildcard (`*.jpg`, `report?`) when it contains `*`/`?`; options for match-case and including folders. The search runs off-thread with a live result count, current-folder status, and a **Cancel** button, and skips folders it can't read. Double-click a result to jump the panel to its folder.
