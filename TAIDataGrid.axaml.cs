@@ -13,11 +13,32 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DirOpusReImagined.FileSystem.Rclone;
 
 namespace DirOpusReImagined
 {
+    /// <summary>Payload carried by an intra-app panel-to-panel file drag.</summary>
+    public sealed class InternalDragPayload
+    {
+        public string SourcePath = "";
+        public List<AFileEntry> Entries = new();
+    }
+
+    /// <summary>Raised when files are dropped onto a panel. Carries the dragged entries, the source
+    /// folder they came from, and the hovered destination subfolder name (empty = drop into the
+    /// panel's current directory). The host resolves the actual destination path from its own
+    /// authoritative panel path so the drop never depends on the grid's cached source path.</summary>
+    public sealed class FilesDroppedEventArgs : EventArgs
+    {
+        public List<AFileEntry> Entries = new();
+        public string SourcePath = "";
+        public string TargetSubfolder = "";
+        public bool Move;
+    }
+
     /// <summary>
     /// Represents a data grid control for Avalonia.
     /// </summary>
@@ -78,6 +99,9 @@ namespace DirOpusReImagined
         /// The brush used to color the selected item in a grid.
         /// </summary>
         private IBrush _gridSelectedItemBrush = Brushes.AliceBlue;
+
+        /// <summary>Brush marking the folder row highlighted as a drop target during a drag.</summary>
+        private IBrush _gridDropTargetBrush = Brushes.Gold;
 
         /// <summary>
         /// Brush used to highlight the content of a grid cell.
@@ -235,6 +259,42 @@ namespace DirOpusReImagined
         /// </summary>
         private List<object> _selecteditems = new List<object>();
 
+        #region Drag and Drop
+
+        /// <summary>Private clipboard format for intra-app panel-to-panel drags.</summary>
+        public const string InternalDragFormat = "application/x-diropus-entries";
+
+        /// <summary>How far the pointer must move (px) after a press before a drag begins.</summary>
+        private const double DragThreshold = 4.0;
+
+        // Drag-initiation state, captured on pointer-press and consumed by pointer-move.
+        private Point _pressPoint;
+        private object _pressedItemForDrag;
+        private List<object> _prePressSelection = new List<object>();
+        private bool _maybeDragging;
+        private bool _isDragging;
+
+        // The folder row currently highlighted as a drop target (null = drop into the current dir).
+        private object _dropHighlightItem;
+
+        // Floating "Copy"/"Move" badge shown next to the cursor while a drag hovers this panel.
+        private string _dragIndicatorText;
+        private int _dragIndicatorX = -1;
+        private int _dragIndicatorY = -1;
+
+        // Move (Shift) vs Copy as last seen by DragOver; the drop uses this so the outcome matches
+        // the badge the user saw at the moment of release.
+        private bool _lastDragOverMove;
+
+        /// <summary>The panel's current directory (local path or cloud URI). Set by the host so a
+        /// drag knows where its items come from and a drop knows where they land.</summary>
+        public string SourcePath { get; set; } = "";
+
+        /// <summary>Raised when a valid internal file drop completes on this panel.</summary>
+        public event EventHandler<FilesDroppedEventArgs> FilesDropped;
+
+        #endregion
+
         /// <summary>
         /// Represents an array of column widths.
         /// </summary>
@@ -353,9 +413,13 @@ namespace DirOpusReImagined
             PointerExited += OnPointerExited;
             PointerPressed += OnPointerPressed;
             PointerReleased += OnPointerReleased;
-            
-            
-            
+
+            // Accept files dragged from the other panel (or a folder row within this one).
+            DragDrop.SetAllowDrop(this, true);
+            AddHandler(DragDrop.DragOverEvent, OnDragOver);
+            AddHandler(DragDrop.DropEvent, OnDrop);
+            AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
+
             TheCanvas.PointerExited += OnPointerExited;
 
             // Track context-menu visibility so the pointer handlers below don't rebuild the canvas
@@ -1340,6 +1404,13 @@ namespace DirOpusReImagined
                                     tcb = _gridCellHighlightContentBrush;
                                 }
 
+                                // During a drag, the hovered destination folder wins visually.
+                                if (ReferenceEquals(item, _dropHighlightItem))
+                                {
+                                    tbb = _gridDropTargetBrush;
+                                    tcb = _gridCellHighlightContentBrush;
+                                }
+
                                 idx = 0;
                                 left = 0;
 
@@ -1510,7 +1581,10 @@ namespace DirOpusReImagined
                         }
 
                         //GridHover?.Invoke(this, TheItemUnderTheMouse);
-                    
+
+                       // Floating Copy/Move badge overlay (drawn last so it sits on top of the rows).
+                       DrawDragIndicator();
+
                        // here we blit TheBackingCanvas onto TheCanvas
                        TheCanvas.Children.Clear();
                        TheCanvas.Children.Add(BackingCanvas);
@@ -2019,6 +2093,21 @@ namespace DirOpusReImagined
 
             _lastPosition = position;
 
+            // Begin a drag once the left button is held and the pointer has moved past the threshold
+            // since a press that armed one. DoDragDrop runs its own nested loop, so fire-and-forget;
+            // _isDragging guards re-entrancy.
+            if (_maybeDragging && !_isDragging &&
+                e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            {
+                double dx = position.X - _pressPoint.X;
+                double dy = position.Y - _pressPoint.Y;
+                if (Math.Abs(dx) >= DragThreshold || Math.Abs(dy) >= DragThreshold)
+                {
+                    _ = StartDragAsync(e);
+                    return;
+                }
+            }
+
             if (_inDesignMode)
             {
                 _curMouseX = (int)position.X;
@@ -2109,6 +2198,19 @@ namespace DirOpusReImagined
 
                 return;
             }
+
+            // Arm a potential drag: remember where the press landed, the item under it, and the
+            // selection as it stood BEFORE the press mutates it. If the press is on an already-selected
+            // item, that pre-press snapshot lets us drag the whole (possibly multi-item) selection even
+            // though the selection logic below may collapse it to a single row. Consumed by OnPointerMoved.
+            //
+            // Arm even when Shift/Ctrl are held so a Shift-drag (= Move) can start: a stationary
+            // Shift/Ctrl click still runs the range/toggle selection below and never begins a drag,
+            // because a drag only starts once the pointer moves past the threshold.
+            _maybeDragging = TheItemUnderTheMouse.ItemUnderMouse is AFileEntry;
+            _pressPoint = e.GetPosition(this);
+            _pressedItemForDrag = TheItemUnderTheMouse.ItemUnderMouse;
+            _prePressSelection = new List<object>(_selecteditems);
 
             // We have a rowclicked event so fire it
             if (TheItemUnderTheMouse.ItemUnderMouse != null)
@@ -2356,10 +2458,188 @@ namespace DirOpusReImagined
         /// <param name="e">The event data.</param>
         private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
         {
-            // Get the current pointer position relative to the UserControl
-            //Point position = e.GetPosition(this);
-            // Do something with this 411
+            // A plain release ends any armed-but-not-started drag.
+            _maybeDragging = false;
+        }
 
+        /// <summary>
+        /// Begins a panel-to-panel drag of the current selection. Runs Avalonia's cross-platform
+        /// <see cref="DragDrop.DoDragDrop"/> with a private in-process payload (Copy allowed by default,
+        /// Move when the drop side sees Shift).
+        /// </summary>
+        private async Task StartDragAsync(PointerEventArgs e)
+        {
+            _isDragging = true;
+            _maybeDragging = false;
+            try
+            {
+                // If the press landed inside a multi-item selection, restore that selection (the press
+                // may have collapsed it) so the grid shows exactly what is being dragged.
+                if (_pressedItemForDrag != null && _prePressSelection.Count > 1 &&
+                    _prePressSelection.Contains(_pressedItemForDrag))
+                {
+                    _selecteditems = new List<object>(_prePressSelection);
+                    ReRender();
+                }
+
+                var entries = _selecteditems.OfType<AFileEntry>().ToList();
+                if (entries.Count == 0) return;
+
+                var payload = new InternalDragPayload { SourcePath = SourcePath, Entries = entries };
+                var data = new DataObject();
+                data.Set(InternalDragFormat, payload);
+
+                await DragDrop.DoDragDrop(e, data, DragDropEffects.Copy | DragDropEffects.Move);
+            }
+            catch
+            {
+                // A failed drag must never crash the panel.
+            }
+            finally
+            {
+                _isDragging = false;
+                _dropHighlightItem = null;
+                _dragIndicatorText = null;
+                _dragIndicatorX = -1;
+                _dragIndicatorY = -1;
+                _lastDragOverMove = false;
+                ReRender();
+            }
+        }
+
+        /// <summary>Highlights the folder row under the pointer (if any) and sets Copy/Move by modifier.</summary>
+        private void OnDragOver(object sender, DragEventArgs e)
+        {
+            if (!e.Data.Contains(InternalDragFormat))
+            {
+                e.DragEffects = DragDropEffects.None;
+                return;
+            }
+
+            bool move = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            e.DragEffects = move ? DragDropEffects.Move : DragDropEffects.Copy;
+            _lastDragOverMove = move;
+
+            object hovered = ResolveRowUnderDrag(e); // also updates _curMouseX/_curMouseY
+            object newHighlight = hovered is AFileEntry af && af.Typ ? hovered : null;
+            string newIndicator = move ? "Move" : "Copy";
+
+            // Redraw when the target folder or the Copy/Move label changes, or the cursor moved far
+            // enough that the floating badge should follow it (throttled to avoid per-pixel churn).
+            bool changed = !ReferenceEquals(newHighlight, _dropHighlightItem) ||
+                           newIndicator != _dragIndicatorText;
+            bool moved = Math.Abs(_curMouseX - _dragIndicatorX) >= 6 ||
+                         Math.Abs(_curMouseY - _dragIndicatorY) >= 6;
+
+            _dropHighlightItem = newHighlight;
+            _dragIndicatorText = newIndicator;
+            _dragIndicatorX = _curMouseX;
+            _dragIndicatorY = _curMouseY;
+
+            if (changed || moved) ReRender();
+
+            e.Handled = true;
+        }
+
+        private void OnDragLeave(object sender, DragEventArgs e)
+        {
+            if (_dropHighlightItem != null || _dragIndicatorText != null)
+            {
+                _dropHighlightItem = null;
+                _dragIndicatorText = null;
+                _dragIndicatorX = -1;
+                _dragIndicatorY = -1;
+                ReRender();
+            }
+        }
+
+        /// <summary>Resolves the drop target folder and raises <see cref="FilesDropped"/> for the host.</summary>
+        private void OnDrop(object sender, DragEventArgs e)
+        {
+            _dropHighlightItem = null;
+            _dragIndicatorText = null;
+
+            if (!e.Data.Contains(InternalDragFormat) ||
+                e.Data.Get(InternalDragFormat) is not InternalDragPayload payload ||
+                payload.Entries == null || payload.Entries.Count == 0)
+            {
+                ReRender();
+                return;
+            }
+
+            // Report the hovered folder (if any) by name; the host resolves it against the panel's
+            // authoritative current path. Dropping onto a file/empty area targets the current dir.
+            object hovered = ResolveRowUnderDrag(e);
+            string subfolder = hovered is AFileEntry af && af.Typ ? af.Name : "";
+
+            FilesDropped?.Invoke(this, new FilesDroppedEventArgs
+            {
+                Entries = payload.Entries,
+                SourcePath = payload.SourcePath,
+                TargetSubfolder = subfolder,
+                // Use the effect the badge last showed (DragOver's live Shift read) so the outcome
+                // matches what the user saw; fall back to the drop event's own modifier state.
+                Move = _lastDragOverMove || e.KeyModifiers.HasFlag(KeyModifiers.Shift),
+            });
+
+            ReRender();
+            e.Handled = true;
+        }
+
+        // Maps a drag pointer position to the grid row beneath it, reusing the hover hit-test.
+        private object ResolveRowUnderDrag(DragEventArgs e)
+        {
+            Point p = e.GetPosition(this);
+            _curMouseX = (int)p.X - (int)TheCanvas.Bounds.Left;
+            _curMouseY = (int)p.Y - (int)TheCanvas.Bounds.Top;
+            RecalcItemUnderMouse();
+            return TheItemUnderTheMouse.ItemUnderMouse;
+        }
+
+        // Draws the floating "Copy"/"Move" badge next to the cursor during a drag over this panel.
+        private void DrawDragIndicator()
+        {
+            if (BackingCanvas == null || string.IsNullOrEmpty(_dragIndicatorText) ||
+                _dragIndicatorX < 0 || _dragIndicatorY < 0)
+                return;
+
+            var measure = new FormattedText(_dragIndicatorText, CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight, _gridTypeface, _gridFontSize, Brushes.White);
+
+            const double padX = 6, padY = 3, gap = 16;
+            double boxW = measure.Width + padX * 2;
+            double boxH = measure.Height + padY * 2;
+
+            // Sit to the lower-right of the cursor, but keep the whole badge inside the canvas.
+            double x = _dragIndicatorX + gap;
+            double y = _dragIndicatorY + gap;
+            if (x + boxW > BackingCanvas.Width) x = _dragIndicatorX - boxW - 4;
+            if (y + boxH > BackingCanvas.Height) y = _dragIndicatorY - boxH - 4;
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+
+            var box = new Rectangle
+            {
+                Width = boxW,
+                Height = boxH,
+                RadiusX = 3,
+                RadiusY = 3,
+                Fill = new SolidColorBrush(Color.FromArgb(230, 40, 40, 40)),
+            };
+            Canvas.SetLeft(box, x);
+            Canvas.SetTop(box, y);
+            BackingCanvas.Children.Add(box);
+
+            var label = new TextBlock
+            {
+                Text = _dragIndicatorText,
+                FontSize = _gridFontSize,
+                Foreground = Brushes.White,
+                FontFamily = _gridTypeface.FontFamily,
+            };
+            Canvas.SetLeft(label, x + padX);
+            Canvas.SetTop(label, y + padY);
+            BackingCanvas.Children.Add(label);
         }
 
         /// <summary>

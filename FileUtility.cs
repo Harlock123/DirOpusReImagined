@@ -385,7 +385,7 @@ namespace DirOpusReImagined
 
                 if (!p.DirectoryExists(olddir) || p.DirectoryExists(newdir))
                 {
-                    MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.");
+                    MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.", "Rename Failed");
                     mb.ShowDialog(GetMainWindow());
                 }
 
@@ -393,7 +393,7 @@ namespace DirOpusReImagined
             }
             catch (Exception ex)
             {
-                MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}");
+                MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}", "Rename Failed");
                 mb.ShowDialog(GetMainWindow());
             }
         }
@@ -493,7 +493,7 @@ namespace DirOpusReImagined
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message);
+                MessageBox MB = new MessageBox(e.Message, "Error");
                 MB.ShowDialog(GetMainWindow());
             }
 
@@ -524,7 +524,7 @@ namespace DirOpusReImagined
                     if (error is not null)
                     {
                         ThePanel.Items = new List<object>();
-                        new MessageBox(error.Message).ShowDialog(GetMainWindow());
+                        new MessageBox(error.Message, "Error").ShowDialog(GetMainWindow());
                     }
                     else
                     {
@@ -638,7 +638,7 @@ namespace DirOpusReImagined
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message);
+                MessageBox MB = new MessageBox(e.Message, "Error");
                 MB.ShowDialog(GetMainWindow());
             }
 
@@ -669,7 +669,7 @@ namespace DirOpusReImagined
                     if (error is not null)
                     {
                         ThePanel.Items = new List<object>();
-                        new MessageBox(error.Message).ShowDialog(GetMainWindow());
+                        new MessageBox(error.Message, "Error").ShowDialog(GetMainWindow());
                     }
                     else
                     {
@@ -697,7 +697,7 @@ namespace DirOpusReImagined
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message);
+                MessageBox MB = new MessageBox(e.Message, "Error");
                 MB.ShowDialog(GetMainWindow());
             }
         }
@@ -718,7 +718,7 @@ namespace DirOpusReImagined
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message);
+                MessageBox MB = new MessageBox(e.Message, "Error");
                 MB.ShowDialog(GetMainWindow());
             }
         }

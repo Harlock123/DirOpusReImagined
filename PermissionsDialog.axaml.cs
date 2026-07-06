@@ -174,7 +174,7 @@ public partial class PermissionsDialog : Window
         }
         catch (Exception ex)
         {
-            MessageBox mb = new MessageBox($"Failed to set permissions: {ex.Message}");
+            MessageBox mb = new MessageBox($"Failed to set permissions: {ex.Message}", "Error");
             mb.ShowDialog(this);
         }
     }

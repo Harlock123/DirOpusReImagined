@@ -21,6 +21,16 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Rename** files and folders with a pattern-based rename interface for batch operations
 - **Create folders** in either panel
 - **Create ZIP archives** from selected files
+- **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
+
+### Directory Compare & Sync
+- **Compare panels** — a **Cmp** button color-codes the two panels against each other: green = only on this side, blue = newer, gray = older, khaki = same time but different size, coral = couldn't be read (permissions)
+- Comparison is **recursive** — a folder that looks identical at the top level but differs deep inside is still flagged; click **Cmp** again (or navigate) to clear
+- **Content (hash) compare** — right-click **Cmp** to compare by MD5 hash instead of size + timestamp, catching files edited and re-saved at the same size and time
+- **One-way sync / mirror** — **Sync→** and **Sync←** bring the destination up to date with the source, copying only new, newer, and changed items and never overwriting a newer destination file; an opt-in **mirror** mode also deletes items that exist only in the destination
+- **Two-way "newer wins" sync** — the **⇄** button merges both panels in both directions, copying each file's newer version to whichever side is older or missing; nothing is deleted and same-time/different-content files are left as conflicts
+- Sync is **recursive and file-level**, reuses the transfer progress dialog (current file, speed, ETA, cancel), and works for local, cloud, and cross-provider paths
+- Right-click either **Sync** button (or **⇄**) for a content (hash) variant; long compares run behind a modal dialog with a live "current folder" line and a **Cancel** button
 
 ### Real-Time Filter
 - Each panel has a filter text box that narrows the displayed files and folders as you type
@@ -643,6 +653,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 2026-07-03 — Drag-and-drop between panels
+- **Drag and drop** — drag the selected files/folders from one panel and drop them on the other to transfer them; drop **onto a folder row** (highlighted gold while hovered) to drop into that folder instead of the panel's current directory. **Copy** by default; hold **Shift** to **Move**. A multi-item selection drags as a set. Built on Avalonia's cross-platform drag/drop, so it works on Windows, macOS, and Linux, and reuses the same transfer pipeline as the Copy/Move buttons (progress, cancel, and local/cloud/cross-provider paths). Dropping a folder into itself or its own subtree, or back into the folder it already lives in, is refused. A floating **Copy/Move badge** follows the cursor during the drag so the current action (which flips as you hold/release Shift) is always visible. (Internal panel-to-panel only; dragging to/from the OS desktop is not included.)
+- **Overwrite warning** — Copy, Move, and drag-and-drop now check the destination first and, if anything would be overwritten, ask for confirmation ("*N items already exist in the destination and will be overwritten. Copy anyway?*") before transferring. The existence check runs off the UI thread so it stays responsive for cloud targets.
 
 ### 2026-06-17 — Recursive search & filter patterns
 - **Recursive search** — a **Find** button on each panel's filter row opens a search window that recursively searches that panel's folder (local or cloud) for a name pattern. The pattern is a substring by default, or a wildcard (`*.jpg`, `report?`) when it contains `*`/`?`; options for match-case and including folders. The search runs off-thread with a live result count, current-folder status, and a **Cancel** button, and skips folders it can't read. Double-click a result to jump the panel to its folder.

@@ -38,8 +38,11 @@ public partial class RcloneDiagnosticsDialog : Window
 
     private async Task OnDeleteRemoteClicked(string name)
     {
-        var confirm = new MessageBox($"Delete remote '{name}'? This only removes it from rclone.conf — files on the cloud are not affected.");
-        await confirm.ShowDialog(this);
+        var confirm = new MessageBox(
+            $"Delete remote '{name}'? This only removes it from rclone.conf — files on the cloud are not affected.",
+            showCancel: true, okText: "Delete", title: "Delete Remote");
+        if (!await confirm.ShowDialog<bool>(this))
+            return;
 
         try
         {
@@ -48,7 +51,7 @@ public partial class RcloneDiagnosticsDialog : Window
         }
         catch (Exception ex)
         {
-            await new MessageBox($"Delete failed: {ex.Message}").ShowDialog(this);
+            await new MessageBox($"Delete failed: {ex.Message}", "Error").ShowDialog(this);
         }
     }
 

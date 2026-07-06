@@ -14,6 +14,9 @@
         </Grid.RowDefinitions>
         <TextBlock x:Name="messageTextBlock" TextWrapping="Wrap" Text="TextBlock" Grid.Row="0"
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button x:Name="okButton" Content="OK" Grid.Row="1" HorizontalAlignment="Center" />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+            <Button x:Name="okButton" Content="OK" />
+            <Button x:Name="cancelButton" Content="Cancel" IsVisible="False" />
+        </StackPanel>
     </Grid>
 </Window>

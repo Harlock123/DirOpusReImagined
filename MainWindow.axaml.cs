@@ -75,6 +75,10 @@ namespace DirOpusReImagined
             FileUtility.PanelPopulated += OnPanelPopulated;
             Closing += (_, _) => RcloneService.Shutdown();
 
+            // Panel-to-panel (and folder-drop) drag and drop.
+            LPgrid.FilesDropped += OnPanelFilesDropped;
+            RPgrid.FilesDropped += OnPanelFilesDropped;
+
             var cinf = new ComputerInfo();
             
             var globalMEM = cinf.TotalPhysicalMemory;
@@ -390,7 +394,7 @@ namespace DirOpusReImagined
 
             if (!fileselected)
             {
-                MessageBox MB = new MessageBox("You have to have a file or a folder selected in the Left panel");
+                MessageBox MB = new MessageBox("You have to have a file or a folder selected in the Left panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }
@@ -430,7 +434,7 @@ namespace DirOpusReImagined
 
             if (!fileselected)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }
@@ -662,7 +666,7 @@ namespace DirOpusReImagined
             
             if (RPgrid.SelectedItems.Count == 0)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }
@@ -681,7 +685,7 @@ namespace DirOpusReImagined
             
             if (LPgrid.SelectedItems.Count == 0)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }   
@@ -726,7 +730,7 @@ namespace DirOpusReImagined
             
             if (RPgrid.SelectedItems.Count == 0)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel");
+                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }
@@ -746,7 +750,7 @@ namespace DirOpusReImagined
             
             if (LPgrid.SelectedItems.Count == 0)
             {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel");
+                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel", "Selection Required");
                 MB.ShowDialog(this);
                 return;
             }
@@ -1197,7 +1201,7 @@ namespace DirOpusReImagined
                         whichProc?.WaitForExit(3000);
                         if (whichProc == null || whichProc.ExitCode != 0)
                         {
-                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.");
+                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.", "Program Not Found");
                             mb.ShowDialog(this);
                             return;
                         }
@@ -1240,7 +1244,7 @@ namespace DirOpusReImagined
                         whereProc?.WaitForExit(3000);
                         if (whereProc == null || whereProc.ExitCode != 0)
                         {
-                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.");
+                            MessageBox mb = new MessageBox($"Program not found: {fileName}\nMake sure it is installed and available on your PATH.", "Program Not Found");
                             mb.ShowDialog(this);
                             return;
                         }
@@ -1264,7 +1268,7 @@ namespace DirOpusReImagined
             }
             catch (Exception ex)
             {
-                MessageBox mb = new MessageBox($"Failed to start process: {fileName}\nError: {ex.Message}");
+                MessageBox mb = new MessageBox($"Failed to start process: {fileName}\nError: {ex.Message}", "Error");
                 mb.ShowDialog(this);
             }
         }
@@ -1719,6 +1723,33 @@ namespace DirOpusReImagined
             }
             if (items.Count == 0) return;
 
+            // Warn before clobbering anything that already exists at the destination. The existence
+            // probe can hit the network for cloud targets, so run it off the UI thread.
+            int existing = await Task.Run(() =>
+            {
+                int n = 0;
+                foreach (var it in items)
+                {
+                    try
+                    {
+                        var prov = ProviderRegistry.For(it.TargetPath);
+                        bool here = it.IsDirectory ? prov.DirectoryExists(it.TargetPath) : prov.FileExists(it.TargetPath);
+                        if (here) n++;
+                    }
+                    catch { /* if we can't tell, don't block the transfer */ }
+                }
+                return n;
+            });
+
+            if (existing > 0)
+            {
+                string what = existing == 1 ? "1 item" : $"{existing} items";
+                string verb = move ? "Move" : "Copy";
+                string msg = $"{what} already exist in the destination and will be overwritten.\n\n{verb} anyway?";
+                if (!await new MessageBox(msg, showCancel: true, okText: verb, title: "Confirm Overwrite").ShowDialog<bool>(this))
+                    return;
+            }
+
             var win = new TransferProgressWindow(move ? "Moving" : "Copying", items, move);
             await win.ShowDialog(this);
 
@@ -1726,7 +1757,7 @@ namespace DirOpusReImagined
             RefreshRPGrid();
 
             if (win.Error != null)
-                await new MessageBox($"Transfer failed: {win.Error.Message}").ShowDialog(this);
+                await new MessageBox($"Transfer failed: {win.Error.Message}", "Error").ShowDialog(this);
         }
 
         private static string AppendSeparator(string p)
@@ -1776,7 +1807,7 @@ namespace DirOpusReImagined
             if (dlg.Canceled) return;
             if (dlg.Error != null)
             {
-                await new MessageBox($"Compare failed: {dlg.Error.Message}").ShowDialog(this);
+                await new MessageBox($"Compare failed: {dlg.Error.Message}", "Error").ShowDialog(this);
                 return;
             }
             if (dlg.Result is null) return;
@@ -1805,13 +1836,13 @@ namespace DirOpusReImagined
             }
             catch (Exception ex)
             {
-                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                await new MessageBox($"Compare failed: {ex.Message}", "Error").ShowDialog(this);
                 return;
             }
 
             if (plan.Copies.Count == 0 && plan.Deletes.Count == 0)
             {
-                await new MessageBox("The destination is already up to date.").ShowDialog(this);
+                await new MessageBox("The destination is already up to date.", "Sync").ShowDialog(this);
                 return;
             }
 
@@ -1851,9 +1882,9 @@ namespace DirOpusReImagined
             RefreshRPGrid();
 
             if (copyError != null)
-                await new MessageBox($"Sync failed: {copyError.Message}").ShowDialog(this);
+                await new MessageBox($"Sync failed: {copyError.Message}", "Error").ShowDialog(this);
             else if (deleteError != null)
-                await new MessageBox($"Some deletions failed: {deleteError.Message}").ShowDialog(this);
+                await new MessageBox($"Some deletions failed: {deleteError.Message}", "Error").ShowDialog(this);
         }
 
         /// <summary>
@@ -1874,13 +1905,13 @@ namespace DirOpusReImagined
             }
             catch (Exception ex)
             {
-                await new MessageBox($"Compare failed: {ex.Message}").ShowDialog(this);
+                await new MessageBox($"Compare failed: {ex.Message}", "Error").ShowDialog(this);
                 return;
             }
 
             if (plan.Copies.Count == 0)
             {
-                await new MessageBox("Both panels are already in sync.").ShowDialog(this);
+                await new MessageBox("Both panels are already in sync.", "Sync").ShowDialog(this);
                 return;
             }
 
@@ -1896,7 +1927,7 @@ namespace DirOpusReImagined
             RefreshRPGrid();
 
             if (win.Error != null)
-                await new MessageBox($"Sync failed: {win.Error.Message}").ShowDialog(this);
+                await new MessageBox($"Sync failed: {win.Error.Message}", "Error").ShowDialog(this);
         }
 
         private string MakePathEnvSafe(string path)
@@ -2451,7 +2482,8 @@ namespace DirOpusReImagined
             if (!RcloneService.IsInstalled())
             {
                 await new MessageBox(
-                    "rclone is not installed. Use the %RCLONECONFIG% button to add a cloud remote first.")
+                    "rclone is not installed. Use the %RCLONECONFIG% button to add a cloud remote first.",
+                    "rclone Not Installed")
                     .ShowDialog(this);
                 return;
             }
@@ -2463,14 +2495,15 @@ namespace DirOpusReImagined
             }
             catch (Exception ex)
             {
-                await new MessageBox($"Could not list cloud remotes: {ex.Message}").ShowDialog(this);
+                await new MessageBox($"Could not list cloud remotes: {ex.Message}", "Error").ShowDialog(this);
                 return;
             }
 
             if (remotes.Count == 0)
             {
                 await new MessageBox(
-                    "No cloud remotes are configured yet. Use the %RCLONECONFIG% button to add one.")
+                    "No cloud remotes are configured yet. Use the %RCLONECONFIG% button to add one.",
+                    "No Cloud Remotes")
                     .ShowDialog(this);
                 return;
             }
@@ -2571,7 +2604,7 @@ namespace DirOpusReImagined
 
             if (items.Count == 0)
             {
-                _ = new MessageBox("No ready drives or volumes were found.").ShowDialog(this);
+                _ = new MessageBox("No ready drives or volumes were found.", "Drives").ShowDialog(this);
                 return;
             }
 
@@ -2634,15 +2667,55 @@ namespace DirOpusReImagined
 
             if (ReferenceEquals(grid, LPgrid))
             {
+                LPgrid.SourcePath = LPpath.Text ?? "";
                 CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
                 ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
             }
             else if (ReferenceEquals(grid, RPgrid))
             {
+                RPgrid.SourcePath = RPpath.Text ?? "";
                 CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
                 ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
             }
             UpdateStatusBar();
+        }
+
+        /// <summary>
+        /// Handles a drag-and-drop from one panel onto the other (or onto a folder row): reuses the
+        /// same transfer pipeline as the Copy/Move buttons. Copy by default; Move when Shift is held.
+        /// The destination is resolved from the drop panel's own path box (the authoritative current
+        /// folder) so it never lands on an empty/root path.
+        /// </summary>
+        private async void OnPanelFilesDropped(object? sender, FilesDroppedEventArgs e)
+        {
+            if (e.Entries == null || e.Entries.Count == 0) return;
+
+            // Destination base = the current path of whichever panel received the drop.
+            string destBase = ReferenceEquals(sender, LPgrid) ? (LPpath.Text ?? "")
+                            : ReferenceEquals(sender, RPgrid) ? (RPpath.Text ?? "")
+                            : "";
+            string source = e.SourcePath ?? "";
+            if (string.IsNullOrEmpty(destBase) || string.IsNullOrEmpty(source)) return;
+
+            // Drop onto a folder row → into that subfolder; otherwise the panel's current directory.
+            string target = string.IsNullOrEmpty(e.TargetSubfolder) ? destBase : JoinChildPath(destBase, e.TargetSubfolder);
+
+            // No-op: items already live in the destination folder.
+            if (string.Equals(target, source, StringComparison.OrdinalIgnoreCase)) return;
+
+            // Refuse to drop a folder into itself or its own subtree (would recurse forever).
+            foreach (var entry in e.Entries)
+            {
+                if (!entry.Typ) continue;
+                string entryPath = JoinChildPath(source, entry.Name);
+                if (string.Equals(target, entryPath, StringComparison.OrdinalIgnoreCase) ||
+                    target.StartsWith(entryPath + "/", StringComparison.OrdinalIgnoreCase) ||
+                    target.StartsWith(entryPath + "\\", StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+
+            var selected = new List<object>(e.Entries);
+            await RunPanelTransferAsync(selected, source, target, e.Move);
         }
 
         private void CaptureUnfilteredItems(TaiDataGrid grid, ref List<object> store)
@@ -3449,7 +3522,8 @@ namespace DirOpusReImagined
             if (!RcloneService.IsInstalled())
             {
                 await new MessageBox(
-                    "rclone is not installed. Open the rclone Diagnostics dialog (%RCLONEDIAG%) to install it first.")
+                    "rclone is not installed. Open the rclone Diagnostics dialog (%RCLONEDIAG%) to install it first.",
+                    "rclone Not Installed")
                     .ShowDialog(this);
                 return;
             }
