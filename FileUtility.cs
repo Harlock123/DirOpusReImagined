@@ -152,17 +152,25 @@ namespace DirOpusReImagined
             dstP.CreateDirectory(targetDirectory);
             string targetFile = Path.Combine(targetDirectory, Path.GetFileName(sourceFile));
 
+            // Moving a file onto itself (same folder) is a no-op — never touch the only copy.
+            if (ReferenceEquals(srcP, dstP) &&
+                string.Equals(sourceFile, targetFile, StringComparison.OrdinalIgnoreCase))
+                return;
+
             if (ReferenceEquals(srcP, dstP))
             {
                 await Task.Run(() =>
                 {
                     ct.ThrowIfCancellationRequested();
+                    // The caller confirms overwrite before we get here; clear any existing target so
+                    // the move doesn't fail with "already exists" (File.Move won't overwrite).
+                    if (dstP.FileExists(targetFile)) dstP.DeleteFile(targetFile);
                     srcP.MoveFile(sourceFile, targetFile);
                 }, ct).ConfigureAwait(false);
             }
             else
             {
-                await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: false, progress, ct)
+                await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: true, progress, ct)
                     .ConfigureAwait(false);
                 srcP.DeleteFile(sourceFile);
             }
@@ -175,7 +183,16 @@ namespace DirOpusReImagined
             var srcP = ProviderRegistry.For(sourceDirectory);
             var dstP = ProviderRegistry.For(targetDirectory);
 
-            if (ReferenceEquals(srcP, dstP))
+            // Moving a folder onto itself is a no-op — never merge-and-delete the only copy.
+            if (ReferenceEquals(srcP, dstP) &&
+                string.Equals(sourceDirectory, targetDirectory, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // A same-provider rename is only valid when the destination doesn't already exist —
+            // Directory.Move can't merge into an existing folder. When it does exist (overwrite already
+            // confirmed), merge the tree in file-by-file and then remove the source, same as the
+            // cross-provider path below.
+            if (ReferenceEquals(srcP, dstP) && !dstP.DirectoryExists(targetDirectory))
             {
                 await Task.Run(() =>
                 {
