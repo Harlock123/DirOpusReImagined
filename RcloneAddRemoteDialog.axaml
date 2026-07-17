@@ -29,14 +29,14 @@
             <ComboBox Grid.Column="6" x:Name="TypeBox" HorizontalAlignment="Stretch"/>
         </Grid>
 
-        <Border Grid.Row="4" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8">
+        <Border Grid.Row="4" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="3" Padding="8">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="FieldsPanel" Spacing="6"/>
             </ScrollViewer>
         </Border>
 
         <TextBlock Grid.Row="6" x:Name="StatusText"
-                   TextWrapping="Wrap" Foreground="Gray"
+                   TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                    MaxHeight="80"/>
 
         <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">

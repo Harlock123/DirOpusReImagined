@@ -5,7 +5,7 @@
         mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="100"
         x:Class="DirOpusReImagined.PopUp"
         Title="PopUp"
-		Background="Cornsilk">
+		Background="{DynamicResource SurfaceBackgroundBrush}">
 	<TextBlock Name="TheText"
 			   Width="190"
 			   TextWrapping="Wrap"

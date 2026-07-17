@@ -57,6 +57,12 @@ namespace DirOpusReImagined
         /// </summary>
         private TaiDataGrid _activeGrid;
 
+        /// <summary>Path of the configuration file the app loaded (or will write the theme choice to).</summary>
+        private string _configFilePath;
+
+        /// <summary>Guards the theme ComboBox handler while its initial selection is being set.</summary>
+        private bool _themeUiReady;
+
         private bool UseIntegratedImageViewer = true;
         
         private string LastButtonPopupName = "";
@@ -118,11 +124,15 @@ namespace DirOpusReImagined
             //    - Windows: %APPDATA%\dori\Configuration.xml
 
             string configFile = FindConfigurationFile();
+            _configFilePath = configFile;
             if (configFile != null)
             {
                 ClearLowerButtons();
                 ApplyButtonSettingsFromXml(configFile, this);
             }
+
+            // Restore the saved Light/Dark/System theme choice (defaults to Light) and sync the picker.
+            LoadThemeFromConfig();
             
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
@@ -2062,6 +2072,93 @@ namespace DirOpusReImagined
             if (sender is Button b) ToolTip.SetIsOpen(b, false);
             var help = new GeneralHelp();
             help.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// Reads the persisted &lt;Theme&gt; setting (Light/Dark/System, default Light), applies it,
+        /// and syncs the picker without triggering a save.
+        /// </summary>
+        private void LoadThemeFromConfig()
+        {
+            ThemeChoice choice = ThemeChoice.Light;
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var doc = XDocument.Load(_configFilePath);
+                    var el = doc.Descendants("Theme").FirstOrDefault();
+                    if (el != null && Enum.TryParse<ThemeChoice>(el.Value.Trim(), ignoreCase: true, out var parsed))
+                        choice = parsed;
+                }
+            }
+            catch { /* fall back to Light on any parse/IO error */ }
+
+            ThemeManager.Apply(choice);
+
+            if (ThemeCombo != null)
+                ThemeCombo.SelectedIndex = (int)choice;   // Light=0, Dark=1, System=2
+
+            _themeUiReady = true;
+        }
+
+        /// <summary>Applies and persists the theme when the user picks one from the ComboBox.</summary>
+        private void ThemeCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (!_themeUiReady) return;                    // ignore the initial programmatic selection
+            if (ThemeCombo.SelectedIndex < 0) return;
+
+            var choice = (ThemeChoice)ThemeCombo.SelectedIndex;
+            ThemeManager.Apply(choice);
+            SaveThemeToConfig(choice);
+        }
+
+        /// <summary>
+        /// Writes the chosen theme to the &lt;Theme&gt; element of the config file, creating the file
+        /// (in the platform's user-config location) if the app didn't load one. Failures are non-fatal.
+        /// </summary>
+        private void SaveThemeToConfig(ThemeChoice choice)
+        {
+            try
+            {
+                string path = _configFilePath ?? GetWritableConfigPath();
+
+                XDocument doc;
+                if (File.Exists(path))
+                    doc = XDocument.Load(path);
+                else
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    doc = new XDocument(new XElement("Settings"));
+                }
+
+                var root = doc.Root ?? new XElement("Settings");
+                if (doc.Root == null) doc.Add(root);
+
+                var el = root.Element("Theme");
+                if (el == null)
+                {
+                    el = new XElement("Theme");
+                    root.Add(el);
+                }
+                el.Value = choice.ToString();
+
+                doc.Save(path);
+                _configFilePath = path;
+            }
+            catch { /* persistence is best-effort; the in-session choice still applies */ }
+        }
+
+        /// <summary>Platform-appropriate, user-writable path for a config file when none was found.</summary>
+        private string GetWritableConfigPath()
+        {
+            const string configName = "Configuration.xml";
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return Path.Combine(home, "Library", "Application Support", "dori", configName);
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dori", configName);
+            return Path.Combine(home, ".config", "dori", configName);
         }
 
         /// <summary>

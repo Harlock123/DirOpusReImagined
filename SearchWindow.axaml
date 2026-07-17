@@ -4,7 +4,7 @@
         Width="640" Height="470" Title="Search"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="12" RowDefinitions="auto,auto,auto,*,auto">
-        <TextBlock x:Name="rootText" Grid.Row="0" FontSize="11" Foreground="Gray"
+        <TextBlock x:Name="rootText" Grid.Row="0" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
                    TextTrimming="CharacterEllipsis" Text=""/>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto" Margin="0,8,0,0">
@@ -17,7 +17,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
             <CheckBox x:Name="matchCaseCheck" Content="Match case"/>
             <CheckBox x:Name="includeFoldersCheck" Content="Include folders"/>
-            <TextBlock x:Name="statusText" VerticalAlignment="Center" Foreground="Gray" Text=""/>
+            <TextBlock x:Name="statusText" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" Text=""/>
         </StackPanel>
 
         <ListBox x:Name="resultsList" Grid.Row="3" Margin="0,8,0,0">
@@ -25,14 +25,14 @@
                 <DataTemplate>
                     <StackPanel Margin="0,1">
                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding Folder}" FontSize="11" Foreground="Gray"
+                        <TextBlock Text="{Binding Folder}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <TextBlock Grid.Row="4" FontSize="11" Foreground="Gray" Margin="0,6,0,0"
+        <TextBlock Grid.Row="4" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,6,0,0"
                    Text="Double-click a result to open its folder in the panel."/>
     </Grid>
 </Window>

@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterOwner"
         x:Class="DirOpusReImagined.RenameFileInterface"
         Title="Rename Selected File(s)"
-        Background="Bisque">
+        Background="{DynamicResource SurfaceBackgroundBrush}">
     <Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Orientation="Vertical">

@@ -142,6 +142,13 @@ namespace DirOpusReImagined
         /// </summary>
         private IBrush _gridHeaderBackground = Brushes.Cyan;
 
+        // Compare-state row backgrounds (resolved from theme tokens in ApplyTheme).
+        private IBrush _compareUnique       = Brushes.LightGreen;
+        private IBrush _compareNewer        = Brushes.LightSkyBlue;
+        private IBrush _compareOlder        = Brushes.Gainsboro;
+        private IBrush _compareDifferent    = Brushes.Khaki;
+        private IBrush _compareInaccessible = Brushes.LightCoral;
+
         /// <summary>
         /// Represents the typeface used for the grid titles.
         /// </summary>
@@ -460,6 +467,11 @@ namespace DirOpusReImagined
             AddHandler(DragDrop.DragOverEvent, OnDragOver);
             AddHandler(DragDrop.DropEvent, OnDrop);
             AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
+
+            // Pull grid colors from the app's theme tokens once we're attached (so app resources are
+            // reachable), and re-resolve whenever the Light/Dark variant changes.
+            AttachedToVisualTree += (_, _) => ApplyTheme();
+            ActualThemeVariantChanged += (_, _) => ApplyTheme();
 
             TheCanvas.PointerExited += OnPointerExited;
 
@@ -1135,16 +1147,88 @@ namespace DirOpusReImagined
         /// suppressed, preventing the UI from crashing due to rendering issues. These exceptions are
         /// logged for debugging purposes.
         /// </summary>
-        /// <summary>Maps a directory-compare state to the row background brush used while marked.</summary>
-        private static IBrush CompareBrush(RowCompareState state) => state switch
+        /// <summary>Maps a directory-compare state to the row background brush used while marked.
+        /// Brushes come from theme tokens (resolved in <see cref="ApplyTheme"/>) so they adapt to Light/Dark.</summary>
+        private IBrush CompareBrush(RowCompareState state) => state switch
         {
-            RowCompareState.Unique    => Brushes.LightGreen,
-            RowCompareState.Newer     => Brushes.LightSkyBlue,
-            RowCompareState.Older        => Brushes.Gainsboro,
-            RowCompareState.Different    => Brushes.Khaki,
-            RowCompareState.Inaccessible => Brushes.LightCoral,
+            RowCompareState.Unique       => _compareUnique,
+            RowCompareState.Newer        => _compareNewer,
+            RowCompareState.Older        => _compareOlder,
+            RowCompareState.Different    => _compareDifferent,
+            RowCompareState.Inaccessible => _compareInaccessible,
             _                            => Brushes.Transparent,
         };
+
+        #region Theming
+
+        /// <summary>Resolves a theme resource brush by key for this control's current variant,
+        /// falling back to <paramref name="fallback"/> if the resource isn't available yet.</summary>
+        private IBrush ResolveBrush(string key, IBrush fallback)
+        {
+            if (this.TryFindResource(key, this.ActualThemeVariant, out var val) && val is IBrush b)
+                return b;
+            return fallback;
+        }
+
+        /// <summary>
+        /// Pulls every grid brush from the app's semantic theme tokens for the current Light/Dark
+        /// variant and repaints. Called when the control attaches and whenever the theme changes,
+        /// so the Canvas-painted grid tracks the theme like the rest of the app.
+        /// </summary>
+        private void ApplyTheme()
+        {
+            _gridBackground        = ResolveBrush("GridBackgroundBrush",      Brushes.Cornsilk);
+            _gridCellBrush         = ResolveBrush("GridCellBrush",            Brushes.Wheat);
+            _gridCellContentBrush  = ResolveBrush("GridCellTextBrush",        Brushes.Black);
+            _gridCellHighlightContentBrush = ResolveBrush("GridCellTextBrush", Brushes.Black);
+            _gridCellOutline       = ResolveBrush("GridCellOutlineBrush",     Brushes.Black);
+            _gridHeaderBackground  = ResolveBrush("GridHeaderBackgroundBrush", Brushes.Cyan);
+            _gridHeaderBrush       = ResolveBrush("GridHeaderTextBrush",      Brushes.DarkBlue);
+            _gridTitleBackground   = ResolveBrush("GridTitleBackgroundBrush", Brushes.Blue);
+            _gridTitleBrush        = ResolveBrush("GridTitleTextBrush",       Brushes.White);
+
+            _gridSelectedItemBrush = ResolveBrush("RowSelectedBrush",         Brushes.AliceBlue);
+            _gridCellHighlightBrush = ResolveBrush("RowHoverBrush",           Brushes.LightBlue);
+            _gridCursorBrush       = ResolveBrush("RowCursorBrush",           Brushes.DodgerBlue);
+            _gridDropTargetBrush   = ResolveBrush("DropTargetBrush",          Brushes.Gold);
+            _activePanelBrush      = ResolveBrush("ActivePanelFrameBrush",    Brushes.DodgerBlue);
+
+            _compareUnique         = ResolveBrush("CompareUniqueBrush",       Brushes.LightGreen);
+            _compareNewer          = ResolveBrush("CompareNewerBrush",        Brushes.LightSkyBlue);
+            _compareOlder          = ResolveBrush("CompareOlderBrush",        Brushes.Gainsboro);
+            _compareDifferent      = ResolveBrush("CompareDifferentBrush",    Brushes.Khaki);
+            _compareInaccessible   = ResolveBrush("CompareInaccessibleBrush", Brushes.LightCoral);
+
+            if (TheCanvas != null) TheCanvas.Background = _gridBackground;
+
+            ReRender();
+        }
+
+        /// <summary>
+        /// Returns black or white — whichever is more legible over <paramref name="bg"/> — using the
+        /// WCAG relative-luminance crossover (~0.179). This lets row text stay readable over ANY row
+        /// background (normal, selection, hover, drop target, and every compare color) in both themes,
+        /// without hand-tuning a text color per background.
+        /// </summary>
+        private static IBrush ReadableTextFor(IBrush bg)
+        {
+            if (bg is ISolidColorBrush scb)
+                return RelativeLuminance(scb.Color) > 0.179 ? Brushes.Black : Brushes.White;
+            return Brushes.Black;
+        }
+
+        private static double RelativeLuminance(Color c)
+        {
+            double r = LinearizeChannel(c.R / 255.0);
+            double g = LinearizeChannel(c.G / 255.0);
+            double b = LinearizeChannel(c.B / 255.0);
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        }
+
+        private static double LinearizeChannel(double ch)
+            => ch <= 0.03928 ? ch / 12.92 : Math.Pow((ch + 0.055) / 1.055, 2.4);
+
+        #endregion
 
         /// <summary>Applies per-name compare states to the current rows and repaints.</summary>
         public void SetCompareStates(IReadOnlyDictionary<string, RowCompareState> states)
@@ -1428,7 +1512,6 @@ namespace DirOpusReImagined
                             {
 
                                 IBrush tbb = _gridCellBrush;
-                                IBrush tcb = _gridCellContentBrush;
 
                                 if (item is AFileEntry cmpEntry && cmpEntry.CompareState != RowCompareState.None)
                                 {
@@ -1438,21 +1521,22 @@ namespace DirOpusReImagined
                                 if (_selecteditems.Contains(item))
                                 {
                                     tbb = _gridSelectedItemBrush;
-                                    tcb = _gridCellHighlightContentBrush;
                                 }
 
                                 if (rowidx == TheItemUnderTheMouse.rowID && _mouseInControl)
                                 {
                                     tbb = _gridCellHighlightBrush;
-                                    tcb = _gridCellHighlightContentBrush;
                                 }
 
                                 // During a drag, the hovered destination folder wins visually.
                                 if (ReferenceEquals(item, _dropHighlightItem))
                                 {
                                     tbb = _gridDropTargetBrush;
-                                    tcb = _gridCellHighlightContentBrush;
                                 }
+
+                                // Choose the row text color for legibility over whatever background won
+                                // (normal, compare, selection, hover, or drop target) in either theme.
+                                IBrush tcb = ReadableTextFor(tbb);
 
                                 idx = 0;
                                 left = 0;

@@ -7,7 +7,7 @@
         Height="800" Width="1300" WindowStartupLocation="CenterScreen"
         x:Class="DirOpusReImagined.MainWindow"
         Title="DORI"
-		Background="LightGray">
+		Background="{DynamicResource WindowBackgroundBrush}">
 	
 	<!-- Set the DataContext for the MainWindow to itself 
 	<Window.DataContext>
@@ -37,13 +37,13 @@
 					Grid.Column="1"
 					Grid.Row="0">
 			<StackPanel Orientation="Horizontal" Spacing="2">
-				<Button Name="LeftToRightButton" Background="Goldenrod"
+				<Button Name="LeftToRightButton" Background="{DynamicResource PanelChromeBrush}"
 				        Content="&gt;"
 				        ToolTip.Tip="Clone the Left Panels path settings in the Right Panel" />
-				<Button Name="SwapButton" Background="Goldenrod"
+				<Button Name="SwapButton" Background="{DynamicResource PanelChromeBrush}"
 				        Content="&lt;&gt;"
 				        ToolTip.Tip="Exchange the Left Panels path setup with the Right Panel, and visa versa." />
-				<Button Name="RightToLeftButton" Background="Goldenrod"
+				<Button Name="RightToLeftButton" Background="{DynamicResource PanelChromeBrush}"
 				        Content="&lt;"
 				        ToolTip.Tip="Clone the Right Panels path setup in the Left Panel"/>
 			</StackPanel>
@@ -60,6 +60,17 @@
 			        Height="22" Padding="1" Margin="0,0,0,3"
 			        FontSize="11" FontWeight="Bold"
 			        Click="GeneralHelpButton_Click" />
+			<Label FontSize="9" Padding="0" Margin="0,2,0,-2"
+			       HorizontalAlignment="Center" FontWeight="Bold">Theme</Label>
+			<ComboBox Name="ThemeCombo" HorizontalAlignment="Stretch"
+			          FontSize="10" Margin="0,0,0,3" Padding="6,0"
+			          Height="22" MinHeight="0"
+			          VerticalContentAlignment="Center"
+			          SelectionChanged="ThemeCombo_SelectionChanged">
+				<ComboBoxItem>Light</ComboBoxItem>
+				<ComboBoxItem>Dark</ComboBoxItem>
+				<ComboBoxItem>System</ComboBoxItem>
+			</ComboBox>
 			<StackPanel Name="TheDrivePresetsSp"
 			            Orientation="Vertical">
 				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
@@ -348,19 +359,22 @@
 			</StackPanel>
 			
 			<StackPanel Orientation="Vertical">
-				<Label FontSize="11" Margin="0,0,0,-4"
+				<Label FontSize="9" Padding="0" Margin="0,0,0,-2"
+				       HorizontalAlignment="Center"
 				       FontWeight="Bold">Sort Options</Label>
-				<RadioButton Name="RbSortName"
-							 FontSize="11"
-				             FontWeight="Bold"
-				             Content="Name"
-				             IsChecked="True"
-							 Margin="0,0,0,-8"></RadioButton>
-				<RadioButton Name="RbSortSize"
-							 FontSize="11"
-				             FontWeight="Bold"
-				             Content="Size"
-							 Margin="0,0,0,-4"></RadioButton>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+					<RadioButton Name="RbSortName"
+								 FontSize="9"
+					             FontWeight="Bold"
+					             Content="Name"
+					             IsChecked="True"
+								 Margin="0"></RadioButton>
+					<RadioButton Name="RbSortSize"
+								 FontSize="9"
+					             FontWeight="Bold"
+					             Content="Size"
+								 Margin="0"></RadioButton>
+				</StackPanel>
 			</StackPanel>
 			
 		</StackPanel>
@@ -416,12 +430,12 @@
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="LpBackButton" Grid.Column="0" Grid.Row="0"
-			        Background="Goldenrod" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			        Background="{DynamicResource PanelChromeBrush}" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
 			<Grid Grid.Column="1" Grid.Row="0" Margin="2,4,2,4" Height="28">
 				<!-- Edit mode (visible at startup, hidden once breadcrumbs are ready) -->
 				<TextBox Name="LPpath" Text="" FontSize="12"/>
 				<!-- Breadcrumb mode (hidden at startup, shown once ready) -->
-				<Border Name="LPbreadcrumbBorder" Background="White" BorderBrush="Gray"
+				<Border Name="LPbreadcrumbBorder" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}"
 				        BorderThickness="1" CornerRadius="3" ClipToBounds="True"
 				        IsVisible="False">
 					<ScrollViewer Name="LPbreadcrumbScroll"
@@ -437,10 +451,10 @@
 					</ScrollViewer>
 				</Border>
 			</Grid>
-			<Button Name="LpCloudButton" Background="Goldenrod"
+			<Button Name="LpCloudButton" Background="{DynamicResource PanelChromeBrush}"
 			        Grid.Column="2" Grid.Row="0" Content="&#x2601;" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Browse configured cloud remotes"/>
-			<Button Name="LpDriveButton" Background="Goldenrod"
+			<Button Name="LpDriveButton" Background="{DynamicResource PanelChromeBrush}"
 			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Jump to a drive / mounted volume"/>
 		</Grid>
@@ -453,12 +467,12 @@
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
 			<Button Name="RpBackButton" Grid.Column="0" Grid.Row="0"
-			        Background="Goldenrod" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			        Background="{DynamicResource PanelChromeBrush}" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
 			<Grid Grid.Column="1" Grid.Row="0" Margin="2,4,2,4" Height="28">
 				<!-- Edit mode (visible at startup, hidden once breadcrumbs are ready) -->
 				<TextBox Name="RPpath" Text="" FontSize="12"/>
 				<!-- Breadcrumb mode (hidden at startup, shown once ready) -->
-				<Border Name="RPbreadcrumbBorder" Background="White" BorderBrush="Gray"
+				<Border Name="RPbreadcrumbBorder" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}"
 				        BorderThickness="1" CornerRadius="3" ClipToBounds="True"
 				        IsVisible="False">
 					<ScrollViewer Name="RPbreadcrumbScroll"
@@ -474,10 +488,10 @@
 					</ScrollViewer>
 				</Border>
 			</Grid>
-			<Button Name="RpCloudButton" Background="Goldenrod"
+			<Button Name="RpCloudButton" Background="{DynamicResource PanelChromeBrush}"
 			        Grid.Column="2" Grid.Row="0" Content="&#x2601;" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Browse configured cloud remotes"/>
-			<Button Name="RpDriveButton" Background="Goldenrod"
+			<Button Name="RpDriveButton" Background="{DynamicResource PanelChromeBrush}"
 			        Grid.Column="3" Grid.Row="0" Content="" Height="28" Margin="0,4,2,4"
 			        ToolTip.Tip="Jump to a drive / mounted volume"/>
 		</Grid>
@@ -487,7 +501,7 @@
 		<StackPanel Grid.Column="1" Grid.Row="1"
 		            Orientation="Horizontal" Spacing="2"
 		            HorizontalAlignment="Center" VerticalAlignment="Center">
-			<Button Name="CompareButton" Background="Goldenrod" Content="Cmp"
+			<Button Name="CompareButton" Background="{DynamicResource PanelChromeBrush}" Content="Cmp"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
 				<Button.ContextFlyout>
 					<MenuFlyout>
@@ -499,34 +513,34 @@
 					<StackPanel Spacing="4" Margin="2" MaxWidth="300">
 						<TextBlock Text="Compare the two panels (recursive)." FontWeight="Bold" TextWrapping="Wrap"/>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="LightGreen" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="{DynamicResource CompareUniqueBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="exists only on this side"/>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="LightSkyBlue" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="{DynamicResource CompareNewerBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="newer than the other side"/>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="Gainsboro" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="{DynamicResource CompareOlderBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="older than the other side"/>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="Khaki" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="{DynamicResource CompareDifferentBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="same time, different size — or a folder whose contents differ"/>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="Transparent" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="Transparent" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="identical on both sides (no color)"/>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="16" Height="12" Background="LightCoral" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Top"/>
+							<Border Grid.Column="0" Width="16" Height="12" Background="{DynamicResource CompareInaccessibleBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Top"/>
 							<TextBlock Grid.Column="1" Margin="7,0,0,0" TextWrapping="Wrap" Text="could not be read (permissions) — not fully compared"/>
 						</Grid>
 						<TextBlock Text="Left-click: quick compare (by name, size, time). Right-click for content (hash) compare. Click again to clear." FontStyle="Italic" Margin="0,3,0,0" TextWrapping="Wrap"/>
 					</StackPanel>
 				</ToolTip.Tip>
 			</Button>
-			<Button Name="SyncRightButton" Background="Goldenrod" Content="Sync&#x2192;"
+			<Button Name="SyncRightButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2192;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in). Right-click for content (hash) sync.">
 				<Button.ContextFlyout>
@@ -536,7 +550,7 @@
 					</MenuFlyout>
 				</Button.ContextFlyout>
 			</Button>
-			<Button Name="SyncLeftButton" Background="Goldenrod" Content="Sync&#x2190;"
+			<Button Name="SyncLeftButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2190;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Copy new, newer, and changed items from the RIGHT panel to the LEFT (mirror/delete is opt-in). Right-click for content (hash) sync.">
 				<Button.ContextFlyout>
@@ -546,7 +560,7 @@
 					</MenuFlyout>
 				</Button.ContextFlyout>
 			</Button>
-			<Button Name="SyncBothButton" Background="Goldenrod" Content="&#x21C4;"
+			<Button Name="SyncBothButton" Background="{DynamicResource PanelChromeBrush}" Content="&#x21C4;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Two-way sync (newer wins): copy the newer version of each file to both panels, and any item missing on one side to the other. Nothing is deleted. Right-click for content (hash) mode.">
 				<Button.ContextFlyout>
@@ -700,17 +714,17 @@
 
 		<!-- Status Bar -->
 		<Grid Name="StatusBar" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3"
-		      Background="DarkSlateGray">
+		      Background="{DynamicResource StatusBarBackgroundBrush}">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
 			<TextBlock Name="LeftStatusText" Grid.Column="0"
-			           Foreground="White" FontSize="11" FontWeight="Bold"
+			           Foreground="{DynamicResource StatusBarTextBrush}" FontSize="11" FontWeight="Bold"
 			           VerticalAlignment="Center" Margin="8,0,0,0"
 			           Text="Left: 0 items"/>
 			<TextBlock Name="RightStatusText" Grid.Column="1"
-			           Foreground="White" FontSize="11" FontWeight="Bold"
+			           Foreground="{DynamicResource StatusBarTextBrush}" FontSize="11" FontWeight="Bold"
 			           VerticalAlignment="Center" Margin="8,0,0,0"
 			           Text="Right: 0 items"/>
 		</Grid>

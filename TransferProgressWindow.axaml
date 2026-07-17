@@ -10,7 +10,7 @@
         <TextBlock Name="HeaderText" FontSize="16" FontWeight="SemiBold" Text="Transferring…"/>
         <TextBlock Name="FileText" TextTrimming="CharacterEllipsis" Text=""/>
         <ProgressBar Name="Bar" Minimum="0" Maximum="1" Height="20"/>
-        <TextBlock Name="StatsText" Foreground="Gray" Text=""/>
+        <TextBlock Name="StatsText" Foreground="{DynamicResource MutedTextBrush}" Text=""/>
         <Button Name="CancelBtn" Content="Cancel" HorizontalAlignment="Right" Click="CancelBtn_Click"/>
     </StackPanel>
 </Window>

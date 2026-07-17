@@ -20,8 +20,8 @@
         <TextBlock Grid.Row="0" Text="Mounted Volumes" FontWeight="Bold" FontSize="16"/>
 
         <!-- Drive list -->
-        <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="1" CornerRadius="3"
-                Background="White" ClipToBounds="True">
+        <Border Grid.Row="2" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="3"
+                Background="{DynamicResource SurfaceBackgroundBrush}" ClipToBounds="True">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="DriveListPanel" Margin="4"/>
             </ScrollViewer>

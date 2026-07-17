@@ -112,6 +112,15 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Right-click context menu on panels for font size adjustment
 - Tooltips on hover showing file/folder details
 
+### Light / Dark Theming
+- A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, and **System** (follow the OS)
+- The choice is saved to `Configuration.xml` and restored on next launch; System mode tracks OS appearance changes live
+- Themes the entire application — window chrome, every dialog, and both file grids — from a central set of semantic color tokens
+- File-row text color is chosen per row for legibility (WCAG luminance) so selection, hover, and compare colors stay readable in both themes
+
+### Built-in Help
+- A **General Help** button opens a scrollable dialog listing the application's features and a full keyboard-shortcut reference
+
 ### Cross-Platform Support
 - Runs on Windows, macOS, and Linux via Avalonia
 - Platform-specific configuration files (Configuration.xml, MACConfiguration.xml, LINUXConfiguration.xml)
@@ -129,7 +138,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.8.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.9.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -680,6 +689,13 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.9.0 (2026-07-17) — Light/Dark theming & General Help
+- **Light / Dark / System theme** — a new **Theme** selector in the center panel switches the whole application between Light, Dark, and following the operating system. The choice is persisted to `Configuration.xml` and restored on the next launch. System mode tracks OS appearance changes live.
+- **App-wide theming** — colors are driven by a central set of semantic tokens (with a curated Light and Dark value each) defined in `App.axaml`. The main window chrome, every dialog, and both Canvas-rendered file grids all switch together; standard controls adapt via Avalonia's Fluent theme.
+- **Intelligible-by-design contrast** — file-row text color is computed per row from the actual row background (normal, selection, hover, drop target, and each compare state) using the WCAG relative-luminance formula, so text stays legible over any color in either theme without hand-tuning. This also fixed compare-row text always rendering dark.
+- **General Help dialog** — a new **General Help** button in the center panel opens a scrollable reference enumerating the application's features and a full table of the keyboard navigation shortcuts, with a Dismiss button.
+- **Center panel polish** — smaller section labels, the Sort **Name**/**Size** radios placed side by side, and a compact theme selector to reclaim vertical space.
 
 ### 0.1.8.0 (2026-07-17) — Keyboard-driven navigation & operations
 - **Active panel** — the panel with keyboard focus is now the "active" panel and is drawn with a highlighted frame. Click a panel or press **Tab** to switch; keyboard operations act on the active panel.

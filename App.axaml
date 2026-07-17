@@ -6,4 +6,95 @@
         <FluentTheme/>
     </Application.Styles>
 
+    <!--
+      Semantic color tokens for Light/Dark theming. Every app color is named by MEANING here
+      (with a Light and a Dark value) so the rest of the app can reference {DynamicResource <Key>}
+      and swap automatically when RequestedThemeVariant changes (see ThemeManager).
+
+      Text over VARIABLE row backgrounds (selection, hover, drop target, and the compare states)
+      is NOT paired here — Phase C computes a legible foreground per background via a WCAG
+      luminance helper, so these values only need to be reasonable surfaces, not contrast-tuned.
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+
+                <!-- ============================ LIGHT ============================ -->
+                <ResourceDictionary x:Key="Light">
+                    <!-- App chrome -->
+                    <SolidColorBrush x:Key="WindowBackgroundBrush"   Color="LightGray"/>
+                    <SolidColorBrush x:Key="SurfaceBackgroundBrush"  Color="White"/>
+                    <SolidColorBrush x:Key="PanelChromeBrush"        Color="Goldenrod"/>
+                    <SolidColorBrush x:Key="BorderSubtleBrush"       Color="Gray"/>
+                    <SolidColorBrush x:Key="MutedTextBrush"          Color="Gray"/>
+                    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="DarkSlateGray"/>
+                    <SolidColorBrush x:Key="StatusBarTextBrush"      Color="White"/>
+                    <SolidColorBrush x:Key="ScrollBarBackgroundBrush" Color="Honeydew"/>
+
+                    <!-- Grid surfaces -->
+                    <SolidColorBrush x:Key="GridBackgroundBrush"     Color="Cornsilk"/>
+                    <SolidColorBrush x:Key="GridCellBrush"           Color="Wheat"/>
+                    <SolidColorBrush x:Key="GridCellTextBrush"       Color="Black"/>
+                    <SolidColorBrush x:Key="GridCellOutlineBrush"    Color="Black"/>
+                    <SolidColorBrush x:Key="GridHeaderBackgroundBrush" Color="Cyan"/>
+                    <SolidColorBrush x:Key="GridHeaderTextBrush"     Color="DarkBlue"/>
+                    <SolidColorBrush x:Key="GridTitleBackgroundBrush" Color="Blue"/>
+                    <SolidColorBrush x:Key="GridTitleTextBrush"      Color="White"/>
+
+                    <!-- Grid row states -->
+                    <SolidColorBrush x:Key="RowSelectedBrush"        Color="AliceBlue"/>
+                    <SolidColorBrush x:Key="RowHoverBrush"           Color="LightBlue"/>
+                    <SolidColorBrush x:Key="RowCursorBrush"          Color="DodgerBlue"/>
+                    <SolidColorBrush x:Key="DropTargetBrush"         Color="Gold"/>
+                    <SolidColorBrush x:Key="ActivePanelFrameBrush"   Color="DodgerBlue"/>
+
+                    <!-- Compare states -->
+                    <SolidColorBrush x:Key="CompareUniqueBrush"       Color="LightGreen"/>
+                    <SolidColorBrush x:Key="CompareNewerBrush"        Color="LightSkyBlue"/>
+                    <SolidColorBrush x:Key="CompareOlderBrush"        Color="Gainsboro"/>
+                    <SolidColorBrush x:Key="CompareDifferentBrush"    Color="Khaki"/>
+                    <SolidColorBrush x:Key="CompareInaccessibleBrush" Color="LightCoral"/>
+                </ResourceDictionary>
+
+                <!-- ============================ DARK ============================ -->
+                <ResourceDictionary x:Key="Dark">
+                    <!-- App chrome -->
+                    <SolidColorBrush x:Key="WindowBackgroundBrush"   Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="SurfaceBackgroundBrush"  Color="#252525"/>
+                    <SolidColorBrush x:Key="PanelChromeBrush"        Color="#6E5A1E"/>
+                    <SolidColorBrush x:Key="BorderSubtleBrush"       Color="#555555"/>
+                    <SolidColorBrush x:Key="MutedTextBrush"          Color="#9A9A9A"/>
+                    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#101418"/>
+                    <SolidColorBrush x:Key="StatusBarTextBrush"      Color="White"/>
+                    <SolidColorBrush x:Key="ScrollBarBackgroundBrush" Color="#262626"/>
+
+                    <!-- Grid surfaces -->
+                    <SolidColorBrush x:Key="GridBackgroundBrush"     Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="GridCellBrush"           Color="#2B2B2B"/>
+                    <SolidColorBrush x:Key="GridCellTextBrush"       Color="#E6E6E6"/>
+                    <SolidColorBrush x:Key="GridCellOutlineBrush"    Color="#3C3C3C"/>
+                    <SolidColorBrush x:Key="GridHeaderBackgroundBrush" Color="#14343A"/>
+                    <SolidColorBrush x:Key="GridHeaderTextBrush"     Color="#7FD0E0"/>
+                    <SolidColorBrush x:Key="GridTitleBackgroundBrush" Color="#123A66"/>
+                    <SolidColorBrush x:Key="GridTitleTextBrush"      Color="White"/>
+
+                    <!-- Grid row states -->
+                    <SolidColorBrush x:Key="RowSelectedBrush"        Color="#2F4A6B"/>
+                    <SolidColorBrush x:Key="RowHoverBrush"           Color="#3A5A7A"/>
+                    <SolidColorBrush x:Key="RowCursorBrush"          Color="DodgerBlue"/>
+                    <SolidColorBrush x:Key="DropTargetBrush"         Color="#B8860B"/>
+                    <SolidColorBrush x:Key="ActivePanelFrameBrush"   Color="DodgerBlue"/>
+
+                    <!-- Compare states -->
+                    <SolidColorBrush x:Key="CompareUniqueBrush"       Color="#2E5A2E"/>
+                    <SolidColorBrush x:Key="CompareNewerBrush"        Color="#24506E"/>
+                    <SolidColorBrush x:Key="CompareOlderBrush"        Color="#3A3A3A"/>
+                    <SolidColorBrush x:Key="CompareDifferentBrush"    Color="#5C531F"/>
+                    <SolidColorBrush x:Key="CompareInaccessibleBrush" Color="#6E2B2B"/>
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
 </Application>

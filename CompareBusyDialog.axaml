@@ -6,7 +6,7 @@
     <StackPanel Margin="16" Spacing="12">
         <TextBlock x:Name="headerText" FontWeight="SemiBold" Text="Comparing panels…"/>
         <ProgressBar x:Name="bar" IsIndeterminate="True" Height="18"/>
-        <TextBlock x:Name="statusText" Foreground="Gray" TextTrimming="CharacterEllipsis" Text=""/>
+        <TextBlock x:Name="statusText" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" Text=""/>
         <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" Width="90"/>
     </StackPanel>
 </Window>

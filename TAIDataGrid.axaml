@@ -15,7 +15,7 @@
 				<ColumnDefinition Width="12"/>
 			</Grid.ColumnDefinitions>
 			<Canvas Name="TheCanvas" 
-					Background="Cornsilk" 
+					Background="{DynamicResource GridBackgroundBrush}" 
 					Width="800" Height="300"
 					Grid.Row="0"
 					Grid.Column="0"
@@ -43,7 +43,7 @@
 					   Value="0"
 					   ViewportSize="10"
 					   Visibility="Visible"
-					   Background="Honeydew"
+					   Background="{DynamicResource ScrollBarBackgroundBrush}"
 					   />
 			<ScrollBar Name="TheHorizontalScrollBar"
 					   Orientation="Horizontal"
@@ -55,11 +55,11 @@
 					   Value="0"
 					   ViewportSize="10"
 					   Visibility="Visible"
-					   Background="Honeydew"
+					   Background="{DynamicResource ScrollBarBackgroundBrush}"
 					   />
 		</Grid>
 		<!-- 
-		<Canvas Name="TheCanvas" Background="Cornsilk" Width="800" Height="300">
+		<Canvas Name="TheCanvas" Background="{DynamicResource GridBackgroundBrush}" Width="800" Height="300">
 		</Canvas>
 		-->
 
