@@ -54,9 +54,15 @@
 					HorizontalAlignment="Center"
 					Grid.Column="1"
 					Grid.Row="2">
-			<StackPanel Name="TheDrivePresetsSp" 
+			<Button Name="GeneralHelpButton" Content="General Help"
+			        HorizontalAlignment="Stretch"
+			        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+			        Height="22" Padding="1" Margin="0,0,0,3"
+			        FontSize="11" FontWeight="Bold"
+			        Click="GeneralHelpButton_Click" />
+			<StackPanel Name="TheDrivePresetsSp"
 			            Orientation="Vertical">
-				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" />
+				<Label Name="LpLabel3" Content="Folder Presets" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
 				<Grid >
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -142,7 +148,7 @@
 					
 					</Grid>
 			</StackPanel>
-			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" />
+			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 
@@ -197,7 +203,7 @@
 				</Button>
 			</StackPanel>
 			
-			<Label Name="LpLabel2" Content="File Mgmt" HorizontalAlignment="Center" />
+			<Label Name="LpLabel2" Content="File Mgmt" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="CopyLeftButton" Height="22" Padding="1"

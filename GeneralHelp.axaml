@@ -1,0 +1,135 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="620"
+        x:Class="DirOpusReImagined.GeneralHelp"
+        Height="620" Width="760" WindowStartupLocation="CenterOwner"
+        Title="DirOpus Reimagined — General Help">
+
+    <DockPanel LastChildFill="True">
+
+        <!-- Dismiss bar pinned to the bottom, always visible regardless of scroll -->
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="#40808080" Padding="10">
+            <Button Name="DismissButton" Content="Dismiss" Click="DismissButton_Click"
+                    HorizontalAlignment="Right" MinWidth="90" Padding="14,4"
+                    FontWeight="Bold" />
+        </Border>
+
+        <ScrollViewer Padding="16,12">
+            <StackPanel Spacing="4">
+
+                <TextBlock Text="DirOpus Reimagined" FontSize="24" FontWeight="Bold" />
+                <TextBlock Text="A cross-platform dual-panel file manager inspired by the classic Amiga Directory Opus 4.12. Two independent panels sit side by side for efficient file management; the panel with keyboard focus is the &quot;active&quot; panel and is drawn with a highlighted frame."
+                           TextWrapping="Wrap" Margin="0,0,0,8" />
+
+                <!-- ===================== Features ===================== -->
+                <TextBlock Text="Features" FontSize="18" FontWeight="Bold" Margin="0,8,0,2" />
+
+                <TextBlock Text="Dual-panel browsing" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Two independent panels, each with its own path bar, back button, and drive selector." TextWrapping="Wrap" />
+                <TextBlock Text="• Double-click a folder to enter it; use the back button (or Backspace) to go up a level." TextWrapping="Wrap" />
+                <TextBlock Text="• Swap panel contents, or clone one panel's path to the other, with the center buttons." TextWrapping="Wrap" />
+
+                <TextBlock Text="File operations" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and Rename (including pattern-based batch rename)." TextWrapping="Wrap" />
+                <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
+                <TextBlock Text="• Overwrite is confirmed before anything at the destination is replaced." TextWrapping="Wrap" />
+
+                <TextBlock Text="Drag and drop" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Drag a selection from one panel to the other to transfer it; drop onto a folder row (highlighted while hovered) to drop into that folder. Copy by default; hold Shift to Move. A badge follows the cursor showing the current action." TextWrapping="Wrap" />
+
+                <TextBlock Text="Directory compare &amp; sync" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Cmp color-codes the two panels against each other (only-here, newer, older, same-time/different-size, unreadable); comparison is recursive. Right-click Cmp for a content (hash) compare." TextWrapping="Wrap" />
+                <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
+
+                <TextBlock Text="Real-time filter" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Each panel has a filter box that narrows the listing as you type (case-insensitive, wildcards supported); an X button clears it. Filters reset when you navigate." TextWrapping="Wrap" />
+
+                <TextBlock Text="Selection" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Click to select; Ctrl+Click multi-select; Shift+Click range select. Full keyboard selection is available (see below). Select All / Clear buttons per panel." TextWrapping="Wrap" />
+
+                <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Access a remote with cloud://&lt;remote&gt;/&lt;path&gt; in the panel path box." TextWrapping="Wrap" />
+
+                <TextBlock Text="Customization" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution; up to 5 folder presets; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
+
+                <!-- ============ Keyboard navigation & shortcuts ============ -->
+                <TextBlock Text="Keyboard Navigation &amp; Shortcuts" FontSize="18" FontWeight="Bold" Margin="0,14,0,2" />
+                <TextBlock Text="The panel with keyboard focus is the active panel (highlighted frame). A keyboard cursor (the outlined row) moves with the arrow keys, independent of the mouse. Shortcuts act only while a file panel has focus, so typing in the path or filter boxes is never intercepted."
+                           TextWrapping="Wrap" Margin="0,0,0,6" />
+
+                <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="↑ / ↓" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Move the cursor and single-select that row (Explorer-style)" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Page Up / Page Down" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Move a screenful at a time" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Home / End" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="Jump to the first / last item" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl/Cmd + ↑ / ↓" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="Move the cursor without changing the selection" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Shift + ↑ / ↓ / Home / End / Page" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="Extend a contiguous selection from the anchor" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Space / Insert" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Toggle the cursor row's selection, then advance one row" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Ctrl/Cmd + A" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="Select all files in the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Enter" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Text="Open the cursor row — folders navigate in, files open/execute" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Backspace" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Text="Go up one directory level in the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Tab" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="9" Grid.Column="1" Text="Switch the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="F2" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="10" Grid.Column="1" Text="Rename the selection in the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" Text="F5" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="11" Grid.Column="1" Text="Copy the selection from the active panel to the other panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="F6" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="12" Grid.Column="1" Text="Move the selection from the active panel to the other panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="13" Grid.Column="0" Text="F7" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="13" Grid.Column="1" Text="Create a new folder in the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="14" Grid.Column="0" Text="F8 / Delete" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="14" Grid.Column="1" Text="Delete the selection in the active panel" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="15" Grid.Column="0" Text="(direction)" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="15" Grid.Column="1" Text="Copy/Move always flow out of the active (framed) panel, so Tab-then-F5 reverses the direction" TextWrapping="Wrap" Margin="0,2" />
+                </Grid>
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

@@ -2054,6 +2054,17 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
+        /// Opens the scrollable General Help dialog enumerating the app's features and the
+        /// keyboard navigation shortcuts.
+        /// </summary>
+        private void GeneralHelpButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button b) ToolTip.SetIsOpen(b, false);
+            var help = new GeneralHelp();
+            help.ShowDialog(this);
+        }
+
+        /// <summary>
         /// Marks <paramref name="grid"/> as the active panel and updates the active-panel frame
         /// on both grids so exactly one shows the focus border.
         /// </summary>
