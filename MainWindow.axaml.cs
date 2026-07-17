@@ -51,6 +51,12 @@ namespace DirOpusReImagined
         private Stack<string> _lpHistory = new Stack<string>();
         private Stack<string> _rpHistory = new Stack<string>();
 
+        /// <summary>
+        /// The panel that currently has keyboard focus. Keyboard-driven file operations
+        /// (added in later phases) act on this panel. Defaults to the left grid.
+        /// </summary>
+        private TaiDataGrid _activeGrid;
+
         private bool UseIntegratedImageViewer = true;
         
         private string LastButtonPopupName = "";
@@ -78,6 +84,23 @@ namespace DirOpusReImagined
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
             RPgrid.FilesDropped += OnPanelFilesDropped;
+
+            // Active-panel tracking: whichever grid holds keyboard focus is the active panel.
+            // Keyboard-driven file verbs (later phases) target this panel.
+            LPgrid.GotFocus += (_, _) => SetActivePanel(LPgrid);
+            RPgrid.GotFocus += (_, _) => SetActivePanel(RPgrid);
+            _activeGrid = LPgrid;
+
+            // Keyboard navigation: Backspace goes up a level (reusing the Back button logic);
+            // Tab moves the active-panel focus to the other grid.
+            LPgrid.NavigateUpRequested += (_, _) => LPBackButton_Click(null, new RoutedEventArgs());
+            RPgrid.NavigateUpRequested += (_, _) => RPBackButton_Click(null, new RoutedEventArgs());
+            LPgrid.SwitchPanelRequested += (_, _) => RPgrid.Focus();
+            RPgrid.SwitchPanelRequested += (_, _) => LPgrid.Focus();
+
+            // Keyboard file verbs (F2/F5/F6/F7/F8/Del) target the panel that raised them.
+            LPgrid.VerbRequested += OnPanelVerbRequested;
+            RPgrid.VerbRequested += OnPanelVerbRequested;
 
             var cinf = new ComputerInfo();
             
@@ -1991,6 +2014,54 @@ namespace DirOpusReImagined
             {
                 return Bitmap.DecodeToWidth(memoryStream, 32);
             }
+        }
+
+        /// <summary>
+        /// Dispatches a keyboard file verb to the same handler as the corresponding toolbar button.
+        /// The panel that raised the event (<paramref name="sender"/>) is the active/source panel:
+        /// Copy/Move go from it to the other panel; Rename/New Folder/Delete act on it. Each target
+        /// handler validates its own selection, so no selection guard is needed here. The real button
+        /// control is passed as sender because those handlers cast it to close their tooltip.
+        /// </summary>
+        private void OnPanelVerbRequested(object? sender, GridVerb verb)
+        {
+            bool left = ReferenceEquals(sender, LPgrid);
+            var e = new RoutedEventArgs();
+
+            switch (verb)
+            {
+                case GridVerb.Rename:
+                    if (left) RenameLeftButton_Click(RenameLeftButton, e);
+                    else RenameRightButton_Click(RenameRightButton, e);
+                    break;
+                case GridVerb.Copy:      // from the active panel into the other
+                    if (left) CopyRightButton_Click(CopyRightButton, e);
+                    else CopyLeftButton_Click(CopyLeftButton, e);
+                    break;
+                case GridVerb.Move:      // from the active panel into the other
+                    if (left) MoveRightButton_Click(MoveRightButton, e);
+                    else MoveLeftButton_Click(MoveLeftButton, e);
+                    break;
+                case GridVerb.NewFolder:
+                    if (left) MkDirLeftButton_Click(MkDirLeftButton, e);
+                    else MkDirRightButton_Click(MkDirRightButton, e);
+                    break;
+                case GridVerb.Delete:
+                    if (left) DeleteLeftButton_Click(DeleteLeftButton, e);
+                    else DeleteRightButton_Click(DeleteRightButton, e);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Marks <paramref name="grid"/> as the active panel and updates the active-panel frame
+        /// on both grids so exactly one shows the focus border.
+        /// </summary>
+        private void SetActivePanel(TaiDataGrid grid)
+        {
+            _activeGrid = grid;
+            LPgrid.IsActivePanel = ReferenceEquals(grid, LPgrid);
+            RPgrid.IsActivePanel = ReferenceEquals(grid, RPgrid);
         }
 
         private void LPBackButton_Click(object? sender, RoutedEventArgs e)

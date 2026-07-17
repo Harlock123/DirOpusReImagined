@@ -46,8 +46,34 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 
 ### Selection Management
 - Click to select a single item; Ctrl+Click for multi-select; Shift+Click for range select
+- Full keyboard selection: arrows single-select, Shift+arrows extend a range, Space/Insert mark-and-advance (see **Keyboard Navigation & Shortcuts**)
 - "Select All" buttons to select all files (not folders) in a panel
 - "Clear" buttons to deselect everything in a panel
+
+### Keyboard Navigation & Shortcuts
+- The panel with keyboard focus is the **active panel**, shown with a highlighted frame; click a panel or press **Tab** to switch between them
+- A keyboard **cursor** (the outlined row) is moved with the arrow keys, independent of the mouse:
+
+| Key | Action |
+|-----|--------|
+| **↑ / ↓** | Move the cursor and single-select that row (Explorer-style) |
+| **Page Up / Page Down** | Move a screenful at a time |
+| **Home / End** | Jump to the first / last item |
+| **Ctrl/Cmd + ↑ / ↓** | Move the cursor **without** changing the selection |
+| **Shift + ↑ / ↓ / Home / End / Page** | Extend a contiguous selection from the anchor |
+| **Space / Insert** | Toggle the cursor row's selection, then advance one row |
+| **Ctrl/Cmd + A** | Select all files in the active panel |
+| **Enter** | Open the cursor row — folders navigate in, files open/execute |
+| **Backspace** | Go up one directory level in the active panel |
+| **Tab** | Switch the active panel |
+| **F2** | Rename the selection in the active panel |
+| **F5** | Copy the selection from the active panel to the other panel |
+| **F6** | Move the selection from the active panel to the other panel |
+| **F7** | Create a new folder in the active panel |
+| **F8** or **Delete** | Delete the selection in the active panel |
+
+- Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
+- Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus
 
 ### 36 Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -74,6 +100,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 ### Navigation
 - Path text box with Enter key navigation
 - Back button to go up one directory level
+- Full keyboard navigation — arrow-key cursor, Enter to open, Backspace to go up, Tab to switch panels (see **Keyboard Navigation & Shortcuts**)
 - Drive button for drive/volume selection
 - Panel swap and clone buttons for quick path synchronization
 - Cloud paths fully integrated alongside local — same double-click / breadcrumb / back behavior
@@ -102,7 +129,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.7.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.8.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -653,6 +680,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.8.0 (2026-07-17) — Keyboard-driven navigation & operations
+- **Active panel** — the panel with keyboard focus is now the "active" panel and is drawn with a highlighted frame. Click a panel or press **Tab** to switch; keyboard operations act on the active panel.
+- **Keyboard cursor & selection** — a keyboard cursor (the outlined row) moves with **↑/↓/PageUp/PageDown/Home/End** and scrolls into view. Explorer-style selection: plain arrows single-select, **Shift+**arrows extend a contiguous range from the anchor, **Ctrl/Cmd+**arrows move without selecting, **Space/Insert** toggle-and-advance, and **Ctrl/Cmd+A** selects all files. The status bar updates live as the selection changes.
+- **Keyboard navigation** — **Enter** opens the cursor row (folders navigate in, files open/execute), **Backspace** goes up one directory level (history-aware, like the Back button), and **Tab** switches the active panel. These act only while a file panel has focus, so typing in the path and filter boxes is unaffected.
+- **Keyboard file operations** — **F2** rename, **F5** copy, **F6** move, **F7** new folder, and **F8**/**Delete** delete, all targeting the active panel and reusing the existing dialogs (overwrite confirmation, transfer progress, delete confirmation, selection validation). Copy/Move always flow out of the active panel into the other, so Tab-then-F5 reverses the direction.
 
 ### 0.1.7.0 (2026-07-06) — Drag-and-drop, overwrite confirmation & dialog titles
 - **Drag and drop** — drag the selected files/folders from one panel and drop them on the other to transfer them; drop **onto a folder row** (highlighted gold while hovered) to drop into that folder instead of the panel's current directory. **Copy** by default; hold **Shift** to **Move**. A multi-item selection drags as a set. Built on Avalonia's cross-platform drag/drop, so it works on Windows, macOS, and Linux, and reuses the same transfer pipeline as the Copy/Move buttons (progress, cancel, and local/cloud/cross-provider paths). Dropping a folder into itself or its own subtree, or back into the folder it already lives in, is refused. A floating **Copy/Move badge** follows the cursor during the drag so the current action (which flips as you hold/release Shift) is always visible. (Internal panel-to-panel only; dragging to/from the OS desktop is not included.)

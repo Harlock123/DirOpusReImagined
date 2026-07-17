@@ -27,6 +27,20 @@ namespace DirOpusReImagined
         public List<AFileEntry> Entries = new();
     }
 
+    /// <summary>
+    /// A file-operation verb requested from the keyboard on the active panel. The host maps each
+    /// to the same action as the corresponding toolbar button, choosing the direction from which
+    /// panel raised it (the sender).
+    /// </summary>
+    public enum GridVerb
+    {
+        Rename,
+        Copy,
+        Move,
+        NewFolder,
+        Delete
+    }
+
     /// <summary>Raised when files are dropped onto a panel. Carries the dragged entries, the source
     /// folder they came from, and the hovered destination subfolder name (empty = drop into the
     /// panel's current directory). The host resolves the actual destination path from its own
@@ -259,6 +273,29 @@ namespace DirOpusReImagined
         /// </summary>
         private List<object> _selecteditems = new List<object>();
 
+        #region Keyboard Navigation
+
+        /// <summary>
+        /// Index into <see cref="_items"/> of the keyboard "cursor" (focused row).
+        /// This is independent of both the mouse hover row and the selection: it tracks
+        /// where the arrow keys are pointing. -1 means no cursor yet.
+        /// </summary>
+        private int _cursorIndex = -1;
+
+        /// <summary>Anchor row for future Shift-extend range selection (Phase 2).</summary>
+        private int _anchorIndex = -1;
+
+        /// <summary>Outline brush drawn around the row that currently holds the keyboard cursor.</summary>
+        private IBrush _gridCursorBrush = Brushes.DodgerBlue;
+
+        /// <summary>True when this grid is the active panel (has keyboard focus); drives the frame.</summary>
+        private bool _isActivePanel;
+
+        /// <summary>Frame brush drawn around the whole grid when it is the active panel.</summary>
+        private IBrush _activePanelBrush = Brushes.DodgerBlue;
+
+        #endregion
+
         #region Drag and Drop
 
         /// <summary>Private clipboard format for intra-app panel-to-panel drags.</summary>
@@ -400,6 +437,10 @@ namespace DirOpusReImagined
             InitializeComponent();
 
             _inDesignMode = Design.IsDesignMode;
+
+            // The grid must be able to take keyboard focus for cursor navigation and to
+            // signal (via GotFocus) which panel is active.
+            Focusable = true;
 
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
 
@@ -798,6 +839,8 @@ namespace DirOpusReImagined
                 TheItemUnderTheMouse = new GridHoverItem();
                 _gridXShift = 0;
                 _gridYShift = 0;
+                _cursorIndex = -1;
+                _anchorIndex = -1;
 
                 SuspendRendering = false;
 
@@ -1452,8 +1495,18 @@ namespace DirOpusReImagined
                                             Rectangle rr1 = new Rectangle();
                                             rr1.Width = _colWidths[idx];
                                             rr1.Height = _rowHeights[rowidx];
-                                            rr1.Stroke = _gridCellOutline;
-                                            rr1.StrokeThickness = 1;
+                                            // The keyboard-cursor row gets a thicker accent outline so it
+                                            // reads as "focused" even when it is also selected or hovered.
+                                            if (rowidx == _cursorIndex)
+                                            {
+                                                rr1.Stroke = _gridCursorBrush;
+                                                rr1.StrokeThickness = 2;
+                                            }
+                                            else
+                                            {
+                                                rr1.Stroke = _gridCellOutline;
+                                                rr1.StrokeThickness = 1;
+                                            }
                                             Canvas.SetLeft(rr1, left - _gridXShift);
                                             Canvas.SetTop(rr1, top);
 
@@ -1581,6 +1634,23 @@ namespace DirOpusReImagined
                         }
 
                         //GridHover?.Invoke(this, TheItemUnderTheMouse);
+
+                       // Active-panel frame: a thin accent border around the canvas edge so the user
+                       // can see at a glance which panel the keyboard is driving.
+                       if (_isActivePanel)
+                       {
+                           double frameW = TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width;
+                           double frameH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+                           Rectangle frame = new Rectangle();
+                           frame.Width = frameW - 2;
+                           frame.Height = frameH - 2;
+                           frame.Stroke = _activePanelBrush;
+                           frame.StrokeThickness = 2;
+                           frame.Fill = null;
+                           Canvas.SetLeft(frame, 1);
+                           Canvas.SetTop(frame, 1);
+                           BackingCanvas.Children.Add(frame);
+                       }
 
                        // Floating Copy/Move badge overlay (drawn last so it sits on top of the rows).
                        DrawDragIndicator();
@@ -2178,6 +2248,346 @@ namespace DirOpusReImagined
         /// Handles the pointer pressed event.
         /// @param sender The object that raised the event.
         /// @param e The event arguments containing information about the pointer press.
+        #region Keyboard Cursor & Active Panel
+
+        /// <summary>
+        /// Index into <see cref="Items"/> of the keyboard cursor (focused row), or -1 if none.
+        /// </summary>
+        public int CursorIndex
+        {
+            get { return _cursorIndex; }
+        }
+
+        /// <summary>
+        /// The item currently under the keyboard cursor, or null if the cursor is unset/out of range.
+        /// </summary>
+        public object CursorItem
+        {
+            get
+            {
+                if (_cursorIndex >= 0 && _cursorIndex < _items.Count)
+                    return _items[_cursorIndex];
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// True when this grid is the active panel. Setting it redraws the panel so the
+        /// active-panel frame appears or disappears. Owned by the host (MainWindow), which
+        /// toggles it in response to <see cref="InputElement.GotFocusEvent"/>.
+        /// </summary>
+        public bool IsActivePanel
+        {
+            get { return _isActivePanel; }
+            set
+            {
+                if (_isActivePanel == value) return;
+                _isActivePanel = value;
+                ReRender();
+            }
+        }
+
+        /// <summary>
+        /// Estimate of how many data rows fit in the visible canvas area, used for PageUp/PageDown.
+        /// Falls back to a sane minimum when metrics are not yet available.
+        /// </summary>
+        private int VisibleRowCount()
+        {
+            double viewport = TheCanvas.Bounds.Height;
+            if (viewport <= 0) viewport = TheCanvas.Height;
+            viewport -= _gridHeaderAndTitleHeight;
+
+            // Use the cursor row's height (or the first row's) as a representative row height.
+            int rowH = 0;
+            if (_rowHeights != null && _rowHeights.Length > 0)
+            {
+                int probe = (_cursorIndex >= 0 && _cursorIndex < _rowHeights.Length) ? _cursorIndex : 0;
+                rowH = _rowHeights[probe];
+            }
+            if (rowH <= 0) rowH = 16;
+
+            int rows = (int)(viewport / rowH);
+            return rows < 1 ? 1 : rows;
+        }
+
+        /// <summary>
+        /// Scrolls the grid so the row at <see cref="_cursorIndex"/> is fully within the viewport,
+        /// keeping <see cref="_gridYShift"/> and the vertical scrollbar in sync. Row heights are
+        /// variable, so the "fits below" test sums real row heights from the top visible row.
+        /// </summary>
+        private void EnsureCursorVisible()
+        {
+            if (_cursorIndex < 0 || _rowHeights == null || _rowHeights.Length == 0) return;
+
+            double viewport = TheCanvas.Bounds.Height;
+            if (viewport <= 0) viewport = TheCanvas.Height;
+            viewport -= _gridHeaderAndTitleHeight;
+            if (viewport <= 0) return;
+
+            // Cursor above the first visible row: pull the view up to it.
+            if (_cursorIndex < _gridYShift)
+            {
+                _gridYShift = _cursorIndex;
+            }
+            else
+            {
+                // Advance the top row until the cursor's bottom edge fits within the viewport.
+                while (_gridYShift < _cursorIndex)
+                {
+                    double h = 0;
+                    for (int i = _gridYShift; i <= _cursorIndex && i < _rowHeights.Length; i++)
+                        h += _rowHeights[i];
+                    if (h <= viewport) break;
+                    _gridYShift++;
+                }
+            }
+
+            if (_gridYShift < 0) _gridYShift = 0;
+            TheVerticleScrollBar.Value = _gridYShift;
+        }
+
+        /// <summary>Clamps an index into the valid item range [0, Count-1], or -1 when empty.</summary>
+        private int ClampIndex(int i)
+        {
+            if (_items.Count == 0) return -1;
+            if (i < 0) return 0;
+            if (i > _items.Count - 1) return _items.Count - 1;
+            return i;
+        }
+
+        /// <summary>
+        /// Moves the keyboard cursor to <paramref name="target"/> (clamped) and scrolls it into
+        /// view, WITHOUT redrawing or touching selection. Callers batch their own ReRender so a
+        /// combined cursor+selection change repaints only once.
+        /// </summary>
+        private void SetCursorNoRender(int target)
+        {
+            if (_items.Count == 0)
+            {
+                _cursorIndex = -1;
+                return;
+            }
+            _cursorIndex = ClampIndex(target);
+            EnsureCursorVisible();
+        }
+
+        /// <summary>
+        /// Moves the keyboard cursor to <paramref name="target"/> (clamped to the item range),
+        /// scrolls it into view, and redraws. No-op when the grid is empty.
+        /// </summary>
+        private void MoveCursorTo(int target)
+        {
+            if (_items.Count == 0)
+            {
+                _cursorIndex = -1;
+                return;
+            }
+
+            SetCursorNoRender(target);
+            ReRender();
+        }
+
+        /// <summary>Selects only the item at <paramref name="index"/> and makes it the range anchor.</summary>
+        private void SelectSingle(int index)
+        {
+            _selecteditems.Clear();
+            if (index >= 0 && index < _items.Count)
+                _selecteditems.Add(_items[index]);
+            _anchorIndex = index;
+        }
+
+        /// <summary>Toggles selection of the item at <paramref name="index"/> and makes it the anchor.</summary>
+        private void ToggleSelect(int index)
+        {
+            if (index < 0 || index >= _items.Count) return;
+            object item = _items[index];
+            if (_selecteditems.Contains(item))
+                _selecteditems.Remove(item);
+            else
+                _selecteditems.Add(item);
+            _anchorIndex = index;
+        }
+
+        /// <summary>
+        /// Replaces the selection with the contiguous range between the anchor and
+        /// <paramref name="index"/> (inclusive) — the Shift-extend behaviour. The anchor is left
+        /// in place so successive Shift moves grow/shrink from the same origin.
+        /// </summary>
+        private void ExtendSelectionTo(int index)
+        {
+            if (index < 0 || index >= _items.Count) return;
+            if (_anchorIndex < 0 || _anchorIndex >= _items.Count) _anchorIndex = index;
+
+            int lo = Math.Min(_anchorIndex, index);
+            int hi = Math.Max(_anchorIndex, index);
+
+            _selecteditems.Clear();
+            for (int i = lo; i <= hi; i++)
+                _selecteditems.Add(_items[i]);
+        }
+
+        /// <summary>
+        /// Keyboard cursor navigation and selection for the active panel (Explorer-style):
+        /// <list type="bullet">
+        /// <item>Up/Down/PageUp/PageDown/Home/End move the cursor and single-select that row.</item>
+        /// <item>Ctrl (or Cmd) + those keys move the cursor without changing the selection.</item>
+        /// <item>Shift + those keys extend a contiguous selection from the anchor.</item>
+        /// <item>Space / Insert toggle the cursor row's selection and advance one row.</item>
+        /// <item>Ctrl/Cmd + A selects all files (matching the "Select All" button).</item>
+        /// </list>
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            // Treat Cmd (Meta) like Ctrl so the shortcuts feel native on macOS.
+            bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta);
+
+            // Panel-level keys that must work even when the panel is empty.
+            // Tab: hand off focus to the other panel (also suppresses default focus traversal).
+            if (e.Key == Key.Tab)
+            {
+                SwitchPanelRequested?.Invoke(this, EventArgs.Empty);
+                e.Handled = true;
+                return;
+            }
+            // Backspace: navigate this panel up one directory level.
+            if (e.Key == Key.Back)
+            {
+                NavigateUpRequested?.Invoke(this, EventArgs.Empty);
+                e.Handled = true;
+                return;
+            }
+
+            // File-operation verbs. Handled before the empty-panel check because "New Folder"
+            // is valid in an empty directory; the other verbs validate their own selection.
+            switch (e.Key)
+            {
+                case Key.F2: RaiseVerb(GridVerb.Rename);    e.Handled = true; return;
+                case Key.F5: RaiseVerb(GridVerb.Copy);      e.Handled = true; return;
+                case Key.F6: RaiseVerb(GridVerb.Move);      e.Handled = true; return;
+                case Key.F7: RaiseVerb(GridVerb.NewFolder); e.Handled = true; return;
+                case Key.F8:
+                case Key.Delete: RaiseVerb(GridVerb.Delete); e.Handled = true; return;
+            }
+
+            if (_items.Count == 0)
+            {
+                base.OnKeyDown(e);
+                return;
+            }
+
+            // Enter: open the cursor row (folder → navigate, file → open/execute).
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                ActivateCursorItem();
+                e.Handled = true;
+                return;
+            }
+
+            // Select-all: Ctrl/Cmd + A.
+            if (ctrl && e.Key == Key.A)
+            {
+                SelectAllFilesOnly();
+                RaiseKeyboardSelectionChanged();
+                e.Handled = true;
+                return;
+            }
+
+            // Mark-and-advance: Space / Insert toggle the cursor row, then step down one.
+            if (e.Key == Key.Space || e.Key == Key.Insert)
+            {
+                int cur = _cursorIndex >= 0 ? _cursorIndex : _gridYShift;
+                cur = ClampIndex(cur);
+                ToggleSelect(cur);
+                SetCursorNoRender(cur + 1);
+                ReRender();
+                RaiseKeyboardSelectionChanged();
+                e.Handled = true;
+                return;
+            }
+
+            // Directional navigation. If nothing is focused yet, start at the top visible row.
+            int start = _cursorIndex >= 0 ? _cursorIndex : _gridYShift;
+            int target;
+            switch (e.Key)
+            {
+                case Key.Down:     target = start + 1; break;
+                case Key.Up:       target = start - 1; break;
+                case Key.PageDown: target = start + VisibleRowCount(); break;
+                case Key.PageUp:   target = start - VisibleRowCount(); break;
+                case Key.Home:     target = 0; break;
+                case Key.End:      target = _items.Count - 1; break;
+                default:
+                    base.OnKeyDown(e);
+                    return;
+            }
+
+            SetCursorNoRender(target);
+
+            if (shift)
+                ExtendSelectionTo(_cursorIndex);   // grow/shrink range from the anchor
+            else if (!ctrl)
+                SelectSingle(_cursorIndex);        // plain move → single-select (Explorer)
+            // ctrl (no shift): move the cursor only, leave the selection untouched.
+
+            ReRender();
+            RaiseKeyboardSelectionChanged();
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Notifies the host that the selection changed via the keyboard so it can refresh the
+        /// status bar. Reuses <see cref="GridItemClick"/>, whose handlers ignore the event args
+        /// and recompute from <see cref="SelectedItems"/>.
+        /// </summary>
+        private void RaiseKeyboardSelectionChanged()
+        {
+            GridItemClick?.Invoke(this, TheItemUnderTheMouse);
+        }
+
+        /// <summary>
+        /// Raised when the user presses Backspace, asking the host to navigate this panel up one
+        /// directory level. The host maps it to the same action as the panel's Back button.
+        /// </summary>
+        public event EventHandler NavigateUpRequested;
+
+        /// <summary>
+        /// Raised when the user presses Tab, asking the host to make the other panel active.
+        /// </summary>
+        public event EventHandler SwitchPanelRequested;
+
+        /// <summary>
+        /// Raised when the user presses a file-verb key (F2/F5/F6/F7/F8/Del) on this panel.
+        /// The host performs the operation, treating this grid as the active/source panel.
+        /// </summary>
+        public event EventHandler<GridVerb> VerbRequested;
+
+        private void RaiseVerb(GridVerb v)
+        {
+            VerbRequested?.Invoke(this, v);
+        }
+
+        /// <summary>
+        /// Opens the row under the keyboard cursor as if it had been double-clicked: folders
+        /// navigate, files open/execute. Reuses the existing <see cref="GridItemDoubleClick"/>
+        /// wiring by raising it with a synthetic hover item pointing at the cursor row.
+        /// </summary>
+        public void ActivateCursorItem()
+        {
+            if (CursorItem == null) return;
+
+            GridHoverItem hi = new GridHoverItem
+            {
+                rowID = _cursorIndex,
+                colID = 0,
+                cellContent = "",
+                ItemUnderMouse = CursorItem
+            };
+            GridItemDoubleClick?.Invoke(this, hi);
+        }
+
+        #endregion
+
         private void OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             // Get the current pointer position relative to the UserControl
@@ -2211,6 +2621,16 @@ namespace DirOpusReImagined
             _pressPoint = e.GetPosition(this);
             _pressedItemForDrag = TheItemUnderTheMouse.ItemUnderMouse;
             _prePressSelection = new List<object>(_selecteditems);
+
+            // Take keyboard focus so this becomes the active panel and arrow-key navigation
+            // targets this grid. Move the keyboard cursor to the clicked row so keyboard nav
+            // continues from wherever the mouse just landed.
+            Focus();
+            if (TheItemUnderTheMouse.ItemUnderMouse != null && TheItemUnderTheMouse.rowID >= 0)
+            {
+                _cursorIndex = TheItemUnderTheMouse.rowID;
+                _anchorIndex = _cursorIndex;
+            }
 
             // We have a rowclicked event so fire it
             if (TheItemUnderTheMouse.ItemUnderMouse != null)
