@@ -138,7 +138,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.9.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.10.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -689,6 +689,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.10.0 (2026-07-18) — Fix Windows startup crash (physical memory lookup)
+- **Windows startup crash fixed** — the app threw at initialization in `MainWindow` when reading total physical memory. The `ComputerInfo` package shells out to `wmic`, which Microsoft has deprecated and removed from current Windows 11 builds, so the call failed to launch and the memory properties threw a type exception.
+- **New cross-platform memory helper** — added `SystemInfo/PhysicalMemory.cs`, which reads true installed RAM through a native API per platform with no external process: `GlobalMemoryStatusEx` on Windows, `/proc/meminfo` on Linux, and `sysctlbyname("hw.memsize")` on macOS. It falls back to the .NET runtime's `GC.GetGCMemoryInfo()` and returns `0` on failure rather than throwing, so startup can no longer fail here.
+- **Dependency removed** — dropped the `ComputerInfo` NuGet package entirely.
 
 ### 0.1.9.0 (2026-07-17) — Light/Dark theming & General Help
 - **Light / Dark / System theme** — a new **Theme** selector in the center panel switches the whole application between Light, Dark, and following the operating system. The choice is persisted to `Configuration.xml` and restored on the next launch. System mode tracks OS appearance changes live.

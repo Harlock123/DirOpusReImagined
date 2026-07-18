@@ -17,9 +17,7 @@ using System.Xml.Linq;
 using Avalonia.Input;
 using DirOpusReImagined.FileSystem;
 using DirOpusReImagined.FileSystem.Rclone;
-using NickStrupat;
 using Tomlyn;
-//using NickStrupat.ComputerInfo;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
 using Image = Avalonia.Controls.Image;
@@ -108,9 +106,7 @@ namespace DirOpusReImagined
             LPgrid.VerbRequested += OnPanelVerbRequested;
             RPgrid.VerbRequested += OnPanelVerbRequested;
 
-            var cinf = new ComputerInfo();
-            
-            var globalMEM = cinf.TotalPhysicalMemory;
+            var globalMEM = SystemInfo.PhysicalMemory.GetTotalBytes();
 
             this.Title += " " + (globalMEM / 1024 / 1024 / 1024).ToString() + " GB ";
             
