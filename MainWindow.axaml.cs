@@ -595,7 +595,12 @@ namespace DirOpusReImagined
             
             ChkShowHidden.Checked += ChkShowHidden_Checked;
             ChkShowHidden.Unchecked += ChkShowHidden_Checked;
-            
+
+            // Repopulate both panels when the sort order changes. Switching radios
+            // fires Checked on the newly selected one, so this runs exactly once.
+            RbSortName.Checked += SortOption_Checked;
+            RbSortSize.Checked += SortOption_Checked;
+
             #endregion
             
             #region Pointer Enter/Leave Handlers
@@ -684,6 +689,24 @@ namespace DirOpusReImagined
         {
             FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
             FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+            RefreshLPGridPostActions();
+            RefreshRPGridPostActions();
+        }
+
+        /// <summary>
+        /// Handles the sort-order radios (Name/Size). Repopulates both panels so the
+        /// new sort order is applied immediately, mirroring the Show Hidden toggle.
+        /// </summary>
+        private void SortOption_Checked(object? sender, RoutedEventArgs e)
+        {
+            // Derive the sort from the radio that raised the event rather than reading
+            // RbSortName.IsChecked: the two radios are a group, and Avalonia unchecks the
+            // sibling as a separate step, so RbSortName may still be stale-true here when
+            // Size was clicked — which would incorrectly re-sort by Name.
+            bool sortByName = ReferenceEquals(sender, RbSortName);
+
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, sortByName);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, sortByName);
             RefreshLPGridPostActions();
             RefreshRPGridPostActions();
         }
