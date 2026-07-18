@@ -3285,6 +3285,13 @@ namespace DirOpusReImagined
             }
         }
 
+        // Opens a terminal in this panel's folder. No item check — right-clicking empty
+        // space in the panel should work too.
+        private void TerminalHere_Click(object sender, RoutedEventArgs e)
+        {
+            GridContextTerminalHere?.Invoke(this, EventArgs.Empty);
+        }
+
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
             this.GridFontSize += 1;
@@ -3352,6 +3359,10 @@ namespace DirOpusReImagined
         public event EventHandler<GridHoverItem> GridContextCopyPath;
 
         public event EventHandler<GridHoverItem> GridContextCopyFullPath;
+
+        /// <summary>Raised when "Terminal Here" is chosen. The host opens a terminal in this
+        /// panel's current folder, so no item under the mouse is required.</summary>
+        public event EventHandler GridContextTerminalHere;
 
         #endregion
         

@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="460"
+        x:Class="DirOpusReImagined.BookmarksDialog"
+        Width="560" Height="460" WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Bookmarks">
+
+    <DockPanel LastChildFill="True" Margin="12">
+
+        <!-- Title -->
+        <TextBlock DockPanel.Dock="Top" Text="Bookmarks" FontWeight="Bold" FontSize="16"
+                   Foreground="{DynamicResource GridCellTextBrush}" Margin="0,0,0,8" />
+
+        <!-- Add-current bar, pinned to the bottom -->
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="0,8,0,0" Margin="0,8,0,0">
+            <StackPanel Orientation="Vertical" Spacing="6">
+                <TextBlock Text="Add a bookmark from a panel's current folder:" FontSize="11"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                    <TextBlock Grid.Column="0" Text="Name" VerticalAlignment="Center"
+                               Foreground="{DynamicResource GridCellTextBrush}" Margin="0,0,6,0" />
+                    <TextBox Grid.Column="1" Name="NewNameBox" Watermark="(defaults to folder name)"
+                             VerticalContentAlignment="Center" Margin="0,0,6,0" />
+                    <Button Grid.Column="2" Name="AddLeftButton" Content="◀ Set Left"
+                            FontWeight="Bold" Padding="10,4" Margin="0,0,6,0"
+                            ToolTip.Tip="Bookmark the Left panel's current folder" />
+                    <Button Grid.Column="3" Name="AddRightButton" Content="Set Right ▶"
+                            FontWeight="Bold" Padding="10,4"
+                            ToolTip.Tip="Bookmark the Right panel's current folder" />
+                </Grid>
+                <Button Name="CloseButton" Content="Close" HorizontalAlignment="Right"
+                        MinWidth="90" Padding="14,4" FontWeight="Bold" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Bookmark list -->
+        <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="3"
+                Background="{DynamicResource SurfaceBackgroundBrush}" ClipToBounds="True">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="BookmarksListPanel" Margin="6" Spacing="2" />
+            </ScrollViewer>
+        </Border>
+
+    </DockPanel>
+</Window>

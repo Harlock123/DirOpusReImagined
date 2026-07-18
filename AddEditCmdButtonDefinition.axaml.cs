@@ -75,7 +75,45 @@ public partial class AddEditCmdButtonDefinition : Window
             Button b = this.FindControl<Button>("LPB" + i.ToString());
             b.Click += HandleButtonClicked;
         }
-      
+
+        LoadTerminalSettings();
+    }
+
+    /// <summary>Populates the System Wide Settings tab's Terminal fields from Configuration.xml.</summary>
+    private void LoadTerminalSettings()
+    {
+        try
+        {
+            if (!File.Exists("Configuration.xml")) return;
+
+            var terminal = XDocument.Load("Configuration.xml").Descendants("Terminal").FirstOrDefault();
+            if (terminal == null) return;
+
+            this.FindControl<TextBox>("tbTerminalCommand").Text = (string?)terminal.Element("Command") ?? "";
+            this.FindControl<TextBox>("tbTerminalArgs").Text = (string?)terminal.Element("Args") ?? "";
+        }
+        catch
+        {
+            // Missing or malformed config just leaves the fields blank.
+        }
+    }
+
+    /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
+    private void UpsertTerminalSettings(XDocument doc)
+    {
+        var command = this.FindControl<TextBox>("tbTerminalCommand").Text ?? "";
+        var args = this.FindControl<TextBox>("tbTerminalArgs").Text ?? "";
+
+        var terminal = doc.Descendants("Terminal").FirstOrDefault();
+        if (terminal == null)
+        {
+            terminal = new XElement("Terminal");
+            doc.Root!.Add(terminal);
+        }
+
+        terminal.RemoveAll();
+        terminal.Add(new XElement("Command", command));
+        terminal.Add(new XElement("Args", args));
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
@@ -423,12 +461,15 @@ public partial class AddEditCmdButtonDefinition : Window
         if (buttonsElement != null)
         {
             buttonsElement.RemoveAll();
-            
+
             buttonsElement.Add(newElement);
+
+            // Persist the System Wide Settings (Terminal) alongside the buttons.
+            UpsertTerminalSettings(doc);
 
             // Save the modifications back to the Configuration.xml file
             doc.Save("Configuration.xml");
-            
+
             TheMainWindow.DoButtonRefresh();
         }
         else

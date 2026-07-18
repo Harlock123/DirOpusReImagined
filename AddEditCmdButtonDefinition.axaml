@@ -11,7 +11,10 @@
             <Button Content="Clear" Click="Clear_OnClick" Margin="5" />
             <Button Content="Exit" Click="Exit_OnClick" Margin="5" />
         </StackPanel>
-        <ScrollViewer DockPanel.Dock="Left" 
+        <TabControl>
+        <TabItem Header="Command Buttons">
+        <DockPanel>
+        <ScrollViewer DockPanel.Dock="Left"
                       VerticalScrollBarVisibility="Visible"
                       >
         <StackPanel Width="140" Spacing="4">
@@ -114,11 +117,34 @@
                 Padding="4" Content="ToolTip"/>
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="140">
                 <TextBox Name="tbToolTip"
-                         Padding="4" 
-                         AcceptsReturn="True" 
-                         TextWrapping="Wrap" 
+                         Padding="4"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
                          />
             </ScrollViewer>
         </StackPanel>
+        </DockPanel>
+        </TabItem>
+        <TabItem Header="System Wide Settings">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="12" Spacing="6" MaxWidth="620" HorizontalAlignment="Left">
+                    <TextBlock Text="Terminal" FontSize="16" FontWeight="Bold" />
+                    <TextBlock TextWrapping="Wrap"
+                               Text="The command used by &quot;Terminal Here&quot; (the panel right-click menu). Leave the command blank to let the app auto-detect a terminal for the current operating system." />
+
+                    <Label Padding="0,6,0,0" Content="Command" />
+                    <TextBox Name="tbTerminalCommand"
+                             Watermark="e.g. wt.exe  (Windows),  open  (macOS),  x-terminal-emulator  (Linux)" />
+
+                    <Label Padding="0,6,0,0" Content="Arguments" />
+                    <TextBox Name="tbTerminalArgs"
+                             Watermark="e.g. -d &quot;%DIR%&quot;" />
+
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0"
+                               Text="Use %DIR% where the target folder should be substituted. Quote it if the path may contain spaces, e.g. -d &quot;%DIR%&quot;. The folder is also set as the launched process's working directory, so many terminals need no arguments at all." />
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>

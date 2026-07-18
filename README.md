@@ -81,10 +81,16 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
 
-### Drive Presets
-- Up to 5 configurable quick-navigation presets between the panels
-- Each preset has a left-panel and right-panel button
-- Supports environment variables: `$HOME`, `$ROOT`, `$DESKTOP`, `$DOCUMENTS`, `$PICTURES`
+### Bookmarks
+- A **Bookmarks** button in the center panel opens a dialog listing your saved folders
+- Send any bookmark to the **Left** or **Right** panel, add the current folder of either panel, or remove entries — all following the active Light/Dark theme
+- Persisted to `BOOKMARKS.MD` beside the executable as a plain-Markdown list (`- [Name](path)`) that ships with the app and is easy to hand-edit
+- Paths may be local or `cloud://<remote>/<path>`; on first run a default set is seeded — **Home, Root, Desktop, Documents, Pictures** — resolved for the current user and OS
+
+### Open Terminal Here
+- **Terminal Here** on each panel's right-click menu opens a terminal in that panel's current folder — no need to activate the panel first
+- Cross-platform by default: Windows Terminal → PowerShell → cmd on Windows, Terminal.app on macOS, and the first available emulator on Linux (`x-terminal-emulator`, `gnome-terminal`, `konsole`, `alacritty`, `kitty`, and more)
+- Override the terminal with a `<Terminal>` entry in `Configuration.xml`, editable from the **System Wide Settings** tab of the Button Configuration dialog; use `%DIR%` for the target folder. A failed custom command falls back to auto-detection
 
 ### Integrated Image Viewer
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
@@ -109,7 +115,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Toggle hidden file visibility with the "Show Hidden" checkbox
 - Sort files by name or by size
 - Configurable font sizes for grid content and headers
-- Right-click context menu on panels for font size adjustment
+- Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
 
 ### Light / Dark Theming
@@ -240,34 +246,6 @@ A Sample of this file is shown below
 		</Button>
 	</Buttons>
 
-	<DrivePresets>
-		<DrivePreset>
-			<Order>1</Order>
-			<Name>Home</Name>
-			<Path>$HOME</Path>
-		</DrivePreset>
-		<DrivePreset>
-			<Order>2</Order>
-			<Name>Root</Name>
-			<Path>$ROOT</Path>
-		</DrivePreset>
-		<DrivePreset>
-			<Order>3</Order>
-			<Name>DT</Name>
-			<Path>$DESKTOP</Path>
-		</DrivePreset>
-		<DrivePreset>
-			<Order>4</Order>
-			<Name>Docs</Name>
-			<Path>$DOCUMENTS</Path>
-		</DrivePreset>
-		<DrivePreset>
-			<Order>5</Order>
-			<Name>Pics</Name>
-			<Path>$PICTURES</Path>
-		</DrivePreset>
-	</DrivePresets>
-
 	<Executable>
 		<Extensions>
 			EXE,BAT,PS1,BMP,JPG,JPEG,TXT,PNG,TIFF,GIF,ICO,
@@ -389,32 +367,47 @@ valid values are True or False
 The `<ToolTip></ToolTip>` Parameter is the text that will appear when the mouse hovers over the button for a few seconds
 
 
-The configuration file contains a section called `<DrivePresets></DrivePresets>` that allows one to define a set of hardcoded 
-path specifications to be loaded into the LEFT and RIGHT panels. The buttons for this functionality are located in the 
-interface between the left and right panels. Set as block of 10 buttons seperated between each panel. 5 dedicated to the
-LEFT and 5 to the RIGHT panel. The panels button tuples are numbered from 1 to 5. The first button set at the top
-is number 1 and the bottom set is number 5.
+### Bookmarks
 
-Each button is defined between a `<DrivePreset></DrivePreset>` tag.
+Quick-access folders are managed through **Bookmarks** (the button in the center panel), which
+replaced the older fixed grid of drive-preset buttons. The dialog lists your saved folders and lets
+you send any of them to the **Left** or **Right** panel, add the current folder of either panel, or
+remove entries — all following the active Light/Dark theme.
 
-The `<Order></Order>` tag is used to define the order of the button in the panel.
+Bookmarks are stored in `BOOKMARKS.MD`, a plain-Markdown file kept beside the executable so it ships
+with the app and is easy to hand-edit. Each bookmark is one list line:
 
-The `<Name></Name>` tag is used to define the text that will appear on the button.
-care should be taken to ensure that the text is not too long as it will be truncated if it does not fit on the button.
+```markdown
+- [Name](path)
+```
 
-The `<Path></Path>` Specifier is the path that will be loaded into the panel when the button is clicked.
+`path` may be a local path or a `cloud://<remote>/<path>` URI. On first run (when `BOOKMARKS.MD` has
+no entries) the app seeds a default set — **Home, Root, Desktop, Documents, Pictures** — with paths
+resolved for the current user and OS.
 
-There are a number of special variables that can be used in the path specification.
-- $HOME - The users home directory
-- $ROOT - The root directory of the system 
-  - usually C:\ on Windows, / on Linux and MacOS
-- $DESKTOP - The users desktop directory
-- $DOCUMENTS - The users documents directory 
-  - Note:
-       On Mac and Linux it will compare the folder returned by .Nets Environment.SpecialFolder
-       enumeration with the users HOME folder. If they are the same it will then search the
-       Home folder for a Documents, documents, DOCUMENTS folder and if found will return that.
-- $PICTURES - The users pictures directory
+### Terminal
+
+**Terminal Here** on a panel's right-click menu opens a terminal in that panel's current folder. The
+terminal it launches is controlled by the `<Terminal>` element in `Configuration.xml`, which you can
+edit directly or from the **System Wide Settings** tab of the Button Configuration dialog:
+
+```xml
+<Terminal>
+  <Command>wt.exe</Command>
+  <Args>-d "%DIR%"</Args>
+</Terminal>
+```
+
+- `<Command>` is the terminal executable. Leave it **blank** to let the app auto-detect a terminal
+  for the current OS (Windows Terminal → PowerShell → cmd on Windows, Terminal.app on macOS, and the
+  first available emulator on Linux).
+- `<Args>` are passed to that command, with `%DIR%` replaced by the target folder. Quote it
+  (`-d "%DIR%"`) if the path may contain spaces. The folder is also set as the launched process's
+  working directory, so many terminals need no arguments at all.
+- If a configured command can't start (e.g. it isn't installed), the app falls back to auto-detection.
+
+This is separate from any terminal-launching command buttons you may have configured — those still
+work exactly as before.
 
 ## Cloud Storage (rclone)
 
@@ -690,7 +683,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
 
-### 0.1.10.0 (2026-07-18) — Fix Windows startup crash (physical memory lookup)
+### 0.1.10.0 (2026-07-18) — Bookmarks, Open Terminal Here, Windows startup fix & center-panel declutter
+- **Folder bookmarks** — a new **Bookmarks** button in the center panel opens a dialog that lists your saved folders and sends any one of them to the **Left** or **Right** panel (◀ Left / Right ▶). Bookmarks can be added from either panel's current folder (**◀ Set Left** / **Set Right ▶**) and removed inline. Everything persists to `BOOKMARKS.MD` beside the executable — a plain Markdown list (`- [Name](path)`) that ships with the app and is easy to hand-edit. The dialog follows the active Light/Dark theme.
+- **Drive Presets replaced by Bookmarks** — the fixed grid of 10 drive-preset buttons was removed from the center panel to reduce clutter and stop it truncating on smaller displays. On first run (when `BOOKMARKS.MD` has no entries) the app synthesizes the same common presets as bookmarks — **Home, Root, Desktop, Documents, Pictures** — with paths resolved for the current user/OS, so nothing is lost. The stale `<DrivePresets>` sections and docs were removed from the config files and README.
+- **Open Terminal Here** — a new **Terminal Here** entry on each panel's right-click menu opens a terminal in that panel's current folder (works on empty space too, so no need to activate the panel first). Cloud locations report a message instead of failing.
+- **Cross-platform terminal detection** — with no configuration, the launcher picks a terminal per OS with no external helper process: Windows Terminal → PowerShell → cmd on Windows, Terminal.app on macOS, and the first available emulator on Linux (`x-terminal-emulator`, `gnome-terminal`, `konsole`, `xfce4-terminal`, `alacritty`, `kitty`, and more). A trailing-backslash quoting bug that broke Windows Terminal on paths like `C:\…\Folder\` was fixed by building arguments with `ArgumentList` and normalizing the path.
+- **Configurable terminal + System Wide Settings tab** — a new `<Terminal>` element in `Configuration.xml` (`<Command>` + `<Args>`, with `%DIR%` substituted for the folder) overrides the terminal. It's editable from a new **System Wide Settings** tab added to the Button Configuration dialog. A configured command that can't start falls back to auto-detection.
 - **Windows startup crash fixed** — the app threw at initialization in `MainWindow` when reading total physical memory. The `ComputerInfo` package shells out to `wmic`, which Microsoft has deprecated and removed from current Windows 11 builds, so the call failed to launch and the memory properties threw a type exception.
 - **New cross-platform memory helper** — added `SystemInfo/PhysicalMemory.cs`, which reads true installed RAM through a native API per platform with no external process: `GlobalMemoryStatusEx` on Windows, `/proc/meminfo` on Linux, and `sysctlbyname("hw.memsize")` on macOS. It falls back to the .NET runtime's `GC.GetGCMemoryInfo()` and returns `0` on failure rather than throwing, so startup can no longer fail here.
 - **Dependency removed** — dropped the `ComputerInfo` NuGet package entirely.

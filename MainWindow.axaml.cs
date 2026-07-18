@@ -37,8 +37,7 @@ namespace DirOpusReImagined
         private List<string> ImageStuff = new List<string>();
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
-        private List<DriveButtonEntry> TheDriveButtons = new List<DriveButtonEntry>();
-        
+
         private List<Button> TheLowerPanelButtons = new List<Button>();
         
         private List<ButtonSettings> TheButtonSettings = new List<ButtonSettings>();
@@ -223,6 +222,9 @@ namespace DirOpusReImagined
             LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
             RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
 
+            LPgrid.GridContextTerminalHere += Handle_TerminalHere;
+            RPgrid.GridContextTerminalHere += Handle_TerminalHere;
+
             LPgrid.JustifyColumns.Add(2);
             LPgrid.JustifyColumns.Add(3);
             LPgrid.JustifyColumns.Add(4);
@@ -375,7 +377,6 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// Clears the lower buttons by setting their content and tag to null.
-        /// Also clears the content of the DrivePreset buttons.
         /// </summary>
         private void ClearLowerButtons()
         {
@@ -384,17 +385,47 @@ namespace DirOpusReImagined
                 b.Content = "";
                 b.Tag = null;
             }
-            
-            DrivePreset1A.Content = "";
-            DrivePreset1B.Content = "";
-            DrivePreset2A.Content = "";
-            DrivePreset2B.Content = "";
-            DrivePreset3A.Content = "";
-            DrivePreset3B.Content = "";
-            DrivePreset4A.Content = "";
-            DrivePreset4B.Content = "";
-            DrivePreset5A.Content = "";
-            DrivePreset5B.Content = "";
+        }
+
+        /// <summary>
+        /// If no bookmarks exist yet, synthesizes a default BOOKMARKS.MD from the common
+        /// folder locations that were previously offered as hardcoded drive-preset buttons
+        /// (Home, Root, Desktop, Documents, Pictures). Paths are resolved for the current
+        /// user/OS so the seeded file is portable rather than machine-specific.
+        /// </summary>
+        private void SeedDefaultBookmarksIfEmpty()
+        {
+            try
+            {
+                if (Bookmarks.BookmarkStore.Load().Count > 0) return;
+
+                var defaults = new List<Bookmarks.Bookmark>();
+
+                void Add(string name, string path)
+                {
+                    if (!string.IsNullOrWhiteSpace(path))
+                        defaults.Add(new Bookmarks.Bookmark(name, path));
+                }
+
+                // On Windows GetRootDirectoryPath() maps to the "My Computer" shell folder,
+                // which has no filesystem path; fall back to the system drive root (e.g. C:\).
+                string root = GetRootDirectoryPath();
+                if (string.IsNullOrWhiteSpace(root))
+                    root = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ?? "";
+
+                Add("Home", GetHomeDirectoryPath());
+                Add("Root", root);
+                Add("Desktop", GetDesktopDirectoryPath());
+                Add("Documents", GetDocumentsDirectoryPath());
+                Add("Pictures", GetPicturesDirectoryPath());
+
+                if (defaults.Count > 0)
+                    Bookmarks.BookmarkStore.Save(defaults);
+            }
+            catch
+            {
+                // Seeding is best-effort; a read-only app folder just means no seed file.
+            }
         }
 
         /// <summary>
@@ -576,16 +607,6 @@ namespace DirOpusReImagined
             LpButton35.Click += Handle_Lower_Panel_Button_Clicks;
             LpButton36.Click += Handle_Lower_Panel_Button_Clicks;
             
-            DrivePreset1A.Click += Handle_Drive_Button_Clicks;
-            DrivePreset1B.Click += Handle_Drive_Button_Clicks;
-            DrivePreset2A.Click += Handle_Drive_Button_Clicks;
-            DrivePreset2B.Click += Handle_Drive_Button_Clicks;
-            DrivePreset3A.Click += Handle_Drive_Button_Clicks;
-            DrivePreset3B.Click += Handle_Drive_Button_Clicks;
-            DrivePreset4A.Click += Handle_Drive_Button_Clicks;
-            DrivePreset4B.Click += Handle_Drive_Button_Clicks;
-            DrivePreset5A.Click += Handle_Drive_Button_Clicks;
-            DrivePreset5B.Click += Handle_Drive_Button_Clicks;
             
             
 
@@ -602,6 +623,10 @@ namespace DirOpusReImagined
             RbSortSize.Checked += SortOption_Checked;
 
             #endregion
+
+            // First run seeds BOOKMARKS.MD with the common folder presets (Home, Root,
+            // Desktop, Documents, Pictures) that used to be hardcoded drive-preset buttons.
+            SeedDefaultBookmarksIfEmpty();
             
             #region Pointer Enter/Leave Handlers
 
@@ -829,147 +854,6 @@ namespace DirOpusReImagined
             ToolTip.SetIsOpen(B,false);
             
             RPgrid.SelectAllFilesOnly();
-        }
-
-        private void Handle_Drive_Button_Clicks(object? sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("made it here");
-            if (sender is null)
-            {
-                return;
-            }
-
-            Button bb = (Button)sender;
-            
-            string nm = bb.Name;
-
-            DriveButtonEntry dbe = (DriveButtonEntry)bb.Tag;
-
-            // Push current path to history before navigating
-            if (nm.EndsWith("A") && !string.IsNullOrEmpty(LPpath.Text))
-                _lpHistory.Push(LPpath.Text);
-            else if (!string.IsNullOrEmpty(RPpath.Text))
-                _rpHistory.Push(RPpath.Text);
-
-            switch (dbe.Path.ToUpper())
-            {
-                case "$HOME":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetHomeDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetHomeDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-
-                    break;
-                case "$ROOT":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetRootDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value); 
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetRootDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value); 
-                    }
-
-                    break;
-                case "$DESKTOP":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetDesktopDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetDesktopDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value); 
-                    }
-
-                    break;
-                case "$DOCUMENTS":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetDocumentsDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetDocumentsDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-
-                    break;
-                case "$PICTURES":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetPicturesDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetPicturesDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-
-                    break;
-                case "$DOWNLOADS":
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = GetPicturesDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = GetPicturesDirectoryPath();
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-
-                    break;
-                default:
-                    if (nm.EndsWith("A")) // Left
-                    {
-                        LPpath.Text = dbe.Path;
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-                    else // Right
-                    {
-                        RPpath.Text = dbe.Path;
-                        if (ChkShowHidden != null) 
-                            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
-                    }
-
-                    break;
-            }
-
-            if (nm.EndsWith("A"))
-            {
-                LPfilter.Text = "";
-                RefreshLPGridPostActions();
-            }
-            else
-            {
-                RPfilter.Text = "";
-                RefreshRPGridPostActions();
-            }
         }
 
         private void Handle_Lower_Panel_Button_PointerLeave(object? sender, PointerEventArgs e)
@@ -2091,6 +1975,57 @@ namespace DirOpusReImagined
             if (sender is Button b) ToolTip.SetIsOpen(b, false);
             var help = new GeneralHelp();
             help.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// Opens the Bookmarks dialog. Selecting a bookmark loads it into the Left or Right
+        /// panel via the same navigation path a typed-path Enter uses.
+        /// </summary>
+        private void BookmarksButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button b) ToolTip.SetIsOpen(b, false);
+
+            var dialog = new BookmarksDialog(
+                LPpath.Text ?? string.Empty,
+                RPpath.Text ?? string.Empty,
+                path => NavigatePanelTo("LP", path),
+                path => NavigatePanelTo("RP", path));
+
+            dialog.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// Right-click "Terminal Here" on a panel: opens a terminal in the folder of the
+        /// panel that raised the event (the one under the cursor), no panel activation needed.
+        /// </summary>
+        private void Handle_TerminalHere(object? sender, EventArgs e)
+        {
+            string path = ReferenceEquals(sender, RPgrid)
+                ? RPpath.Text ?? string.Empty
+                : LPpath.Text ?? string.Empty;
+
+            OpenTerminalAt(path);
+        }
+
+        /// <summary>
+        /// Opens a native terminal at <paramref name="path"/>. Cloud locations have no local
+        /// working directory, so those are reported rather than launched.
+        /// </summary>
+        private void OpenTerminalAt(string path)
+        {
+            if (path.StartsWith(CloudPath.Scheme, StringComparison.OrdinalIgnoreCase))
+            {
+                new MessageBox("A terminal can't be opened in a cloud location.\nSelect a local folder first.",
+                    "Terminal").ShowDialog(this);
+                return;
+            }
+
+            // Honor the user's configured terminal (<Terminal> in Configuration.xml) if set;
+            // TerminalLauncher falls back to per-OS auto-detection when it's empty.
+            var cfg = SystemInfo.TerminalConfig.Load(_configFilePath);
+            string? error = SystemInfo.TerminalLauncher.OpenAt(path, cfg.Command, cfg.Args);
+            if (error != null)
+                new MessageBox(error, "Terminal").ShowDialog(this);
         }
 
         /// <summary>
@@ -3239,7 +3174,6 @@ namespace DirOpusReImagined
                 // Clear The Button Entries out first
 
                 TheButtons.Clear();
-                TheDriveButtons.Clear();
 
                 // Load XML file
                 XDocument xmlDoc = XDocument.Load(xmlFilePath);
@@ -3599,96 +3533,6 @@ namespace DirOpusReImagined
                     }
                 }
                 
-                var driveSettingsList = from btn in xmlDoc.Descendants("DrivePreset")
-                                         select new DriveButtonEntry()
-                                         {
-                                             Order = (string)btn.Element("Order"),
-                                             Name = (string)btn.Element("Name"),
-                                             Path = (string)btn.Element("Path"),
-                                             Content = (string)btn.Element("Content"),
-                                             Background = (string)btn.Element("Background"),
-                                             Foreground = (string)btn.Element("Foreground"),
-                                             ToolTip = (string)btn.Element("ToolTip")
-                                         };
-
-                foreach (var thing in driveSettingsList)
-                {
-                    if (thing.Content == null)
-                    {
-                        thing.Content = thing.Name;
-                    }
-                    
-                    switch (thing.Order)
-                    {
-                        case "1":
-                            Button b1 = (Button)window.FindControl<Control>("DrivePreset1A");
-                            Button b2 = (Button)window.FindControl<Control>("DrivePreset1B");
-                            if (thing.Content != null)
-                            {
-                                b1.Content = "<-" + thing.Content.ToString();
-                                b2.Content = thing.Content.ToString() + "->";
-                            }
-
-                            b1.Tag = thing;
-                            b2.Tag = thing;
-
-                            break;
-                        case "2":
-                            Button b3 = (Button)window.FindControl<Control>("DrivePreset2A");
-                            Button b4 = (Button)window.FindControl<Control>("DrivePreset2B");
-                            if (thing.Content != null)
-                            {
-                                b3.Content = "<-" + thing.Content.ToString();
-                                b4.Content = thing.Content.ToString() + "->";
-                            }
-
-                            b3.Tag = thing;
-                            b4.Tag = thing;
-
-                            break;
-                        case "3":
-                            Button b5 = (Button)window.FindControl<Control>("DrivePreset3A");
-                            Button b6 = (Button)window.FindControl<Control>("DrivePreset3B");
-                            if (thing.Content != null)
-                            {
-                                b5.Content = "<-" + thing.Content.ToString();
-                                b6.Content = thing.Content.ToString() + "->";
-                            }
-
-                            b5.Tag = thing;
-                            b6.Tag = thing;
-
-                            break;
-                        case "4":
-                            Button b7 = (Button)window.FindControl<Control>("DrivePreset4A");
-                            Button b8 = (Button)window.FindControl<Control>("DrivePreset4B");
-                            if (thing.Content != null)
-                            {
-                                b7.Content = "<-" + thing.Content.ToString();
-                                b8.Content = thing.Content.ToString() + "->";
-                            }
-
-                            b7.Tag = thing;
-                            b8.Tag = thing;
-
-                            break;
-                        case "5":
-                            Button b9 = (Button)window.FindControl<Control>("DrivePreset5A");
-                            Button b10 = (Button)window.FindControl<Control>("DrivePreset5B");
-                            if (thing.Content != null)
-                            {
-                                b9.Content = "<-" + thing.Content.ToString();
-                                b10.Content = thing.Content.ToString() + "->";
-                            }
-
-                            b9.Tag = thing;
-                            b10.Tag = thing;
-
-                            break;
-                    }
-                }
-                
-                
             }
             catch (Exception ex)
             {
@@ -3738,27 +3582,6 @@ namespace DirOpusReImagined
             return parent + sep + childName;
         }
 
-    }
-    
-    public class DriveButtonEntry
-    {
-        public DriveButtonEntry()
-        {
-            Order = "";
-            Name = "";
-            Path = "";
-            Content = "";
-            Background = "";
-            Foreground = "";
-            ToolTip = "";
-        }
-        public string Order { get; set; }
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public string Content { get; set; }
-        public string Background { get; set; }
-        public string Foreground { get; set; }
-        public string ToolTip { get; set; }
     }
     
     public class ButtonEntry

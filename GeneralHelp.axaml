@@ -49,11 +49,17 @@
                 <TextBlock Text="Selection" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Click to select; Ctrl+Click multi-select; Shift+Click range select. Full keyboard selection is available (see below). Select All / Clear buttons per panel." TextWrapping="Wrap" />
 
+                <TextBlock Text="Bookmarks" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• The Bookmarks button opens a dialog that lists your saved folders; send any one to the Left or Right panel, add either panel's current folder, or remove entries. Saved to BOOKMARKS.MD beside the app; a default set (Home, Root, Desktop, Documents, Pictures) is seeded on first run." TextWrapping="Wrap" />
+
+                <TextBlock Text="Open terminal here" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Right-click a panel and choose Terminal Here to open a terminal in that panel's current folder. A terminal is auto-detected for your OS, or set your own in the System Wide Settings tab of the button configuration dialog (the &lt;Terminal&gt; entry in Configuration.xml, using %DIR% for the folder)." TextWrapping="Wrap" />
+
                 <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Access a remote with cloud://&lt;remote&gt;/&lt;path&gt; in the panel path box." TextWrapping="Wrap" />
 
                 <TextBlock Text="Customization" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution; up to 5 folder presets; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
+                <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution; folder bookmarks; a configurable terminal; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
 
                 <!-- ============ Keyboard navigation & shortcuts ============ -->
                 <TextBlock Text="Keyboard Navigation &amp; Shortcuts" FontSize="18" FontWeight="Bold" Margin="0,14,0,2" />
