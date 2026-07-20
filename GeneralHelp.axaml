@@ -50,6 +50,9 @@
                 <TextBlock Text="• Click to select; Ctrl+Click multi-select; Shift+Click range select. Full keyboard selection is available (see below). Select All / Clear buttons per panel." TextWrapping="Wrap" />
                 <TextBlock Text="• Wildcard selection: right-click a panel (or use + / - / *) to Select or Deselect items by a pattern like *.jpg or proj*, or Invert the selection. Matches the displayed rows, so it respects an active filter; a Files-only option skips folders." TextWrapping="Wrap" />
 
+                <TextBlock Text="Sorting" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Click a column header (Name, Size, or Date) to sort that panel by it; click again to reverse (▲/▼ marks the active column). Right-click a header for a menu that also sorts by Type (extension) and sets Ascending/Descending. Sorting is per-panel and persists as you navigate; folders stay grouped first." TextWrapping="Wrap" />
+
                 <TextBlock Text="Bookmarks" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Bookmarks button opens a dialog that lists your saved folders; send any one to the Left or Right panel, add either panel's current folder, or remove entries. Saved to BOOKMARKS.MD beside the app; a default set (Home, Root, Desktop, Documents, Pictures) is seeded on first run." TextWrapping="Wrap" />
 

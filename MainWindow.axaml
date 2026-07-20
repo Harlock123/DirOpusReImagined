@@ -281,24 +281,6 @@
 				          Content="Show Hidden" />
 			</StackPanel>
 			
-			<StackPanel Orientation="Vertical">
-				<Label FontSize="9" Padding="0" Margin="0,0,0,-2"
-				       HorizontalAlignment="Center"
-				       FontWeight="Bold">Sort Options</Label>
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
-					<RadioButton Name="RbSortName"
-								 FontSize="9"
-					             FontWeight="Bold"
-					             Content="Name"
-					             IsChecked="True"
-								 Margin="0"></RadioButton>
-					<RadioButton Name="RbSortSize"
-								 FontSize="9"
-					             FontWeight="Bold"
-					             Content="Size"
-								 Margin="0"></RadioButton>
-				</StackPanel>
-			</StackPanel>
 			
 		</StackPanel>
 		

@@ -311,6 +311,18 @@ namespace DirOpusReImagined
         /// <summary>True when this grid is the active panel (has keyboard focus); drives the frame.</summary>
         private bool _isActivePanel;
 
+        /// <summary>Column index the list is currently sorted by (for the header ▲/▼ indicator), or -1.</summary>
+        public int SortColumnIndex { get; set; } = -1;
+
+        /// <summary>Direction of the current sort, for the header indicator glyph.</summary>
+        public bool SortAscending { get; set; } = true;
+
+        /// <summary>Raised when the user clicks a column header; carries the 0-based column index.</summary>
+        public event EventHandler<int> GridHeaderClicked;
+
+        /// <summary>Raised when the user right-clicks a column header; carries the 0-based column index.</summary>
+        public event EventHandler<int> GridHeaderRightClicked;
+
         /// <summary>Frame brush drawn around the whole grid when it is the active panel.</summary>
         private IBrush _activePanelBrush = Brushes.DodgerBlue;
 
@@ -444,6 +456,9 @@ namespace DirOpusReImagined
         /// ReRender (which clears+rebuilds TheCanvas.Children) while it's open dismisses it — the
         /// menu flashes open then shut, most visibly on macOS. Pointer handlers skip ReRender while set.
         private bool _contextMenuOpen;
+
+        /// <summary>Set when a right-click lands on a column header, to cancel the row context menu.</summary>
+        private bool _suppressRowContextMenu;
         
         #endregion
 
@@ -492,6 +507,12 @@ namespace DirOpusReImagined
             // out from under the open popup. Redraw once when it closes to restore hover state.
             GridContextMenu.Opened += (_, _) => _contextMenuOpen = true;
             GridContextMenu.Closed += (_, _) => { _contextMenuOpen = false; ReRender(); };
+            // Suppress the row context menu when the right-click landed on a column header
+            // (the host shows a sort menu there instead).
+            GridContextMenu.Opening += (_, ev) =>
+            {
+                if (_suppressRowContextMenu) { ev.Cancel = true; _suppressRowContextMenu = false; }
+            };
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _doubleClickTimer.Tick += DoubleClickTimer_Tick;
@@ -1497,6 +1518,19 @@ namespace DirOpusReImagined
                                 Canvas.SetLeft(ttb, left + 2 - _gridXShift);
                                 Canvas.SetTop(ttb, top + 1);
                                 BackingCanvas.Children.Add(ttb);
+
+                                // Sort indicator (▲/▼) in the active sort column's header, right-aligned.
+                                if (idx == SortColumnIndex)
+                                {
+                                    TextBlock ind = new TextBlock();
+                                    ind.Text = SortAscending ? "▲" : "▼";
+                                    ind.FontSize = GridHeaderFontSize;
+                                    ind.Foreground = GridHeaderBrush;
+                                    Canvas.SetLeft(ind, left + _colWidths[idx] - 12 - _gridXShift);
+                                    Canvas.SetTop(ind, top + 1);
+                                    BackingCanvas.Children.Add(ind);
+                                }
+
                                 left += _colWidths[idx];
 
                                 idx++;
@@ -2769,11 +2803,52 @@ namespace DirOpusReImagined
 
         #endregion
 
+        /// <summary>
+        /// Maps an X coordinate (in canvas space) to a column index, accounting for horizontal
+        /// scroll. Returns -1 if past the last column.
+        /// </summary>
+        private int HeaderColumnAt(double x)
+        {
+            double edge = x + _gridXShift;
+            double acc = 0;
+            for (int i = 0; i < _colWidths.Length; i++)
+            {
+                acc += _colWidths[i];
+                if (edge < acc) return i;
+            }
+            return -1;
+        }
+
         private void OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             // Get the current pointer position relative to the UserControl
             //Point position = e.GetPosition(this);
             // Do something with this 411
+
+            // Column-header click → sort by that column. Detect a press within the header band and
+            // map the X position to a column; left-click sorts, right-click asks for the sort menu.
+            var headerPos = e.GetPosition(TheCanvas);
+            if (_colWidths != null && _colWidths.Length > 0 &&
+                headerPos.Y >= _gridTitleHeight && headerPos.Y < _gridHeaderAndTitleHeight)
+            {
+                int hcol = HeaderColumnAt(headerPos.X);
+                if (hcol >= 0)
+                {
+                    bool rightBtn = e.GetCurrentPoint(sender as Visual).Properties.PointerUpdateKind ==
+                                    PointerUpdateKind.RightButtonPressed;
+                    if (rightBtn)
+                    {
+                        _suppressRowContextMenu = true;   // cancel the row menu that would otherwise open
+                        GridHeaderRightClicked?.Invoke(this, hcol);
+                    }
+                    else
+                    {
+                        GridHeaderClicked?.Invoke(this, hcol);
+                    }
+                    e.Handled = true;
+                    return;
+                }
+            }
 
             if (e.GetCurrentPoint(sender as Visual).Properties.PointerUpdateKind ==
                 PointerUpdateKind.RightButtonPressed)

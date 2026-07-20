@@ -481,25 +481,25 @@ namespace DirOpusReImagined
         /// <param name="PATHNAME">The path name of the directory to populate from.</param>
         /// <param name="ShowHidden">A boolean value indicating whether to show hidden files.</param>
         /// <param name="SortByName">A boolean value indicating the results get sorted by Name</param>
-        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, bool SortByName)
+        public static void PopulateFilePanel(TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, SortSpec Sort)
         {
             //LPgrid.PopulateGrid(PATHNAME);
 
             //var Directories = System.IO.Directory.EnumerateDirectories(PATHNAME);
 
             // using linq to sort the directories by name alphabetically
-            
+
             if (PATHNAME == null || PATHNAME == "")
             {
                 return;
             }
-            
-            
+
+
             var provider = ProviderRegistry.For(PATHNAME);
 
             if (provider.IsRemote)
             {
-                PopulateFilePanelAsync(ThePanel, PATHNAME, ShowHidden, SortByName, provider);
+                PopulateFilePanelAsync(ThePanel, PATHNAME, ShowHidden, Sort, provider);
                 return;
             }
 
@@ -507,7 +507,7 @@ namespace DirOpusReImagined
             {
                 ThePanel.SuspendRendering = true;
                 ThePanel.Items.Clear();
-                ThePanel.Items = BuildFileList(provider, PATHNAME, ShowHidden, SortByName).OfType<object>().ToList();
+                ThePanel.Items = BuildFileList(provider, PATHNAME, ShowHidden, Sort).OfType<object>().ToList();
             }
             catch (Exception e)
             {
@@ -520,7 +520,7 @@ namespace DirOpusReImagined
         }
 
         private static void PopulateFilePanelAsync(
-            TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, bool SortByName, IFileProvider provider)
+            TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, SortSpec Sort, IFileProvider provider)
         {
             ThePanel.SuspendRendering = true;
             ThePanel.Items = new List<object>
@@ -533,7 +533,7 @@ namespace DirOpusReImagined
             {
                 List<AFileEntry>? list = null;
                 Exception? error = null;
-                try { list = BuildFileList(provider, PATHNAME, ShowHidden, SortByName); }
+                try { list = BuildFileList(provider, PATHNAME, ShowHidden, Sort); }
                 catch (Exception ex) { error = ex; }
 
                 Dispatcher.UIThread.Post(() =>
@@ -554,26 +554,41 @@ namespace DirOpusReImagined
             });
         }
 
-        private static List<AFileEntry> BuildFileList(IFileProvider provider, string PATHNAME, bool ShowHidden, bool SortByName)
-            => BuildFileListCore(provider, PATHNAME, ShowHidden, SortByName);
+        private static List<AFileEntry> BuildFileList(IFileProvider provider, string PATHNAME, bool ShowHidden, SortSpec Sort)
+            => BuildFileListCore(provider, PATHNAME, ShowHidden, Sort);
 
         private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden)
-            => BuildFileListCore(provider, PATHNAME, ShowHidden, sortByName: true);
+            => BuildFileListCore(provider, PATHNAME, ShowHidden, SortSpec.Default);
 
-        // Folders always come first, sorted alphabetically; files follow. Files sort by name, or —
-        // in size mode — by actual byte count. (AFileEntry.FileSize is a display string like
-        // "1.2 MB", so the old list.OrderBy(fe => fe.FileSize) sorted on text, not size, and the
-        // flat OrderBy over the combined list interleaved folders with files. Both are fixed here.)
-        private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden, bool sortByName)
+        private static readonly StringComparer NameComparer = StringComparer.OrdinalIgnoreCase;
+
+        private static string Extension(string name)
+        {
+            int dot = name.LastIndexOf('.');
+            return dot > 0 ? name.Substring(dot + 1).ToLowerInvariant() : "";
+        }
+
+        // Sorts files on the RAW FileEntry fields (typed Size/LastModified/Name) so numbers and dates
+        // order correctly — AFileEntry stores display strings, which would sort as text.
+        private static IEnumerable<FileEntry> SortFiles(IEnumerable<FileEntry> files, SortSpec sort) => sort.Key switch
+        {
+            SortKey.Size => sort.Ascending ? files.OrderBy(e => e.Size) : files.OrderByDescending(e => e.Size),
+            SortKey.Date => sort.Ascending ? files.OrderBy(e => e.LastModified) : files.OrderByDescending(e => e.LastModified),
+            SortKey.Type => sort.Ascending
+                ? files.OrderBy(e => Extension(e.Name)).ThenBy(e => e.Name, NameComparer)
+                : files.OrderByDescending(e => Extension(e.Name)).ThenBy(e => e.Name, NameComparer),
+            _            => sort.Ascending ? files.OrderBy(e => e.Name, NameComparer) : files.OrderByDescending(e => e.Name, NameComparer),
+        };
+
+        // Folders always come first, sorted alphabetically; files follow, ordered by the panel's
+        // SortSpec (name / size / date / type, ascending or descending).
+        private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden, SortSpec sort)
         {
             var directoryEntries = provider.EnumerateDirectories(PATHNAME)
                 .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            var fileEntries = (sortByName
-                    ? provider.EnumerateFiles(PATHNAME).OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                    : provider.EnumerateFiles(PATHNAME).OrderByDescending(e => e.Size))
-                .ToList();
+            var fileEntries = SortFiles(provider.EnumerateFiles(PATHNAME), sort).ToList();
 
             var result = new List<AFileEntry>();
 

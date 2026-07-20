@@ -131,13 +131,13 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 
 ### Display Options
 - Toggle hidden file visibility with the "Show Hidden" checkbox
-- Sort files by name or by size
+- **Sort by clicking a column header** — Name, Size, or Date; click again to reverse (an ▲/▼ shows the active column). **Right-click a header** for a menu with **Type (extension)** sorting and explicit Ascending/Descending. Sorting is per-panel and persists as you navigate; folders stay grouped first
 - Configurable font sizes for grid content and headers
 - Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
 
-### Light / Dark Theming
-- A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, and **System** (follow the OS)
+### Theming
+- A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, **System** (follow the OS), and the named palettes **Dracula**, **Nord**, **Solarized Light**, and **Solarized Dark**
 - The choice is saved to `Configuration.xml` and restored on next launch; System mode tracks OS appearance changes live
 - Themes the entire application — window chrome, every dialog, and both file grids — from a central set of semantic color tokens
 - File-row text color is chosen per row for legibility (WCAG luminance) so selection, hover, and compare colors stay readable in both themes
@@ -162,7 +162,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.13.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.14.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -700,6 +700,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.14.0 (2026-07-20) — Click-to-sort columns & named themes
+- **Sort by clicking column headers** — click the **Name**, **Size**, or **Date** header to sort a panel by it; click again to reverse (an **▲/▼** marks the active column). **Right-click** a header for a menu that also sorts by **Type (extension)** and sets **Ascending/Descending**. Sorting is now **per-panel** and persists as you navigate; folders stay grouped first. Sorting runs on the typed underlying fields, so sizes order numerically and dates chronologically. The old Name/Size sort radios were retired in favor of the headers (reclaiming center-panel space).
+- **Named themes** — in addition to Light/Dark/System, the Theme selector now offers **Dracula**, **Nord**, **Solarized Light**, and **Solarized Dark**. These are custom palettes layered on the existing semantic-token system (each inherits a light or dark base so standard controls stay consistent), and the choice persists like the others.
 
 ### 0.1.13.0 (2026-07-19) — Text/hex viewer & external tools on archived files
 - **Text/Hex file viewer** — press **F3** (or right-click → **View**) to open a read-only viewer for the selected file. It auto-detects text vs binary, offers a Text ⇄ Hex toggle (offset · bytes · ASCII), honors BOMs for text, and caps large files at the first 256 KB with a truncation note. It reads through the provider layer, so it views files inside archives exactly like normal files.

@@ -55,6 +55,10 @@ namespace DirOpusReImagined
         /// </summary>
         private TaiDataGrid _activeGrid;
 
+        /// <summary>Per-panel sort order (column + direction), driven by clicking column headers.</summary>
+        private SortSpec _lpSort = SortSpec.Default;
+        private SortSpec _rpSort = SortSpec.Default;
+
         /// <summary>Path of the configuration file the app loaded (or will write the theme choice to).</summary>
         private string _configFilePath;
 
@@ -229,6 +233,12 @@ namespace DirOpusReImagined
 
             LPgrid.GridContextView += Handle_ViewFile;
             RPgrid.GridContextView += Handle_ViewFile;
+
+            // Click a column header to sort that panel by it; right-click for the sort menu.
+            LPgrid.GridHeaderClicked += OnGridHeaderClicked;
+            RPgrid.GridHeaderClicked += OnGridHeaderClicked;
+            LPgrid.GridHeaderRightClicked += OnGridHeaderRightClicked;
+            RPgrid.GridHeaderRightClicked += OnGridHeaderRightClicked;
             LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
             RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
 
@@ -627,10 +637,7 @@ namespace DirOpusReImagined
             ChkShowHidden.Checked += ChkShowHidden_Checked;
             ChkShowHidden.Unchecked += ChkShowHidden_Checked;
 
-            // Repopulate both panels when the sort order changes. Switching radios
-            // fires Checked on the newly selected one, so this runs exactly once.
-            RbSortName.Checked += SortOption_Checked;
-            RbSortSize.Checked += SortOption_Checked;
+            // Sorting is driven by clicking column headers (see GridHeaderClicked wiring below).
 
             #endregion
 
@@ -722,8 +729,8 @@ namespace DirOpusReImagined
         /// /
         private void ChkShowHidden_Checked(object? sender, RoutedEventArgs e)
         {
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
+            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
             RefreshLPGridPostActions();
             RefreshRPGridPostActions();
         }
@@ -732,18 +739,105 @@ namespace DirOpusReImagined
         /// Handles the sort-order radios (Name/Size). Repopulates both panels so the
         /// new sort order is applied immediately, mirroring the Show Hidden toggle.
         /// </summary>
-        private void SortOption_Checked(object? sender, RoutedEventArgs e)
+        /// <summary>
+        /// Re-sorts a panel by <paramref name="key"/> — toggling direction if it's already the sort
+        /// key — and repopulates. Driven by clicking a column header or the header context menu.
+        /// </summary>
+        private void SetPanelSort(TaiDataGrid grid, SortKey key)
         {
-            // Derive the sort from the radio that raised the event rather than reading
-            // RbSortName.IsChecked: the two radios are a group, and Avalonia unchecks the
-            // sibling as a separate step, so RbSortName may still be stale-true here when
-            // Size was clicked — which would incorrectly re-sort by Name.
-            bool sortByName = ReferenceEquals(sender, RbSortName);
+            bool left = ReferenceEquals(grid, LPgrid);
+            if (left) _lpSort = _lpSort.Toward(key); else _rpSort = _rpSort.Toward(key);
+            ApplyPanelSort(grid);
+        }
 
-            FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, sortByName);
-            FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, sortByName);
-            RefreshLPGridPostActions();
-            RefreshRPGridPostActions();
+        /// <summary>Sets a panel's sort to an explicit key + direction (header menu) and repopulates.</summary>
+        private void SetPanelSort(TaiDataGrid grid, SortKey key, bool ascending)
+        {
+            bool left = ReferenceEquals(grid, LPgrid);
+            if (left) _lpSort = new SortSpec(key, ascending); else _rpSort = new SortSpec(key, ascending);
+            ApplyPanelSort(grid);
+        }
+
+        private void ApplyPanelSort(TaiDataGrid grid)
+        {
+            bool showHidden = ChkShowHidden?.IsChecked ?? false;
+            var spec = ReferenceEquals(grid, LPgrid) ? _lpSort : _rpSort;
+
+            // Set the header ▲/▼ indicator before repopulating (the render reads these).
+            grid.SortColumnIndex = ColumnForSortKey(spec.Key);
+            grid.SortAscending = spec.Ascending;
+
+            if (ReferenceEquals(grid, LPgrid))
+            {
+                FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, showHidden, _lpSort);
+                RefreshLPGridPostActions();
+            }
+            else
+            {
+                FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, showHidden, _rpSort);
+                RefreshRPGridPostActions();
+            }
+        }
+
+        // AFileEntry column order: 0=Typ, 1=Name, 2=Size, 3=Date, 4=Dirs, 5=Files, 6=Flags.
+        private static int ColumnForSortKey(SortKey key) => key switch
+        {
+            SortKey.Name => 1,
+            SortKey.Size => 2,
+            SortKey.Date => 3,
+            _            => -1,   // Type has no column → no header indicator
+        };
+
+        private static SortKey? SortKeyForColumn(int col) => col switch
+        {
+            1 => SortKey.Name,
+            2 => SortKey.Size,
+            3 => SortKey.Date,
+            _ => (SortKey?)null,  // Typ/Dirs/Files/Flags aren't sortable via click
+        };
+
+        /// <summary>Left-click on a column header: sort that panel by the column (toggle if repeated).</summary>
+        private void OnGridHeaderClicked(object? sender, int col)
+        {
+            if (sender is not TaiDataGrid grid) return;
+            var key = SortKeyForColumn(col);
+            if (key == null) return;
+            SetPanelSort(grid, key.Value);
+        }
+
+        /// <summary>
+        /// Right-click on a column header: pop a menu to sort by any key (including Type, which has no
+        /// column) and to set the direction explicitly. Shown at the pointer.
+        /// </summary>
+        private void OnGridHeaderRightClicked(object? sender, int col)
+        {
+            if (sender is not TaiDataGrid grid) return;
+            var current = ReferenceEquals(grid, LPgrid) ? _lpSort : _rpSort;
+
+            var flyout = new MenuFlyout();
+
+            MenuItem KeyItem(string label, SortKey key)
+            {
+                var mi = new MenuItem { Header = (current.Key == key ? "● " : "    ") + label };
+                mi.Click += (_, _) => SetPanelSort(grid, key, current.Ascending);
+                return mi;
+            }
+            MenuItem DirItem(string label, bool ascending)
+            {
+                var mi = new MenuItem { Header = (current.Ascending == ascending ? "● " : "    ") + label };
+                mi.Click += (_, _) => SetPanelSort(grid, current.Key, ascending);
+                return mi;
+            }
+
+            flyout.Items.Add(KeyItem("Sort by Name", SortKey.Name));
+            flyout.Items.Add(KeyItem("Sort by Size", SortKey.Size));
+            flyout.Items.Add(KeyItem("Sort by Date", SortKey.Date));
+            flyout.Items.Add(KeyItem("Sort by Type", SortKey.Type));
+            flyout.Items.Add(new Separator());
+            flyout.Items.Add(DirItem("Ascending", true));
+            flyout.Items.Add(DirItem("Descending", false));
+
+            flyout.ShowAt(grid, showAtPointer: true);
         }
 
         private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
@@ -965,7 +1059,7 @@ namespace DirOpusReImagined
             LPfilter.Text = "";
             if (LPpath.Text != null)
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
             RefreshLPGridPostActions();
         }
 
@@ -978,7 +1072,7 @@ namespace DirOpusReImagined
             RPfilter.Text = "";
             if (RPpath.Text != null)
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
             RefreshRPGridPostActions();
         }
 
@@ -994,7 +1088,7 @@ namespace DirOpusReImagined
                 RPfilter.Text = "";
                 if (RPpath.Text != null)
                     if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
                 RefreshRPGridPostActions();
                 ExitPathEditMode("RP");
             }
@@ -1013,7 +1107,7 @@ namespace DirOpusReImagined
                 LPfilter.Text = "";
                 if (LPpath.Text != null)
                     if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
                 RefreshLPGridPostActions();
                 ExitPathEditMode("LP");
             }
@@ -2313,7 +2407,7 @@ namespace DirOpusReImagined
             }
 
             LPfilter.Text = "";
-            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
             RefreshLPGridPostActions();
         }
 
@@ -2332,7 +2426,7 @@ namespace DirOpusReImagined
             }
 
             RPfilter.Text = "";
-            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
             RefreshRPGridPostActions();
         }
 
@@ -2353,7 +2447,7 @@ namespace DirOpusReImagined
                 {
                     _rpHistory.Push(RPpath.Text);
                     RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
                 }
                 else
                 {
@@ -2384,7 +2478,7 @@ namespace DirOpusReImagined
 
                     RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
                     if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value);
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
                 }
                 else
                 {
@@ -2428,7 +2522,7 @@ namespace DirOpusReImagined
                     _lpHistory.Push(LPpath.Text);
                     LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
                     if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
                 }
                 else
                 {
@@ -2458,7 +2552,7 @@ namespace DirOpusReImagined
                     _lpHistory.Push(LPpath.Text);
 
                     LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value);
+                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
                 }
                 else
                 {
@@ -2583,7 +2677,7 @@ namespace DirOpusReImagined
         {
             if (LPpath.Text != null)
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
             CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
             ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
             UpdateStatusBar();
@@ -2593,7 +2687,7 @@ namespace DirOpusReImagined
         {
             if (RPpath.Text != null)
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value,RbSortName.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
             CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
             ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
             UpdateStatusBar();
@@ -2731,7 +2825,7 @@ namespace DirOpusReImagined
                 LPpath.Text = targetPath;
                 LPfilter.Text = "";
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
                 RefreshLPGridPostActions();
             }
             else
@@ -2741,7 +2835,7 @@ namespace DirOpusReImagined
                 RPpath.Text = targetPath;
                 RPfilter.Text = "";
                 if (ChkShowHidden != null)
-                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
                 RefreshRPGridPostActions();
             }
         }
@@ -3794,7 +3888,7 @@ namespace DirOpusReImagined
             pathBox.Text = ArchivePath.RootUriFor(fsPath);
 
             if (ChkShowHidden != null)
-                FileUtility.PopulateFilePanel(grid, pathBox.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+                FileUtility.PopulateFilePanel(grid, pathBox.Text, ChkShowHidden.IsChecked.Value, ReferenceEquals(grid, LPgrid) ? _lpSort : _rpSort);
 
             if (ReferenceEquals(grid, LPgrid)) { LPfilter.Text = ""; RefreshLPGridPostActions(); }
             else { RPfilter.Text = ""; RefreshRPGridPostActions(); }
