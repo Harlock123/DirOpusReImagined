@@ -49,6 +49,18 @@ namespace DirOpusReImagined
         private Stack<string> _lpHistory = new Stack<string>();
         private Stack<string> _rpHistory = new Stack<string>();
 
+        // Forward-navigation stacks (populated by Back, consumed by Forward, cleared by new nav).
+        private Stack<string> _lpForward = new Stack<string>();
+        private Stack<string> _rpForward = new Stack<string>();
+
+        /// <summary>Pushes <paramref name="path"/> onto a panel's Back history and clears its Forward
+        /// stack — the standard "a new navigation invalidates forward" behavior.</summary>
+        private void PushHistory(bool isLeft, string path)
+        {
+            if (isLeft) { _lpHistory.Push(path); _lpForward.Clear(); }
+            else        { _rpHistory.Push(path); _rpForward.Clear(); }
+        }
+
         /// <summary>
         /// The panel that currently has keyboard focus. Keyboard-driven file operations
         /// (added in later phases) act on this panel. Defaults to the left grid.
@@ -98,6 +110,7 @@ namespace DirOpusReImagined
             Closing += (_, _) => RcloneService.Shutdown();
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
+            Closing += (_, _) => SaveUseTrashToConfig();
 
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
@@ -113,6 +126,8 @@ namespace DirOpusReImagined
             // Tab moves the active-panel focus to the other grid.
             LPgrid.NavigateUpRequested += (_, _) => LPBackButton_Click(null, new RoutedEventArgs());
             RPgrid.NavigateUpRequested += (_, _) => RPBackButton_Click(null, new RoutedEventArgs());
+            LPgrid.NavigateForwardRequested += (_, _) => LPForwardButton_Click(null, new RoutedEventArgs());
+            RPgrid.NavigateForwardRequested += (_, _) => RPForwardButton_Click(null, new RoutedEventArgs());
             LPgrid.SwitchPanelRequested += (_, _) => RPgrid.Focus();
             RPgrid.SwitchPanelRequested += (_, _) => LPgrid.Focus();
 
@@ -147,6 +162,7 @@ namespace DirOpusReImagined
 
             // Restore the saved Light/Dark/System theme choice (defaults to Light) and sync the picker.
             LoadThemeFromConfig();
+            LoadUseTrashFromConfig();
             
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
@@ -199,8 +215,8 @@ namespace DirOpusReImagined
                 I7.Height = 12;
 
 
-                RpBackButton.Content = I1;
-                LpBackButton.Content = I2;
+                // Back/Forward use matching text arrow glyphs (set in XAML) rather than the
+                // folder-back image, so the pair looks consistent. I1/I2 are left unused.
 
                 SwapButton.Content = I7;
                 LeftToRightButton.Content = I5;
@@ -576,6 +592,8 @@ namespace DirOpusReImagined
 
             RpBackButton.Click += RPBackButton_Click;
             LpBackButton.Click += LPBackButton_Click;
+            LpForwardButton.Click += LPForwardButton_Click;
+            RpForwardButton.Click += RPForwardButton_Click;
 
             LpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(LpCloudButton, "LP");
             RpCloudButton.Click += async (_, _) => await ShowCloudRemotesAsync(RpCloudButton, "RP");
@@ -1106,7 +1124,7 @@ namespace DirOpusReImagined
             if (e.Key == Key.Enter)
             {
                 if (!string.IsNullOrEmpty(_rpPathBeforeEdit) && _rpPathBeforeEdit != RPpath.Text)
-                    _rpHistory.Push(_rpPathBeforeEdit);
+                    PushHistory(false, _rpPathBeforeEdit);
                 RPfilter.Text = "";
                 if (RPpath.Text != null)
                     if (ChkShowHidden != null)
@@ -1125,7 +1143,7 @@ namespace DirOpusReImagined
             if (e.Key == Key.Enter)
             {
                 if (!string.IsNullOrEmpty(_lpPathBeforeEdit) && _lpPathBeforeEdit != LPpath.Text)
-                    _lpHistory.Push(_lpPathBeforeEdit);
+                    PushHistory(true, _lpPathBeforeEdit);
                 LPfilter.Text = "";
                 if (LPpath.Text != null)
                     if (ChkShowHidden != null)
@@ -2310,6 +2328,42 @@ namespace DirOpusReImagined
         /// Reads the persisted &lt;Theme&gt; setting (Light/Dark/System, default Light), applies it,
         /// and syncs the picker without triggering a save.
         /// </summary>
+        /// <summary>Reads the persisted &lt;UseTrash&gt; setting (default true) into <see cref="AppOptions"/>.</summary>
+        private void LoadUseTrashFromConfig()
+        {
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var el = XDocument.Load(_configFilePath).Descendants("UseTrash").FirstOrDefault();
+                    if (el != null && bool.TryParse(el.Value.Trim(), out var v))
+                        AppOptions.UseTrash = v;
+                }
+            }
+            catch { /* keep the default (on) */ }
+        }
+
+        /// <summary>Writes the current &lt;UseTrash&gt; option to the config file.</summary>
+        private void SaveUseTrashToConfig()
+        {
+            try
+            {
+                string path = _configFilePath ?? GetWritableConfigPath();
+                XDocument doc = File.Exists(path) ? XDocument.Load(path) : new XDocument(new XElement("Settings"));
+                var root = doc.Root ?? new XElement("Settings");
+                if (doc.Root == null) doc.Add(root);
+
+                var el = root.Element("UseTrash");
+                if (el == null) { el = new XElement("UseTrash"); root.Add(el); }
+                el.Value = AppOptions.UseTrash ? "true" : "false";
+
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                doc.Save(path);
+                _configFilePath = path;
+            }
+            catch { /* best-effort */ }
+        }
+
         private void LoadThemeFromConfig()
         {
             ThemeChoice choice = ThemeChoice.Light;
@@ -2555,7 +2609,7 @@ namespace DirOpusReImagined
                 if (_lpActiveTab < 0 || _lpActiveTab >= _lpTabs.Count) return;
                 var t = _lpTabs[_lpActiveTab];
                 t.Path = LPpath.Text ?? "";
-                t.History = _lpHistory;
+                t.History = _lpHistory;                t.Forward = _lpForward;
                 t.Sort = _lpSort;
                 t.FilterText = LPfilter.Text ?? "";
             }
@@ -2564,7 +2618,7 @@ namespace DirOpusReImagined
                 if (_rpActiveTab < 0 || _rpActiveTab >= _rpTabs.Count) return;
                 var t = _rpTabs[_rpActiveTab];
                 t.Path = RPpath.Text ?? "";
-                t.History = _rpHistory;
+                t.History = _rpHistory;                t.Forward = _rpForward;
                 t.Sort = _rpSort;
                 t.FilterText = RPfilter.Text ?? "";
             }
@@ -2579,7 +2633,7 @@ namespace DirOpusReImagined
             if (isLeft)
             {
                 var t = _lpTabs[index];
-                _lpHistory = t.History ?? new Stack<string>();
+                _lpHistory = t.History ?? new Stack<string>();                _lpForward = t.Forward ?? new Stack<string>();
                 _lpSort = t.Sort;
                 LPfilter.Text = t.FilterText;
                 LPpath.Text = t.Path;
@@ -2591,7 +2645,7 @@ namespace DirOpusReImagined
             else
             {
                 var t = _rpTabs[index];
-                _rpHistory = t.History ?? new Stack<string>();
+                _rpHistory = t.History ?? new Stack<string>();                _rpForward = t.Forward ?? new Stack<string>();
                 _rpSort = t.Sort;
                 RPfilter.Text = t.FilterText;
                 RPpath.Text = t.Path;
@@ -2713,6 +2767,7 @@ namespace DirOpusReImagined
         {
             if (_lpHistory.Count > 0)
             {
+                _lpForward.Push(LPpath.Text ?? "");   // current becomes a forward step
                 LPpath.Text = _lpHistory.Pop();
             }
             else
@@ -2720,7 +2775,10 @@ namespace DirOpusReImagined
                 // Fallback: navigate up the directory tree
                 var parent = ParentOf(LPpath.Text);
                 if (!string.IsNullOrEmpty(parent))
+                {
+                    _lpForward.Push(LPpath.Text ?? "");
                     LPpath.Text = parent;
+                }
             }
 
             LPfilter.Text = "";
@@ -2732,6 +2790,7 @@ namespace DirOpusReImagined
         {
             if (_rpHistory.Count > 0)
             {
+                _rpForward.Push(RPpath.Text ?? "");
                 RPpath.Text = _rpHistory.Pop();
             }
             else
@@ -2739,9 +2798,32 @@ namespace DirOpusReImagined
                 // Fallback: navigate up the directory tree
                 var parent = ParentOf(RPpath.Text);
                 if (!string.IsNullOrEmpty(parent))
+                {
+                    _rpForward.Push(RPpath.Text ?? "");
                     RPpath.Text = parent;
+                }
             }
 
+            RPfilter.Text = "";
+            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
+            RefreshRPGridPostActions();
+        }
+
+        private void LPForwardButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_lpForward.Count == 0) return;
+            _lpHistory.Push(LPpath.Text ?? "");   // current becomes a back step
+            LPpath.Text = _lpForward.Pop();
+            LPfilter.Text = "";
+            if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
+            RefreshLPGridPostActions();
+        }
+
+        private void RPForwardButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_rpForward.Count == 0) return;
+            _rpHistory.Push(RPpath.Text ?? "");
+            RPpath.Text = _rpForward.Pop();
             RPfilter.Text = "";
             if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
             RefreshRPGridPostActions();
@@ -2762,7 +2844,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    _rpHistory.Push(RPpath.Text);
+                    PushHistory(false, RPpath.Text);
                     RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
                 }
@@ -2791,7 +2873,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    _rpHistory.Push(RPpath.Text);
+                    PushHistory(false, RPpath.Text);
 
                     RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
                     if (ChkShowHidden != null)
@@ -2836,7 +2918,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    _lpHistory.Push(LPpath.Text);
+                    PushHistory(true, LPpath.Text);
                     LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
                     if (ChkShowHidden != null)
                         FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
@@ -2866,7 +2948,7 @@ namespace DirOpusReImagined
             {
                 if (it.Typ)
                 {
-                    _lpHistory.Push(LPpath.Text);
+                    PushHistory(true, LPpath.Text);
 
                     LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
                     if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
@@ -3138,7 +3220,7 @@ namespace DirOpusReImagined
             if (side == "LP")
             {
                 if (!string.IsNullOrEmpty(LPpath.Text))
-                    _lpHistory.Push(LPpath.Text);
+                    PushHistory(true, LPpath.Text);
                 LPpath.Text = targetPath;
                 LPfilter.Text = "";
                 if (ChkShowHidden != null)
@@ -3148,7 +3230,7 @@ namespace DirOpusReImagined
             else
             {
                 if (!string.IsNullOrEmpty(RPpath.Text))
-                    _rpHistory.Push(RPpath.Text);
+                    PushHistory(false, RPpath.Text);
                 RPpath.Text = targetPath;
                 RPfilter.Text = "";
                 if (ChkShowHidden != null)
@@ -3274,7 +3356,7 @@ namespace DirOpusReImagined
 
             if (side == "LP")
             {
-                if (!string.IsNullOrEmpty(LPpath.Text)) _lpHistory.Push(LPpath.Text);
+                if (!string.IsNullOrEmpty(LPpath.Text)) PushHistory(true, LPpath.Text);
                 LPpath.Text = path;
                 LPfilter.Text = "";
                 FileUtility.PopulateFilePanel(LPgrid, path, showHidden);
@@ -3283,7 +3365,7 @@ namespace DirOpusReImagined
             }
             else
             {
-                if (!string.IsNullOrEmpty(RPpath.Text)) _rpHistory.Push(RPpath.Text);
+                if (!string.IsNullOrEmpty(RPpath.Text)) PushHistory(false, RPpath.Text);
                 RPpath.Text = path;
                 RPfilter.Text = "";
                 FileUtility.PopulateFilePanel(RPgrid, path, showHidden);
@@ -4203,7 +4285,7 @@ namespace DirOpusReImagined
             if (CloudPath.IsCloudUri(current) || ArchivePath.IsArchiveUri(current)) return false;
 
             string fsPath = JoinChildPath(current, it.Name);
-            history.Push(current);
+            PushHistory(ReferenceEquals(grid, LPgrid), current);   // new nav → clears forward
             pathBox.Text = ArchivePath.RootUriFor(fsPath);
 
             if (ChkShowHidden != null)

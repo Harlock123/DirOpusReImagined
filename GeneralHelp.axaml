@@ -28,7 +28,8 @@
 
                 <TextBlock Text="Dual-panel browsing" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Two independent panels, each with its own path bar, back button, and drive selector." TextWrapping="Wrap" />
-                <TextBlock Text="• Double-click a folder to enter it; use the back button (or Backspace) to go up a level." TextWrapping="Wrap" />
+                <TextBlock Text="• Double-click a folder to enter it; use Back / Forward (or Alt+Left / Alt+Right) to move through history, and Backspace to go up a level." TextWrapping="Wrap" />
+                <TextBlock Text="• Type-ahead: with a panel focused, just start typing a name to jump to the matching row (repeat a letter to cycle through matches)." TextWrapping="Wrap" />
                 <TextBlock Text="• Swap panel contents, or clone one panel's path to the other, with the center buttons." TextWrapping="Wrap" />
 
                 <TextBlock Text="Folder tabs" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
@@ -36,6 +37,7 @@
 
                 <TextBlock Text="File operations" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and Rename (including pattern-based batch rename)." TextWrapping="Wrap" />
+                <TextBlock Text="• Delete sends items to the OS Trash/Recycle Bin by default (recoverable) — a checkbox in the delete dialog switches to permanent deletion. Local files only." TextWrapping="Wrap" />
                 <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
                 <TextBlock Text="• Overwrite is confirmed before anything at the destination is replaced." TextWrapping="Wrap" />
 
@@ -82,6 +84,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -175,6 +178,9 @@
 
                     <TextBlock Grid.Row="22" Grid.Column="0" Text="Ctrl/Cmd + Tab" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="22" Grid.Column="1" Text="Cycle tabs (Shift for previous; or Ctrl/Cmd+PageUp/Down)" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="23" Grid.Column="0" Text="Alt + ← / →" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="23" Grid.Column="1" Text="Back / Forward in the panel's history" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

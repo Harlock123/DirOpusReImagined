@@ -314,6 +314,12 @@ namespace DirOpusReImagined
         /// <summary>Anchor row for future Shift-extend range selection (Phase 2).</summary>
         private int _anchorIndex = -1;
 
+        // Type-ahead: typed characters accumulate into a buffer that jumps the cursor to the first
+        // matching row; the buffer resets after a short idle gap.
+        private string _typeAheadBuffer = "";
+        private DateTime _lastTypeAhead = DateTime.MinValue;
+        private const double TypeAheadTimeoutMs = 900;
+
         /// <summary>Outline brush drawn around the row that currently holds the keyboard cursor.</summary>
         private IBrush _gridCursorBrush = Brushes.DodgerBlue;
 
@@ -896,6 +902,7 @@ namespace DirOpusReImagined
                 _gridYShift = 0;
                 _cursorIndex = -1;
                 _anchorIndex = -1;
+                _typeAheadBuffer = "";
 
                 SuspendRendering = false;
 
@@ -2664,6 +2671,12 @@ namespace DirOpusReImagined
                 e.Handled = true;
                 return;
             }
+            // Alt+Left / Alt+Right: back / forward in this panel's history.
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                if (e.Key == Key.Left)  { NavigateUpRequested?.Invoke(this, EventArgs.Empty);      e.Handled = true; return; }
+                if (e.Key == Key.Right) { NavigateForwardRequested?.Invoke(this, EventArgs.Empty); e.Handled = true; return; }
+            }
 
             // Wildcard selection hotkeys (orthodox "gray-plus/minus/star"). Accept both the numpad
             // keys and the common main-keyboard combos, and ignore them while Ctrl/Cmd is held.
@@ -2768,10 +2781,71 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
+        /// Type-ahead: a printable character typed on the focused grid jumps the cursor to the first
+        /// row whose name matches the accumulated buffer. Character input arrives here (not OnKeyDown)
+        /// so it respects the keyboard layout. Ctrl/Cmd/Alt combos don't produce text, so they're
+        /// naturally excluded.
+        /// </summary>
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            var t = e.Text;
+            if (_items.Count > 0 && !string.IsNullOrEmpty(t) && t.Length == 1 && !char.IsControl(t[0]) && t != " ")
+            {
+                HandleTypeAhead(t);
+                e.Handled = true;
+                return;
+            }
+            base.OnTextInput(e);
+        }
+
+        private void HandleTypeAhead(string ch)
+        {
+            var now = DateTime.Now;
+            if ((now - _lastTypeAhead).TotalMilliseconds > TypeAheadTimeoutMs) _typeAheadBuffer = "";
+            _lastTypeAhead = now;
+
+            // Pressing the same single character again cycles through matches for that letter
+            // instead of extending the buffer (the common orthodox behavior).
+            bool cycle = _typeAheadBuffer.Length == 1 &&
+                         string.Equals(_typeAheadBuffer, ch, StringComparison.OrdinalIgnoreCase);
+            if (!cycle) _typeAheadBuffer += ch;
+
+            string prefix = cycle ? ch : _typeAheadBuffer;
+            int n = _items.Count;
+            int startFrom = cycle ? _cursorIndex + 1 : 0;   // cycle from next row; a new search starts at top
+
+            int match = -1;
+            for (int i = 0; i < n; i++)
+            {
+                int idx = ((startFrom + i) % n + n) % n;
+                if (_items[idx] is AFileEntry af && af.Name != null &&
+                    af.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    match = idx;
+                    break;
+                }
+            }
+
+            if (cycle) _typeAheadBuffer = ch;   // keep the buffer single while cycling
+
+            if (match >= 0)
+            {
+                _cursorIndex = match;
+                SelectSingle(match);            // Explorer-style: the matched row becomes the selection
+                EnsureCursorVisible();
+                ReRender();
+                RaiseKeyboardSelectionChanged();
+            }
+        }
+
+        /// <summary>
         /// Raised when the user presses Backspace, asking the host to navigate this panel up one
         /// directory level. The host maps it to the same action as the panel's Back button.
         /// </summary>
         public event EventHandler NavigateUpRequested;
+
+        /// <summary>Raised on Alt+Right — navigate forward in this panel's history.</summary>
+        public event EventHandler NavigateForwardRequested;
 
         /// <summary>
         /// Raised when the user presses Tab, asking the host to make the other panel active.

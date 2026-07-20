@@ -23,7 +23,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 ### File Operations
 - **Copy** files and folders between panels
 - **Move** files and folders between panels
-- **Delete** files and folders with confirmation dialog
+- **Delete** files and folders with a confirmation dialog — deletes go to the **OS trash / recycle bin** by default (recoverable), with a per-delete toggle for permanent deletion (local files only)
 - **Rename** files and folders with a pattern-based rename interface for batch operations
 - **Create folders** in either panel
 - **Create ZIP archives** from selected files
@@ -72,6 +72,8 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 | **Ctrl/Cmd + A** | Select all files in the active panel |
 | **Enter** | Open the cursor row — folders navigate in, files open/execute |
 | **Backspace** | Go up one directory level in the active panel |
+| **Alt + ← / →** | Back / Forward in the panel's history |
+| *(type a name)* | Type-ahead: jump to the matching row; repeat a letter to cycle |
 | **Tab** | Switch the active panel |
 | **F2** | Rename the selection in the active panel |
 | **F3** | View the selected file (text/hex), including files inside archives |
@@ -133,8 +135,9 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 
 ### Navigation
 - Path text box with Enter key navigation
-- Back button to go up one directory level
+- **Back and Forward** buttons per panel (per-tab history) — Back also goes up a level; **Alt+← / Alt+→** on the keyboard
 - Full keyboard navigation — arrow-key cursor, Enter to open, Backspace to go up, Tab to switch panels (see **Keyboard Navigation & Shortcuts**)
+- **Type-ahead** — start typing a name in a panel to jump to the matching file/folder; repeat a letter to cycle
 - Drive button for drive/volume selection
 - Panel swap and clone buttons for quick path synchronization
 - Cloud paths fully integrated alongside local — same double-click / breadcrumb / back behavior
@@ -172,7 +175,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.15.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.16.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -710,6 +713,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.16.0 (2026-07-20) — Forward navigation, type-ahead & Trash
+- **Forward navigation** — each panel now has a **Forward** button beside Back (and **Alt+←/Alt+→**), with per-tab history. A new navigation clears the forward stack, exactly like a web browser.
+- **Type-ahead jump** — start typing a name in a focused panel to jump the cursor to the first matching row; repeating a letter cycles through matches. Layout-aware, resets after a short pause, and never interferes with the path/filter boxes.
+- **Send to Trash** — deletes now go to the OS **trash / recycle bin** by default (recoverable), with a **"Move to Trash (recoverable)"** checkbox in the delete dialog to choose permanent deletion per-delete (remembered in `Configuration.xml`). Cross-platform: Windows Recycle Bin (`SHFileOperation`), macOS Finder Trash, and Linux `gio trash` with a freedesktop.org spec fallback. Applies to local files only — cloud deletes remain permanent.
 
 ### 0.1.15.0 (2026-07-20) — Folder tabs
 - **Folder tabs per panel** — each side now has a tab bar above the file list. Open multiple folders per panel and switch between them; every tab keeps its own path, back-history, sort, and filter, all independent of the other tabs and the other panel.

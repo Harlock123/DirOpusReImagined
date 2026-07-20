@@ -334,8 +334,14 @@
 				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
-			<Button Name="LpBackButton" Grid.Column="0" Grid.Row="0"
-			        Background="{DynamicResource PanelChromeBrush}" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			<StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+				<Button Name="LpBackButton"
+				        Background="{DynamicResource PanelChromeBrush}" Content="◀" FontSize="13" Height="28" Margin="2,4,0,4"
+				        ToolTip.Tip="Back (Alt+Left / Backspace)"/>
+				<Button Name="LpForwardButton"
+				        Background="{DynamicResource PanelChromeBrush}" Content="▶" FontSize="13" Height="28" Margin="2,4,0,4"
+				        ToolTip.Tip="Forward (Alt+Right)"/>
+			</StackPanel>
 			<Grid Grid.Column="1" Grid.Row="0" Margin="2,4,2,4" Height="28">
 				<!-- Edit mode (visible at startup, hidden once breadcrumbs are ready) -->
 				<TextBox Name="LPpath" Text="" FontSize="12"/>
@@ -371,8 +377,14 @@
 				<ColumnDefinition Width="auto"/>
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
-			<Button Name="RpBackButton" Grid.Column="0" Grid.Row="0"
-			        Background="{DynamicResource PanelChromeBrush}" Content="&lt;=" Height="28" Margin="2,4,0,4"/>
+			<StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+				<Button Name="RpBackButton"
+				        Background="{DynamicResource PanelChromeBrush}" Content="◀" FontSize="13" Height="28" Margin="2,4,0,4"
+				        ToolTip.Tip="Back (Alt+Left / Backspace)"/>
+				<Button Name="RpForwardButton"
+				        Background="{DynamicResource PanelChromeBrush}" Content="▶" FontSize="13" Height="28" Margin="2,4,0,4"
+				        ToolTip.Tip="Forward (Alt+Right)"/>
+			</StackPanel>
 			<Grid Grid.Column="1" Grid.Row="0" Margin="2,4,2,4" Height="28">
 				<!-- Edit mode (visible at startup, hidden once breadcrumbs are ready) -->
 				<TextBox Name="RPpath" Text="" FontSize="12"/>

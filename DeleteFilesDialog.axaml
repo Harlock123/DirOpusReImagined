@@ -15,8 +15,12 @@
             <Run Text="folders, are you sure this is what you want to do?"/> 
         </TextBlock>
     
+        <CheckBox x:Name="TrashCheck" Content="Move to Trash (recoverable)"
+                  HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12"
+                  ToolTip.Tip="On: deletes go to the OS trash/recycle bin. Off: permanent delete. (Local files only.)"/>
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
-            
+
             <Button x:Name="OKButton" Content="OK"  Margin="5"/>
             <Button x:Name="CANCELButton" Content="Cancel"  Margin="5"/>
         </StackPanel>

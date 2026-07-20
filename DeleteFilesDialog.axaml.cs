@@ -33,7 +33,9 @@ public partial class DeleteFilesDialog : Window
         
         OKButton.Click += OKButton_Click;
         CANCELButton.Click += CANButton_Click;
-        
+
+        TrashCheck.IsChecked = AppOptions.UseTrash;   // default from the saved setting
+
         FilesToDelete = filesToDelete;
         RootPath = rootPath;
         ThePanel = thepanel;
@@ -73,21 +75,22 @@ public partial class DeleteFilesDialog : Window
     {
         // They said OK so lets delete the files
 
+        bool useTrash = TrashCheck.IsChecked == true;
+        AppOptions.UseTrash = useTrash;   // remember the choice for next time (persisted on app close)
+
         foreach (AFileEntry af in FilesToDelete)
         {
             if (af.Typ)
             {
                 // This is a folder
-                
-                
-                FileUtility.DeleteFolder(Path.Combine(RootPath, af.Name));
+                FileUtility.DeleteFolder(Path.Combine(RootPath, af.Name), useTrash);
             }
             else
             {
                 // This is a file
-                FileUtility.DeleteFile(Path.Combine(RootPath, af.Name));
+                FileUtility.DeleteFile(Path.Combine(RootPath, af.Name), useTrash);
             }
-            
+
         }
         
         FileUtility.PopulateFilePanel(ThePanel, RootPath,_ShowHidden);

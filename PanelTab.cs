@@ -11,6 +11,7 @@ public sealed class PanelTab
 {
     public string Path = "";
     public Stack<string> History = new();
+    public Stack<string> Forward = new();
     public SortSpec Sort = SortSpec.Default;
     public string FilterText = "";
     public int CursorIndex = -1;

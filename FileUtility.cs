@@ -718,14 +718,19 @@ namespace DirOpusReImagined
         /// Deletes a folder and its contents.
         /// </summary>
         /// <param name="rootPath">The root path of the folder to delete.</param>
-        public static void DeleteFolder(string rootPath)
+        public static void DeleteFolder(string rootPath) => DeleteFolder(rootPath, useTrash: false);
+
+        public static void DeleteFolder(string rootPath, bool useTrash)
         {
             try
             {
                 var p = ProviderRegistry.For(rootPath);
                 if (p.DirectoryExists(rootPath))
                 {
-                    p.DeleteDirectory(rootPath, recursive: true);
+                    if (CanTrash(p, rootPath, useTrash))
+                        TrashService.Trash(rootPath);
+                    else
+                        p.DeleteDirectory(rootPath, recursive: true);
                 }
             }
             catch (Exception e)
@@ -739,14 +744,19 @@ namespace DirOpusReImagined
         /// This method deletes a file at the specified root path.
         /// </summary>
         /// <param name="rootPath">The root path of the file to be deleted.</param>
-        public static void DeleteFile(string rootPath)
+        public static void DeleteFile(string rootPath) => DeleteFile(rootPath, useTrash: false);
+
+        public static void DeleteFile(string rootPath, bool useTrash)
         {
             try
             {
                 var p = ProviderRegistry.For(rootPath);
                 if (p.FileExists(rootPath))
                 {
-                    p.DeleteFile(rootPath);
+                    if (CanTrash(p, rootPath, useTrash))
+                        TrashService.Trash(rootPath);
+                    else
+                        p.DeleteFile(rootPath);
                 }
             }
             catch (Exception e)
@@ -755,5 +765,10 @@ namespace DirOpusReImagined
                 MB.ShowDialog(GetMainWindow());
             }
         }
+
+        // Trash applies only to local files — cloud has no recycle bin and archives are read-only.
+        private static bool CanTrash(IFileProvider provider, string path, bool useTrash)
+            => useTrash && !provider.IsRemote
+               && !DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(path);
     }
 }
