@@ -43,6 +43,15 @@ namespace DirOpusReImagined
         View
     }
 
+    /// <summary>A folder-tab action requested on the active panel via a keyboard shortcut.</summary>
+    public enum TabAction
+    {
+        New,
+        Close,
+        Next,
+        Previous
+    }
+
     /// <summary>
     /// A wildcard-selection action requested on the active panel. Select/Deselect need a pattern
     /// (the host prompts for one); Invert is immediate.
@@ -2630,6 +2639,16 @@ namespace DirOpusReImagined
             // Treat Cmd (Meta) like Ctrl so the shortcuts feel native on macOS.
             bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
+            // Folder-tab shortcuts (Ctrl/Cmd based) — checked before the plain-Tab panel switch.
+            if (ctrl)
+            {
+                if (e.Key == Key.T)        { TabActionRequested?.Invoke(this, TabAction.New);   e.Handled = true; return; }
+                if (e.Key == Key.W)        { TabActionRequested?.Invoke(this, TabAction.Close); e.Handled = true; return; }
+                if (e.Key == Key.Tab)      { TabActionRequested?.Invoke(this, shift ? TabAction.Previous : TabAction.Next); e.Handled = true; return; }
+                if (e.Key == Key.PageDown) { TabActionRequested?.Invoke(this, TabAction.Next);     e.Handled = true; return; }
+                if (e.Key == Key.PageUp)   { TabActionRequested?.Invoke(this, TabAction.Previous); e.Handled = true; return; }
+            }
+
             // Panel-level keys that must work even when the panel is empty.
             // Tab: hand off focus to the other panel (also suppresses default focus traversal).
             if (e.Key == Key.Tab)
@@ -2758,6 +2777,9 @@ namespace DirOpusReImagined
         /// Raised when the user presses Tab, asking the host to make the other panel active.
         /// </summary>
         public event EventHandler SwitchPanelRequested;
+
+        /// <summary>Raised for a folder-tab keyboard shortcut (Ctrl+T/W, Ctrl+Tab, Ctrl+PageUp/Down).</summary>
+        public event EventHandler<TabAction> TabActionRequested;
 
         /// <summary>
         /// Raised when the user presses a file-verb key (F2/F5/F6/F7/F8/Del) on this panel.

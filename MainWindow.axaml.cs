@@ -59,6 +59,13 @@ namespace DirOpusReImagined
         private SortSpec _lpSort = SortSpec.Default;
         private SortSpec _rpSort = SortSpec.Default;
 
+        /// <summary>Open folder tabs per side. The active tab's state lives in the panel's live
+        /// fields (path/history/sort/filter); the others are snapshots restored on switch.</summary>
+        private readonly List<PanelTab> _lpTabs = new();
+        private readonly List<PanelTab> _rpTabs = new();
+        private int _lpActiveTab;
+        private int _rpActiveTab;
+
         /// <summary>Path of the configuration file the app loaded (or will write the theme choice to).</summary>
         private string _configFilePath;
 
@@ -90,6 +97,7 @@ namespace DirOpusReImagined
             FileUtility.PanelPopulated += OnPanelPopulated;
             Closing += (_, _) => RcloneService.Shutdown();
             Closing += (_, _) => CleanupToolTemp();
+            Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
 
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
@@ -239,6 +247,10 @@ namespace DirOpusReImagined
             RPgrid.GridHeaderClicked += OnGridHeaderClicked;
             LPgrid.GridHeaderRightClicked += OnGridHeaderRightClicked;
             RPgrid.GridHeaderRightClicked += OnGridHeaderRightClicked;
+
+            // Folder-tab keyboard shortcuts (Ctrl+T/W, Ctrl+Tab, Ctrl+PageUp/Down).
+            LPgrid.TabActionRequested += OnPanelTabAction;
+            RPgrid.TabActionRequested += OnPanelTabAction;
             LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
             RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
 
@@ -276,6 +288,16 @@ namespace DirOpusReImagined
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
             CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
             UpdateStatusBar();
+
+            // Seed one tab per side from the initial start paths.
+            _lpTabs.Add(new PanelTab(LPpath.Text ?? "") { Sort = _lpSort });
+            _rpTabs.Add(new PanelTab(RPpath.Text ?? "") { Sort = _rpSort });
+            _lpActiveTab = 0;
+            _rpActiveTab = 0;
+            // Restore any tabs saved from a previous session (replaces the seeded single tab).
+            LoadTabsFromConfig();
+            RenderTabBar(isLeft: true);
+            RenderTabBar(isLeft: false);
 
             // Breadcrumb bar setup — switch from TextBox to breadcrumb mode
             // after initial load so TextBox.Text is reliably set during config loading
@@ -2368,6 +2390,77 @@ namespace DirOpusReImagined
             catch { /* persistence is best-effort; the in-session choice still applies */ }
         }
 
+        /// <summary>Writes each side's open tab paths and active index to the config file.</summary>
+        private void SaveTabsToConfig()
+        {
+            try
+            {
+                // Capture live path/state into the active tabs first.
+                SaveActiveTabState(true);
+                SaveActiveTabState(false);
+
+                string path = _configFilePath ?? GetWritableConfigPath();
+                XDocument doc = File.Exists(path) ? XDocument.Load(path) : new XDocument(new XElement("Settings"));
+                var root = doc.Root ?? new XElement("Settings");
+                if (doc.Root == null) doc.Add(root);
+
+                root.Element("Tabs")?.Remove();
+                root.Add(new XElement("Tabs",
+                    BuildTabsSide("Left", _lpTabs, _lpActiveTab),
+                    BuildTabsSide("Right", _rpTabs, _rpActiveTab)));
+
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                doc.Save(path);
+                _configFilePath = path;
+            }
+            catch { /* best-effort */ }
+        }
+
+        private static XElement BuildTabsSide(string name, List<PanelTab> tabs, int active)
+        {
+            var el = new XElement(name, new XAttribute("active", active));
+            foreach (var t in tabs)
+                el.Add(new XElement("Tab", t.Path));
+            return el;
+        }
+
+        /// <summary>Restores saved tabs (if any) over the seeded single tab on each side.</summary>
+        private void LoadTabsFromConfig()
+        {
+            try
+            {
+                if (_configFilePath == null || !File.Exists(_configFilePath)) return;
+                var tabsEl = XDocument.Load(_configFilePath).Root?.Element("Tabs");
+                if (tabsEl == null) return;
+                ApplySavedTabs(tabsEl.Element("Left"), isLeft: true);
+                ApplySavedTabs(tabsEl.Element("Right"), isLeft: false);
+            }
+            catch { /* fall back to the seeded single tab */ }
+        }
+
+        private void ApplySavedTabs(XElement sideEl, bool isLeft)
+        {
+            if (sideEl == null) return;
+
+            // Keep only paths that still resolve (cloud/archive are kept as best-effort).
+            var paths = sideEl.Elements("Tab").Select(e => e.Value)
+                .Where(p => !string.IsNullOrWhiteSpace(p) &&
+                            (CloudPath.IsCloudUri(p) || ArchivePath.IsArchiveUri(p) || Directory.Exists(p)))
+                .ToList();
+            if (paths.Count == 0) return;
+
+            int active = 0;
+            int.TryParse(sideEl.Attribute("active")?.Value, out active);
+            if (active < 0 || active >= paths.Count) active = 0;
+
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            tabs.Clear();
+            foreach (var p in paths)
+                tabs.Add(new PanelTab(p) { History = new Stack<string>(), Sort = SortSpec.Default });
+            if (isLeft) _lpActiveTab = active; else _rpActiveTab = active;
+            LoadTab(isLeft, active);
+        }
+
         /// <summary>Platform-appropriate, user-writable path for a config file when none was found.</summary>
         private string GetWritableConfigPath()
         {
@@ -2380,6 +2473,230 @@ namespace DirOpusReImagined
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dori", configName);
             return Path.Combine(home, ".config", "dori", configName);
         }
+
+        #region Folder tabs
+
+        private void LPnewTab_Click(object? sender, RoutedEventArgs e) => NewTab(isLeft: true);
+        private void RPnewTab_Click(object? sender, RoutedEventArgs e) => NewTab(isLeft: false);
+
+        /// <summary>Handles a keyboard tab shortcut on the panel that raised it.</summary>
+        private void OnPanelTabAction(object? sender, TabAction action)
+        {
+            if (sender is not TaiDataGrid grid) return;
+            bool isLeft = ReferenceEquals(grid, LPgrid);
+            switch (action)
+            {
+                case TabAction.New:      NewTab(isLeft); break;
+                case TabAction.Close:    CloseTab(isLeft, isLeft ? _lpActiveTab : _rpActiveTab); break;
+                case TabAction.Next:     CycleTab(isLeft, +1); break;
+                case TabAction.Previous: CycleTab(isLeft, -1); break;
+            }
+        }
+
+        /// <summary>Moves to the next/previous tab, wrapping around.</summary>
+        private void CycleTab(bool isLeft, int direction)
+        {
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            if (tabs.Count <= 1) return;
+            int active = isLeft ? _lpActiveTab : _rpActiveTab;
+            int next = (active + direction + tabs.Count) % tabs.Count;
+            SwitchTab(isLeft, next);
+        }
+
+        /// <summary>Opens a new tab cloning the current folder and switches to it.</summary>
+        private void NewTab(bool isLeft)
+        {
+            SaveActiveTabState(isLeft);
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            string current = (isLeft ? LPpath.Text : RPpath.Text) ?? "";
+            tabs.Add(new PanelTab(current) { Sort = SortSpec.Default, History = new Stack<string>() });
+            int newIndex = tabs.Count - 1;
+            if (isLeft) _lpActiveTab = newIndex; else _rpActiveTab = newIndex;
+            LoadTab(isLeft, newIndex);
+            SaveTabsToConfig();
+        }
+
+        /// <summary>Closes a tab (never the last one); if it was active, moves to a neighbor.</summary>
+        private void CloseTab(bool isLeft, int index)
+        {
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            if (tabs.Count <= 1 || index < 0 || index >= tabs.Count) return;
+
+            int active = isLeft ? _lpActiveTab : _rpActiveTab;
+            bool closingActive = index == active;
+            tabs.RemoveAt(index);
+
+            int newActive = active;
+            if (index < active) newActive = active - 1;
+            else if (index == active) newActive = Math.Min(active, tabs.Count - 1);
+            if (isLeft) _lpActiveTab = newActive; else _rpActiveTab = newActive;
+
+            if (closingActive) LoadTab(isLeft, newActive);   // restore neighbor's state
+            else RenderTabBar(isLeft);                       // active tab's live state is unchanged
+            SaveTabsToConfig();
+        }
+
+        /// <summary>Switches to <paramref name="index"/>, snapshotting the current tab first.</summary>
+        private void SwitchTab(bool isLeft, int index)
+        {
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            int active = isLeft ? _lpActiveTab : _rpActiveTab;
+            if (index < 0 || index >= tabs.Count || index == active) return;
+            SaveActiveTabState(isLeft);
+            if (isLeft) _lpActiveTab = index; else _rpActiveTab = index;
+            LoadTab(isLeft, index);
+        }
+
+        /// <summary>Snapshots the panel's live state (path/history/sort/filter) into its active tab.</summary>
+        private void SaveActiveTabState(bool isLeft)
+        {
+            if (isLeft)
+            {
+                if (_lpActiveTab < 0 || _lpActiveTab >= _lpTabs.Count) return;
+                var t = _lpTabs[_lpActiveTab];
+                t.Path = LPpath.Text ?? "";
+                t.History = _lpHistory;
+                t.Sort = _lpSort;
+                t.FilterText = LPfilter.Text ?? "";
+            }
+            else
+            {
+                if (_rpActiveTab < 0 || _rpActiveTab >= _rpTabs.Count) return;
+                var t = _rpTabs[_rpActiveTab];
+                t.Path = RPpath.Text ?? "";
+                t.History = _rpHistory;
+                t.Sort = _rpSort;
+                t.FilterText = RPfilter.Text ?? "";
+            }
+        }
+
+        /// <summary>Restores a tab's saved state into the panel's live fields and repopulates.</summary>
+        private void LoadTab(bool isLeft, int index)
+        {
+            ClearCompare();   // comparisons are cross-panel and folder-specific
+            bool showHidden = ChkShowHidden?.IsChecked ?? false;
+
+            if (isLeft)
+            {
+                var t = _lpTabs[index];
+                _lpHistory = t.History ?? new Stack<string>();
+                _lpSort = t.Sort;
+                LPfilter.Text = t.FilterText;
+                LPpath.Text = t.Path;
+                LPgrid.SortColumnIndex = ColumnForSortKey(t.Sort.Key);
+                LPgrid.SortAscending = t.Sort.Ascending;
+                FileUtility.PopulateFilePanel(LPgrid, t.Path, showHidden, _lpSort);
+                RefreshLPGridPostActions();
+            }
+            else
+            {
+                var t = _rpTabs[index];
+                _rpHistory = t.History ?? new Stack<string>();
+                _rpSort = t.Sort;
+                RPfilter.Text = t.FilterText;
+                RPpath.Text = t.Path;
+                RPgrid.SortColumnIndex = ColumnForSortKey(t.Sort.Key);
+                RPgrid.SortAscending = t.Sort.Ascending;
+                FileUtility.PopulateFilePanel(RPgrid, t.Path, showHidden, _rpSort);
+                RefreshRPGridPostActions();
+            }
+            RenderTabBar(isLeft);
+        }
+
+        /// <summary>Keeps the active tab's stored path (and thus its title) in sync after navigation.</summary>
+        private void SyncActiveTabTitle(bool isLeft)
+        {
+            if (isLeft)
+            {
+                if (_lpActiveTab >= 0 && _lpActiveTab < _lpTabs.Count)
+                    _lpTabs[_lpActiveTab].Path = LPpath.Text ?? "";
+            }
+            else
+            {
+                if (_rpActiveTab >= 0 && _rpActiveTab < _rpTabs.Count)
+                    _rpTabs[_rpActiveTab].Path = RPpath.Text ?? "";
+            }
+            RenderTabBar(isLeft);
+        }
+
+        private IBrush ThemeBrush(string key, IBrush fallback)
+            => this.TryFindResource(key, ActualThemeVariant, out var v) && v is IBrush b ? b : fallback;
+
+        /// <summary>Rebuilds a panel's tab strip from its tab list, highlighting the active tab.</summary>
+        private void RenderTabBar(bool isLeft)
+        {
+            var bar = isLeft ? LPtabBar : RPtabBar;
+            if (bar == null) return;
+            var tabs = isLeft ? _lpTabs : _rpTabs;
+            int active = isLeft ? _lpActiveTab : _rpActiveTab;
+
+            bar.Children.Clear();
+            var activeBg = ThemeBrush("GridBackgroundBrush", Brushes.White);
+            var border = ThemeBrush("BorderSubtleBrush", Brushes.Gray);
+
+            for (int i = 0; i < tabs.Count; i++)
+            {
+                int idx = i;
+                bool isActive = i == active;
+
+                var container = new Border
+                {
+                    Background = isActive ? activeBg : Brushes.Transparent,
+                    BorderBrush = border,
+                    BorderThickness = new Thickness(1, 1, 1, 0),
+                    CornerRadius = new CornerRadius(3, 3, 0, 0),
+                    Height = 22,
+                };
+                var row = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal };
+
+                var title = new Button
+                {
+                    Content = tabs[i].Title,
+                    Background = Brushes.Transparent,
+                    BorderThickness = new Thickness(0),
+                    FontSize = 11,
+                    FontWeight = isActive ? FontWeight.Bold : FontWeight.Normal,
+                    Padding = new Thickness(8, 0),
+                    Height = 22,
+                    VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                };
+                title.Click += (_, _) => SwitchTab(isLeft, idx);
+                ToolTip.SetTip(title, tabs[i].Path);
+                row.Children.Add(title);
+
+                if (tabs.Count > 1)
+                {
+                    var close = new Button
+                    {
+                        Content = "×",
+                        Background = Brushes.Transparent,
+                        BorderThickness = new Thickness(0),
+                        FontSize = 12,
+                        Padding = new Thickness(2, 0, 5, 0),
+                        Height = 22,
+                        VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    };
+                    close.Click += (_, _) => CloseTab(isLeft, idx);
+                    ToolTip.SetTip(close, "Close tab");
+                    row.Children.Add(close);
+                }
+
+                // Middle-click anywhere on the tab closes it.
+                container.PointerPressed += (s, ev) =>
+                {
+                    if (ev.GetCurrentPoint(container).Properties.IsMiddleButtonPressed)
+                    {
+                        CloseTab(isLeft, idx);
+                        ev.Handled = true;
+                    }
+                };
+
+                container.Child = row;
+                bar.Children.Add(container);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Marks <paramref name="grid"/> as the active panel and updates the active-panel frame
@@ -3075,12 +3392,14 @@ namespace DirOpusReImagined
                 LPgrid.SourcePath = LPpath.Text ?? "";
                 CaptureUnfilteredItems(LPgrid, ref _lpUnfilteredItems);
                 ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
+                SyncActiveTabTitle(isLeft: true);
             }
             else if (ReferenceEquals(grid, RPgrid))
             {
                 RPgrid.SourcePath = RPpath.Text ?? "";
                 CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
                 ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
+                SyncActiveTabTitle(isLeft: false);
             }
             UpdateStatusBar();
         }

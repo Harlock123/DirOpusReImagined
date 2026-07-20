@@ -477,9 +477,35 @@
 			</Button>
 		</StackPanel>
 
-		<cons:TaiDataGrid  Margin="4,4,4,4" Name="LPgrid" Grid.Column="0" Grid.Row="2" />
+		<StackPanel Grid.Column="0" Grid.Row="2" Margin="4,4,4,4" Orientation="Vertical">
+			<Border Height="26" Background="{DynamicResource PanelChromeBrush}"
+			        BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+						<StackPanel Name="LPtabBar" Orientation="Horizontal" Spacing="1" VerticalAlignment="Center" />
+					</ScrollViewer>
+					<Button Name="LPnewTab" Content="+" FontWeight="Bold" FontSize="14"
+					        Padding="8,0" Height="20" Margin="3,0"
+					        ToolTip.Tip="New tab (clone current folder)" Click="LPnewTab_Click" />
+				</StackPanel>
+			</Border>
+			<cons:TaiDataGrid Name="LPgrid" VerticalAlignment="Top" />
+		</StackPanel>
 
-		<cons:TaiDataGrid  Margin="4,4,4,4" Name="RPgrid" Grid.Column="2" Grid.Row="2" />
+		<StackPanel Grid.Column="2" Grid.Row="2" Margin="4,4,4,4" Orientation="Vertical">
+			<Border Height="26" Background="{DynamicResource PanelChromeBrush}"
+			        BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+						<StackPanel Name="RPtabBar" Orientation="Horizontal" Spacing="1" VerticalAlignment="Center" />
+					</ScrollViewer>
+					<Button Name="RPnewTab" Content="+" FontWeight="Bold" FontSize="14"
+					        Padding="8,0" Height="20" Margin="3,0"
+					        ToolTip.Tip="New tab (clone current folder)" Click="RPnewTab_Click" />
+				</StackPanel>
+			</Border>
+			<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />
+		</StackPanel>
 
 		<Grid Name="ButtonGrid" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Grid.RowSpan="2">
 			<Grid.ColumnDefinitions>

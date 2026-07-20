@@ -14,6 +14,12 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Double-click a folder to navigate into it; use the back button to go up a level
 - Swap panel contents or clone one panel's path to the other with dedicated buttons
 
+### Folder Tabs
+- Each panel has its own row of **folder tabs** — open several folders per side and switch between them with a click
+- **＋** opens a new tab cloning the current folder; each tab keeps its own path, back-history, sort, and filter
+- Close a tab with its **×** or a **middle-click** (the last tab can't be closed); keyboard: **Ctrl/Cmd+T** new, **Ctrl/Cmd+W** close, **Ctrl/Cmd+Tab** / **Ctrl/Cmd+PageUp/Down** to cycle
+- Open tabs are **remembered across restarts** (saved to `Configuration.xml`); paths that no longer exist are dropped on load
+
 ### File Operations
 - **Copy** files and folders between panels
 - **Move** files and folders between panels
@@ -76,6 +82,10 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 | **+** | Select items by a wildcard pattern (e.g. `*.jpg`) |
 | **-** | Deselect items by a wildcard pattern |
 | **\*** | Invert the selection |
+| **Ctrl/Cmd + T** | New folder tab (clones the current folder) |
+| **Ctrl/Cmd + W** | Close the active tab |
+| **Ctrl/Cmd + Tab** | Cycle to the next tab (Shift for previous) |
+| **Ctrl/Cmd + PageUp / PageDown** | Previous / next tab |
 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus
@@ -162,7 +172,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.14.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.15.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -700,6 +710,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.15.0 (2026-07-20) — Folder tabs
+- **Folder tabs per panel** — each side now has a tab bar above the file list. Open multiple folders per panel and switch between them; every tab keeps its own path, back-history, sort, and filter, all independent of the other tabs and the other panel.
+- **New / close / switch** — the **＋** button opens a new tab cloning the current folder; close a tab with its **×** or a **middle-click** (the last tab can't be closed). Keyboard: **Ctrl/Cmd+T** new, **Ctrl/Cmd+W** close, **Ctrl/Cmd+Tab** (Shift for previous) or **Ctrl/Cmd+PageUp/PageDown** to cycle. Plain **Tab** still switches panels.
+- **Persistence** — open tabs and the active tab are saved to `Configuration.xml` and restored on the next launch; paths that no longer resolve are dropped on load.
 
 ### 0.1.14.0 (2026-07-20) — Click-to-sort columns & named themes
 - **Sort by clicking column headers** — click the **Name**, **Size**, or **Date** header to sort a panel by it; click again to reverse (an **▲/▼** marks the active column). **Right-click** a header for a menu that also sorts by **Type (extension)** and sets **Ascending/Descending**. Sorting is now **per-panel** and persists as you navigate; folders stay grouped first. Sorting runs on the typed underlying fields, so sizes order numerically and dates chronologically. The old Name/Size sort radios were retired in favor of the headers (reclaiming center-panel space).

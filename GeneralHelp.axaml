@@ -31,6 +31,9 @@
                 <TextBlock Text="• Double-click a folder to enter it; use the back button (or Backspace) to go up a level." TextWrapping="Wrap" />
                 <TextBlock Text="• Swap panel contents, or clone one panel's path to the other, with the center buttons." TextWrapping="Wrap" />
 
+                <TextBlock Text="Folder tabs" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Each panel has its own tabs. Click + (or Ctrl/Cmd+T) to open a new tab cloning the current folder; each tab keeps its own path, history, sort, and filter. Close with × or a middle-click (Ctrl/Cmd+W closes the active one); Ctrl/Cmd+Tab cycles. Open tabs are restored on the next launch." TextWrapping="Wrap" />
+
                 <TextBlock Text="File operations" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and Rename (including pattern-based batch rename)." TextWrapping="Wrap" />
                 <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
@@ -79,6 +82,9 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -160,6 +166,15 @@
 
                     <TextBlock Grid.Row="19" Grid.Column="0" Text="F3" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="19" Grid.Column="1" Text="View the selected file (text/hex), including files inside archives" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="20" Grid.Column="0" Text="Ctrl/Cmd + T" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="20" Grid.Column="1" Text="New folder tab (clones the current folder)" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="21" Grid.Column="0" Text="Ctrl/Cmd + W" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="21" Grid.Column="1" Text="Close the active tab" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="22" Grid.Column="0" Text="Ctrl/Cmd + Tab" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="22" Grid.Column="1" Text="Cycle tabs (Shift for previous; or Ctrl/Cmd+PageUp/Down)" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>
