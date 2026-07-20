@@ -47,6 +47,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 ### Selection Management
 - Click to select a single item; Ctrl+Click for multi-select; Shift+Click for range select
 - Full keyboard selection: arrows single-select, Shift+arrows extend a range, Space/Insert mark-and-advance (see **Keyboard Navigation & Shortcuts**)
+- **Wildcard selection** — Select or Deselect items by a pattern (e.g. `*.jpg`, `proj*`), or Invert the selection, from the right-click menu or the **+** / **-** / **\*** keys; respects an active filter and offers a Files-only option
 - "Select All" buttons to select all files (not folders) in a panel
 - "Clear" buttons to deselect everything in a panel
 
@@ -71,6 +72,9 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 | **F6** | Move the selection from the active panel to the other panel |
 | **F7** | Create a new folder in the active panel |
 | **F8** or **Delete** | Delete the selection in the active panel |
+| **+** | Select items by a wildcard pattern (e.g. `*.jpg`) |
+| **-** | Deselect items by a wildcard pattern |
+| **\*** | Invert the selection |
 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus
@@ -144,7 +148,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.10.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.11.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -682,6 +686,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.11.0 (2026-07-19) — Wildcard selection
+- **Select / Deselect by pattern** — pick items by a wildcard or substring pattern (e.g. `*.jpg`, `proj*`, `report?`) instead of one at a time. Available from each panel's right-click menu ("Select by Pattern…", "Deselect by Pattern…") and via the orthodox **+** (select) and **-** (deselect) keys. A dialog collects the pattern and offers a **Files only** option to skip folders.
+- **Invert selection** — flip the current selection with "Invert Selection" on the right-click menu or the **\*** key.
+- Wildcard actions use the same matcher as the filter box and operate on the **displayed** rows, so they respect an active filter. The keys only fire while a file panel has focus, so typing in the path/filter boxes is unaffected, and each accepts both the number-pad and main-keyboard variants.
 
 ### 0.1.10.0 (2026-07-18) — Bookmarks, Open Terminal Here, Windows startup fix & center-panel declutter
 - **Folder bookmarks** — a new **Bookmarks** button in the center panel opens a dialog that lists your saved folders and sends any one of them to the **Left** or **Right** panel (◀ Left / Right ▶). Bookmarks can be added from either panel's current folder (**◀ Set Left** / **Set Right ▶**) and removed inline. Everything persists to `BOOKMARKS.MD` beside the executable — a plain Markdown list (`- [Name](path)`) that ships with the app and is easy to hand-edit. The dialog follows the active Light/Dark theme.

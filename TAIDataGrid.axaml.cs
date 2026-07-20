@@ -15,6 +15,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DirOpusReImagined.FileSystem.Rclone;
 
@@ -39,6 +40,17 @@ namespace DirOpusReImagined
         Move,
         NewFolder,
         Delete
+    }
+
+    /// <summary>
+    /// A wildcard-selection action requested on the active panel. Select/Deselect need a pattern
+    /// (the host prompts for one); Invert is immediate.
+    /// </summary>
+    public enum SelectionAction
+    {
+        SelectByPattern,
+        DeselectByPattern,
+        Invert
     }
 
     /// <summary>Raised when files are dropped onto a panel. Carries the dragged entries, the source
@@ -2033,7 +2045,64 @@ namespace DirOpusReImagined
 
             ReRender();
         }
-        
+
+        #region Wildcard selection
+
+        /// <summary>
+        /// Adds every currently displayed entry whose name matches <paramref name="matcher"/> to the
+        /// selection (orthodox "gray-plus"). When <paramref name="filesOnly"/> is true, folders are
+        /// skipped. Operates on the displayed <see cref="Items"/>, so it respects any active filter.
+        /// </summary>
+        public void SelectByPattern(Regex matcher, bool filesOnly = false)
+        {
+            if (matcher == null) return;
+            foreach (var obj in _items)
+            {
+                if (obj is not AFileEntry af) continue;
+                if (filesOnly && af.Typ) continue;
+                if (matcher.IsMatch(af.Name) && !_selecteditems.Contains(obj))
+                    _selecteditems.Add(obj);
+            }
+            RaiseKeyboardSelectionChanged();
+            ReRender();
+        }
+
+        /// <summary>
+        /// Removes every currently displayed entry whose name matches <paramref name="matcher"/> from
+        /// the selection (orthodox "gray-minus").
+        /// </summary>
+        public void DeselectByPattern(Regex matcher, bool filesOnly = false)
+        {
+            if (matcher == null) return;
+            _selecteditems.RemoveAll(obj =>
+            {
+                if (obj is not AFileEntry af) return false;
+                if (filesOnly && af.Typ) return false;
+                return matcher.IsMatch(af.Name);
+            });
+            RaiseKeyboardSelectionChanged();
+            ReRender();
+        }
+
+        /// <summary>
+        /// Inverts the selection over the currently displayed <see cref="Items"/>: previously selected
+        /// rows become unselected and vice versa. Respects any active filter (hidden rows are untouched).
+        /// </summary>
+        public void InvertSelection()
+        {
+            var newSelection = new List<object>();
+            foreach (var obj in _items)
+            {
+                if (obj is AFileEntry && !_selecteditems.Contains(obj))
+                    newSelection.Add(obj);
+            }
+            _selecteditems = newSelection;
+            RaiseKeyboardSelectionChanged();
+            ReRender();
+        }
+
+        #endregion
+
         #endregion
 
         #region Private methods
@@ -2542,6 +2611,20 @@ namespace DirOpusReImagined
                 return;
             }
 
+            // Wildcard selection hotkeys (orthodox "gray-plus/minus/star"). Accept both the numpad
+            // keys and the common main-keyboard combos, and ignore them while Ctrl/Cmd is held.
+            // + : Select by pattern   - : Deselect by pattern   * : Invert selection
+            if (!ctrl)
+            {
+                bool plus  = e.Key == Key.Add      || (e.Key == Key.OemPlus  && shift);
+                bool minus = e.Key == Key.Subtract || (e.Key == Key.OemMinus && !shift);
+                bool star  = e.Key == Key.Multiply || (e.Key == Key.D8       && shift);
+
+                if (plus)  { RaiseSelectionAction(SelectionAction.SelectByPattern);   e.Handled = true; return; }
+                if (minus) { RaiseSelectionAction(SelectionAction.DeselectByPattern); e.Handled = true; return; }
+                if (star)  { RaiseSelectionAction(SelectionAction.Invert);            e.Handled = true; return; }
+            }
+
             // File-operation verbs. Handled before the empty-panel check because "New Folder"
             // is valid in an empty directory; the other verbs validate their own selection.
             switch (e.Key)
@@ -2649,6 +2732,18 @@ namespace DirOpusReImagined
         private void RaiseVerb(GridVerb v)
         {
             VerbRequested?.Invoke(this, v);
+        }
+
+        /// <summary>
+        /// Raised when the user requests a wildcard-selection action (Select/Deselect/Invert) on this
+        /// panel via the context menu or a hotkey. The host prompts for a pattern where needed and
+        /// calls the matching engine method (<see cref="SelectByPattern"/>, etc.).
+        /// </summary>
+        public event EventHandler<SelectionAction> SelectionActionRequested;
+
+        private void RaiseSelectionAction(SelectionAction a)
+        {
+            SelectionActionRequested?.Invoke(this, a);
         }
 
         /// <summary>
@@ -3291,6 +3386,15 @@ namespace DirOpusReImagined
         {
             GridContextTerminalHere?.Invoke(this, EventArgs.Empty);
         }
+
+        private void SelectByPattern_Click(object sender, RoutedEventArgs e)
+            => RaiseSelectionAction(SelectionAction.SelectByPattern);
+
+        private void DeselectByPattern_Click(object sender, RoutedEventArgs e)
+            => RaiseSelectionAction(SelectionAction.DeselectByPattern);
+
+        private void InvertSelection_Click(object sender, RoutedEventArgs e)
+            => RaiseSelectionAction(SelectionAction.Invert);
 
         private void Option1_Click(object sender, RoutedEventArgs e)
         {

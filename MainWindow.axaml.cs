@@ -105,6 +105,10 @@ namespace DirOpusReImagined
             LPgrid.VerbRequested += OnPanelVerbRequested;
             RPgrid.VerbRequested += OnPanelVerbRequested;
 
+            // Wildcard selection (Select/Deselect by pattern, Invert) on the panel that raised it.
+            LPgrid.SelectionActionRequested += OnPanelSelectionActionRequested;
+            RPgrid.SelectionActionRequested += OnPanelSelectionActionRequested;
+
             var globalMEM = SystemInfo.PhysicalMemory.GetTotalBytes();
 
             this.Title += " " + (globalMEM / 1024 / 1024 / 1024).ToString() + " GB ";
@@ -1964,6 +1968,37 @@ namespace DirOpusReImagined
                     else DeleteRightButton_Click(DeleteRightButton, e);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handles a wildcard-selection request from a panel. Invert applies immediately; Select and
+        /// Deselect prompt for a pattern (via <see cref="WildcardSelectDialog"/>) and then apply it to
+        /// the panel that raised the request.
+        /// </summary>
+        private async void OnPanelSelectionActionRequested(object? sender, SelectionAction action)
+        {
+            if (sender is not TaiDataGrid grid) return;
+
+            if (action == SelectionAction.Invert)
+            {
+                grid.InvertSelection();
+                return;
+            }
+
+            bool deselect = action == SelectionAction.DeselectByPattern;
+            string title = deselect ? "Deselect by Pattern" : "Select by Pattern";
+            string prompt = deselect
+                ? "Deselect items whose name matches this pattern (e.g. *.tmp, ~*)."
+                : "Select items whose name matches this pattern (e.g. *.jpg, proj*, report?).";
+
+            var dlg = new WildcardSelectDialog(title, prompt);
+            if (!await dlg.ShowDialog<bool>(this)) return;
+
+            var matcher = FileSearch.MakeNameMatcher(dlg.Pattern, matchCase: false);
+            if (deselect)
+                grid.DeselectByPattern(matcher, dlg.FilesOnly);
+            else
+                grid.SelectByPattern(matcher, dlg.FilesOnly);
         }
 
         /// <summary>

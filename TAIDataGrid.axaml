@@ -30,6 +30,10 @@
 						<Separator/>
 						<MenuItem Name="TerminalHereMenuItem" Header="Terminal Here" Click="TerminalHere_Click"/>
 						<Separator/>
+						<MenuItem Header="Select by Pattern…" Click="SelectByPattern_Click"/>
+						<MenuItem Header="Deselect by Pattern…" Click="DeselectByPattern_Click"/>
+						<MenuItem Header="Invert Selection" Click="InvertSelection_Click"/>
+						<Separator/>
 						<MenuItem Header="Fonts Larger" Click="Option1_Click"/>
 						<MenuItem Header="Fonts Smaller" Click="Option2_Click"/>
 					</ContextMenu>

@@ -79,8 +79,8 @@
                     <SolidColorBrush x:Key="GridTitleTextBrush"      Color="White"/>
 
                     <!-- Grid row states -->
-                    <SolidColorBrush x:Key="RowSelectedBrush"        Color="#2F4A6B"/>
-                    <SolidColorBrush x:Key="RowHoverBrush"           Color="#3A5A7A"/>
+                    <SolidColorBrush x:Key="RowSelectedBrush"        Color="#2D6CC4"/>
+                    <SolidColorBrush x:Key="RowHoverBrush"           Color="#4C4C4C"/>
                     <SolidColorBrush x:Key="RowCursorBrush"          Color="DodgerBlue"/>
                     <SolidColorBrush x:Key="DropTargetBrush"         Color="#B8860B"/>
                     <SolidColorBrush x:Key="ActivePanelFrameBrush"   Color="DodgerBlue"/>

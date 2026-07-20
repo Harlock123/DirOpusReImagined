@@ -48,6 +48,7 @@
 
                 <TextBlock Text="Selection" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Click to select; Ctrl+Click multi-select; Shift+Click range select. Full keyboard selection is available (see below). Select All / Clear buttons per panel." TextWrapping="Wrap" />
+                <TextBlock Text="• Wildcard selection: right-click a panel (or use + / - / *) to Select or Deselect items by a pattern like *.jpg or proj*, or Invert the selection. Matches the displayed rows, so it respects an active filter; a Files-only option skips folders." TextWrapping="Wrap" />
 
                 <TextBlock Text="Bookmarks" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Bookmarks button opens a dialog that lists your saved folders; send any one to the Left or Right panel, add either panel's current folder, or remove entries. Saved to BOOKMARKS.MD beside the app; a default set (Home, Root, Desktop, Documents, Pictures) is seeded on first run." TextWrapping="Wrap" />
@@ -68,6 +69,9 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -131,8 +135,17 @@
                     <TextBlock Grid.Row="14" Grid.Column="0" Text="F8 / Delete" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="14" Grid.Column="1" Text="Delete the selection in the active panel" TextWrapping="Wrap" Margin="0,2" />
 
-                    <TextBlock Grid.Row="15" Grid.Column="0" Text="(direction)" FontWeight="Bold" Margin="0,2" />
-                    <TextBlock Grid.Row="15" Grid.Column="1" Text="Copy/Move always flow out of the active (framed) panel, so Tab-then-F5 reverses the direction" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="15" Grid.Column="0" Text="+" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="15" Grid.Column="1" Text="Select items by a wildcard pattern (e.g. *.jpg)" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="16" Grid.Column="0" Text="-" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="16" Grid.Column="1" Text="Deselect items by a wildcard pattern" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="17" Grid.Column="0" Text="*" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="17" Grid.Column="1" Text="Invert the selection" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="18" Grid.Column="0" Text="(direction)" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="18" Grid.Column="1" Text="Copy/Move always flow out of the active (framed) panel, so Tab-then-F5 reverses the direction" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

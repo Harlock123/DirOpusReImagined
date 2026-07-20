@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="180"
+        x:Class="DirOpusReImagined.WildcardSelectDialog"
+        Width="420" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="Select by Pattern">
+
+    <StackPanel Margin="16" Spacing="10">
+        <TextBlock Name="PromptText"
+                   Text="Enter a pattern (e.g. *.jpg, proj*, report?)."
+                   TextWrapping="Wrap" />
+        <TextBox Name="PatternBox" Text="*" Watermark="*.ext or name*" />
+        <CheckBox Name="FilesOnlyCheck" Content="Files only (skip folders)" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Name="OkButton" Content="OK" MinWidth="80" FontWeight="Bold" Click="OkButton_Click" />
+            <Button Name="CancelButton" Content="Cancel" MinWidth="80" Click="CancelButton_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>
