@@ -68,6 +68,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 | **Backspace** | Go up one directory level in the active panel |
 | **Tab** | Switch the active panel |
 | **F2** | Rename the selection in the active panel |
+| **F3** | View the selected file (text/hex), including files inside archives |
 | **F5** | Copy the selection from the active panel to the other panel |
 | **F6** | Move the selection from the active panel to the other panel |
 | **F7** | Create a new folder in the active panel |
@@ -100,10 +101,17 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
 - Configurable via the `<UseIntegratedImageViewer>` setting
 
+### File Viewer (Text / Hex)
+- Press **F3** (or right-click → **View**) to open a read-only viewer for the selected file
+- **Auto-detects** text vs binary and opens in the right mode; a **Text ⇄ Hex** toggle switches anytime (hex shows offset · bytes · ASCII)
+- Reads through the same provider layer as everything else, so it views **files inside archives** just as easily as normal files
+- Large files are capped (first 256 KB) with a truncation note so the viewer stays responsive
+
 ### Browse Into Archives
 - Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
 - **Extract** by copying or dragging files/folders out to a normal folder — reuses the standard transfer progress and overwrite prompts
-- Archives are **read-only**: writing into one is blocked with a clear message (extract first, then modify)
+- **View** files inside archives with F3, and **open them in external tools** (custom command buttons) — the file is extracted to a temporary copy that the tool receives
+- Archives are **read-only**: writing into one is blocked with a clear message (extract first, then modify); edits made in an external tool stay in the temp copy and are not written back
 - Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
 
 ### Cloud Storage Access
@@ -154,7 +162,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.12.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.13.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -692,6 +700,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.13.0 (2026-07-19) — Text/hex viewer & external tools on archived files
+- **Text/Hex file viewer** — press **F3** (or right-click → **View**) to open a read-only viewer for the selected file. It auto-detects text vs binary, offers a Text ⇄ Hex toggle (offset · bytes · ASCII), honors BOMs for text, and caps large files at the first 256 KB with a truncation note. It reads through the provider layer, so it views files inside archives exactly like normal files.
+- **Custom commands work on files inside archives** — external tools launched from the command buttons (e.g. "edit with VS Code") previously received an unusable `archive://…` path. Now the `%AF%`, `%LAF%`, `%LF1%`, `%RF1%`, `%LPAF%`, and `%RPAF%` tokens transparently **extract the archive entry to a temporary copy** and pass that real path to the tool. A one-time note explains that edits to the temp copy are not written back into the read-only archive; the temp folder is cleaned up on exit.
 
 ### 0.1.12.0 (2026-07-19) — Browse into archives
 - **Browse archives like folders** — double-click a `.zip`, `.7z`, `.rar`, `.tar`, or `.tar.gz`/`.tgz` to open it in the panel and navigate its contents, including nested folders. Back/up steps out of the archive naturally.

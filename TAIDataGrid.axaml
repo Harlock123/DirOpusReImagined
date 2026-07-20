@@ -22,6 +22,7 @@
 					ClipToBounds="true">
 				<Canvas.ContextMenu>
 					<ContextMenu Name="GridContextMenu">
+						<MenuItem Name="ViewFileMenuItem" Header="View" Click="ViewFile_Click"/>
 						<MenuItem Name="CalcFolderSizeMenuItem" Header="Calculate Folder Size" Click="CalculateFolderSize_Click"/>
 						<MenuItem Name="PermissionsMenuItem" Header="File Permissions" Click="Permissions_Click"/>
 						<Separator/>

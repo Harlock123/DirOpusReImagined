@@ -39,7 +39,8 @@ namespace DirOpusReImagined
         Copy,
         Move,
         NewFolder,
-        Delete
+        Delete,
+        View
     }
 
     /// <summary>
@@ -2630,6 +2631,7 @@ namespace DirOpusReImagined
             switch (e.Key)
             {
                 case Key.F2: RaiseVerb(GridVerb.Rename);    e.Handled = true; return;
+                case Key.F3: RaiseVerb(GridVerb.View);      e.Handled = true; return;
                 case Key.F5: RaiseVerb(GridVerb.Copy);      e.Handled = true; return;
                 case Key.F6: RaiseVerb(GridVerb.Move);      e.Handled = true; return;
                 case Key.F7: RaiseVerb(GridVerb.NewFolder); e.Handled = true; return;
@@ -3372,6 +3374,15 @@ namespace DirOpusReImagined
             }
         }
 
+        private void ViewFile_Click(object sender, RoutedEventArgs e)
+        {
+            // Only meaningful for files, not folders.
+            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry af && !af.Typ)
+            {
+                GridContextView?.Invoke(this, TheItemUnderTheMouse);
+            }
+        }
+
         private void CopyFullPath_Click(object sender, RoutedEventArgs e)
         {
             if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry)
@@ -3461,6 +3472,8 @@ namespace DirOpusReImagined
         public event EventHandler<GridHoverItem> GridContextPermissions;
 
         public event EventHandler<GridHoverItem> GridContextCopyPath;
+
+        public event EventHandler<GridHoverItem> GridContextView;
 
         public event EventHandler<GridHoverItem> GridContextCopyFullPath;
 

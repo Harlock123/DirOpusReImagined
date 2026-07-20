@@ -56,8 +56,12 @@
                 <TextBlock Text="Open terminal here" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Right-click a panel and choose Terminal Here to open a terminal in that panel's current folder. A terminal is auto-detected for your OS, or set your own in the System Wide Settings tab of the button configuration dialog (the &lt;Terminal&gt; entry in Configuration.xml, using %DIR% for the folder)." TextWrapping="Wrap" />
 
+                <TextBlock Text="View files (F3)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Press F3 (or right-click → View) to open a read-only text/hex viewer for the selected file. It auto-detects text vs binary and has a Text/Hex toggle. Works on normal files and on files inside archives alike." TextWrapping="Wrap" />
+
                 <TextBlock Text="Browse into archives" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Double-click a .zip, .7z, .rar, .tar, or .tar.gz to open it like a folder and browse its contents. Copy or drag files out to a normal folder to extract them (with the usual progress and overwrite prompts). Archives are read-only — extract first, then modify." TextWrapping="Wrap" />
+                <TextBlock Text="• Custom command buttons (e.g. open in an editor) also work on files inside archives: the file is extracted to a temporary copy and that path is passed to the tool. Edits to the temp copy are not written back into the archive." TextWrapping="Wrap" />
 
                 <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Access a remote with cloud://&lt;remote&gt;/&lt;path&gt; in the panel path box." TextWrapping="Wrap" />
@@ -72,6 +76,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -149,6 +154,9 @@
 
                     <TextBlock Grid.Row="18" Grid.Column="0" Text="(direction)" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="18" Grid.Column="1" Text="Copy/Move always flow out of the active (framed) panel, so Tab-then-F5 reverses the direction" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="19" Grid.Column="0" Text="F3" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="19" Grid.Column="1" Text="View the selected file (text/hex), including files inside archives" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

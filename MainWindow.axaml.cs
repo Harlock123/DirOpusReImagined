@@ -85,6 +85,7 @@ namespace DirOpusReImagined
             ProviderRegistry.Register(new ArchiveFileProvider());
             FileUtility.PanelPopulated += OnPanelPopulated;
             Closing += (_, _) => RcloneService.Shutdown();
+            Closing += (_, _) => CleanupToolTemp();
 
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
@@ -225,6 +226,9 @@ namespace DirOpusReImagined
 
             LPgrid.GridContextCopyPath += Handle_CopyPath;
             RPgrid.GridContextCopyPath += Handle_CopyPath;
+
+            LPgrid.GridContextView += Handle_ViewFile;
+            RPgrid.GridContextView += Handle_ViewFile;
             LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
             RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
 
@@ -1221,6 +1225,78 @@ namespace DirOpusReImagined
             return path;
         }
 
+        // Session temp dir for archive entries handed to external tools; cleaned up on exit.
+        private string _toolTempDir;
+        private bool _archiveToolNoteShown;
+
+        /// <summary>Removes the session temp folder holding archive entries extracted for external tools.</summary>
+        private void CleanupToolTemp()
+        {
+            try
+            {
+                if (_toolTempDir != null && Directory.Exists(_toolTempDir))
+                    Directory.Delete(_toolTempDir, recursive: true);
+            }
+            catch { /* best-effort cleanup */ }
+        }
+
+        /// <summary>
+        /// Resolves a selected file into the quoted path string to hand to an external command.
+        /// For a normal folder this is the usual "panel path + name". For a file inside an archive
+        /// (the panel path is an archive:// URI), the entry is extracted to a session temp file and
+        /// that real path is returned instead — external tools can't open archive:// URIs.
+        /// Returns "" if an archive entry couldn't be extracted.
+        /// </summary>
+        private string ResolveFileArgPath(string panelPath, string name)
+        {
+            if (ArchivePath.IsArchiveUri(panelPath))
+            {
+                string temp = ExtractArchiveEntryToTemp(panelPath, name);
+                return string.IsNullOrEmpty(temp) ? "" : QuoteIfNeeded(temp);
+            }
+            return QuoteIfNeeded(MakePathEnvSafe(panelPath) + name);
+        }
+
+        /// <summary>
+        /// Extracts a single archive entry to a session temp folder and returns its real path (or null
+        /// on failure). Shows a one-time note that edits to the extracted copy won't be written back
+        /// into the read-only archive.
+        /// </summary>
+        private string ExtractArchiveEntryToTemp(string panelPath, string name)
+        {
+            try
+            {
+                string entryUri = JoinChildPath(panelPath, name);
+                var provider = ProviderRegistry.For(entryUri);
+
+                if (_toolTempDir == null)
+                    _toolTempDir = Path.Combine(Path.GetTempPath(), "dori-tool-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                Directory.CreateDirectory(_toolTempDir);
+
+                string dest = Path.Combine(_toolTempDir, name);
+                Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                using (var inS = provider.OpenRead(entryUri))
+                using (var outS = File.Create(dest))
+                    inS.CopyTo(outS);
+
+                if (!_archiveToolNoteShown)
+                {
+                    _archiveToolNoteShown = true;
+                    new MessageBox(
+                        "Files inside an archive are opened from a temporary extracted copy.\n\n" +
+                        "Any changes you save in the external program stay in that temporary copy and are " +
+                        "NOT written back into the archive.",
+                        "Opened from archive").ShowDialog(this);
+                }
+
+                return dest;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private static List<string> SplitArguments(string arguments)
         {
             var args = new List<string>();
@@ -1318,7 +1394,7 @@ namespace DirOpusReImagined
 
                     foreach(AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + " ";
+                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + " ";
                     }
 
                     string ret = bcontent.Replace("%AF%", PTH);
@@ -1332,7 +1408,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + " ";
+                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + " ";
                     }
 
                     string ret = bcontent.Replace("%AF%", PTH);
@@ -1368,7 +1444,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + ",";
+                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1382,7 +1458,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + ",";
+                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1422,7 +1498,7 @@ namespace DirOpusReImagined
                     List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
                     List<AFileEntry> thelistb = RPgrid.GetListOfSelectedFiles();
 
-                    PTH = QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + thelista[0].Name) + " " + QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + thelistb[0].Name);
+                    PTH = ResolveFileArgPath(LPpath.Text, thelista[0].Name) + " " + ResolveFileArgPath(RPpath.Text, thelistb[0].Name);
 
                     string ret = bcontent.Replace("%LF1%", PTH).Replace("%RF1%","");
 
@@ -1456,7 +1532,7 @@ namespace DirOpusReImagined
 
                     List<AFileEntry> thelista = LPgrid.GetListOfSelectedFiles();
 
-                    PTH = QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + thelista[0].Name);
+                    PTH = ResolveFileArgPath(LPpath.Text, thelista[0].Name);
 
                     string ret = bcontent.Replace("%LF1%", PTH);
 
@@ -1490,7 +1566,7 @@ namespace DirOpusReImagined
 
                     List<AFileEntry> thelista = RPgrid.GetListOfSelectedFiles();
 
-                    PTH = QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + thelista[0].Name);
+                    PTH = ResolveFileArgPath(RPpath.Text, thelista[0].Name);
 
                     string ret = bcontent.Replace("%RF1%", PTH);
 
@@ -1524,7 +1600,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(RPpath.Text) + af.Name) + ",";
+                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%RPAF%", PTH);
@@ -1559,7 +1635,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += QuoteIfNeeded(MakePathEnvSafe(LPpath.Text) + af.Name) + ",";
+                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ",";
                     }
 
                     string ret = bcontent.Replace("%LPAF%", PTH);
@@ -1979,7 +2055,46 @@ namespace DirOpusReImagined
                     if (left) DeleteLeftButton_Click(DeleteLeftButton, e);
                     else DeleteRightButton_Click(DeleteRightButton, e);
                     break;
+                case GridVerb.View:
+                    ViewActivePanelFile(left ? LPgrid : RPgrid, left ? LPpath.Text : RPpath.Text);
+                    break;
             }
+        }
+
+        /// <summary>
+        /// Opens the text/hex viewer for the given panel's current file — the keyboard cursor row if
+        /// it's a file, otherwise the first selected file. No-op if neither is a file.
+        /// </summary>
+        private void ViewActivePanelFile(TaiDataGrid grid, string panelPath)
+        {
+            AFileEntry target = grid.CursorItem as AFileEntry;
+            if (target == null || target.Typ)
+            {
+                foreach (var f in grid.GetListOfSelectedFiles()) { target = f; break; }
+            }
+            if (target == null || target.Typ) return;
+
+            OpenFileViewer(panelPath, target.Name);
+        }
+
+        /// <summary>Context-menu "View" on a specific right-clicked file.</summary>
+        private void Handle_ViewFile(object? sender, GridHoverItem e)
+        {
+            if (e?.ItemUnderMouse is not AFileEntry af || af.Typ) return;
+            string panelPath = ReferenceEquals(sender, LPgrid) ? LPpath.Text : RPpath.Text;
+            OpenFileViewer(panelPath, af.Name);
+        }
+
+        /// <summary>
+        /// Opens the <see cref="FileViewer"/> for a file addressed by its panel folder + name. The
+        /// path is resolved through the provider layer, so files inside archives view fine too.
+        /// </summary>
+        private void OpenFileViewer(string panelPath, string fileName)
+        {
+            if (string.IsNullOrEmpty(panelPath) || string.IsNullOrEmpty(fileName)) return;
+            string fullPath = JoinChildPath(panelPath, fileName);
+            var viewer = new FileViewer(fullPath, fileName);
+            viewer.Show(this);
         }
 
         /// <summary>
