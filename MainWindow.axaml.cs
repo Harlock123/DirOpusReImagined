@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -267,6 +268,7 @@ namespace DirOpusReImagined
             // Folder-tab keyboard shortcuts (Ctrl+T/W, Ctrl+Tab, Ctrl+PageUp/Down).
             LPgrid.TabActionRequested += OnPanelTabAction;
             RPgrid.TabActionRequested += OnPanelTabAction;
+
             LPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
             RPgrid.GridContextCopyFullPath += Handle_CopyFullPath;
 

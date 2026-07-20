@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -72,9 +73,9 @@ public partial class RenameFileInterface : Window
             // now lets make sure we have some selected items
             if (theGrid.SelectedItems.Count > 0)
             {
-                
+
                 int i = 0;
-                
+
                 foreach (AFileEntry af in theGrid.SelectedItems)
                 {
                     i += 1;
@@ -115,9 +116,9 @@ public partial class RenameFileInterface : Window
                         }
                         
                         string newpath = Path.Combine(thePath, pfx + bsn + sfx);
-                        
-                        FileUtility.RenameFile(oldpath, newpath);
-                    
+
+                        if (newpath != oldpath) FileUtility.RenameFile(oldpath, newpath);
+
                     }
                     else
                     {
@@ -154,12 +155,12 @@ public partial class RenameFileInterface : Window
                         }
                         
                         string newpath = Path.Combine(thePath, pfx + bsn);
-                        
-                        FileUtility.RenameDirectory(oldpath, newpath);
+
+                        if (newpath != oldpath) FileUtility.RenameDirectory(oldpath, newpath);
 
                     }
                 }
-                
+
                 FileUtility.PopulateFilePanel(theGrid,thePath,_ShowHidden);
                 if (thePath == theOtherPath)
                     FileUtility.PopulateFilePanel(theOtherGrid,theOtherPath,_ShowHidden);

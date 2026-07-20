@@ -2847,6 +2847,7 @@ namespace DirOpusReImagined
         /// <summary>Raised on Alt+Right — navigate forward in this panel's history.</summary>
         public event EventHandler NavigateForwardRequested;
 
+
         /// <summary>
         /// Raised when the user presses Tab, asking the host to make the other panel active.
         /// </summary>

@@ -369,7 +369,9 @@ namespace DirOpusReImagined
         /// </summary>
         /// <param name="oldFilePath">The path of the file to be renamed.</param>
         /// <param name="newFilePath">The new path for the file after renaming.</param>
-        public static void RenameFile(string oldFilePath, string newFilePath)
+        /// <summary>Renames (moves) a file. Returns true only if the rename actually happened;
+        /// surfaces collisions/errors to the user rather than swallowing them.</summary>
+        public static bool RenameFile(string oldFilePath, string newFilePath)
         {
             try
             {
@@ -377,16 +379,24 @@ namespace DirOpusReImagined
 
                 if (!p.FileExists(oldFilePath))
                 {
-                    throw new FileNotFoundException("The source file does not exist.", oldFilePath);
+                    new MessageBox($"Cannot rename — the file no longer exists:\n{oldFilePath}", "Rename Failed")
+                        .ShowDialog(GetMainWindow());
+                    return false;
+                }
+                if (p.FileExists(newFilePath))
+                {
+                    new MessageBox($"A file named \"{Path.GetFileName(newFilePath)}\" already exists — rename skipped.",
+                        "Rename Failed").ShowDialog(GetMainWindow());
+                    return false;
                 }
 
                 p.MoveFile(oldFilePath, newFilePath);
-
-                Console.WriteLine($"File renamed from '{oldFilePath}' to '{newFilePath}'");
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error renaming the file: {ex.Message}");
+                new MessageBox($"Error renaming the file: {ex.Message}", "Rename Failed").ShowDialog(GetMainWindow());
+                return false;
             }
         }
 
@@ -395,7 +405,8 @@ namespace DirOpusReImagined
         /// </summary>
         /// <param name="olddir">The path of the directory to be renamed.</param>
         /// <param name="newdir">The new path for the renamed directory.</param>
-        public static void RenameDirectory(string olddir, string newdir)
+        /// <summary>Renames (moves) a directory. Returns true only if it actually happened.</summary>
+        public static bool RenameDirectory(string olddir, string newdir)
         {
             try
             {
@@ -403,16 +414,18 @@ namespace DirOpusReImagined
 
                 if (!p.DirectoryExists(olddir) || p.DirectoryExists(newdir))
                 {
-                    MessageBox mb = new MessageBox("The source directory does not exist or the target directory already exists.", "Rename Failed");
-                    mb.ShowDialog(GetMainWindow());
+                    new MessageBox("The source directory does not exist or the target directory already exists.",
+                        "Rename Failed").ShowDialog(GetMainWindow());
+                    return false;   // don't fall through to MoveDirectory on a collision
                 }
 
                 p.MoveDirectory(olddir, newdir);
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox mb = new MessageBox($"Error renaming the directory: {ex.Message}", "Rename Failed");
-                mb.ShowDialog(GetMainWindow());
+                new MessageBox($"Error renaming the directory: {ex.Message}", "Rename Failed").ShowDialog(GetMainWindow());
+                return false;
             }
         }
 

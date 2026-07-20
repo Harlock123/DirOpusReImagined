@@ -66,7 +66,7 @@ public partial class CreateFolder : Window
         string folderPath = Path.Combine(_panelSetup!.PrimaryPath, basename);
 
         provider.CreateDirectory(folderPath);
-        
+
         FileUtility.PopulateFilePanel(_panelSetup!.PrimaryGrid, _panelSetup!.PrimaryPath, _ShowHidden);
         
         if (_panelSetup!.PrimaryPath == _panelSetup!.SecondaryPath)
