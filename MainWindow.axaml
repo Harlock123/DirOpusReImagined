@@ -67,18 +67,22 @@
 			        FontSize="11" FontWeight="Bold"
 			        ToolTip.Tip="Open, add, and manage folder bookmarks"
 			        Click="BookmarksButton_Click" />
-			<Label FontSize="9" Padding="0" Margin="0,2,0,-2"
+			<Label FontSize="9" Padding="0" Margin="0,4,0,3"
 			       HorizontalAlignment="Center" FontWeight="Bold">Theme</Label>
 			<ComboBox Name="ThemeCombo" HorizontalAlignment="Stretch"
 			          FontSize="10" Margin="0,0,0,3" Padding="6,0"
 			          Height="22" MinHeight="0"
 			          VerticalContentAlignment="Center"
 			          SelectionChanged="ThemeCombo_SelectionChanged">
-				<ComboBoxItem>Light</ComboBoxItem>
-				<ComboBoxItem>Dark</ComboBoxItem>
-				<ComboBoxItem>System</ComboBoxItem>
+				<ComboBoxItem Tag="Light">Light</ComboBoxItem>
+				<ComboBoxItem Tag="Dark">Dark</ComboBoxItem>
+				<ComboBoxItem Tag="System">System</ComboBoxItem>
+				<ComboBoxItem Tag="Dracula">Dracula</ComboBoxItem>
+				<ComboBoxItem Tag="Nord">Nord</ComboBoxItem>
+				<ComboBoxItem Tag="SolarizedLight">Solarized Light</ComboBoxItem>
+				<ComboBoxItem Tag="SolarizedDark">Solarized Dark</ComboBoxItem>
 			</ComboBox>
-			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
+			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" FontSize="9" FontWeight="Bold" Padding="0" Margin="0,1" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 
@@ -133,7 +137,7 @@
 				</Button>
 			</StackPanel>
 			
-			<Label Name="LpLabel2" Content="File Mgmt" HorizontalAlignment="Center" FontSize="9" Padding="0" Margin="0,1" />
+			<Label Name="LpLabel2" Content="File Mgmt" HorizontalAlignment="Center" FontSize="9" FontWeight="Bold" Padding="0" Margin="0,1" />
 
 			<StackPanel Orientation="Horizontal" Margin="2">
 				<Button Name="CopyLeftButton" Height="22" Padding="1"
@@ -459,7 +463,7 @@
 					</StackPanel>
 				</ToolTip.Tip>
 			</Button>
-			<Button Name="SyncRightButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2192;"
+			<Button Name="SyncRightButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2192;&#xFE0E;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Copy new, newer, and changed items from the LEFT panel to the RIGHT (mirror/delete is opt-in). Right-click for content (hash) sync.">
 				<Button.ContextFlyout>
@@ -469,7 +473,7 @@
 					</MenuFlyout>
 				</Button.ContextFlyout>
 			</Button>
-			<Button Name="SyncLeftButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2190;"
+			<Button Name="SyncLeftButton" Background="{DynamicResource PanelChromeBrush}" Content="Sync&#x2190;&#xFE0E;"
 			        FontSize="11" Padding="6,0" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 			        ToolTip.Tip="Copy new, newer, and changed items from the RIGHT panel to the LEFT (mirror/delete is opt-in). Right-click for content (hash) sync.">
 				<Button.ContextFlyout>

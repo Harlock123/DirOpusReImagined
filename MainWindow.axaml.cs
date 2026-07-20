@@ -2211,8 +2211,18 @@ namespace DirOpusReImagined
 
             ThemeManager.Apply(choice);
 
+            // Select the combo item whose Tag matches the choice name (order-independent).
             if (ThemeCombo != null)
-                ThemeCombo.SelectedIndex = (int)choice;   // Light=0, Dark=1, System=2
+            {
+                foreach (var obj in ThemeCombo.Items)
+                {
+                    if (obj is ComboBoxItem item && (item.Tag as string) == choice.ToString())
+                    {
+                        ThemeCombo.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
 
             _themeUiReady = true;
         }
@@ -2221,9 +2231,9 @@ namespace DirOpusReImagined
         private void ThemeCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (!_themeUiReady) return;                    // ignore the initial programmatic selection
-            if (ThemeCombo.SelectedIndex < 0) return;
+            if (ThemeCombo.SelectedItem is not ComboBoxItem item) return;
+            if (!Enum.TryParse<ThemeChoice>(item.Tag as string, out var choice)) return;
 
-            var choice = (ThemeChoice)ThemeCombo.SelectedIndex;
             ThemeManager.Apply(choice);
             SaveThemeToConfig(choice);
         }

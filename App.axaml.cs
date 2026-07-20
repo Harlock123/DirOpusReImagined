@@ -13,6 +13,10 @@ namespace DirOpusReImagined
 
         public override void OnFrameworkInitializationCompleted()
         {
+            // Register the named-theme palettes (Dracula/Nord/Solarized) before the window loads
+            // and restores its saved theme.
+            ThemeManager.Init(this);
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();
