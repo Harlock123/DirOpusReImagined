@@ -238,7 +238,8 @@ namespace DirOpusReImagined
             }
             else
             {
-                // Unreachable with today's providers (e.g. two distinct remotes); stream safely.
+                // Two non-remote providers (e.g. extracting from a read-only archive to local disk):
+                // stream the bytes through OpenRead/OpenWrite.
                 await Task.Run(() =>
                 {
                     ct.ThrowIfCancellationRequested();

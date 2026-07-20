@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
 using DirOpusReImagined.FileSystem;
+using DirOpusReImagined.FileSystem.Archive;
 using DirOpusReImagined.FileSystem.Rclone;
 using Tomlyn;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
@@ -81,6 +82,7 @@ namespace DirOpusReImagined
             InitializeComponent();
 
             ProviderRegistry.Register(new RcloneFileProvider());
+            ProviderRegistry.Register(new ArchiveFileProvider());
             FileUtility.PanelPopulated += OnPanelPopulated;
             Closing += (_, _) => RcloneService.Shutdown();
 
@@ -1650,6 +1652,16 @@ namespace DirOpusReImagined
         {
             if (selected == null || selected.Count == 0) return;
 
+            // Archives are read-only: block writing INTO one up front with a clear message rather than
+            // letting the transfer fail partway. Extracting OUT of an archive is fine and continues below.
+            if (ArchivePath.IsArchiveUri(targetPathRaw))
+            {
+                await new MessageBox(
+                    "This location is inside an archive, which is read-only.\n\nExtract the files to a normal folder first, then modify them there.",
+                    "Archive is read-only").ShowDialog(this);
+                return;
+            }
+
             string spath = AppendSeparator(sourcePathRaw.Replace(@"\\", @"\"));
             string tpath = AppendSeparator(targetPathRaw.Replace(@"\\", @"\"));
 
@@ -2170,7 +2182,7 @@ namespace DirOpusReImagined
             else
             {
                 // Fallback: navigate up the directory tree
-                var parent = Path.GetDirectoryName(LPpath.Text);
+                var parent = ParentOf(LPpath.Text);
                 if (!string.IsNullOrEmpty(parent))
                     LPpath.Text = parent;
             }
@@ -2189,7 +2201,7 @@ namespace DirOpusReImagined
             else
             {
                 // Fallback: navigate up the directory tree
-                var parent = Path.GetDirectoryName(RPpath.Text);
+                var parent = ParentOf(RPpath.Text);
                 if (!string.IsNullOrEmpty(parent))
                     RPpath.Text = parent;
             }
@@ -2206,7 +2218,10 @@ namespace DirOpusReImagined
             // Kill the tooltip if any
             if (sender != null)
                 ToolTip.SetIsOpen((TaiDataGrid)sender,false);
-            
+
+            // Double-clicking an archive file enters it like a folder.
+            if (TryEnterArchive(RPgrid, RPpath, _rpHistory, it)) return;
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 if (it.Typ)
@@ -2277,7 +2292,10 @@ namespace DirOpusReImagined
             // Kill the tooltip if any
             if (sender != null)
                 ToolTip.SetIsOpen((TaiDataGrid)sender,false);
-            
+
+            // Double-clicking an archive file enters it like a folder.
+            if (TryEnterArchive(LPgrid, LPpath, _lpHistory, it)) return;
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 if (it.Typ)
@@ -3607,14 +3625,55 @@ namespace DirOpusReImagined
             await new RcloneAddRemoteDialog().ShowDialog(this);
         }
 
+        /// <summary>
+        /// The parent location of <paramref name="path"/>, archive-aware: going up from inside an
+        /// archive climbs the entry tree and, at the archive root, steps back out to the real folder
+        /// that contains the archive file. Falls back to the filesystem parent otherwise.
+        /// </summary>
+        private static string ParentOf(string path)
+        {
+            if (ArchivePath.IsArchiveUri(path))
+                return ArchivePath.Parse(path).ParentUri();
+            return Path.GetDirectoryName(path);
+        }
+
         private static string JoinChildPath(string parent, string childName)
         {
+            if (ArchivePath.IsArchiveUri(parent))
+                return ArchivePath.Parse(parent).Join(childName).FullUri;
+
             if (CloudPath.IsCloudUri(parent))
                 return CloudPath.Parse(parent).Join(childName).FullUri;
 
             var sep = Environment.OSVersion.Platform == PlatformID.Win32NT ? "\\" : "/";
             if (parent.EndsWith(sep)) return parent + childName;
             return parent + sep + childName;
+        }
+
+        /// <summary>
+        /// If <paramref name="it"/> is an archive file being double-clicked from a real (local) folder,
+        /// navigates the panel into the archive (<c>archive://…!/</c>) and returns true. Nesting into an
+        /// archive that already lives inside a cloud or archive path isn't supported (v1), so those return
+        /// false and fall through to the normal open/execute behaviour.
+        /// </summary>
+        private bool TryEnterArchive(TaiDataGrid grid, TextBox pathBox, Stack<string> history, AFileEntry it)
+        {
+            if (it == null || it.Typ) return false;
+            if (!ArchivePath.IsArchiveFile(it.Name)) return false;
+
+            string current = pathBox.Text ?? "";
+            if (CloudPath.IsCloudUri(current) || ArchivePath.IsArchiveUri(current)) return false;
+
+            string fsPath = JoinChildPath(current, it.Name);
+            history.Push(current);
+            pathBox.Text = ArchivePath.RootUriFor(fsPath);
+
+            if (ChkShowHidden != null)
+                FileUtility.PopulateFilePanel(grid, pathBox.Text, ChkShowHidden.IsChecked.Value, RbSortName.IsChecked.Value);
+
+            if (ReferenceEquals(grid, LPgrid)) { LPfilter.Text = ""; RefreshLPGridPostActions(); }
+            else { RPfilter.Text = ""; RefreshRPGridPostActions(); }
+            return true;
         }
 
     }

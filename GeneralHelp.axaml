@@ -56,6 +56,9 @@
                 <TextBlock Text="Open terminal here" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Right-click a panel and choose Terminal Here to open a terminal in that panel's current folder. A terminal is auto-detected for your OS, or set your own in the System Wide Settings tab of the button configuration dialog (the &lt;Terminal&gt; entry in Configuration.xml, using %DIR% for the folder)." TextWrapping="Wrap" />
 
+                <TextBlock Text="Browse into archives" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Double-click a .zip, .7z, .rar, .tar, or .tar.gz to open it like a folder and browse its contents. Copy or drag files out to a normal folder to extract them (with the usual progress and overwrite prompts). Archives are read-only — extract first, then modify." TextWrapping="Wrap" />
+
                 <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Access a remote with cloud://&lt;remote&gt;/&lt;path&gt; in the panel path box." TextWrapping="Wrap" />
 

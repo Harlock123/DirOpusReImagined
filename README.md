@@ -100,6 +100,12 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
 - Configurable via the `<UseIntegratedImageViewer>` setting
 
+### Browse Into Archives
+- Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
+- **Extract** by copying or dragging files/folders out to a normal folder — reuses the standard transfer progress and overwrite prompts
+- Archives are **read-only**: writing into one is blocked with a clear message (extract first, then modify)
+- Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
+
 ### Cloud Storage Access
 - Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via [rclone](https://rclone.org/)
 - Access any configured remote with `cloud://<remote-name>/<path>` in the panel path box
@@ -148,7 +154,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.11.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.12.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -686,6 +692,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.12.0 (2026-07-19) — Browse into archives
+- **Browse archives like folders** — double-click a `.zip`, `.7z`, `.rar`, `.tar`, or `.tar.gz`/`.tgz` to open it in the panel and navigate its contents, including nested folders. Back/up steps out of the archive naturally.
+- **Extract via the normal transfer pipeline** — copy or drag files and folders out of an archive to a normal folder; extraction reuses the existing progress dialog, cancel, and overwrite confirmation. Recursive folder extraction is supported.
+- **Read-only by design** — writing *into* an archive (copy/move/drag in) is blocked up front with a clear message rather than failing partway; extract first, then modify.
+- Built on a new `ArchiveFileProvider` behind the existing `IFileProvider`/`ProviderRegistry` abstraction (paths use an `archive://<file>!/<entry>` scheme), reading via the pure-managed **SharpCompress** library so it works on Windows, macOS, and Linux. Random-access formats (zip/7z/rar/tar) and compression-wrapped tarballs (gzip/bzip2) are both handled.
 
 ### 0.1.11.0 (2026-07-19) — Wildcard selection
 - **Select / Deselect by pattern** — pick items by a wildcard or substring pattern (e.g. `*.jpg`, `proj*`, `report?`) instead of one at a time. Available from each panel's right-click menu ("Select by Pattern…", "Deselect by Pattern…") and via the orthodox **+** (select) and **-** (deselect) keys. A dialog collects the pattern and offers a **Files only** option to skip folders.
