@@ -665,6 +665,692 @@ The dialog shows:
 - Double-clicking a cloud **file** to launch it is not yet supported (download-to-temp-and-launch is planned).
 - ZIP archive creation targeting a cloud path is not yet supported.
 
+### Supported cloud providers & their settings
+
+DORI browses any storage backend that [rclone](https://rclone.org/) supports — the **Add Cloud Remote** dialog lists them and prompts for exactly the fields shown below. The list is generated from the bundled rclone version; newer rclone builds may add more.
+
+Notes that apply throughout:
+
+- **OAuth providers** (Google Drive, OneDrive, Dropbox, Box, pCloud, and others): just click **Add** and sign in through your browser — there are no fields to fill. `client_id` / `client_secret` are optional and only needed if you want to use your own API application instead of rclone's.
+- Fields marked **(required)** must be supplied; the rest are optional (sensible defaults, or credentials that can come from the environment).
+- Only the common setup fields are shown here. Every backend has additional **advanced** options — see each provider's linked rclone docs page for the full reference.
+- After adding a remote named `myremote`, open it in any panel with `cloud://myremote/`.
+
+#### 1Fichier
+
+rclone type: `fichier` · docs: https://rclone.org/fichier/
+
+**Settings:**
+
+- `api_key` — Your API Key, get it from https://1fichier.com/console/params.pl.
+
+#### Akamai NetStorage
+
+rclone type: `netstorage` · docs: https://rclone.org/netstorage/
+
+**Settings:**
+
+- `host` **(required)** — Domain+path of NetStorage host to connect to.
+- `account` **(required)** — Set the NetStorage account name
+- `secret` **(required)** — Set the NetStorage account secret/G2O key for authentication.
+
+#### Amazon S3 & S3-compatible (AWS, Wasabi, MinIO, Cloudflare R2, DigitalOcean Spaces, Backblaze, Ceph, and many more)
+
+rclone type: `s3` · docs: https://rclone.org/s3/
+
+**Settings:**
+
+- `provider` — Choose your S3 provider.
+- `env_auth` — Get AWS credentials from runtime (environment variables or EC2/ECS meta data if no env vars).
+- `access_key_id` — AWS Access Key ID.
+- `secret_access_key` — AWS Secret Access Key (password).
+- `region` — Region to connect to.
+- `endpoint` — Endpoint for S3 API.
+- `location_constraint` — Location constraint - must be set to match the Region.
+- `acl` — Canned ACL used when creating buckets and storing or copying objects.
+- `server_side_encryption` — The server-side encryption algorithm used when storing this object in S3.
+- `sse_kms_key_id` — If using KMS ID you must provide the ARN of Key.
+- `storage_class` — The storage class to use when storing new objects in S3.
+- `ibm_api_key` — IBM API Key to be used to obtain IAM token
+- `ibm_resource_instance_id` — IBM service instance id
+- `bucket_object_lock_enabled` — Enable Object Lock when creating new buckets.
+
+#### Backblaze B2
+
+rclone type: `b2` · docs: https://rclone.org/b2/
+
+**Settings:**
+
+- `account` **(required)** — Account ID or Application Key ID.
+- `key` **(required)** — Application Key.
+- `hard_delete` — Permanently delete files on remote removal, otherwise hide files.
+
+#### Box
+
+rclone type: `box` · docs: https://rclone.org/box/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `box_config_file` — Box App config.json location
+- `access_token` — Box App Primary Access Token
+- `box_sub_type` — null
+
+#### Citrix Sharefile
+
+rclone type: `sharefile` · docs: https://rclone.org/sharefile/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `root_folder_id` — ID of the root folder.
+
+#### Cloudinary
+
+rclone type: `cloudinary` · docs: https://rclone.org/cloudinary/
+
+**Settings:**
+
+- `cloud_name` **(required)** — Cloudinary Environment Name
+- `api_key` **(required)** — Cloudinary API Key
+- `api_secret` **(required)** — Cloudinary API Secret
+- `upload_prefix` — Specify the API endpoint for environments out of the US
+- `upload_preset` — Upload Preset to select asset manipulation on upload
+
+#### DOI datasets
+
+rclone type: `doi` · docs: https://rclone.org/doi/
+
+**Settings:**
+
+- `doi` **(required)** — The DOI or the doi.org URL.
+
+#### Drime
+
+rclone type: `drime` · docs: https://rclone.org/drime/
+
+**Settings:**
+
+- `access_token` — API Access token
+
+#### Dropbox
+
+rclone type: `dropbox` · docs: https://rclone.org/dropbox/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### Enterprise File Fabric
+
+rclone type: `filefabric` · docs: https://rclone.org/filefabric/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `url` **(required)** — URL of the Enterprise File Fabric to connect to.
+- `root_folder_id` — ID of the root folder.
+- `permanent_token` — Permanent Authentication Token.
+
+#### FileLu Cloud Storage
+
+rclone type: `filelu` · docs: https://rclone.org/filelu/
+
+**Settings:**
+
+- `key` **(required)** — Your FileLu Rclone key from My Account
+
+#### Filen
+
+rclone type: `filen` · docs: https://rclone.org/filen/
+
+**Settings:**
+
+- `email` **(required)** — Email of your Filen account
+- `password` **(required)** — Password of your Filen account
+- `api_key` **(required)** — API Key for your Filen account
+
+#### Files.com
+
+rclone type: `filescom` · docs: https://rclone.org/filescom/
+
+**Settings:**
+
+- `site` — Your site subdomain (e.g. mysite) or custom domain (e.g. myfiles.customdomain.com).
+- `username` — The username used to authenticate with Files.com.
+- `password` — The password used to authenticate with Files.com.
+
+#### FTP
+
+rclone type: `ftp` · docs: https://rclone.org/ftp/
+
+**Settings:**
+
+- `host` **(required)** — FTP host to connect to.
+- `user` — FTP username.
+- `port` — FTP port number.
+- `pass` — FTP password.
+- `tls` — Use Implicit FTPS (FTP over TLS).
+- `explicit_tls` — Use Explicit FTPS (FTP over TLS).
+
+#### Gofile
+
+rclone type: `gofile` · docs: https://rclone.org/gofile/
+
+**Settings:**
+
+- `access_token` — API Access token
+
+#### Google Cloud Storage (this is not Google Drive)
+
+rclone type: `google cloud storage` · docs: https://rclone.org/googlecloudstorage/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `project_number` — Project number.
+- `user_project` — User project.
+- `service_account_file` — Service Account Credentials JSON file path.
+- `anonymous` — Access public buckets and objects without credentials.
+- `object_acl` — Access Control List for new objects.
+- `bucket_acl` — Access Control List for new buckets.
+- `bucket_policy_only` — Access checks should use bucket-level IAM policies.
+- `location` — Location for the newly created buckets.
+- `storage_class` — The storage class to use when storing objects in Google Cloud Storage.
+- `env_auth` — Get GCP IAM credentials from runtime (environment variables or instance meta data if no env vars).
+
+#### Google Drive
+
+rclone type: `drive` · docs: https://rclone.org/drive/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — Google Application Client Id
+- `client_secret` — OAuth Client Secret.
+- `scope` — Comma separated list of scopes that rclone should use when requesting access from drive.
+- `service_account_file` — Service Account Credentials JSON file path.
+
+#### Google Photos
+
+rclone type: `google photos` · docs: https://rclone.org/googlephotos/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `read_only` — Set to make the Google Photos backend read only.
+
+#### Hadoop distributed file system
+
+rclone type: `hdfs` · docs: https://rclone.org/hdfs/
+
+**Settings:**
+
+- `namenode` **(required)** — Hadoop name nodes and ports.
+- `username` — Hadoop user name.
+
+#### HiDrive
+
+rclone type: `hidrive` · docs: https://rclone.org/hidrive/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `scope_access` — Access permissions that rclone should use when requesting access from HiDrive.
+
+#### HTTP
+
+rclone type: `http` · docs: https://rclone.org/http/
+
+**Settings:**
+
+- `url` **(required)** — URL of HTTP host to connect to.
+- `no_escape` — Do not escape URL metacharacters in path names.
+
+#### Huawei Drive
+
+rclone type: `huaweidrive` · docs: https://rclone.org/huaweidrive/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### iCloud Drive and Photos
+
+rclone type: `iclouddrive` · docs: https://rclone.org/iclouddrive/
+
+**Settings:**
+
+- `service` **(required)** — iCloud service to use.
+- `apple_id` **(required)** — Apple ID.
+- `password` **(required)** — Password.
+
+#### ImageKit.io
+
+rclone type: `imagekit` · docs: https://rclone.org/imagekit/
+
+**Settings:**
+
+- `endpoint` **(required)** — You can find your ImageKit.io URL endpoint in your [dashboard](https://imagekit.io/dashboard/developer/api-keys)
+- `public_key` **(required)** — You can find your ImageKit.io public key in your [dashboard](https://imagekit.io/dashboard/developer/api-keys)
+- `private_key` **(required)** — You can find your ImageKit.io private key in your [dashboard](https://imagekit.io/dashboard/developer/api-keys)
+
+#### Internet Archive
+
+rclone type: `internetarchive` · docs: https://rclone.org/internetarchive/
+
+**Settings:**
+
+- `access_key_id` — IAS3 Access Key.
+- `secret_access_key` — IAS3 Secret Key (password).
+- `item_derive` — Whether to trigger derive on the IA item or not. If set to false, the item will not be derived by IA upon upload.
+
+#### Internxt Drive
+
+rclone type: `internxt` · docs: https://rclone.org/internxt/
+
+**Settings:**
+
+- `email` **(required)** — Email of your Internxt account.
+- `pass` **(required)** — Password.
+
+#### Jottacloud
+
+rclone type: `jottacloud` · docs: https://rclone.org/jottacloud/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### Koofr, Digi Storage and other Koofr-compatible storage providers
+
+rclone type: `koofr` · docs: https://rclone.org/koofr/
+
+**Settings:**
+
+- `provider` — Choose your storage provider.
+- `endpoint` **(required)** — The Koofr API endpoint to use.
+- `user` **(required)** — Your user name.
+- `password` **(required)** — Your password for rclone generate one at https://app.koofr.net/app/admin/preferences/password.
+- `password` **(required)** — Your password for rclone generate one at https://storage.rcs-rds.ro/app/admin/preferences/password.
+- `password` **(required)** — Your password for rclone (generate one at your service's settings page).
+
+#### Linkbox
+
+rclone type: `linkbox` · docs: https://rclone.org/linkbox/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `token` **(required)** — Token from https://www.linkbox.to/admin/account
+- `email` **(required)** — Email for login
+- `password` **(required)** — Password for login
+
+#### Mail.ru Cloud
+
+rclone type: `mailru` · docs: https://rclone.org/mailru/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `user` **(required)** — User name (usually email).
+- `pass` **(required)** — Password.
+- `speedup_enable` — Skip full upload if there is another file with same data hash.
+
+#### Mega
+
+rclone type: `mega` · docs: https://rclone.org/mega/
+
+**Settings:**
+
+- `user` **(required)** — User name.
+- `pass` **(required)** — Password.
+- `2fa` — The 2FA code of your MEGA account if the account is set up with one
+
+#### Microsoft Azure Blob Storage
+
+rclone type: `azureblob` · docs: https://rclone.org/azureblob/
+
+**Settings:**
+
+- `account` — Azure Storage Account Name.
+- `env_auth` — Read credentials from runtime (environment variables, CLI or MSI).
+- `key` — Storage Account Shared Key.
+- `sas_url` — SAS URL for container level access only.
+- `connection_string` — Storage Connection String.
+- `tenant` — ID of the service principal's tenant. Also called its directory ID.
+- `client_id` — The ID of the client in use.
+- `client_secret` — One of the service principal's client secrets
+- `client_certificate_path` — Path to a PEM or PKCS12 certificate file including the private key.
+- `client_certificate_password` — Password for the certificate file (optional).
+
+#### Microsoft Azure Files
+
+rclone type: `azurefiles` · docs: https://rclone.org/azurefiles/
+
+**Settings:**
+
+- `account` — Azure Storage Account Name.
+- `env_auth` — Read credentials from runtime (environment variables, CLI or MSI).
+- `key` — Storage Account Shared Key.
+- `sas_url` — SAS URL for container level access only.
+- `connection_string` — Storage Connection String.
+- `tenant` — ID of the service principal's tenant. Also called its directory ID.
+- `client_id` — The ID of the client in use.
+- `client_secret` — One of the service principal's client secrets
+- `client_certificate_path` — Path to a PEM or PKCS12 certificate file including the private key.
+- `client_certificate_password` — Password for the certificate file (optional).
+- `share_name` — Azure Files Share Name.
+
+#### Microsoft OneDrive
+
+rclone type: `onedrive` · docs: https://rclone.org/onedrive/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `region` — Choose national cloud region for OneDrive.
+- `tenant` — ID of the service principal's tenant. Also called its directory ID.
+
+#### OpenDrive
+
+rclone type: `opendrive` · docs: https://rclone.org/opendrive/
+
+**Settings:**
+
+- `username` **(required)** — Username.
+- `password` **(required)** — Password.
+
+#### OpenStack Swift (Rackspace Cloud Files, Blomp Cloud Storage, Memset Memstore, OVH)
+
+rclone type: `swift` · docs: https://rclone.org/swift/
+
+**Settings:**
+
+- `env_auth` — Get swift credentials from environment variables in standard OpenStack form.
+- `user` — User name to log in (OS_USERNAME).
+- `key` — API key or password (OS_PASSWORD).
+- `auth` — Authentication URL for server (OS_AUTH_URL).
+- `user_id` — User ID to log in - optional - most swift systems use user and leave this blank (v3 auth) (OS_USER_ID).
+- `domain` — User domain - optional (v3 auth) (OS_USER_DOMAIN_NAME)
+- `tenant` — Tenant name - optional for v1 auth, this or tenant_id required otherwise (OS_TENANT_NAME or OS_PROJECT_NAME).
+- `tenant_id` — Tenant ID - optional for v1 auth, this or tenant required otherwise (OS_TENANT_ID).
+- `tenant_domain` — Tenant domain - optional (v3 auth) (OS_PROJECT_DOMAIN_NAME).
+- `region` — Region name - optional (OS_REGION_NAME).
+- `storage_url` — Storage URL - optional (OS_STORAGE_URL).
+- `auth_token` — Auth Token from alternate authentication - optional (OS_AUTH_TOKEN).
+- `application_credential_id` — Application Credential ID (OS_APPLICATION_CREDENTIAL_ID).
+- `application_credential_name` — Application Credential Name (OS_APPLICATION_CREDENTIAL_NAME).
+- `application_credential_secret` — Application Credential Secret (OS_APPLICATION_CREDENTIAL_SECRET).
+- `auth_version` — AuthVersion - optional - set to (1,2,3) if your auth URL has no version (ST_AUTH_VERSION).
+- `endpoint_type` — Endpoint type to choose from the service catalogue (OS_ENDPOINT_TYPE).
+- `storage_policy` — The storage policy to use when creating a new container.
+
+#### Oracle Cloud Infrastructure Object Storage
+
+rclone type: `oracleobjectstorage` · docs: https://rclone.org/oracleobjectstorage/
+
+**Settings:**
+
+- `provider` **(required)** — Choose your Auth Provider
+- `namespace` **(required)** — Object storage namespace
+- `compartment` — Specify compartment OCID, if you need to list buckets.
+- `region` **(required)** — Object storage Region
+- `endpoint` — Endpoint for Object storage API.
+- `config_file` — Path to OCI config file
+- `config_profile` — Profile name inside the oci config file
+
+#### Pcloud
+
+rclone type: `pcloud` · docs: https://rclone.org/pcloud/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### PikPak
+
+rclone type: `pikpak` · docs: https://rclone.org/pikpak/
+
+**Settings:**
+
+- `user` **(required)** — Pikpak username.
+- `pass` **(required)** — Pikpak password.
+
+#### Pixeldrain Filesystem
+
+rclone type: `pixeldrain` · docs: https://rclone.org/pixeldrain/
+
+**Settings:**
+
+- `api_key` — API key for your pixeldrain account.
+- `root_folder_id` — Root of the filesystem to use.
+
+#### premiumize.me
+
+rclone type: `premiumizeme` · docs: https://rclone.org/premiumizeme/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### Proton Drive
+
+rclone type: `protondrive` · docs: https://rclone.org/protondrive/
+
+**Settings:**
+
+- `username` **(required)** — The username of your proton account
+- `password` **(required)** — The password of your proton account.
+- `2fa` — The 2FA code
+- `otp_secret_key` — The OTP secret key
+
+#### Put.io
+
+rclone type: `putio` · docs: https://rclone.org/putio/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### QingCloud Object Storage
+
+rclone type: `qingstor` · docs: https://rclone.org/qingstor/
+
+**Settings:**
+
+- `env_auth` — Get QingStor credentials from runtime.
+- `access_key_id` — QingStor Access Key ID.
+- `secret_access_key` — QingStor Secret Access Key (password).
+- `endpoint` — Enter an endpoint URL to connection QingStor API.
+- `zone` — Zone to connect to.
+
+#### Quatrix by Maytech
+
+rclone type: `quatrix` · docs: https://rclone.org/quatrix/
+
+**Settings:**
+
+- `api_key` **(required)** — API key for accessing Quatrix account
+- `host` **(required)** — Host name of Quatrix account
+
+#### seafile
+
+rclone type: `seafile` · docs: https://rclone.org/seafile/
+
+**Settings:**
+
+- `url` **(required)** — URL of seafile host to connect to.
+- `user` **(required)** — User name (usually email address).
+- `pass` — Password.
+- `2fa` — Two-factor authentication ('true' if the account has 2FA enabled).
+- `library` — Name of the library.
+- `library_key` — Library password (for encrypted libraries only).
+
+#### Shade FS
+
+rclone type: `shade` · docs: https://rclone.org/shade/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `drive_id` **(required)** — The ID of your drive, see this in the drive settings. Individual rclone configs must be made per drive.
+- `api_key` **(required)** — An API key for your account.
+
+#### Sia Decentralized Cloud
+
+rclone type: `sia` · docs: https://rclone.org/sia/
+
+**Settings:**
+
+- `api_url` — Sia daemon API URL, like http://sia.daemon.host:9980.
+- `api_password` — Sia Daemon API Password.
+
+#### SMB / CIFS
+
+rclone type: `smb` · docs: https://rclone.org/smb/
+
+**Settings:**
+
+- `host` **(required)** — SMB server hostname to connect to.
+- `user` — SMB username.
+- `port` — SMB port number.
+- `pass` — SMB password.
+- `domain` — Domain name for NTLM authentication.
+- `spn` — Service principal name.
+- `use_kerberos` — Use Kerberos authentication.
+
+#### SSH/SFTP
+
+rclone type: `sftp` · docs: https://rclone.org/sftp/
+
+**Settings:**
+
+- `host` **(required)** — SSH host to connect to.
+- `user` — SSH username.
+- `port` — SSH port number.
+- `pass` — SSH password, leave blank to use ssh-agent.
+- `key_pem` — Raw PEM-encoded private key.
+- `key_file` — Path to PEM-encoded private key file.
+- `key_file_pass` — The passphrase to decrypt the PEM-encoded private key file.
+- `pubkey` — SSH public certificate for public certificate based authentication.
+- `pubkey_file` — Optional path to public key file.
+- `key_use_agent` — When set forces the usage of the ssh-agent.
+- `use_insecure_cipher` — Enable the use of insecure ciphers and key exchange methods.
+- `disable_hashcheck` — Disable the execution of SSH commands to determine if remote file hashing is available.
+- `ssh` — Path and arguments to external ssh binary.
+
+#### Storj Decentralized Cloud Storage
+
+rclone type: `storj` · docs: https://rclone.org/storj/
+
+**Settings:**
+
+- `provider` — Choose an authentication method.
+- `access_grant` — Access grant.
+- `satellite_address` — Satellite address.
+- `api_key` — API key.
+- `passphrase` — Encryption passphrase.
+
+#### Sugarsync
+
+rclone type: `sugarsync` · docs: https://rclone.org/sugarsync/
+
+**Settings:**
+
+- `app_id` — Sugarsync App ID.
+- `access_key_id` — Sugarsync Access Key ID.
+- `private_access_key` — Sugarsync Private Access Key.
+- `hard_delete` — Permanently delete files if true
+
+#### Uloz.to
+
+rclone type: `ulozto` · docs: https://rclone.org/ulozto/
+
+**Settings:**
+
+- `app_token` — The application token identifying the app. An app API key can be either found in the API
+- `username` — The username of the principal to operate as.
+- `password` — The password for the user.
+
+#### WebDAV
+
+rclone type: `webdav` · docs: https://rclone.org/webdav/
+
+**Settings:**
+
+- `url` **(required)** — URL of http host to connect to.
+- `vendor` — Name of the WebDAV site/service/software you are using.
+- `user` — User name.
+- `pass` — Password.
+- `bearer_token` — Bearer token instead of user/pass (e.g. a Macaroon).
+
+#### Yandex Disk
+
+rclone type: `yandex` · docs: https://rclone.org/yandex/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+
+#### Zoho
+
+rclone type: `zoho` · docs: https://rclone.org/zoho/
+
+**Authentication:** OAuth — click **Add** and sign in through your browser (no fields required). `client_id` / `client_secret` optional.
+
+**Settings:**
+
+- `client_id` — OAuth Client Id.
+- `client_secret` — OAuth Client Secret.
+- `region` — Zoho region to connect to.
+
 ## Building
 
 ### Prerequisites
