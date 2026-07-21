@@ -142,6 +142,12 @@
 
                     <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0"
                                Text="Use %DIR% where the target folder should be substituted. Quote it if the path may contain spaces, e.g. -d &quot;%DIR%&quot;. The folder is also set as the launched process's working directory, so many terminals need no arguments at all." />
+
+                    <TextBlock Text="Cloud (rclone)" FontSize="16" FontWeight="Bold" Margin="0,16,0,0" />
+                    <CheckBox Name="cbKeepRcloneWarm" Padding="4"
+                              Content="Keep rclone running between launches" />
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
+                               Text="Cloud folders take ~15-20s to load the first time after launch while rclone connects and refreshes its token. When enabled, the rclone background process is left running when you close the app and reused next time, so that delay is paid once instead of every launch. Trade-off: a small rclone process keeps running in the background between launches. Off by default." />
                 </StackPanel>
             </ScrollViewer>
         </TabItem>

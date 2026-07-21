@@ -164,7 +164,12 @@ namespace DirOpusReImagined
             // Restore the saved Light/Dark/System theme choice (defaults to Light) and sync the picker.
             LoadThemeFromConfig();
             LoadUseTrashFromConfig();
-            
+            LoadKeepRcloneWarmFromConfig();
+
+            // Always clean up any rclone daemon we leaked from a previous crash/force-quit (keeps the
+            // still-warm one when keep-warm is enabled). Must run after the setting is loaded.
+            RcloneService.CleanupOrphans();
+
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
 
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
@@ -2349,6 +2354,23 @@ namespace DirOpusReImagined
                 }
             }
             catch { /* keep the default (on) */ }
+        }
+
+        /// <summary>Reads the persisted &lt;KeepRcloneWarm&gt; setting (default false) into
+        /// <see cref="AppOptions"/> and <see cref="RcloneService"/>. Written by the settings dialog.</summary>
+        private void LoadKeepRcloneWarmFromConfig()
+        {
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var el = XDocument.Load(_configFilePath).Descendants("KeepRcloneWarm").FirstOrDefault();
+                    if (el != null && bool.TryParse(el.Value.Trim(), out var v))
+                        AppOptions.KeepRcloneWarm = v;
+                }
+            }
+            catch { /* keep the default (off) */ }
+            RcloneService.KeepWarm = AppOptions.KeepRcloneWarm;
         }
 
         /// <summary>Writes the current &lt;UseTrash&gt; option to the config file.</summary>

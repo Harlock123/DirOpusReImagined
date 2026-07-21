@@ -175,7 +175,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.17.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.18.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -713,6 +713,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.18.0 (2026-07-21) — Keep rclone warm (optional)
+- **Keep rclone running between launches** — a new opt-in setting in the button configuration dialog's **System Wide Settings** tab. When enabled, the background rclone daemon is left running when you close the app and re-attached on the next launch, so cloud folders skip the ~15-20s cold-start on every launch and load instantly instead. **Off by default** (it leaves a small rclone process running between launches).
+- **Orphaned-daemon cleanup (always on)** — the app now records the rclone daemons it spawns and, on every startup, kills any that leaked from a previous crash or force-quit (sparing the one it will re-attach to when keep-warm is enabled). Only daemons this app started are ever touched. The daemon now logs to a file so a kept-warm process keeps logging after the app closes.
 
 ### 0.1.17.0 (2026-07-21) — Screenshot capture
 - **Screenshot hotkey** — press **Ctrl+Shift+P** (**Cmd+Shift+P** on macOS) on any screen or dialog to render that window to a **PNG**. A save dialog opens pre-filled with a descriptive, spaces-free default filename derived from the window (e.g. `DORI_Main_Screen`, `Rename_Selected_File_s`), capped at 40 characters. Registered app-wide via a single tunnelling handler, so it works on every window and modal dialog — including inside the file grid and text boxes — intended as an aid for building documentation.

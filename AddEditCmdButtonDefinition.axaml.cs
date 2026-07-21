@@ -96,6 +96,10 @@ public partial class AddEditCmdButtonDefinition : Window
         {
             // Missing or malformed config just leaves the fields blank.
         }
+
+        // Reflect the live keep-rclone-warm option (loaded from config at startup).
+        var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
+        if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
     }
 
     /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
@@ -114,6 +118,15 @@ public partial class AddEditCmdButtonDefinition : Window
         terminal.RemoveAll();
         terminal.Add(new XElement("Command", command));
         terminal.Add(new XElement("Args", args));
+
+        // Persist the keep-rclone-warm option and apply it live so it takes effect this session.
+        bool keepWarm = this.FindControl<CheckBox>("cbKeepRcloneWarm")?.IsChecked ?? false;
+        AppOptions.KeepRcloneWarm = keepWarm;
+        DirOpusReImagined.FileSystem.Rclone.RcloneService.KeepWarm = keepWarm;
+
+        var warmEl = doc.Root!.Element("KeepRcloneWarm");
+        if (warmEl == null) { warmEl = new XElement("KeepRcloneWarm"); doc.Root!.Add(warmEl); }
+        warmEl.Value = keepWarm ? "true" : "false";
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
