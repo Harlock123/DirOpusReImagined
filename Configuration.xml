@@ -90,6 +90,34 @@
       <ToolTip>Launch Microsoft Word</ToolTip>
     </Button>
     <Button>
+      <Name>LpButton7</Name>
+      <Content>Add Cloud Remote</Content>
+      <Background>LightSkyBlue</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>%RCLONECONFIG%</Action>
+      <Args />
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>Add a cloud storage remote (Google Drive, OneDrive, Dropbox, S3, …) via rclone</ToolTip>
+    </Button>
+    <Button>
+      <Name>LpButton8</Name>
+      <Content>Cloud Diagnostics</Content>
+      <Background>LightSkyBlue</Background>
+      <Foreground>Black</Foreground>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Center</VerticalAlignment>
+      <Margin>2,2,2,2</Margin>
+      <Action>%RCLONEDIAG%</Action>
+      <Args />
+      <ShellExecute>False</ShellExecute>
+      <ShowWindow>False</ShowWindow>
+      <ToolTip>rclone diagnostics — install rclone, view/delete remotes, daemon state, and logs</ToolTip>
+    </Button>
+    <Button>
       <Name>LpButton31</Name>
       <Content>Configure Buttons</Content>
       <Background>GreenYellow</Background>
@@ -198,10 +226,10 @@
   <UseTrash>true</UseTrash>
   <Tabs>
     <Left active="0">
-      <Tab>/Users/lwatson/Downloads</Tab>
+      <Tab>/Users/lwatson</Tab>
     </Left>
     <Right active="0">
-      <Tab>/Users/lwatson</Tab>
+      <Tab>/Users/lwatson/Pictures</Tab>
     </Right>
   </Tabs>
 </Settings>

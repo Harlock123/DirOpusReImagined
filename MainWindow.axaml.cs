@@ -317,6 +317,12 @@ namespace DirOpusReImagined
             RenderTabBar(isLeft: true);
             RenderTabBar(isLeft: false);
 
+            // A restored cloud tab lists before the rclone daemon has cold-started, so its first
+            // populate can sit at "Loading…" until the daemon (and any OAuth token refresh) is ready.
+            // Warm the client in the background and re-populate once it's confirmed up, so the panel
+            // self-heals instead of needing the user to navigate away and back.
+            WarmRestoredCloudTabs();
+
             // Breadcrumb bar setup — switch from TextBox to breadcrumb mode
             // after initial load so TextBox.Text is reliably set during config loading
             ExitPathEditMode("LP");
@@ -2517,6 +2523,34 @@ namespace DirOpusReImagined
             LoadTab(isLeft, active);
         }
 
+        /// <summary>
+        /// If either panel restored a cloud path, warm the rclone client in the background and, once
+        /// it's confirmed ready, re-populate that panel. On a cold start the daemon (plus any OAuth
+        /// token refresh) may not be ready when the tab first lists, leaving it stuck at "Loading…";
+        /// this re-issues the listing against a ready daemon so the panel loads on its own.
+        /// </summary>
+        private void WarmRestoredCloudTabs()
+        {
+            bool leftCloud  = CloudPath.IsCloudUri(LPpath.Text ?? "");
+            bool rightCloud = CloudPath.IsCloudUri(RPpath.Text ?? "");
+            if (!leftCloud && !rightCloud) return;
+
+            Task.Run(async () =>
+            {
+                try { await RcloneService.GetClientAsync().ConfigureAwait(false); }
+                catch { return; } // the panel's own populate surfaces a genuine failure
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    bool showHidden = ChkShowHidden?.IsChecked ?? false;
+                    if (leftCloud && CloudPath.IsCloudUri(LPpath.Text ?? ""))
+                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, showHidden, _lpSort);
+                    if (rightCloud && CloudPath.IsCloudUri(RPpath.Text ?? ""))
+                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, showHidden, _rpSort);
+                });
+            });
+        }
+
         /// <summary>Platform-appropriate, user-writable path for a config file when none was found.</summary>
         private string GetWritableConfigPath()
         {
@@ -3065,8 +3099,12 @@ namespace DirOpusReImagined
 
             double nheight = ((e.NewSize.Height) - 30 - 26 - 24) * .7;
 
-            LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16);
-            RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 16 );
+            // Row 2 (the 0.7* row) must also make room for the per-panel tab bar (26px), the
+            // wrapping StackPanel's 8px vertical margin, and the grid control's own 12px horizontal
+            // scrollbar — otherwise the grid renders taller than its row and spills over the button
+            // panel below. Subtract for those here so the grid fits within its row.
+            LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 58);
+            RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 58 );
 
             // here we should also set the sizes for other elements of the UI
             // like the center buttons between the file grids

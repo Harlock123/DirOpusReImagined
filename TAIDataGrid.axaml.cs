@@ -3067,6 +3067,10 @@ namespace DirOpusReImagined
                 }
             }
 
+            // Repaint immediately so the selection highlight shows on the click itself, rather than
+            // waiting for the next pointer-move to trigger a redraw.
+            if (!_contextMenuOpen) ReRender();
+
             // Look to handle double click here
             if (e.ClickCount == 1)
             {

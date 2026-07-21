@@ -16,8 +16,11 @@
                     FontWeight="Bold" />
         </Border>
 
-        <ScrollViewer Padding="16,12">
-            <StackPanel Spacing="4">
+        <!-- The right margin lives on the content (not ScrollViewer.Padding, which doesn't
+             reduce the text wrap width) so wrapped lines stay clear of the overlay vertical
+             scrollbar that otherwise draws over the last couple of characters. -->
+        <ScrollViewer>
+            <StackPanel Spacing="4" Margin="16,12,40,12">
 
                 <TextBlock Text="DirOpus Reimagined" FontSize="24" FontWeight="Bold" />
                 <TextBlock Text="A cross-platform dual-panel file manager inspired by the classic Amiga Directory Opus 4.12. Two independent panels sit side by side for efficient file management; the panel with keyboard focus is the &quot;active&quot; panel and is drawn with a highlighted frame."
@@ -72,10 +75,18 @@
                 <TextBlock Text="• Custom command buttons (e.g. open in an editor) also work on files inside archives: the file is extracted to a temporary copy and that path is passed to the tool. Edits to the temp copy are not written back into the archive." TextWrapping="Wrap" />
 
                 <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Access a remote with cloud://&lt;remote&gt;/&lt;path&gt; in the panel path box." TextWrapping="Wrap" />
+                <TextBlock Text="• Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via rclone. Cloud folders behave just like local ones — double-click, breadcrumbs, Back/Forward, copy/move, and sync all work across local and cloud alike. DORI never handles your credentials; rclone stores them in its own config, and a local rclone daemon is started on first use and shut down when DORI closes." TextWrapping="Wrap" />
+                <TextBlock Text="• Install rclone: DORI uses whichever rclone it finds on your PATH, or open the Diagnostics dialog (the %RCLONEDIAG% button) and click Install rclone to download a private copy — no admin rights needed. On macOS you can also use “brew install rclone”." TextWrapping="Wrap" />
+                <TextBlock Text="• Set up the buttons (one time): the two rclone actions are command-button actions and are not assigned by default. Click Configure Buttons, pick an empty slot, and set its Action to %RCLONECONFIG% (Add Remote) — do it again with %RCLONEDIAG% (Diagnostics) if you want that too. The Content field is just the label you see." TextWrapping="Wrap" />
+                <TextBlock Text="• Add a remote: click your %RCLONECONFIG% button, pick a provider, and fill in the fields (required ones are marked *). OAuth providers (Google Drive, OneDrive, Dropbox, …) have no fields — just click Add and your browser opens for sign-in." TextWrapping="Wrap" />
+                <TextBlock Text="• Use a remote: click the ☁ cloud button in either panel's navigation bar and choose a remote from the list to jump straight to it, or type cloud://&lt;remote&gt;/&lt;path&gt; into the panel path box." TextWrapping="Wrap" />
+                <TextBlock Text="• Manage remotes: the %RCLONEDIAG% button shows the rclone binary location, daemon state, your configured remotes (each with a Delete), a live log, and the Install rclone button." TextWrapping="Wrap" />
 
                 <TextBlock Text="Customization" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution; folder bookmarks; a configurable terminal; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
+
+                <TextBlock Text="Screenshots" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Press Ctrl+Shift+P (Cmd+Shift+P on macOS) on any screen or dialog to save a PNG image of that window. A save dialog opens with a descriptive default filename (no spaces); pick a name and location. Works everywhere in the app — handy for documentation." TextWrapping="Wrap" />
 
                 <!-- ============ Keyboard navigation & shortcuts ============ -->
                 <TextBlock Text="Keyboard Navigation &amp; Shortcuts" FontSize="18" FontWeight="Bold" Margin="0,14,0,2" />
@@ -84,6 +95,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -181,6 +193,9 @@
 
                     <TextBlock Grid.Row="23" Grid.Column="0" Text="Alt + ← / →" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="23" Grid.Column="1" Text="Back / Forward in the panel's history" TextWrapping="Wrap" Margin="0,2" />
+
+                    <TextBlock Grid.Row="24" Grid.Column="0" Text="Ctrl/Cmd + Shift + P" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="24" Grid.Column="1" Text="Save a screenshot of the current window — works on every screen and dialog, not just a focused panel" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

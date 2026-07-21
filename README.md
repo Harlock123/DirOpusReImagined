@@ -175,7 +175,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.16.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.17.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -713,6 +713,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.17.0 (2026-07-21) — Screenshot capture
+- **Screenshot hotkey** — press **Ctrl+Shift+P** (**Cmd+Shift+P** on macOS) on any screen or dialog to render that window to a **PNG**. A save dialog opens pre-filled with a descriptive, spaces-free default filename derived from the window (e.g. `DORI_Main_Screen`, `Rename_Selected_File_s`), capped at 40 characters. Registered app-wide via a single tunnelling handler, so it works on every window and modal dialog — including inside the file grid and text boxes — intended as an aid for building documentation.
+- **Layout fixes** — the General Help text no longer clips under the vertical scrollbar, and the file panels no longer overrun the button panel at the bottom (the per-panel tab bar height was not being accounted for when sizing the grids).
+- **Click selection repaints immediately** — clicking a row now highlights it at once instead of waiting for the next mouse move; the panel was updating the selection without repainting the grid.
+- **Cloud tab reliability** — a cloud folder restored from the previous session now loads on its own instead of sitting at "Loading…" until you navigate away and back. On a cold start the rclone daemon (and its OAuth token refresh) isn't ready when the tab first lists, so DORI now warms the client in the background and re-populates the panel once it's ready; the loading row also notes that the first cloud access can take ~20s, and the daemon-ready timeout was raised to 20s.
 
 ### 0.1.16.0 (2026-07-20) — Forward navigation, type-ahead & Trash
 - **Forward navigation** — each panel now has a **Forward** button beside Back (and **Alt+←/Alt+→**), with per-tab history. A new navigation clears the forward stack, exactly like a web browser.

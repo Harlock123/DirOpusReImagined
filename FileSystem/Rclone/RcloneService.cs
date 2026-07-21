@@ -74,13 +74,13 @@ public static class RcloneService
             _daemon.Start();
 
             var client = new RcloneClient(_daemon.BaseUrl, _daemon.User, _daemon.Password);
-            var ready = await client.WaitForReadyAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            var ready = await client.WaitForReadyAsync(TimeSpan.FromSeconds(20)).ConfigureAwait(false);
             if (!ready)
             {
                 client.Dispose();
                 _daemon.Stop();
                 throw new InvalidOperationException(
-                    "rclone daemon did not become ready within 10 seconds. Check diagnostics for details.");
+                    "rclone daemon did not become ready within 20 seconds. Check diagnostics for details.");
             }
 
             _client = client;

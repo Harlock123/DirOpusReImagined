@@ -535,10 +535,15 @@ namespace DirOpusReImagined
         private static void PopulateFilePanelAsync(
             TaiDataGrid ThePanel, string PATHNAME, bool ShowHidden, SortSpec Sort, IFileProvider provider)
         {
+            // A cloud remote's first listing after launch can take ~20s while rclone spins up the
+            // backend and refreshes its OAuth token; say so, so the panel doesn't look frozen.
+            var loadingText = provider.IsRemote
+                ? "Loading… (first cloud access can take ~20s)"
+                : "Loading…";
             ThePanel.SuspendRendering = true;
             ThePanel.Items = new List<object>
             {
-                new AFileEntry("Loading…", 0, true, 0, 0, ""),
+                new AFileEntry(loadingText, 0, true, 0, 0, ""),
             };
             ThePanel.SuspendRendering = false;
 

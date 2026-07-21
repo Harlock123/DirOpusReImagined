@@ -17,6 +17,9 @@ namespace DirOpusReImagined
             // and restores its saved theme.
             ThemeManager.Init(this);
 
+            // App-wide screenshot hotkey (Ctrl+Shift+P / Cmd+Shift+P) for building the manual.
+            ScreenshotService.Register();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();
