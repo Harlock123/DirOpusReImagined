@@ -313,9 +313,69 @@ A Sample of this file is shown below
 
 It is a work in progress.
 
-Main Screen Interface
+## Screenshots
 
-![Screenshot](https://github.com/Harlock123/DirOpusReImagined/blob/master/Images/MainScreenMac.png)
+### Main window
+
+The dual-panel main window, shown across several of the built-in themes.
+
+**Dracula theme**
+
+![Main window — Dracula theme](ScreenShots/DORI_Main_Screen_Dracula.png)
+
+**Nord theme**
+
+![Main window — Nord theme](ScreenShots/DORI_Main_Screen_Nord.png)
+
+**Solarized Dark theme**
+
+![Main window — Solarized Dark theme](ScreenShots/DORI_Main_Screen_Solorized_dark.png)
+
+**Solarized Light theme**
+
+![Main window — Solarized Light theme](ScreenShots/DORI_Main_Screen_Solorized_light.png)
+
+### Dialogs
+
+**General Help**
+
+![General Help dialog](ScreenShots/DirOpus_Reimagined_General_Help.png)
+
+**Bookmarks**
+
+![Bookmarks dialog](ScreenShots/Bookmarks.png)
+
+**Drive Information**
+
+![Drive Information dialog](ScreenShots/Drive_Information.png)
+
+### Button & app configuration
+
+**Command Buttons**
+
+![Button configuration — Command Buttons tab](ScreenShots/AddEditCmdButtonDefinition.png)
+
+**System Wide Settings**
+
+![Button configuration — System Wide Settings tab](ScreenShots/SystemWideSettings.png)
+
+### Cloud storage (rclone)
+
+**Add a remote — Google Drive**
+
+![Add cloud remote — Google Drive](ScreenShots/Add_rclone_Remote_GoogleDrive.png)
+
+**Add a remote — Dropbox**
+
+![Add cloud remote — Dropbox](ScreenShots/Add_rclone_Remote_DropBox.png)
+
+**Add a remote — AWS S3**
+
+![Add cloud remote — AWS S3](ScreenShots/Add_rclone_Remote_Aws.png)
+
+**rclone Diagnostics**
+
+![rclone Diagnostics dialog](ScreenShots/rclone_Diagnostics.png)
 
 Arguments Parameters
 
