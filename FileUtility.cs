@@ -430,15 +430,44 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
-        /// Replaces double backslashes with single backslashes in the given path.
+        /// Collapses runs of repeated separators in a path while preserving a leading UNC prefix
+        /// (<c>\\SERVER\SHARE</c> or <c>//SERVER/SHARE</c>).
+        /// </summary>
+        /// <remarks>
+        /// A UNC path's leading double separator IS the prefix. Collapsing it turns
+        /// <c>\\SERVER\SHARE\FOLDER</c> into <c>\SERVER\SHARE\FOLDER</c>, which Windows resolves
+        /// against the process's current drive — so a copy to a network share silently lands in
+        /// <c>C:\SERVER\SHARE\FOLDER</c> instead, creating that tree on the way. Keep the first two
+        /// characters when they're both separators and only de-duplicate what follows.
+        /// </remarks>
+        public static string CollapseSeparators(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+
+            int start = IsSeparator(path[0]) && path.Length >= 2 && IsSeparator(path[1]) ? 2 : 0;
+
+            var sb = new System.Text.StringBuilder(path.Length);
+            sb.Append(path, 0, start);
+            for (int i = start; i < path.Length; i++)
+            {
+                if (IsSeparator(path[i]) && sb.Length > 0 && IsSeparator(sb[sb.Length - 1])) continue;
+                sb.Append(path[i]);
+            }
+            return sb.ToString();
+        }
+
+        private static bool IsSeparator(char c) => c == '\\' || c == '/';
+
+        /// <summary>
+        /// Collapses repeated separators in the given path (UNC prefix preserved).
         /// Appends a trailing backslash for Windows OS or a trailing forward slash for Unix/MacOSX OS if necessary.
         /// </summary>
         /// <param name="path">The original path.</param>
         /// <returns>The modified path.</returns>
         public static string MakePathENVSafe(string path)
         {
-            string result = path.Replace(@"\\", @"\"); // get rid of double backslashes
-            
+            string result = CollapseSeparators(path);
+
             // now for some environmental stuff
             
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)

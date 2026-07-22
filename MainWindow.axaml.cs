@@ -1885,8 +1885,11 @@ namespace DirOpusReImagined
                 return;
             }
 
-            string spath = AppendSeparator(sourcePathRaw.Replace(@"\\", @"\"));
-            string tpath = AppendSeparator(targetPathRaw.Replace(@"\\", @"\"));
+            // CollapseSeparators (not a blind Replace of @"\\") so a UNC destination survives —
+            // collapsing \\SERVER\SHARE to \SERVER\SHARE makes Windows resolve it against the current
+            // drive, and the copy then silently lands in C:\SERVER\SHARE instead of on the server.
+            string spath = AppendSeparator(FileUtility.CollapseSeparators(sourcePathRaw));
+            string tpath = AppendSeparator(FileUtility.CollapseSeparators(targetPathRaw));
 
             var items = new List<TransferItem>();
             foreach (var obj in selected)
@@ -1897,6 +1900,21 @@ namespace DirOpusReImagined
                 items.Add(new TransferItem(source, tpath, targetPath, item.Typ));
             }
             if (items.Count == 0) return;
+
+            // The destination is a folder the panel is already showing, so it must exist. If it
+            // doesn't, the path is malformed (an unreachable share, a stale mount) and the copy
+            // would otherwise CreateDirectory its way to "success" somewhere it was never meant to
+            // write. Bail out and say so instead. Local provider only — a remote existence probe can
+            // false-negative on a slow backend, and blocking a valid cloud transfer is worse.
+            var targetProvider = ProviderRegistry.For(tpath);
+            if (!targetProvider.IsRemote && !targetProvider.DirectoryExists(tpath))
+            {
+                await new MessageBox(
+                    $"The destination folder is not reachable:\n\n{tpath}\n\n" +
+                    "Nothing was copied. If this is a network share, check that it is still mounted and that the path is correct.",
+                    "Destination unavailable").ShowDialog(this);
+                return;
+            }
 
             // Warn before clobbering anything that already exists at the destination. The existence
             // probe can hit the network for cloud targets, so run it off the UI thread.
@@ -2107,7 +2125,7 @@ namespace DirOpusReImagined
 
         private string MakePathEnvSafe(string path)
         {
-            string result = path.Replace(@"\\", @"\");
+            string result = FileUtility.CollapseSeparators(path);
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
@@ -2914,7 +2932,7 @@ namespace DirOpusReImagined
                     {
                         // we can execute it
 
-                        string thingtoexecute = (RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                        string thingtoexecute = JoinChildPath(RPpath.Text, it.Name);
 
                         Process.Start(new ProcessStartInfo()
                         {
@@ -2922,7 +2940,6 @@ namespace DirOpusReImagined
                             UseShellExecute = true,
                         });
 
-                        //Process.Start((RPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
 
                 }
@@ -2989,7 +3006,7 @@ namespace DirOpusReImagined
                     {
                         // we can execute it
 
-                        string thingtoexecute = (LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\");
+                        string thingtoexecute = JoinChildPath(LPpath.Text, it.Name);
 
                         Process.Start(new ProcessStartInfo()
                         {
@@ -2997,7 +3014,6 @@ namespace DirOpusReImagined
                             UseShellExecute = true,
                         });
 
-                        //Process.Start((LPpath.Text + "\\" + it.Name).Replace(@"\\", @"\"));
                     }
 
                 }

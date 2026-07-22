@@ -175,7 +175,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.18.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.19.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1459,6 +1459,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.19.0 (2026-07-22) — UNC / network share copy fix
+- **Copying to a Windows network share now actually writes to the share** — copy or move to a UNC path (`\\SERVER\SHARE\FOLDER`) reported success but nothing arrived, and a second attempt claimed files would be overwritten even though the share was empty. The panel paths were being run through a blind "collapse double backslashes" cleanup that ate the UNC prefix itself, turning `\\SERVER\SHARE\FOLDER` into `\SERVER\SHARE\FOLDER` — which Windows resolves against the *current drive*. The transfer then silently created and filled `C:\SERVER\SHARE\FOLDER` on the local disk, and the "already exists" check read back from that same wrong location. Separator cleanup now preserves a leading UNC prefix (both `\\server\share` and `//server/share` forms) everywhere it is applied: transfers, the `%LPATH%`/`%RPATH%` button tokens, terminal launching, config start paths, and double-click launching of executables.
+  - *If you hit this before upgrading*, the files that appeared to vanish are most likely sitting in `C:\SERVER\SHARE\FOLDER\` (substituting your own server and share names). Recover them from there, then delete the stray tree.
+- **Unreachable destinations now fail loudly** — a transfer whose destination folder does not exist stops with a "Destination unavailable" message instead of creating the folder and reporting success. Previously any malformed or unmounted destination path would be brought into existence on the fly, which is what let the UNC bug look like it had worked. Applies to local destinations only, so a slow cloud backend can't false-negative and block a valid transfer.
 
 ### 0.1.18.0 (2026-07-21) — Keep rclone warm (optional)
 - **Keep rclone running between launches** — a new opt-in setting in the button configuration dialog's **System Wide Settings** tab. When enabled, the background rclone daemon is left running when you close the app and re-attached on the next launch, so cloud folders skip the ~15-20s cold-start on every launch and load instantly instead. **Off by default** (it leaves a small rclone process running between launches).
