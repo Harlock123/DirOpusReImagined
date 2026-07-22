@@ -765,9 +765,18 @@ namespace DirOpusReImagined
         /// Deletes a folder and its contents.
         /// </summary>
         /// <param name="rootPath">The root path of the folder to delete.</param>
-        public static void DeleteFolder(string rootPath) => DeleteFolder(rootPath, useTrash: false);
+        public static void DeleteFolder(string rootPath) => TryDeleteFolder(rootPath, useTrash: false);
 
-        public static void DeleteFolder(string rootPath, bool useTrash)
+        /// <summary>
+        /// Deletes a folder, returning the error message on failure and <c>null</c> on success.
+        /// </summary>
+        /// <remarks>
+        /// Returns the error instead of showing it: these run in a loop over a whole selection, and
+        /// putting a fire-and-forget <c>ShowDialog</c> in the catch stacked up one unawaited modal
+        /// per failed item on top of an already-modal dialog — which froze the app and then took the
+        /// process down with no visible error. Callers batch the failures into one message.
+        /// </remarks>
+        public static string? TryDeleteFolder(string rootPath, bool useTrash)
         {
             try
             {
@@ -779,11 +788,11 @@ namespace DirOpusReImagined
                     else
                         p.DeleteDirectory(rootPath, recursive: true);
                 }
+                return null;
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message, "Error");
-                MB.ShowDialog(GetMainWindow());
+                return e.Message;
             }
         }
 
@@ -791,9 +800,13 @@ namespace DirOpusReImagined
         /// This method deletes a file at the specified root path.
         /// </summary>
         /// <param name="rootPath">The root path of the file to be deleted.</param>
-        public static void DeleteFile(string rootPath) => DeleteFile(rootPath, useTrash: false);
+        public static void DeleteFile(string rootPath) => TryDeleteFile(rootPath, useTrash: false);
 
-        public static void DeleteFile(string rootPath, bool useTrash)
+        /// <summary>
+        /// Deletes a file, returning the error message on failure and <c>null</c> on success.
+        /// See <see cref="TryDeleteFolder"/> for why this reports rather than shows.
+        /// </summary>
+        public static string? TryDeleteFile(string rootPath, bool useTrash)
         {
             try
             {
@@ -805,17 +818,40 @@ namespace DirOpusReImagined
                     else
                         p.DeleteFile(rootPath);
                 }
+                return null;
             }
             catch (Exception e)
             {
-                MessageBox MB = new MessageBox(e.Message, "Error");
-                MB.ShowDialog(GetMainWindow());
+                return e.Message;
             }
         }
 
         // Trash applies only to local files — cloud has no recycle bin and archives are read-only.
+        /// <summary>
+        /// Whether this delete should go to the OS trash. Also false where the OS has no trash for
+        /// the location (network shares) — a last-resort guard so a missed check upstream degrades
+        /// to a permanent delete instead of hanging on a doomed shell call.
+        /// </summary>
         private static bool CanTrash(IFileProvider provider, string path, bool useTrash)
             => useTrash && !provider.IsRemote
-               && !DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(path);
+               && !DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(path)
+               && TrashService.IsSupported(path);
+
+        /// <summary>
+        /// Joins a child name onto a panel path, honoring the archive/cloud URI schemes and the
+        /// platform separator. <see cref="Path.Combine"/> is wrong for the URI schemes — on Windows
+        /// it would splice a backslash into a <c>cloud://</c> path.
+        /// </summary>
+        public static string JoinPanelPath(string parent, string childName)
+        {
+            if (DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(parent))
+                return DirOpusReImagined.FileSystem.Archive.ArchivePath.Parse(parent).Join(childName).FullUri;
+
+            if (DirOpusReImagined.FileSystem.Rclone.CloudPath.IsCloudUri(parent))
+                return DirOpusReImagined.FileSystem.Rclone.CloudPath.Parse(parent).Join(childName).FullUri;
+
+            var sep = Environment.OSVersion.Platform == PlatformID.Win32NT ? "\\" : "/";
+            return parent.EndsWith(sep) ? parent + childName : parent + sep + childName;
+        }
     }
 }

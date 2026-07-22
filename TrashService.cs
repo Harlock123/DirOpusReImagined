@@ -21,6 +21,40 @@ public static class TrashService
         else TrashLinux(path);
     }
 
+    /// <summary>
+    /// True when the OS offers a trash / recycle bin for <paramref name="path"/>.
+    /// </summary>
+    /// <remarks>
+    /// Network locations do not have one. On Windows there is no Recycle Bin on a UNC path or a
+    /// mapped network drive, and <c>SHFileOperation</c> does not fall back to a permanent delete —
+    /// it makes a round of blocking network calls per item and then fails. Callers must check this
+    /// before offering a "recoverable" delete, or a batch delete on a share will appear to hang.
+    /// </remarks>
+    public static bool IsSupported(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return true;
+        return !IsWindowsNetworkPath(path);
+    }
+
+    private static bool IsWindowsNetworkPath(string path)
+    {
+        // UNC — \\SERVER\SHARE or //SERVER/SHARE.
+        if (path.Length >= 2 &&
+            (path[0] == '\\' || path[0] == '/') &&
+            (path[1] == '\\' || path[1] == '/'))
+            return true;
+
+        // A drive letter mapped to a share behaves the same way.
+        try
+        {
+            var root = Path.GetPathRoot(path);
+            if (string.IsNullOrEmpty(root)) return false;
+            return new DriveInfo(root).DriveType == DriveType.Network;
+        }
+        catch { return false; }
+    }
+
     // ---------------- Windows: SHFileOperation with FOF_ALLOWUNDO ----------------
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -47,6 +81,10 @@ public static class TrashService
 
     private static void TrashWindows(string path)
     {
+        // Fail fast rather than letting SHFileOperation block on the network and then fail anyway.
+        if (IsWindowsNetworkPath(path))
+            throw new IOException($"Network locations have no Recycle Bin: {path}");
+
         var op = new SHFILEOPSTRUCT
         {
             wFunc = FO_DELETE,
