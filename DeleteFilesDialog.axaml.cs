@@ -72,7 +72,29 @@ public partial class DeleteFilesDialog : Window
             }
     }
 
+    // async void: an exception escaping here goes straight to the dispatcher and (before CrashLog)
+    // took the process down with no dialog. Wrap the whole body so a fault is always reportable.
     private async void OKButton_Click(object? sender, RoutedEventArgs e)
+    {
+        try { await DeleteSelectedAsync(); }
+        catch (Exception ex)
+        {
+            CrashLog.Write("Delete", ex);
+            OKButton.IsEnabled = true;
+            CANCELButton.IsEnabled = true;
+            try
+            {
+                await new MessageBox(
+                    $"The delete could not be completed:\n\n{ex.GetType().Name}: {ex.Message}\n\n" +
+                    $"Details were written to:\n{CrashLog.LogPath}",
+                    "Delete failed").ShowDialog(this);
+            }
+            catch { }
+            Close();
+        }
+    }
+
+    private async Task DeleteSelectedAsync()
     {
         // They said OK so lets delete the files
 
