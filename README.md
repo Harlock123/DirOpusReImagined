@@ -2,6 +2,10 @@
 
 This is **DirOpusReImagined** - a modern cross-platform file manager inspired by the classic Amiga Directory Opus 4.12.
 
+![DirOpusReImagined main window (Solarized Light theme)](ScreenShots/DORI_Main_Screen_Solorized_light.png)
+
+<sub>The two-panel main window (Solarized Light theme). More screenshots — themes, dialogs, cloud setup — in the [Screenshots](#screenshots) section below.</sub>
+
 ## What It Does
 
 It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on Windows, macOS, and Linux. Think of it as a professional-grade file browser with two independent panels side-by-side for efficient file management.
