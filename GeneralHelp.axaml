@@ -39,10 +39,16 @@
                 <TextBlock Text="• Each panel has its own tabs. Click + (or Ctrl/Cmd+T) to open a new tab cloning the current folder; each tab keeps its own path, history, sort, and filter. Close with × or a middle-click (Ctrl/Cmd+W closes the active one); Ctrl/Cmd+Tab cycles. Open tabs are restored on the next launch." TextWrapping="Wrap" />
 
                 <TextBlock Text="File operations" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and Rename (including pattern-based batch rename)." TextWrapping="Wrap" />
+                <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and batch Rename with a live preview." TextWrapping="Wrap" />
                 <TextBlock Text="• Delete sends items to the OS Trash/Recycle Bin by default (recoverable) — a checkbox in the delete dialog switches to permanent deletion. Local files only." TextWrapping="Wrap" />
                 <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
                 <TextBlock Text="• Overwrite is confirmed before anything at the destination is replaced." TextWrapping="Wrap" />
+
+                <TextBlock Text="Batch rename" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Rename opens a dialog that renames the whole selection at once, with a live before→after preview so you see every result before committing." TextWrapping="Wrap" />
+                <TextBlock Text="• Build the new name from a Prefix, Basename, and Suffix. Two tokens are available: %NAME% (the original name without extension) and %ORD% (a sequence number, with configurable start, step, and zero-pad width)." TextWrapping="Wrap" />
+                <TextBlock Text="• Find/Replace edits the existing name; tick Regex for patterns and $1 capture groups, and Ignore case to match regardless of case. A Case option applies UPPER/lower/Title casing, and Keep extension preserves the original extension unless you turn it off." TextWrapping="Wrap" />
+                <TextBlock Text="• The preview flags conflicts in red — two items resolving to the same name, or a name that would clobber an existing file — and those rows are skipped; the rest still rename. Renames run collision-free, so cascades and swaps (a→b, b→a) work." TextWrapping="Wrap" />
 
                 <TextBlock Text="Drag and drop" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Drag a selection from one panel to the other to transfer it; drop onto a folder row (highlighted while hovered) to drop into that folder. Copy by default; hold Shift to Move. A badge follows the cursor showing the current action." TextWrapping="Wrap" />

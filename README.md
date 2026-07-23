@@ -175,7 +175,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.20.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.21.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -336,6 +336,10 @@ The dual-panel main window, shown across several of the built-in themes.
 ![Main window — Solarized Light theme](ScreenShots/DORI_Main_Screen_Solorized_light.png)
 
 ### Dialogs
+
+**Batch Rename (live preview)**
+
+![Batch rename dialog with live before→after preview and conflict highlighting](ScreenShots/Rename_Dialog.png)
 
 **General Help**
 
@@ -1459,6 +1463,13 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.21.0 (2026-07-23) — Batch rename with live preview
+- **Rename is now a live, previewable batch tool.** The Rename dialog shows a **before→after table** for the whole selection that updates as you type, so you see every result — and every conflict — before committing. Build the new name from a Prefix / Basename / Suffix with two tokens: **`%NAME%`** (original name, no extension) and **`%ORD%`** (a sequence number, now with configurable **start, step, and zero-pad width** instead of the old fixed 4-digit pad).
+- **Find / Replace, with regex.** Edit the existing name directly — literal find/replace, or tick **Regex** for patterns and `$1` capture groups, plus an **Ignore case** option. A **Case** option applies UPPER/lower/Title casing, and **Keep extension** preserves the original extension unless you turn it off (letting the pattern own the whole name).
+- **Conflicts are caught before they happen.** The preview flags in red any two items that would resolve to the same name, or a name that would clobber an existing file; those rows are skipped and the rest still rename. Invalid names and bad regex patterns are flagged too.
+- **Renames are collision-free.** Applied via a two-phase pass (each item to a temporary name, then to its final name), so **cascades** (`1,2,3 → 2,3,4`) and **swaps** (`a→b, b→a`) work instead of failing partway. The batch runs off the UI thread and reports any failures in a single summary.
+- **Panel title strip removed.** The per-panel "LEFT Grid" / "RIGHT Grid" title band above each file list is gone — the path bar already identifies each panel — giving that vertical space back to the file list (a few more rows visible per panel).
 
 ### 0.1.20.0 (2026-07-22) — Network share fixes & crash reporting
 - **Copying to a Windows network share now actually writes to the share** — copy or move to a UNC path (`\\SERVER\SHARE\FOLDER`) reported success but nothing arrived, and a second attempt claimed files would be overwritten even though the share was empty. The panel paths were being run through a blind "collapse double backslashes" cleanup that ate the UNC prefix itself, turning `\\SERVER\SHARE\FOLDER` into `\SERVER\SHARE\FOLDER` — which Windows resolves against the *current drive*. The transfer then silently created and filled `C:\SERVER\SHARE\FOLDER` on the local disk, and the "already exists" check read back from that same wrong location. Separator cleanup now preserves a leading UNC prefix (both `\\server\share` and `//server/share` forms) everywhere it is applied: transfers, the `%LPATH%`/`%RPATH%` button tokens, terminal launching, config start paths, and double-click launching of executables.
