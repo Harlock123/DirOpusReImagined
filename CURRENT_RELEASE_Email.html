@@ -2,7 +2,7 @@
 
   <div style="font-size:26px;font-weight:700;letter-spacing:-0.3px;margin:0 0 4px;">
     DirOpus Reimagined
-    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.20.0</span>
+    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.21.0</span>
   </div>
   <div style="color:#5b6472;font-size:14px;margin:4px 0 14px;">A fast, cross-platform dual-panel file manager &mdash; inspired by the classic Amiga Directory Opus.</div>
 
@@ -24,11 +24,7 @@
   </ul>
 
   <div style="background:#f3f8ff;border:1px solid #d6e6ff;border-radius:8px;padding:10px 14px;margin:12px 0 8px;">
-    <b>New in this release (0.1.20.0):</b> fixes for <b>Windows network shares</b> (<span style="font-family:Menlo,Consolas,monospace;background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px;">\\SERVER\SHARE</span>) &mdash; copying to a share now really writes to the share, and deleting from one no longer freezes the app. If something does go wrong, DORI now writes a crash log and keeps running instead of vanishing.
-  </div>
-
-  <div style="background:#fff7f0;border:1px solid #ffd9bd;border-radius:8px;padding:10px 14px;margin:8px 0 12px;">
-    <b>Already using an older version with a network share?</b> Copies to a share looked like they worked but silently landed on your local drive instead, under <span style="font-family:Menlo,Consolas,monospace;background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px;">C:\SERVER\SHARE\...</span>. Nothing was lost &mdash; you can recover anything you need from there, then delete that stray folder.
+    <b>New in this release (0.1.21.0):</b> a much more powerful <b>batch rename</b> &mdash; rename a whole selection at once with a <b>live before&rarr;after preview</b>, find&amp;replace (with regex), sequence numbering, and case changes. It highlights name clashes before you commit, so nothing gets clobbered by surprise.
   </div>
 
   <div style="background:#f7f9fb;border:1px solid #e3e8ef;border-radius:8px;padding:12px 16px;margin:10px 0;">
@@ -41,9 +37,9 @@
     <div style="font-size:12px;color:#5b6472;margin-top:3px;">Complete feature list, screenshots, and setup guide in the project README.</div>
   </div>
 
-  <img src="https://raw.githubusercontent.com/harlock123/DirOpusReImagined/master/ScreenShots/DORI_Main_Screen_Dracula.png" alt="DirOpus Reimagined, Dracula theme" width="660" style="width:100%;max-width:660px;border:1px solid #d9dee6;border-radius:8px;display:block;margin:8px 0 4px;">
-  <div style="color:#7a8494;font-size:11px;margin:0 0 14px;">Same app, Dracula theme &mdash; pick the look you like.</div>
+  <img src="https://raw.githubusercontent.com/harlock123/DirOpusReImagined/master/ScreenShots/Rename_Dialog.png" alt="Batch rename dialog with live before-after preview and conflict highlighting" width="660" style="width:100%;max-width:660px;border:1px solid #d9dee6;border-radius:8px;display:block;margin:8px 0 4px;">
+  <div style="color:#7a8494;font-size:11px;margin:0 0 14px;">The new batch rename &mdash; live preview, find&amp;replace, and clashes flagged in red before you commit.</div>
 
-  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.20.0 &middot; free &amp; open source &middot; built with .NET 8 + Avalonia. Feedback and bug reports welcome!</div>
+  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.21.0 &middot; free &amp; open source &middot; built with .NET 8 + Avalonia. Feedback and bug reports welcome!</div>
 
 </div>
