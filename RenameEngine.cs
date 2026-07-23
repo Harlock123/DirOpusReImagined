@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace DirOpusReImagined;
@@ -162,4 +164,115 @@ public static class RenameEngine
             .Replace(TokenOrdinal, ordText)
             .Replace(TokenName, workingStem);
     }
+
+    // ---------------- Planning (pure; drives both preview and apply) ----------------
+
+    /// <summary>
+    /// Builds the rename plan for a selection: the proposed new name and a status for every item.
+    /// Pure — takes the set of other names already in the folder rather than probing disk — so the
+    /// same result drives the live preview and the apply pass, and can be unit-tested headlessly.
+    /// </summary>
+    /// <param name="selection">The items to rename, in the order they should be numbered.</param>
+    /// <param name="options">The rename options.</param>
+    /// <param name="existingOtherNames">
+    /// Names already present in the folder that are NOT part of the selection — used to flag a
+    /// proposed name that would clobber an untouched neighbour.
+    /// </param>
+    /// <param name="caseInsensitiveFs">
+    /// True on Windows/macOS: collision comparisons ignore case, so <c>a.txt</c> and <c>A.txt</c>
+    /// count as the same target. (A pure case change of the item itself is still a real rename.)
+    /// </param>
+    public static IReadOnlyList<RenamePlanRow> BuildPlan(
+        IReadOnlyList<(string Name, bool IsDir)> selection,
+        RenameOptions options,
+        IEnumerable<string> existingOtherNames,
+        bool caseInsensitiveFs)
+    {
+        var cmp = caseInsensitiveFs ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+        var others = new HashSet<string>(existingOtherNames ?? Enumerable.Empty<string>(), cmp);
+
+        var rows = new List<RenamePlanRow>(selection.Count);
+        int ordinal = 1;
+        foreach (var (name, isDir) in selection)
+        {
+            string newName = ComputeNewName(name, isDir, ordinal, options, out var err);
+            var row = new RenamePlanRow(name, newName, isDir);
+
+            if (err != null) { row.Status = RenameStatus.RegexError; row.Message = err; }
+            else if (!IsValidName(newName)) { row.Status = RenameStatus.Invalid; row.Message = "Not a valid file name."; }
+            // "Unchanged" is a byte-identical name (ordinal): a pure case flip IS a real rename.
+            else if (string.Equals(newName, name, StringComparison.Ordinal)) { row.Status = RenameStatus.Unchanged; }
+            else { row.Status = RenameStatus.Change; }
+
+            rows.Add(row);
+            ordinal++;
+        }
+
+        // Two proposed names landing on the same target would clobber each other — flag both.
+        var targetCounts = new Dictionary<string, int>(cmp);
+        foreach (var r in rows.Where(r => r.Status == RenameStatus.Change))
+            targetCounts[r.NewName] = targetCounts.GetValueOrDefault(r.NewName) + 1;
+
+        foreach (var r in rows.Where(r => r.Status == RenameStatus.Change))
+        {
+            if (targetCounts[r.NewName] > 1)
+            {
+                r.Status = RenameStatus.DuplicateTarget;
+                r.Message = "Two or more items would get this same name.";
+            }
+            else if (others.Contains(r.NewName))
+            {
+                r.Status = RenameStatus.ExistsOnDisk;
+                r.Message = "A different item with this name already exists here.";
+            }
+        }
+
+        return rows;
+    }
+
+    private static readonly char[] InvalidNameChars = Path.GetInvalidFileNameChars();
+
+    private static bool IsValidName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        if (name == "." || name == "..") return false;
+        return name.IndexOfAny(InvalidNameChars) < 0;
+    }
+}
+
+/// <summary>The disposition of one item in a <see cref="RenameEngine.BuildPlan"/> result.</summary>
+public enum RenameStatus
+{
+    /// <summary>Proposed name differs and is safe to apply.</summary>
+    Change,
+    /// <summary>Proposed name equals the original — nothing to do.</summary>
+    Unchanged,
+    /// <summary>Another selected item resolves to the same target name.</summary>
+    DuplicateTarget,
+    /// <summary>An item outside the selection already has this name in the folder.</summary>
+    ExistsOnDisk,
+    /// <summary>Empty name or one containing characters the filesystem rejects.</summary>
+    Invalid,
+    /// <summary>The find pattern is an invalid regular expression.</summary>
+    RegexError,
+}
+
+/// <summary>One row of a rename plan: the old name, the proposed new name, and its status.</summary>
+public sealed class RenamePlanRow
+{
+    public string OldName { get; }
+    public string NewName { get; set; }
+    public bool IsDirectory { get; }
+    public RenameStatus Status { get; set; }
+    public string? Message { get; set; }
+
+    public RenamePlanRow(string oldName, string newName, bool isDirectory)
+    {
+        OldName = oldName;
+        NewName = newName;
+        IsDirectory = isDirectory;
+    }
+
+    /// <summary>Only <see cref="RenameStatus.Change"/> rows are actually renamed.</summary>
+    public bool WillRename => Status == RenameStatus.Change;
 }

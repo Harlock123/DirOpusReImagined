@@ -430,6 +430,91 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
+        /// Renames a file, returning the error message on failure and <c>null</c> on success.
+        /// The report-not-show sibling of <see cref="RenameFile"/> — for batch callers that collect
+        /// failures into one summary instead of one modal per item (see <see cref="ApplyRenamePlanAsync"/>).
+        /// </summary>
+        public static string? TryRenameFile(string oldPath, string newPath)
+        {
+            try
+            {
+                var p = ProviderRegistry.For(oldPath);
+                if (!p.FileExists(oldPath)) return "source no longer exists";
+                if (p.FileExists(newPath)) return $"\"{Path.GetFileName(newPath)}\" already exists";
+                p.MoveFile(oldPath, newPath);
+                return null;
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
+        /// <summary>
+        /// Renames a directory, returning the error message on failure and <c>null</c> on success.
+        /// See <see cref="TryRenameFile"/>.
+        /// </summary>
+        public static string? TryRenameDirectory(string oldPath, string newPath)
+        {
+            try
+            {
+                var p = ProviderRegistry.For(oldPath);
+                if (!p.DirectoryExists(oldPath)) return "source folder no longer exists";
+                if (p.DirectoryExists(newPath)) return $"\"{Path.GetFileName(newPath)}\" already exists";
+                p.MoveDirectory(oldPath, newPath);
+                return null;
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
+        /// <summary>
+        /// Applies the <see cref="RenameStatus.Change"/> rows of a rename plan, returning a list of
+        /// per-item error messages (empty on full success). Runs off the UI thread.
+        /// </summary>
+        /// <remarks>
+        /// Two-phase to be collision-free. A single-pass rename fails on a cascade — <c>1→2, 2→3</c>
+        /// hits "2 already exists" — and on a swap — <c>a→b, b→a</c>. So every item is first renamed
+        /// to a unique temporary name (phase A), then each temp to its final name (phase B). Because
+        /// the plan already guarantees the final names are unique and free (BuildPlan filtered
+        /// duplicates and on-disk clashes), phase B cannot collide. A phase-B failure leaves that
+        /// item at its temp name and reports it, rather than losing the file.
+        /// </remarks>
+        public static Task<List<string>> ApplyRenamePlanAsync(
+            string folderPath, IReadOnlyList<RenamePlanRow> plan, CancellationToken ct = default)
+        {
+            var changes = plan.Where(r => r.WillRename).ToList();
+
+            return Task.Run(() =>
+            {
+                var errors = new List<string>();
+                if (changes.Count == 0) return errors;
+
+                // Phase A: originals -> unique temp names.
+                var staged = new List<(string TmpPath, string FinalName, bool IsDir)>();
+                foreach (var r in changes)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    string oldPath = JoinPanelPath(folderPath, r.OldName);
+                    string tmpName = r.OldName + ".dori_tmp_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                    string tmpPath = JoinPanelPath(folderPath, tmpName);
+
+                    string? err = r.IsDirectory ? TryRenameDirectory(oldPath, tmpPath) : TryRenameFile(oldPath, tmpPath);
+                    if (err != null) { errors.Add($"{r.OldName}: {err}"); continue; }
+                    staged.Add((tmpPath, r.NewName, r.IsDirectory));
+                }
+
+                // Phase B: temps -> final names.
+                foreach (var s in staged)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    string finalPath = JoinPanelPath(folderPath, s.FinalName);
+                    string? err = s.IsDir ? TryRenameDirectory(s.TmpPath, finalPath) : TryRenameFile(s.TmpPath, finalPath);
+                    if (err != null)
+                        errors.Add($"{s.FinalName}: {err} (left as \"{Path.GetFileName(s.TmpPath)}\")");
+                }
+
+                return errors;
+            }, ct);
+        }
+
+        /// <summary>
         /// Collapses runs of repeated separators in a path while preserving a leading UNC prefix
         /// (<c>\\SERVER\SHARE</c> or <c>//SERVER/SHARE</c>).
         /// </summary>
