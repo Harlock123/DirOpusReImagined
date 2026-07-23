@@ -1372,6 +1372,14 @@ namespace DirOpusReImagined
                             BackingCanvas.Children.Add(ttb);
 
                         }
+                        else
+                        {
+                            // No title: collapse the title strip's height so the column-header row
+                            // (which draws at _gridTitleHeight) sits at the very top of the panel and
+                            // the reclaimed space goes to the file list. Without this, _gridTitleHeight
+                            // keeps its stale value and leaves a blank gap above the headers.
+                            _gridTitleHeight = 0;
+                        }
 
                         #endregion
 

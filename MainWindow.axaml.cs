@@ -4033,15 +4033,11 @@ namespace DirOpusReImagined
                     LPgrid.GridHeaderFontSize = 14;
                 }
 
-                if (leftGridTitleElement != null)
-                {
-                    // Get the font size value from <RightGrid>
-                    LPgrid.GridTitle = leftGridTitleElement.Value;
-                }
-                else
-                {
-                    RPgrid.GridTitle = "Right Panel";
-                }
+                // The per-panel title strip ("LEFT Grid"/"RIGHT Grid") is suppressed: the path bar
+                // above each panel already identifies it, so the title was pure vertical overhead.
+                // Forcing it empty here (rather than editing every Configuration.xml) guarantees the
+                // space is reclaimed regardless of a user's existing config; the <Title> tag is ignored.
+                LPgrid.GridTitle = "";
 
                 if (leftGridTitleFontSizeElement != null)
                 {
@@ -4106,15 +4102,8 @@ namespace DirOpusReImagined
                     RPgrid.GridHeaderFontSize = 14;
                 }
 
-                if (rightGridTitleElement != null)
-                {
-                    // Get the font size value from <RightGrid>
-                    RPgrid.GridTitle = rightGridTitleElement.Value;
-                }
-                else
-                {
-                    RPgrid.GridTitle = "Right Panel";
-                }
+                // Suppressed for the same reason as the left panel — see above.
+                RPgrid.GridTitle = "";
 
                 if (rightGridTitleFontSizeElement != null)
                 {
