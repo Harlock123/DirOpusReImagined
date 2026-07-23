@@ -530,11 +530,9 @@ namespace DirOpusReImagined
                 return;
             }
 
-            RenameFileInterface fi = 
+            RenameFileInterface fi =
                 new RenameFileInterface(LPgrid, LPpath.Text+"",
                     RPgrid,RPpath.Text+"", ChkShowHidden.IsChecked.Value);
-            fi.Width = 600;
-            fi.Height = 180;
             fi.Show(this);
             
         }
@@ -571,11 +569,9 @@ namespace DirOpusReImagined
             }
 
             
-            RenameFileInterface fi = 
+            RenameFileInterface fi =
                 new RenameFileInterface(RPgrid, RPpath.Text+ "",
                     LPgrid,LPpath.Text + "", ChkShowHidden.IsChecked.Value);
-            fi.Width = 600;
-            fi.Height = 180;
             fi.Show(this);
             
         }

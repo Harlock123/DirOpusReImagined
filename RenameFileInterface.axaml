@@ -2,41 +2,105 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="180"
+        mc:Ignorable="d" d:DesignWidth="820" d:DesignHeight="620"
+        Width="820" Height="620" MinWidth="640" MinHeight="460"
+        CanResize="True"
         WindowStartupLocation="CenterOwner"
         x:Class="DirOpusReImagined.RenameFileInterface"
         Title="Rename Selected File(s)"
         Background="{DynamicResource SurfaceBackgroundBrush}">
-    <Grid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="PREFIX:" VerticalAlignment="Center" Margin="10"/>
-                <TextBox x:Name="PrefixTextBox" Width="100" Margin="5"/>
+    <Grid Margin="14" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
+
+        <!-- Pattern row -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <StackPanel Orientation="Vertical" Margin="0,0,10,0">
+                <TextBlock Text="Prefix" Margin="2"/>
+                <TextBox x:Name="PrefixTextBox" Width="120"/>
             </StackPanel>
-           
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="BASENAME:" VerticalAlignment="Center" Margin="10"/>
-                <TextBox x:Name="BasenameTextBox" Width="350" Margin="5"/>
+            <StackPanel Orientation="Vertical" Margin="0,0,10,0" HorizontalAlignment="Stretch">
+                <TextBlock Text="Basename" Margin="2"/>
+                <TextBox x:Name="BasenameTextBox" Width="360"/>
             </StackPanel>
-            
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="SUFFIX:" VerticalAlignment="Center" Margin="10"/>
-                <TextBox x:Name="SuffixTextBox" Width="100" Margin="5"/>
+                <TextBlock Text="Suffix" Margin="2"/>
+                <TextBox x:Name="SuffixTextBox" Width="120"/>
             </StackPanel>
         </StackPanel>
-        
-        <TextBlock TextWrapping="Wrap" Margin="2" HorizontalAlignment="Center">
-            <Run Text="You can use the symbol of" />
-            <Run Text="%ORD%" FontWeight="Bold"/>
-            <Run Text="to place the ordinal numeric of the file being renamed in the literal text of the resulting file name. Placing a " />
-            <Run Text="%NAME%" FontWeight="Bold"/>
-            <Run Text="in the pattern will place its original name (minus the extension) in the resulting file name."/> 
-         </TextBlock>
-       
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
-            <CheckBox IsChecked="True" x:Name="chkPad">Pad %ORD% with 0's</CheckBox>
-            <Button x:Name="OKButton" Content="OK"  Margin="5"/>
-            <Button x:Name="CANCELButton" Content="Cancel"  Margin="5"/>
+
+        <!-- Find / replace row -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+            <StackPanel Orientation="Vertical" Margin="0,0,10,0">
+                <TextBlock Text="Find" Margin="2"/>
+                <TextBox x:Name="FindTextBox" Width="200"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,14,0">
+                <TextBlock Text="Replace with" Margin="2"/>
+                <TextBox x:Name="ReplaceTextBox" Width="200"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                <CheckBox x:Name="chkRegex" Content="Regex" Margin="0,2"/>
+                <CheckBox x:Name="chkIgnoreCase" Content="Ignore case" Margin="0,2"/>
+            </StackPanel>
         </StackPanel>
+
+        <!-- Regex error (inline) -->
+        <TextBlock Grid.Row="2" x:Name="RegexErrorText" Foreground="#E05555"
+                   TextWrapping="Wrap" Margin="2,4,2,0" IsVisible="False"/>
+
+        <!-- Options row: case + numbering -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+            <StackPanel Orientation="Vertical" Margin="0,0,18,0">
+                <TextBlock Text="Case" Margin="2"/>
+                <ComboBox x:Name="cmbCase" Width="150" SelectedIndex="0">
+                    <ComboBoxItem>No change</ComboBoxItem>
+                    <ComboBoxItem>UPPERCASE</ComboBoxItem>
+                    <ComboBoxItem>lowercase</ComboBoxItem>
+                    <ComboBoxItem>Title Case</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,8,0">
+                <TextBlock Text="Number start" Margin="2"/>
+                <TextBox x:Name="NumStartBox" Width="70" Text="1"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,8,0">
+                <TextBlock Text="Step" Margin="2"/>
+                <TextBox x:Name="NumStepBox" Width="70" Text="1"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,18,0">
+                <TextBlock Text="Pad width" Margin="2"/>
+                <TextBox x:Name="NumWidthBox" Width="70" Text="4"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                <CheckBox x:Name="chkKeepExt" Content="Keep extension" IsChecked="True" Margin="0,2"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Preview -->
+        <Border Grid.Row="4" Margin="0,12,0,0" BorderThickness="1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="*,*,150" Background="{DynamicResource SystemControlBackgroundListLowBrush}">
+                    <TextBlock Grid.Column="0" Text="Original name" FontWeight="Bold" Margin="6,4"/>
+                    <TextBlock Grid.Column="1" Text="New name" FontWeight="Bold" Margin="6,4"/>
+                    <TextBlock Grid.Column="2" Text="Status" FontWeight="Bold" Margin="6,4"/>
+                </Grid>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="PreviewPanel"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Footer: help + summary + buttons -->
+        <Grid Grid.Row="5" ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+            <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                           Text="Tokens: %NAME% = original name (no extension), %ORD% = sequence number. Find/Replace edits the existing name; enable Regex for patterns and $1 capture groups."/>
+                <TextBlock x:Name="SummaryText" Margin="0,4,0,0" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <Button x:Name="OKButton" Content="Rename" Margin="5"/>
+                <Button x:Name="CANCELButton" Content="Cancel" Margin="5"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
