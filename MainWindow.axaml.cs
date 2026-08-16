@@ -2059,41 +2059,21 @@ namespace DirOpusReImagined
             var dlg = new SyncOptionsDialog(summary, plan.Deletes.Count);
             if (!await dlg.ShowDialog<bool>(this)) return;
 
-            // Deletes first (mirror only), off the UI thread.
-            Exception? deleteError = null;
+            // Enqueue the work on the shared operations queue: mirror-deletes first, then the copies.
+            // Concurrency is 1 and the queue is FIFO, so the deletes finish before the copies start —
+            // preserving sync's delete-then-copy order. Both run in the background with live progress;
+            // any failures are shown inline in the operations window.
+            string dstLabel = dst.TrimEnd('/', '\\');
+            var ops = new List<FileOperation>();
             if (dlg.DeleteExtras && plan.Deletes.Count > 0)
-            {
-                try
-                {
-                    await Task.Run(() =>
-                    {
-                        foreach (var (path, isDir) in plan.Deletes)
-                        {
-                            var p = ProviderRegistry.For(path);
-                            if (isDir) p.DeleteDirectory(path, recursive: true);
-                            else p.DeleteFile(path);
-                        }
-                    });
-                }
-                catch (Exception ex) { deleteError = ex; }
-            }
-
-            // Copies (recursive, file-level) via the transfer progress dialog.
-            Exception? copyError = null;
+                ops.Add(FileOperation.DeleteBatch(plan.Deletes, useTrash: false,
+                    $"Sync: removing {plan.Deletes.Count} extra item(s) in {dstLabel}"));
             if (plan.Copies.Count > 0)
-            {
-                var win = new TransferProgressWindow("Syncing", plan.Copies, move: false);
-                await win.ShowDialog(this);
-                copyError = win.Error;
-            }
+                ops.Add(FileOperation.Transfer(false, plan.Copies,
+                    $"Sync: copying {plan.Copies.Count} item(s) → {dstLabel}", dst));
+            if (ops.Count == 0) return;
 
-            RefreshLPGrid();
-            RefreshRPGrid();
-
-            if (copyError != null)
-                await new MessageBox($"Sync failed: {copyError.Message}", "Error").ShowDialog(this);
-            else if (deleteError != null)
-                await new MessageBox($"Some deletions failed: {deleteError.Message}", "Error").ShowDialog(this);
+            EnqueueSequenceAndRefresh(ops);
         }
 
         /// <summary>
@@ -2129,14 +2109,31 @@ namespace DirOpusReImagined
             var dlg = new SyncOptionsDialog(summary, 0);
             if (!await dlg.ShowDialog<bool>(this)) return;
 
-            var win = new TransferProgressWindow("Two-way sync", plan.Copies, move: false);
-            await win.ShowDialog(this);
+            var op = FileOperation.Transfer(false, plan.Copies,
+                $"Two-way sync: copying {plan.Copies.Count} item(s)");
+            EnqueueSequenceAndRefresh(new List<FileOperation> { op });
+        }
 
-            RefreshLPGrid();
-            RefreshRPGrid();
+        /// <summary>
+        /// Enqueues one or more operations (in order), shows the operations window, and refreshes both
+        /// panels once the last operation finishes — re-raising the window if any of them failed.
+        /// </summary>
+        private void EnqueueSequenceAndRefresh(IReadOnlyList<FileOperation> ops)
+        {
+            if (ops.Count == 0) return;
 
-            if (win.Error != null)
-                await new MessageBox($"Sync failed: {win.Error.Message}", "Error").ShowDialog(this);
+            foreach (var o in ops) OperationQueue.Instance.Enqueue(o);
+            OperationsWindow.ShowSingleton(this);
+
+            var last = ops[ops.Count - 1];
+            _ = last.Completion.ContinueWith(_ =>
+                Dispatcher.UIThread.Post(() =>
+                {
+                    RefreshLPGrid();
+                    RefreshRPGrid();
+                    if (ops.Any(o => o.Status == OperationStatus.Failed))
+                        OperationsWindow.ShowSingleton(this);
+                }), TaskScheduler.Default);
         }
 
         private string MakePathEnvSafe(string path)

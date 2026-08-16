@@ -179,7 +179,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.22.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.23.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1471,6 +1471,11 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.23.0 (2026-08-16) — Compare/Sync on the background queue
+- **Directory Compare/Sync now use the background queue too.** One-way (mirror) sync and two-way ("newer wins") sync no longer run behind their own blocking progress dialog — they enqueue on the same app-wide queue as Copy/Move/Delete and show up in the floating **File Operations** window. The app stays responsive, a sync can be stacked behind other transfers, and its progress/cancel/failure behaviour matches everything else.
+- **Mirror-delete order preserved.** A one-way sync's "delete extras" step is enqueued ahead of its copies, so with the single-at-a-time queue the deletes still complete before the copies begin.
+- **Removed the old modal transfer dialog.** With every file operation now on the queue, the previous per-transfer modal window (`TransferProgressWindow`) is gone. Every Copy, Move, Delete and Sync goes through one consistent progress UI.
 
 ### 0.1.22.0 (2026-08-16) — Background file operations & queue
 - **Copy, Move and Delete now run in the background.** Instead of a blocking modal per transfer, operations run on an app-wide queue and appear in a floating **File Operations** window. The app stays responsive while a transfer runs, and you can **stack several operations** — they run one at a time, in the order started.
