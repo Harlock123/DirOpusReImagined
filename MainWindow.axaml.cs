@@ -1863,9 +1863,11 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
-        /// Builds a transfer batch from the selected entries and runs it through a modal
-        /// <see cref="TransferProgressWindow"/> (off-thread, with live progress and Cancel),
-        /// then refreshes both panels and surfaces any error.
+        /// Builds a transfer batch from the selected entries, does the up-front reachability and
+        /// overwrite checks, then enqueues it on the app-wide <see cref="OperationQueue"/> and raises
+        /// the floating <see cref="OperationsWindow"/>. The transfer runs in the background (the UI
+        /// stays responsive and further transfers can be queued); each panel is refreshed when its
+        /// operation finishes.
         /// </summary>
         private async Task RunPanelTransferAsync(IList<object> selected, string sourcePathRaw, string targetPathRaw, bool move)
         {
@@ -1939,14 +1941,31 @@ namespace DirOpusReImagined
                     return;
             }
 
-            var win = new TransferProgressWindow(move ? "Moving" : "Copying", items, move);
-            await win.ShowDialog(this);
+            // Enqueue the batch and show the (non-modal) operations window. The transfer runs in the
+            // background so the UI stays live and additional transfers can be stacked behind it.
+            var op = FileOperation.Transfer(move, items, BuildTransferTitle(move, items.Count, targetPathRaw), tpath);
+            OperationQueue.Instance.Enqueue(op);
+            OperationsWindow.ShowSingleton(this);
 
-            RefreshLPGrid();
-            RefreshRPGrid();
+            // Refresh both panels when this specific operation finishes (source shrinks on a move,
+            // destination grows). A failure is already shown inline in the operations window; re-raise
+            // it so the red status is visible even if the user had closed the window.
+            _ = op.Completion.ContinueWith(_ =>
+                Dispatcher.UIThread.Post(() =>
+                {
+                    RefreshLPGrid();
+                    RefreshRPGrid();
+                    if (op.Status == OperationStatus.Failed)
+                        OperationsWindow.ShowSingleton(this);
+                }), TaskScheduler.Default);
+        }
 
-            if (win.Error != null)
-                await new MessageBox($"Transfer failed: {win.Error.Message}", "Error").ShowDialog(this);
+        private static string BuildTransferTitle(bool move, int count, string targetDisplay)
+        {
+            string verb = move ? "Moving" : "Copying";
+            string what = count == 1 ? "1 item" : $"{count} items";
+            string dest = (targetDisplay ?? "").TrimEnd('/', '\\');
+            return $"{verb} {what} → {dest}";
         }
 
         private static string AppendSeparator(string p)
