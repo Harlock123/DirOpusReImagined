@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="440"
+        x:Class="DirOpusReImagined.OperationsWindow"
+        Width="540" Height="440" MinWidth="380" MinHeight="240"
+        Title="File Operations"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="12" RowDefinitions="Auto,*,Auto">
+
+        <!-- Header: summary + bulk actions -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+            <TextBlock Grid.Column="0" x:Name="SummaryText" VerticalAlignment="Center"
+                       FontSize="15" FontWeight="SemiBold" Text="No operations"/>
+            <Button Grid.Column="1" x:Name="ClearBtn" Content="Clear finished"
+                    Margin="0,0,8,0" Click="ClearBtn_Click"/>
+            <Button Grid.Column="2" x:Name="CancelAllBtn" Content="Cancel all"
+                    Click="CancelAllBtn_Click"/>
+        </Grid>
+
+        <!-- Per-operation cards -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="OpsPanel" Spacing="8"/>
+        </ScrollViewer>
+
+        <!-- Empty-state hint -->
+        <TextBlock Grid.Row="2" x:Name="EmptyHint" Margin="0,10,0,0"
+                   Foreground="{DynamicResource MutedTextBrush}"
+                   Text="Copy, move and delete operations appear here while they run."/>
+    </Grid>
+</Window>
