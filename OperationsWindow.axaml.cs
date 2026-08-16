@@ -96,6 +96,7 @@ namespace DirOpusReImagined
             {
                 Foreground = Brushes.Gray,
                 FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,   // failure messages can be long
                 Text = ""
             };
 

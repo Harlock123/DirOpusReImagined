@@ -8,6 +8,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using DirOpusReImagined.FileSystem;
 
 namespace DirOpusReImagined;
 
@@ -120,38 +122,30 @@ public partial class DeleteFilesDialog : Window
             useTrash = false;
         }
 
-        OKButton.IsEnabled = false;
-        CANCELButton.IsEnabled = false;
+        // Enqueue the delete on the shared operations queue and show the (non-modal) operations
+        // window. The dialog closes immediately so the UI is never blocked, the deletes run off the
+        // UI thread one batch at a time, and any failures are shown inline in the operations window.
+        string what = targets.Count == 1 ? "1 item" : $"{targets.Count} items";
+        string title = $"Deleting {what} from {RootPath.TrimEnd('/', '\\')}";
+        var op = FileOperation.DeleteBatch(targets, useTrash, title);
 
-        // Off the UI thread: each delete is a blocking filesystem call, and on a network share a
-        // whole selection's worth of them froze the window until Windows declared it unresponsive.
-        var errors = await Task.Run(() =>
-        {
-            var failures = new List<string>();
-            foreach (var (path, isDir) in targets)
+        var owner = this.Owner as Window;
+        OperationQueue.Instance.Enqueue(op);
+        if (owner != null) OperationsWindow.ShowSingleton(owner);
+
+        // Refresh the affected panel(s) when the delete finishes. Captured locals survive this
+        // dialog closing; the grids belong to the main window and persist.
+        var panel = ThePanel; var root = RootPath;
+        var otherPanel = OtherPanel; var otherRoot = OtherRootPath; var showHidden = _ShowHidden;
+        _ = op.Completion.ContinueWith(_ =>
+            Dispatcher.UIThread.Post(() =>
             {
-                string? err = isDir
-                    ? FileUtility.TryDeleteFolder(path, useTrash)
-                    : FileUtility.TryDeleteFile(path, useTrash);
-                if (err != null) failures.Add($"{Path.GetFileName(path.TrimEnd('/', '\\'))}: {err}");
-            }
-            return failures;
-        });
-
-        FileUtility.PopulateFilePanel(ThePanel, RootPath,_ShowHidden);
-        if (OtherRootPath == RootPath)
-            FileUtility.PopulateFilePanel(OtherPanel, OtherRootPath,_ShowHidden);
-
-        // One message for the whole batch, awaited — never one modal per failed item.
-        if (errors.Count > 0)
-        {
-            const int maxShown = 10;
-            string detail = string.Join("\n", errors.GetRange(0, Math.Min(maxShown, errors.Count)));
-            if (errors.Count > maxShown) detail += $"\n… and {errors.Count - maxShown} more.";
-            await new MessageBox(
-                $"{errors.Count} of {targets.Count} item(s) could not be deleted:\n\n{detail}",
-                "Delete failed").ShowDialog(this);
-        }
+                FileUtility.PopulateFilePanel(panel, root, showHidden);
+                if (otherRoot == root)
+                    FileUtility.PopulateFilePanel(otherPanel, otherRoot, showHidden);
+                if (op.Status == OperationStatus.Failed && owner != null)
+                    OperationsWindow.ShowSingleton(owner);
+            }), TaskScheduler.Default);
 
         this.Close();
     }

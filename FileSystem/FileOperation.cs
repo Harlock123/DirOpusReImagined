@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -113,6 +115,51 @@ public sealed class FileOperation
             title,
             (progress, ct) => TransferCoordinator.RunAsync(items, move, progress, ct),
             destinationFolder);
+
+    /// <summary>
+    /// Builds a delete operation over a set of (path, isDirectory) targets. Each item is deleted off
+    /// the UI thread via <see cref="FileUtility"/> (to the OS trash when <paramref name="useTrash"/>
+    /// is set and supported, otherwise permanently). Progress is reported per item; if any items fail,
+    /// the operation ends Failed with a summary of the failures (the ones that succeeded are gone).
+    /// </summary>
+    public static FileOperation DeleteBatch(
+        IReadOnlyList<(string Path, bool IsDir)> targets,
+        bool useTrash,
+        string title)
+    {
+        var list = targets ?? Array.Empty<(string, bool)>();
+        return new FileOperation(
+            OperationKind.Delete,
+            Array.Empty<TransferItem>(),
+            title,
+            (progress, ct) => Task.Run(() =>
+            {
+                var failures = new List<string>();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var (path, isDir) = list[i];
+                    string name = Path.GetFileName(path.TrimEnd('/', '\\'));
+
+                    progress.Report(new TransferProgress(
+                        $"Deleting {name}  ({i + 1} of {list.Count})", i + 1, list.Count, 0, 0, 0));
+
+                    string? err = isDir
+                        ? FileUtility.TryDeleteFolder(path, useTrash)
+                        : FileUtility.TryDeleteFile(path, useTrash);
+                    if (err != null) failures.Add($"{name}: {err}");
+                }
+
+                if (failures.Count > 0)
+                {
+                    const int maxShown = 4;
+                    string detail = string.Join("; ", failures.Take(maxShown));
+                    if (failures.Count > maxShown) detail += $"; …and {failures.Count - maxShown} more";
+                    throw new IOException(
+                        $"{failures.Count} of {list.Count} item(s) could not be deleted: {detail}");
+                }
+            }, ct));
+    }
 
     /// <summary>Marks the operation terminal and releases anyone awaiting <see cref="Completion"/>.</summary>
     internal void SignalCompleted() => _completion.TrySetResult();

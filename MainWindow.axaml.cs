@@ -165,6 +165,7 @@ namespace DirOpusReImagined
             LoadThemeFromConfig();
             LoadUseTrashFromConfig();
             LoadKeepRcloneWarmFromConfig();
+            LoadVerifyCopiesFromConfig();
 
             // Always clean up any rclone daemon we leaked from a previous crash/force-quit (keeps the
             // still-warm one when keep-warm is enabled). Must run after the setting is loaded.
@@ -2404,6 +2405,22 @@ namespace DirOpusReImagined
             }
             catch { /* keep the default (off) */ }
             RcloneService.KeepWarm = AppOptions.KeepRcloneWarm;
+        }
+
+        /// <summary>Reads the persisted &lt;VerifyCopies&gt; setting (default false) into
+        /// <see cref="AppOptions"/>. Written by the settings dialog.</summary>
+        private void LoadVerifyCopiesFromConfig()
+        {
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var el = XDocument.Load(_configFilePath).Descendants("VerifyCopies").FirstOrDefault();
+                    if (el != null && bool.TryParse(el.Value.Trim(), out var v))
+                        AppOptions.VerifyCopies = v;
+                }
+            }
+            catch { /* keep the default (off) */ }
         }
 
         /// <summary>Writes the current &lt;UseTrash&gt; option to the config file.</summary>

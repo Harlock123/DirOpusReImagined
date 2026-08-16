@@ -12,4 +12,10 @@ public static class AppOptions
     /// the next launch, so cloud folders skip the ~15-20s cold-start on subsequent launches. Leaves
     /// a background rclone process running between launches. Default: off.</summary>
     public static bool KeepRcloneWarm = false;
+
+    /// <summary>When true, each copied file is re-read on both sides and its checksum compared after
+    /// the copy; a mismatch fails the operation. Only applies where both ends use the same local
+    /// provider (local disk and Windows/UNC shares) so the hashes are comparable — cross-provider and
+    /// cloud copies are not verified. Roughly doubles read I/O, so it is off by default.</summary>
+    public static bool VerifyCopies = false;
 }

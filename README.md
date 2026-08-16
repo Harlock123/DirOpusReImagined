@@ -179,7 +179,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.21.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.22.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -340,6 +340,10 @@ The dual-panel main window, shown across several of the built-in themes.
 ![Main window — Solarized Light theme](ScreenShots/DORI_Main_Screen_Solorized_light.png)
 
 ### Dialogs
+
+**File Operations (background queue)**
+
+![File Operations window showing a running copy with progress and speed/ETA, plus queued move and delete operations](ScreenShots/Operations_Window.png)
 
 **Batch Rename (live preview)**
 
@@ -1467,6 +1471,13 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.22.0 (2026-08-16) — Background file operations & queue
+- **Copy, Move and Delete now run in the background.** Instead of a blocking modal per transfer, operations run on an app-wide queue and appear in a floating **File Operations** window. The app stays responsive while a transfer runs, and you can **stack several operations** — they run one at a time, in the order started.
+- **Live progress you can act on.** Each operation shows a progress bar, the current file, and transfer **speed / ETA**. A **✕** cancels just that operation; **Cancel all** stops everything; **Clear finished** tidies completed rows. Failures are shown **inline in red** and don't stop the rest of the queue.
+- **Delete joined the queue too.** Deleting a selection no longer blocks behind its dialog — it enqueues like a transfer, runs off the UI thread, and reports any per-item failures inline (the network-share up-front "no Recycle Bin" confirmation is unchanged).
+- **Optional verify-after-copy.** A new **Verify copies** setting (System Wide Settings, off by default) re-reads each copied file and compares checksums, **failing the copy if they differ** instead of reporting a false success. Applies to local disk and Windows/UNC network-share copies (where checksums are comparable); cloud copies aren't verified. It roughly doubles reading, so it's opt-in.
+- *Note:* Compare/Sync still use their existing progress dialog for now.
 
 ### 0.1.21.0 (2026-07-23) — Batch rename with live preview
 - **Rename is now a live, previewable batch tool.** The Rename dialog shows a **before→after table** for the whole selection that updates as you type, so you see every result — and every conflict — before committing. Build the new name from a Prefix / Basename / Suffix with two tokens: **`%NAME%`** (original name, no extension) and **`%ORD%`** (a sequence number, now with configurable **start, step, and zero-pad width** instead of the old fixed 4-digit pad).

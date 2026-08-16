@@ -100,6 +100,10 @@ public partial class AddEditCmdButtonDefinition : Window
         // Reflect the live keep-rclone-warm option (loaded from config at startup).
         var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
         if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
+
+        // Reflect the live verify-copies option (loaded from config at startup).
+        var vc = this.FindControl<CheckBox>("cbVerifyCopies");
+        if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
     }
 
     /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
@@ -127,6 +131,14 @@ public partial class AddEditCmdButtonDefinition : Window
         var warmEl = doc.Root!.Element("KeepRcloneWarm");
         if (warmEl == null) { warmEl = new XElement("KeepRcloneWarm"); doc.Root!.Add(warmEl); }
         warmEl.Value = keepWarm ? "true" : "false";
+
+        // Persist the verify-copies option and apply it live so it takes effect this session.
+        bool verify = this.FindControl<CheckBox>("cbVerifyCopies")?.IsChecked ?? false;
+        AppOptions.VerifyCopies = verify;
+
+        var verifyEl = doc.Root!.Element("VerifyCopies");
+        if (verifyEl == null) { verifyEl = new XElement("VerifyCopies"); doc.Root!.Add(verifyEl); }
+        verifyEl.Value = verify ? "true" : "false";
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)

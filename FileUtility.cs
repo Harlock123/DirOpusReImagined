@@ -219,35 +219,63 @@ namespace DirOpusReImagined
                 // Same provider: local→local falls back to File.Copy; cloud→cloud drives a
                 // server-side rclone job with real progress (RcloneFileProvider.CopyFileAsync).
                 await srcP.CopyFileAsync(src, dst, overwrite, progress, ct).ConfigureAwait(false);
-                return;
-            }
-
-            if (!overwrite && dstP.FileExists(dst))
-                throw new IOException($"Destination exists: {dst}");
-
-            // Cross-provider is always local<->cloud (only one remote provider exists). Let the
-            // remote provider own the rclone leg so the slow network transfer reports real progress,
-            // rather than streaming through OpenRead/OpenWrite's temp-file round-trip.
-            if (srcP.IsRemote && !dstP.IsRemote)
-            {
-                await srcP.CopyToLocalAsync(src, dst, progress, ct).ConfigureAwait(false);
-            }
-            else if (!srcP.IsRemote && dstP.IsRemote)
-            {
-                await dstP.CopyFromLocalAsync(src, dst, overwrite, progress, ct).ConfigureAwait(false);
             }
             else
             {
-                // Two non-remote providers (e.g. extracting from a read-only archive to local disk):
-                // stream the bytes through OpenRead/OpenWrite.
-                await Task.Run(() =>
+                if (!overwrite && dstP.FileExists(dst))
+                    throw new IOException($"Destination exists: {dst}");
+
+                // Cross-provider is always local<->cloud (only one remote provider exists). Let the
+                // remote provider own the rclone leg so the slow network transfer reports real progress,
+                // rather than streaming through OpenRead/OpenWrite's temp-file round-trip.
+                if (srcP.IsRemote && !dstP.IsRemote)
                 {
-                    ct.ThrowIfCancellationRequested();
-                    using var inStream = srcP.OpenRead(src);
-                    using var outStream = dstP.OpenWrite(dst);
-                    inStream.CopyTo(outStream);
-                }, ct).ConfigureAwait(false);
+                    await srcP.CopyToLocalAsync(src, dst, progress, ct).ConfigureAwait(false);
+                }
+                else if (!srcP.IsRemote && dstP.IsRemote)
+                {
+                    await dstP.CopyFromLocalAsync(src, dst, overwrite, progress, ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Two non-remote providers (e.g. extracting from a read-only archive to local disk):
+                    // stream the bytes through OpenRead/OpenWrite.
+                    await Task.Run(() =>
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        using var inStream = srcP.OpenRead(src);
+                        using var outStream = dstP.OpenWrite(dst);
+                        inStream.CopyTo(outStream);
+                    }, ct).ConfigureAwait(false);
+                }
             }
+
+            await VerifyCopyIfEnabledAsync(srcP, dstP, src, dst, ct).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// When <see cref="AppOptions.VerifyCopies"/> is on, re-reads both files and compares their
+        /// checksums, throwing if they differ. Only runs when both ends use the same non-remote
+        /// provider (local disk / UNC share), where the hashes use the same algorithm and are
+        /// comparable; cross-provider and cloud copies are skipped (their hashes aren't). A provider
+        /// that can't hash (returns null) is also skipped rather than failed.
+        /// </summary>
+        private static async Task VerifyCopyIfEnabledAsync(IFileProvider srcP, IFileProvider dstP,
+            string src, string dst, CancellationToken ct)
+        {
+            if (!AppOptions.VerifyCopies) return;
+            if (!ReferenceEquals(srcP, dstP) || srcP.IsRemote) return;
+
+            await Task.Run(() =>
+            {
+                ct.ThrowIfCancellationRequested();
+                string? a = srcP.ComputeHash(src);
+                string? b = dstP.ComputeHash(dst);
+                if (a == null || b == null) return;   // can't verify -> don't fail the copy
+                if (!string.Equals(a, b, StringComparison.OrdinalIgnoreCase))
+                    throw new IOException(
+                        $"Verification failed: {Path.GetFileName(dst.TrimEnd('/', '\\'))} does not match the source after copying.");
+            }, ct).ConfigureAwait(false);
         }
 
         private sealed class ByteCounter { public long Total; }

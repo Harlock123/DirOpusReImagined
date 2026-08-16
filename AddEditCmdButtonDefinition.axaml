@@ -148,6 +148,12 @@
                               Content="Keep rclone running between launches" />
                     <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
                                Text="Cloud folders take ~15-20s to load the first time after launch while rclone connects and refreshes its token. When enabled, the rclone background process is left running when you close the app and reused next time, so that delay is paid once instead of every launch. Trade-off: a small rclone process keeps running in the background between launches. Off by default." />
+
+                    <TextBlock Text="File operations" FontSize="16" FontWeight="Bold" Margin="0,16,0,0" />
+                    <CheckBox Name="cbVerifyCopies" Padding="4"
+                              Content="Verify copies (compare checksums after copying)" />
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
+                               Text="After each file is copied, re-read both copies and compare their checksums; if they differ the operation fails instead of silently reporting success. Applies to local disk and Windows/UNC network-share copies (where the checksums are comparable) — cloud copies are not verified. Trade-off: this roughly doubles the amount of reading, so large or network copies take longer. Off by default." />
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
