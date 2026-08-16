@@ -43,7 +43,7 @@
                 <TextBlock Text="• Copy, Move and Delete run in the background — see &quot;Background operations&quot; below." TextWrapping="Wrap" />
                 <TextBlock Text="• Delete sends items to the OS Trash/Recycle Bin by default (recoverable) — a checkbox in the delete dialog switches to permanent deletion. Local files only." TextWrapping="Wrap" />
                 <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
-                <TextBlock Text="• Overwrite is confirmed before anything at the destination is replaced." TextWrapping="Wrap" />
+                <TextBlock Text="• When items already exist at the destination, a conflict dialog lets you choose per item — Skip, Overwrite, or Keep both (copy under a new name) — showing each side's size and date, with &quot;apply to all&quot; buttons. (Sync uses its own newer-wins rules and isn't affected.)" TextWrapping="Wrap" />
 
                 <TextBlock Text="Batch rename" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Rename opens a dialog that renames the whole selection at once, with a live before→after preview so you see every result before committing." TextWrapping="Wrap" />

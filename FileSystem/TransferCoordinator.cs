@@ -56,19 +56,22 @@ public static class TransferCoordinator
             // Show the item immediately, before any bytes move.
             itemProgress.Report(new TransferProgress(itemName, index, items.Count, 0, 0, 0));
 
+            // Use TargetPath (the exact destination) for both files and directories so a
+            // collision resolved by renaming lands under its new name. TargetPath normally equals
+            // TargetFolder + source name, so ordinary transfers are unaffected.
             if (move)
             {
                 if (item.IsDirectory)
                     await FileUtility.MoveDirectoryAsync(item.Source, item.TargetPath, itemProgress, ct).ConfigureAwait(false);
                 else
-                    await FileUtility.MoveFileAsync(item.Source, item.TargetFolder, itemProgress, ct).ConfigureAwait(false);
+                    await FileUtility.MoveFileToPathAsync(item.Source, item.TargetPath, itemProgress, ct).ConfigureAwait(false);
             }
             else
             {
                 if (item.IsDirectory)
                     await FileUtility.CopyDirectoryToFolderAsync(item.Source, item.TargetPath, itemProgress, ct).ConfigureAwait(false);
                 else
-                    await FileUtility.CopyFileToFolderAsync(item.Source, item.TargetFolder, itemProgress, ct).ConfigureAwait(false);
+                    await FileUtility.CopyFileToPathAsync(item.Source, item.TargetPath, itemProgress, ct).ConfigureAwait(false);
             }
 
             // Advance by the pre-scanned size so the bar is monotonic and lands exactly at 100%.

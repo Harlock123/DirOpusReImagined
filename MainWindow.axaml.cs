@@ -1915,36 +1915,36 @@ namespace DirOpusReImagined
                 return;
             }
 
-            // Warn before clobbering anything that already exists at the destination. The existence
-            // probe can hit the network for cloud targets, so run it off the UI thread.
-            int existing = await Task.Run(() =>
+            // Find items whose target already exists and let the user resolve each collision
+            // (Skip / Overwrite / Keep both). The scan hits the network for cloud targets, so run it
+            // off the UI thread. With no conflicts the transfer proceeds straight to the queue.
+            var conflicts = await Task.Run(() => ConflictScanner.Scan(items));
+            var finalItems = (IReadOnlyList<TransferItem>)items;
+            if (conflicts.Count > 0)
             {
-                int n = 0;
-                foreach (var it in items)
-                {
-                    try
-                    {
-                        var prov = ProviderRegistry.For(it.TargetPath);
-                        bool here = it.IsDirectory ? prov.DirectoryExists(it.TargetPath) : prov.FileExists(it.TargetPath);
-                        if (here) n++;
-                    }
-                    catch { /* if we can't tell, don't block the transfer */ }
-                }
-                return n;
-            });
+                var dlg = new ConflictResolutionDialog(conflicts);
+                if (!await dlg.ShowDialog<bool>(this)) return;   // cancelled — nothing happens
+                finalItems = ConflictResolver.ApplyResolutions(items, dlg.Decisions);
+                if (finalItems.Count == 0) return;               // everything was skipped
 
-            if (existing > 0)
-            {
-                string what = existing == 1 ? "1 item" : $"{existing} items";
-                string verb = move ? "Move" : "Copy";
-                string msg = $"{what} already exist in the destination and will be overwritten.\n\n{verb} anyway?";
-                if (!await new MessageBox(msg, showCancel: true, okText: verb, title: "Confirm Overwrite").ShowDialog<bool>(this))
+                // A user-typed "Keep both" name could collide with another item in the batch, which
+                // would make two items resolve to the same destination (silent data loss). Refuse
+                // rather than clobber; the suggested names never collide, so this only trips on manual edits.
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var dup = finalItems.FirstOrDefault(fi => !seen.Add(fi.TargetPath));
+                if (dup != null)
+                {
+                    await new MessageBox(
+                        $"Two items would end up with the same name at the destination:\n\n{ConflictResolver.LeafOf(dup.TargetPath)}\n\n" +
+                        "Give them different names and try again — nothing was transferred.",
+                        "Duplicate name").ShowDialog(this);
                     return;
+                }
             }
 
-            // Enqueue the batch and show the (non-modal) operations window. The transfer runs in the
-            // background so the UI stays live and additional transfers can be stacked behind it.
-            var op = FileOperation.Transfer(move, items, BuildTransferTitle(move, items.Count, targetPathRaw), tpath);
+            // Enqueue the (possibly rewritten) batch and show the (non-modal) operations window. The
+            // transfer runs in the background so the UI stays live and transfers can be stacked.
+            var op = FileOperation.Transfer(move, finalItems, BuildTransferTitle(move, finalItems.Count, targetPathRaw), tpath);
             OperationQueue.Instance.Enqueue(op);
             OperationsWindow.ShowSingleton(this);
 

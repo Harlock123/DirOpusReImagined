@@ -179,7 +179,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.23.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.24.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -344,6 +344,10 @@ The dual-panel main window, shown across several of the built-in themes.
 **File Operations (background queue)**
 
 ![File Operations window showing a running copy with progress and speed/ETA, plus queued move and delete operations](ScreenShots/Operations_Window.png)
+
+**Conflict resolution (Skip / Overwrite / Keep both)**
+
+![Conflict dialog listing items that already exist, with per-item Skip/Overwrite/Keep both choices and size/date for each side](ScreenShots/Conflict_Dialog.png)
 
 **Batch Rename (live preview)**
 
@@ -1471,6 +1475,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.24.0 (2026-08-16) — Per-file conflict resolution
+- **Copying or moving onto existing files now asks per item, not once for the whole batch.** When some of the items you're transferring already exist at the destination, a conflict dialog lists each collision and lets you choose **Skip**, **Overwrite**, or **Keep both** (copy under a new, auto-suggested name you can edit). Each row shows the destination vs. source **size and modified date**, with a hint for which side is newer, so you can decide informedly.
+- **Apply-to-all** buttons — Overwrite all / Skip all / Keep both (all) — handle big batches in one click.
+- **Keep-both names are collision-free.** Suggested names (`report (2).pdf`, …) are guaranteed not to clash with existing files or with anything else in the same transfer; if you hand-edit a name into a clash, the transfer is refused rather than silently overwriting.
+- Applies to Copy, Move and drag-and-drop. Compare/Sync keep their own newer-wins logic and are unaffected.
 
 ### 0.1.23.0 (2026-08-16) — Compare/Sync on the background queue
 - **Directory Compare/Sync now use the background queue too.** One-way (mirror) sync and two-way ("newer wins") sync no longer run behind their own blocking progress dialog — they enqueue on the same app-wide queue as Copy/Move/Delete and show up in the floating **File Operations** window. The app stays responsive, a sync can be stacked behind other transfers, and its progress/cancel/failure behaviour matches everything else.

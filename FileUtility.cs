@@ -90,12 +90,64 @@ namespace DirOpusReImagined
         public static async Task CopyFileToFolderAsync(string sourceFile, string targetFolder,
             IProgress<TransferProgress>? progress, CancellationToken ct)
         {
-            var dstP = ProviderRegistry.For(targetFolder);
-            dstP.CreateDirectory(targetFolder);
+            string targetFile = JoinPanelPath(targetFolder, Path.GetFileName(sourceFile));
+            await CopyFileToPathAsync(sourceFile, targetFile, progress, ct).ConfigureAwait(false);
+        }
 
-            string targetFile = Path.Combine(targetFolder, Path.GetFileName(sourceFile));
+        /// <summary>Copies a single file to an explicit destination path (which may differ from the
+        /// source name — used when a name collision is resolved by renaming), reporting progress.</summary>
+        public static async Task CopyFileToPathAsync(string sourceFile, string targetFile,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var dstP = ProviderRegistry.For(targetFile);
+            dstP.CreateDirectory(ParentFolderOf(targetFile));
+
             await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: true, progress, ct)
                 .ConfigureAwait(false);
+        }
+
+        /// <summary>Moves a single file to an explicit destination path; server-side rename when
+        /// possible, else copy+delete. Mirrors <see cref="MoveFileAsync"/> but with an explicit target
+        /// filename (used when a name collision is resolved by renaming).</summary>
+        public static async Task MoveFileToPathAsync(string sourceFile, string targetFile,
+            IProgress<TransferProgress>? progress, CancellationToken ct)
+        {
+            var srcP = ProviderRegistry.For(sourceFile);
+            var dstP = ProviderRegistry.For(targetFile);
+
+            dstP.CreateDirectory(ParentFolderOf(targetFile));
+
+            // Moving a file onto itself is a no-op — never touch the only copy.
+            if (ReferenceEquals(srcP, dstP) &&
+                string.Equals(sourceFile, targetFile, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (ReferenceEquals(srcP, dstP))
+            {
+                await Task.Run(() =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    // Overwrite is confirmed before we get here; clear any existing target so the
+                    // move doesn't fail with "already exists" (File.Move won't overwrite).
+                    if (dstP.FileExists(targetFile)) dstP.DeleteFile(targetFile);
+                    srcP.MoveFile(sourceFile, targetFile);
+                }, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: true, progress, ct)
+                    .ConfigureAwait(false);
+                srcP.DeleteFile(sourceFile);
+            }
+        }
+
+        /// <summary>The parent folder of a full path (no trailing separator), separator-agnostic so it
+        /// works for local, UNC, and cloud:// paths.</summary>
+        private static string ParentFolderOf(string fullPath)
+        {
+            string trimmed = fullPath.TrimEnd('/', '\\');
+            int i = trimmed.LastIndexOfAny(new[] { '/', '\\' });
+            return i < 0 ? trimmed : trimmed.Substring(0, i);
         }
 
         /// <summary>Recursively copies a directory, reporting cumulative byte progress for the tree.</summary>
