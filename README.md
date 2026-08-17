@@ -179,7 +179,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.25.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.26.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -338,6 +338,10 @@ The dual-panel main window, shown across several of the built-in themes.
 **Solarized Light theme**
 
 ![Main window — Solarized Light theme](ScreenShots/DORI_Main_Screen_Solorized_light.png)
+
+**Thumbnail (icon) view — per panel**
+
+![Right panel in Thumbnails view showing image thumbnails in a tiled grid while the left panel stays in List view](ScreenShots/Thumbnail_View.png)
 
 ### Dialogs
 
@@ -1475,6 +1479,12 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.26.0 (2026-08-17) — Thumbnail (icon) view
+- **Panels can now show a grid of thumbnails instead of a list.** Each panel has its own **List / Thumbnails** toggle in its tab bar (the ▦ / ☰ button), so you can, say, browse a photo folder as tiles on one side while keeping a detail list on the other. Each panel remembers its choice across launches.
+- **Real image thumbnails** are generated for jpg/jpeg/png/gif/bmp/webp/ico/tiff files and filled in progressively as they decode; folders and other file types show large generic icons. Generation runs in the background (bounded concurrency) so the UI stays responsive, and thumbnails are disk-cached (keyed by path, size and modified time) so revisiting a folder is instant.
+- **Local folders only** — cloud (rclone) and archive folders switch to the tile layout but show icons rather than triggering per-file downloads/extraction.
+- Full mouse and keyboard support in tile mode: click / Ctrl-click / Shift-click selection, drag-and-drop, double-click to open, right-click menu, and 2-D arrow-key navigation (Up/Down by a row, Left/Right by a tile, PageUp/Down by a screenful).
 
 ### 0.1.25.0 (2026-08-17) — Retry failed operations & bulk folder sizing
 - **Retry a failed operation.** Each failed card in the **File Operations** window now has a **↻ Retry** button that re-runs the same work as a fresh operation (works for Copy, Move and Delete). A **Retry all failed** button in the window header re-queues every failed operation at once.

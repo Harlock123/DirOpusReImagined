@@ -18,4 +18,9 @@ public static class AppOptions
     /// provider (local disk and Windows/UNC shares) so the hashes are comparable — cross-provider and
     /// cloud copies are not verified. Roughly doubles read I/O, so it is off by default.</summary>
     public static bool VerifyCopies = false;
+
+    /// <summary>Per-panel layout mode (detail list vs. thumbnail grid). Persisted per side so each
+    /// panel remembers its own view across launches. Default: list.</summary>
+    public static GridViewMode LeftViewMode = GridViewMode.List;
+    public static GridViewMode RightViewMode = GridViewMode.List;
 }

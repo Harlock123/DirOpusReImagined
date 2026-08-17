@@ -65,6 +65,11 @@
                 <TextBlock Text="• Cmp color-codes the two panels against each other (only-here, newer, older, same-time/different-size, unreadable); comparison is recursive. Right-click Cmp for a content (hash) compare." TextWrapping="Wrap" />
                 <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
 
+                <TextBlock Text="Thumbnail (icon) view" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Each panel has a List / Thumbnails toggle in its tab bar (the ▦ / ☰ button). Thumbnails view shows a wrapped grid of tiles instead of the detail list; the two panels are independent and each remembers its choice across launches." TextWrapping="Wrap" />
+                <TextBlock Text="• Image files (jpg, png, gif, bmp, webp, ico, tiff) get real thumbnails, generated in the background and filled in as they load; folders and other files show large icons. Thumbnails are cached on disk, so revisiting a folder is instant. Cloud and archive folders switch to tiles but show icons only (no per-file downloads)." TextWrapping="Wrap" />
+                <TextBlock Text="• All the usual actions work on tiles: click / Ctrl-click / Shift-click to select, drag-and-drop, double-click to open, and right-click for the menu. Arrow keys move in two dimensions (Up/Down a row, Left/Right a tile)." TextWrapping="Wrap" />
+
                 <TextBlock Text="Real-time filter" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Each panel has a filter box that narrows the listing as you type (case-insensitive, wildcards supported); an X button clears it. Filters reset when you navigate." TextWrapping="Wrap" />
 

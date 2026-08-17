@@ -43,6 +43,13 @@ namespace DirOpusReImagined
         View
     }
 
+    /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
+    public enum GridViewMode
+    {
+        List,
+        Thumbnails
+    }
+
     /// <summary>A folder-tab action requested on the active panel via a keyboard shortcut.</summary>
     public enum TabAction
     {
@@ -301,6 +308,38 @@ namespace DirOpusReImagined
         /// The selected items stored in a list.
         /// </summary>
         private List<object> _selecteditems = new List<object>();
+
+        #region Thumbnail (icon) view
+
+        private GridViewMode _viewMode = GridViewMode.List;
+
+        /// <summary>Whether the panel renders a detail list or a grid of thumbnails. Setting it
+        /// resets the vertical scroll (the two modes interpret it differently) and redraws.</summary>
+        public GridViewMode ViewMode
+        {
+            get => _viewMode;
+            set
+            {
+                if (_viewMode == value) return;
+                _viewMode = value;
+                _gridYShift = 0;
+                TheVerticleScrollBar.Value = 0;
+                ReRender();
+            }
+        }
+
+        /// <summary>Decode/display width of a thumbnail image, in px. Tiles are laid out around it.</summary>
+        public int ThumbnailSize = 96;
+
+        // Layout metrics computed by RenderThumbnails and read by hit-testing / scrolling / keyboard
+        // navigation. In Thumbnails mode _gridYShift is reused as the first visible TILE ROW index.
+        private int _thumbCols = 1;
+        private int _thumbTileW = 112;
+        private int _thumbTileH = 140;
+        private int _thumbRows = 0;
+        private int _thumbVisibleRows = 1;
+
+        #endregion
 
         #region Keyboard Navigation
 
@@ -904,6 +943,9 @@ namespace DirOpusReImagined
                 _anchorIndex = -1;
                 _typeAheadBuffer = "";
 
+                // Reset the scroll thumb to the top for the new listing (keep it in sync with _gridYShift).
+                if (TheVerticleScrollBar != null) TheVerticleScrollBar.Value = 0;
+
                 SuspendRendering = false;
 
                 ReRender();
@@ -1314,6 +1356,16 @@ namespace DirOpusReImagined
                 {
                     // the canvas exists so lets render the grid
                     _suspendRendering = true;
+
+                    // Thumbnails view is a completely different (tiled) layout, so it takes its own
+                    // self-contained render path rather than the property-per-column table below.
+                    if (_viewMode == GridViewMode.Thumbnails)
+                    {
+                        try { RenderThumbnails(); } catch { /* match the list path's swallow */ }
+                        _suspendRendering = false;
+                        return;
+                    }
+
                     // clear the canvas
 
                     BackingCanvas = new Canvas();
@@ -1772,6 +1824,8 @@ namespace DirOpusReImagined
 
                         TheVerticleScrollBar.Minimum = 0;
                         TheVerticleScrollBar.Maximum = _items.Count;
+                        TheVerticleScrollBar.ViewportSize = 10;   // list default (may have been changed by Thumbnails view)
+                        TheHorizontalScrollBar.IsVisible = true;  // list view can scroll wide columns
 
                         //if (this.showCrossHairs)
                         //{
@@ -1829,6 +1883,200 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
+        /// Renders the panel as a wrapped grid of thumbnail tiles (image/icon over a filename label).
+        /// Self-contained: builds its own backing canvas and blits it, mirroring <see cref="ReRender"/>'s
+        /// title strip, active-panel frame and drag badge. Only the tile rows that fall inside the
+        /// viewport are built (windowed), so large folders stay cheap. In this mode <c>_gridYShift</c>
+        /// is the first visible TILE ROW index (not an item index).
+        /// </summary>
+        private void RenderThumbnails()
+        {
+            BackingCanvas = new Canvas
+            {
+                Width = TheCanvas.Width,
+                Height = TheCanvas.Height
+            };
+
+            double canvasW = TheCanvas.Bounds.Width  > 0 ? TheCanvas.Bounds.Width  : TheCanvas.Width;
+            double canvasH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+
+            // --- Title strip (no column header in thumbnails view) ---
+            _gridHeaderAndTitleHeight = 0;
+            if (GridTitle != String.Empty)
+            {
+                var ft = new FormattedText(GridTitle, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                    GridTitleTypeface, GridTitleFontSize, GridTitleBrush);
+
+                int stripH = GridTitleHeight < ft.Height ? (int)ft.Height : GridTitleHeight;
+                _gridTitleHeight = (int)ft.Height;
+
+                var bar = new Rectangle { Width = BackingCanvas.Width, Height = stripH, Fill = GridTitleBackground };
+                Canvas.SetLeft(bar, 0); Canvas.SetTop(bar, 0);
+                BackingCanvas.Children.Add(bar);
+
+                var ttl = new TextBlock
+                {
+                    Text = GridTitle, FontSize = GridTitleFontSize, Foreground = GridTitleBrush,
+                    FontFamily = GridTitleTypeface.FontFamily, FontWeight = GridTitleTypeface.Weight,
+                    FontStyle = GridTitleTypeface.Style
+                };
+                Canvas.SetLeft(ttl, 0); Canvas.SetTop(ttl, 0);
+                BackingCanvas.Children.Add(ttl);
+
+                _gridHeaderAndTitleHeight = _gridTitleHeight;
+            }
+            else
+            {
+                _gridTitleHeight = 0;
+            }
+
+            // --- Tile metrics ---
+            int img = ThumbnailSize;
+            const int pad = 8;
+            int labelH = (int)Math.Ceiling((_gridFontSize + 4) * 2.0);   // two lines of filename
+            _thumbTileW = img + pad * 2;
+            _thumbTileH = img + 4 + labelH + pad;
+
+            int usableW = (int)canvasW;
+            int cols = Math.Max(1, usableW / _thumbTileW);
+            _thumbCols = cols;
+
+            int count = _items.Count;
+            _thumbRows = count == 0 ? 0 : (count + cols - 1) / cols;
+
+            double tileAreaH = canvasH - _gridHeaderAndTitleHeight;
+            _thumbVisibleRows = Math.Max(1, (int)(tileAreaH / _thumbTileH));
+
+            int maxFirstRow = Math.Max(0, _thumbRows - _thumbVisibleRows);
+
+            // Vertical scrollbar counts tile ROWS. Setting ViewportSize = visible rows sizes the thumb
+            // correctly and gives it real travel (without it the thumb nearly fills the short track and
+            // dragging feels dead). Tiles wrap to the width, so there is no horizontal scroll here.
+            TheVerticleScrollBar.Minimum = 0;
+            TheVerticleScrollBar.Maximum = maxFirstRow;
+            TheVerticleScrollBar.ViewportSize = _thumbVisibleRows;
+            TheVerticleScrollBar.SmallChange = 1;
+            TheVerticleScrollBar.LargeChange = Math.Max(1, _thumbVisibleRows);
+
+            // Clamp only when actually out of range (folder change / resize / over-scroll). Do NOT write
+            // Value back on every render: during a thumb drag the scrollbar owns its (fractional) Value,
+            // and the Scroll handler floors it into _gridYShift — writing that floored int back each event
+            // would reset the drag baseline and make the thumb snap to the top. A stale Value is coerced
+            // into range by setting Maximum above.
+            if (_gridYShift > maxFirstRow)
+            {
+                _gridYShift = maxFirstRow;
+                TheVerticleScrollBar.Value = _gridYShift;
+            }
+            if (_gridYShift < 0) _gridYShift = 0;
+
+            TheHorizontalScrollBar.IsVisible = false;
+            _gridXShift = 0;
+
+            // Center the tile grid within the usable width.
+            int gridW = cols * _thumbTileW;
+            int xOffset = Math.Max(0, (usableW - gridW) / 2);
+
+            // Windowed: only rows in [firstRow, lastRow] (one extra for a partially visible bottom row).
+            int firstRow = _gridYShift;
+            int lastRow = Math.Min(_thumbRows - 1, firstRow + _thumbVisibleRows);
+
+            for (int r = firstRow; r <= lastRow && r >= 0; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    int idx = r * cols + c;
+                    if (idx >= count) break;
+
+                    object item = _items[idx];
+                    var entry = item as AFileEntry;
+
+                    int tileX = xOffset + c * _thumbTileW;
+                    int tileY = _gridHeaderAndTitleHeight + (r - firstRow) * _thumbTileH;
+
+                    // Background state (same precedence as the list: compare < selection < hover < drop).
+                    IBrush? bg = null;
+                    if (entry != null && entry.CompareState != RowCompareState.None)
+                        bg = CompareBrush(entry.CompareState);
+                    if (_selecteditems.Contains(item))
+                        bg = _gridSelectedItemBrush;
+                    if (idx == TheItemUnderTheMouse.rowID && _mouseInControl)
+                        bg = _gridCellHighlightBrush;
+                    if (ReferenceEquals(item, _dropHighlightItem))
+                        bg = _gridDropTargetBrush;
+
+                    // Tile plate: drawn when the tile has a state background or holds the keyboard cursor.
+                    if (bg != null || idx == _cursorIndex)
+                    {
+                        var plate = new Rectangle
+                        {
+                            Width = _thumbTileW - 4, Height = _thumbTileH - 4,
+                            RadiusX = 6, RadiusY = 6,
+                            Fill = bg
+                        };
+                        if (idx == _cursorIndex) { plate.Stroke = _gridCursorBrush; plate.StrokeThickness = 2; }
+                        Canvas.SetLeft(plate, tileX + 2); Canvas.SetTop(plate, tileY + 2);
+                        BackingCanvas.Children.Add(plate);
+                    }
+
+                    // Image: the generated thumbnail if present, otherwise a generic folder/file icon.
+                    IImage src = entry?.Thumbnail;
+                    if (src == null) src = (entry != null && entry.Typ) ? _folder : _file;
+
+                    var image = new Image { Source = src, Width = img, Height = img, Stretch = Stretch.Uniform };
+                    Canvas.SetLeft(image, tileX + (_thumbTileW - img) / 2);
+                    Canvas.SetTop(image, tileY + pad / 2 + 2);
+                    BackingCanvas.Children.Add(image);
+
+                    // Filename label (centered, wraps to two lines then ellipsizes).
+                    IBrush textBrush = ReadableTextFor(bg ?? _gridBackground);
+                    var label = new TextBlock
+                    {
+                        Text = entry?.Name ?? (item?.ToString() ?? ""),
+                        FontSize = _gridFontSize,
+                        Foreground = textBrush,
+                        FontFamily = _gridTypeface.FontFamily,
+                        FontWeight = _gridTypeface.Weight,
+                        FontStyle = _gridTypeface.Style,
+                        Width = _thumbTileW - 6,
+                        TextAlignment = TextAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                        MaxHeight = labelH + 2,
+                        ClipToBounds = true
+                    };
+                    Canvas.SetLeft(label, tileX + 3);
+                    Canvas.SetTop(label, tileY + pad / 2 + 2 + img + 2);
+                    BackingCanvas.Children.Add(label);
+                }
+            }
+
+            // Hover event parity with the list path.
+            if (TheItemUnderTheMouseLast.rowID != TheItemUnderTheMouse.rowID)
+                GridHover?.Invoke(this, TheItemUnderTheMouse);
+
+            // Active-panel frame.
+            if (_isActivePanel)
+            {
+                double frameW = TheCanvas.Bounds.Width  > 0 ? TheCanvas.Bounds.Width  : TheCanvas.Width;
+                double frameH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+                var frame = new Rectangle
+                {
+                    Width = frameW - 2, Height = frameH - 2,
+                    Stroke = _activePanelBrush, StrokeThickness = 2, Fill = null
+                };
+                Canvas.SetLeft(frame, 1); Canvas.SetTop(frame, 1);
+                BackingCanvas.Children.Add(frame);
+            }
+
+            DrawDragIndicator();
+
+            TheCanvas.Children.Clear();
+            TheCanvas.Children.Add(BackingCanvas);
+            BackingCanvas = null;
+        }
+
+        /// <summary>
         /// Function name: RecalcItemUnderMouse
         /// Purpose: To calculate and store information about the item (or grid cell contents)
         /// that the mouse is currently hovering over.
@@ -1866,6 +2114,13 @@ namespace DirOpusReImagined
         /// </summary>
         private void RecalcItemUnderMouse()
         {
+            // Thumbnails view: map the pointer to a tile (col, visible-row) → item index.
+            if (_viewMode == GridViewMode.Thumbnails)
+            {
+                RecalcTileUnderMouse();
+                return;
+            }
+
             int rowidx = -1;
             int colidx = -1;
 
@@ -1990,6 +2245,49 @@ namespace DirOpusReImagined
                     idx++;
                 }
             }*/
+        }
+
+        /// <summary>
+        /// Thumbnails-view hit test: maps the current mouse position to a tile and stores the item
+        /// under it in <see cref="TheItemUnderTheMouse"/> (rowID = item index, colID = 0), or clears it
+        /// when the pointer is over empty space. Uses the layout metrics computed by RenderThumbnails.
+        /// </summary>
+        private void RecalcTileUnderMouse()
+        {
+            int y = _curMouseY - _gridHeaderAndTitleHeight;
+            int x = _curMouseX;
+
+            int found = -1;
+            if (_curMouseY != -1 && y >= 0 && x >= 0 && _thumbTileW > 0 && _thumbTileH > 0 && _thumbCols > 0)
+            {
+                int gridW = _thumbCols * _thumbTileW;
+                int usableW = (int)(TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width);
+                int xOffset = Math.Max(0, (usableW - gridW) / 2);
+
+                int col = (x - xOffset) / _thumbTileW;
+                int visRow = y / _thumbTileH;
+
+                if (col >= 0 && col < _thumbCols && x >= xOffset)
+                {
+                    int idx = (_gridYShift + visRow) * _thumbCols + col;
+                    if (idx >= 0 && idx < _items.Count) found = idx;
+                }
+            }
+
+            if (found >= 0)
+            {
+                TheItemUnderTheMouse.rowID = found;
+                TheItemUnderTheMouse.colID = 0;
+                TheItemUnderTheMouse.ItemUnderMouse = _items[found];
+                TheItemUnderTheMouse.cellContent = (_items[found] as AFileEntry)?.Name ?? "";
+            }
+            else
+            {
+                TheItemUnderTheMouse.rowID = -1;
+                TheItemUnderTheMouse.colID = -1;
+                TheItemUnderTheMouse.ItemUnderMouse = null;
+                TheItemUnderTheMouse.cellContent = "";
+            }
         }
 
         /// <summary>
@@ -2334,9 +2632,10 @@ namespace DirOpusReImagined
                 }
                 else
                 {
-                    // We are scrolling Vertically
-                    
-                    double d = TheVerticleScrollBar.Value - (e.Delta.Y * _scrollMultiplier);
+                    // We are scrolling Vertically. In Thumbnails mode the scrollbar counts tile ROWS
+                    // (one step per notch feels right); in List mode it counts item rows.
+                    int step = _viewMode == GridViewMode.Thumbnails ? 1 : _scrollMultiplier;
+                    double d = TheVerticleScrollBar.Value - (e.Delta.Y * step);
 
                     if (d < 0)
                     {
@@ -2529,6 +2828,20 @@ namespace DirOpusReImagined
         /// </summary>
         private void EnsureCursorVisible()
         {
+            // Thumbnails view: scroll by whole tile rows so the cursor's tile is on screen.
+            if (_viewMode == GridViewMode.Thumbnails)
+            {
+                if (_cursorIndex < 0 || _thumbCols <= 0) return;
+                int tileRow = _cursorIndex / _thumbCols;
+                if (tileRow < _gridYShift)
+                    _gridYShift = tileRow;
+                else if (tileRow > _gridYShift + _thumbVisibleRows - 1)
+                    _gridYShift = tileRow - _thumbVisibleRows + 1;
+                if (_gridYShift < 0) _gridYShift = 0;
+                TheVerticleScrollBar.Value = Math.Min(_gridYShift, TheVerticleScrollBar.Maximum);
+                return;
+            }
+
             if (_cursorIndex < 0 || _rowHeights == null || _rowHeights.Length == 0) return;
 
             double viewport = TheCanvas.Bounds.Height;
@@ -2749,20 +3062,46 @@ namespace DirOpusReImagined
                 return;
             }
 
-            // Directional navigation. If nothing is focused yet, start at the top visible row.
-            int start = _cursorIndex >= 0 ? _cursorIndex : _gridYShift;
+            // Directional navigation. If nothing is focused yet, start at the top-left item.
+            bool thumbs = _viewMode == GridViewMode.Thumbnails;
+            int startRowItem = thumbs ? _gridYShift * Math.Max(1, _thumbCols) : _gridYShift;
+            int start = _cursorIndex >= 0 ? _cursorIndex : startRowItem;
             int target;
-            switch (e.Key)
+            if (thumbs)
             {
-                case Key.Down:     target = start + 1; break;
-                case Key.Up:       target = start - 1; break;
-                case Key.PageDown: target = start + VisibleRowCount(); break;
-                case Key.PageUp:   target = start - VisibleRowCount(); break;
-                case Key.Home:     target = 0; break;
-                case Key.End:      target = _items.Count - 1; break;
-                default:
-                    base.OnKeyDown(e);
-                    return;
+                // 2-D movement: Up/Down step a whole row of columns; Left/Right step one tile;
+                // PageUp/Down move a viewport of tile rows.
+                int cols = Math.Max(1, _thumbCols);
+                int page = cols * Math.Max(1, _thumbVisibleRows);
+                switch (e.Key)
+                {
+                    case Key.Down:     target = start + cols; break;
+                    case Key.Up:       target = start - cols; break;
+                    case Key.Right:    target = start + 1; break;
+                    case Key.Left:     target = start - 1; break;
+                    case Key.PageDown: target = start + page; break;
+                    case Key.PageUp:   target = start - page; break;
+                    case Key.Home:     target = 0; break;
+                    case Key.End:      target = _items.Count - 1; break;
+                    default:
+                        base.OnKeyDown(e);
+                        return;
+                }
+            }
+            else
+            {
+                switch (e.Key)
+                {
+                    case Key.Down:     target = start + 1; break;
+                    case Key.Up:       target = start - 1; break;
+                    case Key.PageDown: target = start + VisibleRowCount(); break;
+                    case Key.PageUp:   target = start - VisibleRowCount(); break;
+                    case Key.Home:     target = 0; break;
+                    case Key.End:      target = _items.Count - 1; break;
+                    default:
+                        base.OnKeyDown(e);
+                        return;
+                }
             }
 
             SetCursorNoRender(target);
@@ -4424,6 +4763,19 @@ namespace DirOpusReImagined
         }
     }
 
+    /// <summary>Per-row thumbnail lifecycle in the Thumbnails view.</summary>
+    public enum ThumbnailState
+    {
+        /// <summary>Not requested yet (or not an image / not applicable).</summary>
+        None,
+        /// <summary>Generation has been kicked off on a background thread.</summary>
+        Pending,
+        /// <summary><see cref="AFileEntry.Thumbnail"/> holds a decoded bitmap.</summary>
+        Loaded,
+        /// <summary>Generation was attempted and produced nothing — show a generic icon.</summary>
+        Failed
+    }
+
     public class AFileEntry
     {
         public bool Typ { get; set; }
@@ -4437,6 +4789,12 @@ namespace DirOpusReImagined
         // Directory-compare color state. Deliberately a FIELD, not a property: the grid renders one
         // column per public property (reflection), so a property here would show as a stray column.
         public RowCompareState CompareState;
+
+        // Thumbnail state for the Thumbnails view. Both are FIELDS, not properties, for the same
+        // reflection reason as CompareState above — a property here would appear as a stray column in
+        // List view. Thumbnail is null until generated (or when generation fails / isn't applicable).
+        public Avalonia.Media.Imaging.Bitmap? Thumbnail;
+        public ThumbnailState ThumbState = ThumbnailState.None;
 
         //public bool FileSizeCollapsedNumber { get; set; } = false;
         

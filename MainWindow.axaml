@@ -499,6 +499,8 @@
 					<Button Name="LPnewTab" Content="+" FontWeight="Bold" FontSize="14"
 					        Padding="8,0" Height="20" Margin="3,0"
 					        ToolTip.Tip="New tab (clone current folder)" Click="LPnewTab_Click" />
+						<Button Name="LPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
+						        ToolTip.Tip="Switch between list and thumbnail view" Click="LPviewToggle_Click" />
 				</StackPanel>
 			</Border>
 			<cons:TaiDataGrid Name="LPgrid" VerticalAlignment="Top" />
@@ -514,6 +516,8 @@
 					<Button Name="RPnewTab" Content="+" FontWeight="Bold" FontSize="14"
 					        Padding="8,0" Height="20" Margin="3,0"
 					        ToolTip.Tip="New tab (clone current folder)" Click="RPnewTab_Click" />
+						<Button Name="RPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
+						        ToolTip.Tip="Switch between list and thumbnail view" Click="RPviewToggle_Click" />
 				</StackPanel>
 			</Border>
 			<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />

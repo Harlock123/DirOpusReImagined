@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Input;
@@ -112,6 +113,7 @@ namespace DirOpusReImagined
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
             Closing += (_, _) => SaveUseTrashToConfig();
+            Closing += (_, _) => SaveViewModesToConfig();
 
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
@@ -166,6 +168,7 @@ namespace DirOpusReImagined
             LoadUseTrashFromConfig();
             LoadKeepRcloneWarmFromConfig();
             LoadVerifyCopiesFromConfig();
+            LoadViewModesFromConfig();
 
             // Always clean up any rclone daemon we leaked from a previous crash/force-quit (keeps the
             // still-warm one when keep-warm is enabled). Must run after the setting is loaded.
@@ -315,6 +318,10 @@ namespace DirOpusReImagined
                         ChkShowHidden.IsChecked != null && ChkShowHidden.IsChecked.Value);
             CaptureUnfilteredItems(RPgrid, ref _rpUnfilteredItems);
             UpdateStatusBar();
+
+            // Restore each panel's saved List/Thumbnails view (generates thumbnails if applicable).
+            ApplyViewMode(LPgrid, isLeft: true,  AppOptions.LeftViewMode);
+            ApplyViewMode(RPgrid, isLeft: false, AppOptions.RightViewMode);
 
             // Seed one tab per side from the initial start paths.
             _lpTabs.Add(new PanelTab(LPpath.Text ?? "") { Sort = _lpSort });
@@ -2460,6 +2467,51 @@ namespace DirOpusReImagined
             catch { /* keep the default (off) */ }
         }
 
+        /// <summary>Reads the persisted per-panel view modes (&lt;LeftViewMode&gt;/&lt;RightViewMode&gt;,
+        /// "List" or "Thumbnails"; default List) into <see cref="AppOptions"/>.</summary>
+        private void LoadViewModesFromConfig()
+        {
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var doc = XDocument.Load(_configFilePath);
+                    var left = doc.Descendants("LeftViewMode").FirstOrDefault();
+                    if (left != null && Enum.TryParse<GridViewMode>(left.Value.Trim(), true, out var lm))
+                        AppOptions.LeftViewMode = lm;
+                    var right = doc.Descendants("RightViewMode").FirstOrDefault();
+                    if (right != null && Enum.TryParse<GridViewMode>(right.Value.Trim(), true, out var rm))
+                        AppOptions.RightViewMode = rm;
+                }
+            }
+            catch { /* keep the defaults (List) */ }
+        }
+
+        /// <summary>Writes the current per-panel view modes to the config file.</summary>
+        private void SaveViewModesToConfig()
+        {
+            try
+            {
+                string path = _configFilePath ?? GetWritableConfigPath();
+                XDocument doc = File.Exists(path) ? XDocument.Load(path) : new XDocument(new XElement("Settings"));
+                var root = doc.Root ?? new XElement("Settings");
+                if (doc.Root == null) doc.Add(root);
+
+                var left = root.Element("LeftViewMode");
+                if (left == null) { left = new XElement("LeftViewMode"); root.Add(left); }
+                left.Value = AppOptions.LeftViewMode.ToString();
+
+                var right = root.Element("RightViewMode");
+                if (right == null) { right = new XElement("RightViewMode"); root.Add(right); }
+                right.Value = AppOptions.RightViewMode.ToString();
+
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                doc.Save(path);
+                _configFilePath = path;
+            }
+            catch { /* best-effort */ }
+        }
+
         /// <summary>Writes the current &lt;UseTrash&gt; option to the config file.</summary>
         private void SaveUseTrashToConfig()
         {
@@ -3605,6 +3657,123 @@ namespace DirOpusReImagined
             UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
         }
 
+        // In-flight thumbnail generation per panel; cancelled when the panel re-lists or navigates away.
+        private CancellationTokenSource? _lpThumbCts;
+        private CancellationTokenSource? _rpThumbCts;
+
+        /// <summary>
+        /// Kicks off (or restarts) background thumbnail generation for a panel's currently shown
+        /// images. No-op unless the panel is in Thumbnails view and the folder is local (cloud and
+        /// archive folders are skipped — a recursive download/extract per image would be far too slow).
+        /// Already-generated rows are left alone; each new thumbnail fills its tile as it completes.
+        /// </summary>
+        private void RequestThumbnails(TaiDataGrid grid)
+        {
+            bool isLeft = ReferenceEquals(grid, LPgrid);
+
+            // Cancel any run still in flight for this panel before starting a new one.
+            var oldCts = isLeft ? _lpThumbCts : _rpThumbCts;
+            oldCts?.Cancel();
+            oldCts?.Dispose();
+            var cts = new CancellationTokenSource();
+            if (isLeft) _lpThumbCts = cts; else _rpThumbCts = cts;
+
+            if (grid.ViewMode != GridViewMode.Thumbnails) return;
+
+            string path = isLeft ? LPpath.Text : RPpath.Text;
+            if (string.IsNullOrEmpty(path)) return;
+
+            var provider = ProviderRegistry.For(path);
+            if (provider.IsRemote) return;                                             // cloud: skip
+            if (provider is DirOpusReImagined.FileSystem.Archive.ArchiveFileProvider) return;  // archive: skip
+
+            // Include Pending as well as None: a previous pass cancelled mid-flight (we just cancelled its
+            // CTS above) can leave items stuck in Pending with no thumbnail, so this pass must retry them.
+            // Loaded/Failed are terminal and skipped.
+            var targets = grid.Items.OfType<AFileEntry>()
+                .Where(e => !e.Typ && ThumbnailCache.IsImageFile(e.Name) &&
+                            (e.ThumbState == ThumbnailState.None || e.ThumbState == ThumbnailState.Pending))
+                .ToList();
+            if (targets.Count == 0) return;
+
+            _ = GenerateThumbnailsAsync(grid, provider, path, targets, cts.Token);
+        }
+
+        /// <summary>Generates thumbnails for <paramref name="targets"/> with bounded concurrency,
+        /// filling each row's tile and repainting as results land. All failures degrade to a generic
+        /// icon (ThumbState = Failed).</summary>
+        private async Task GenerateThumbnailsAsync(
+            TaiDataGrid grid, DirOpusReImagined.FileSystem.IFileProvider provider,
+            string path, List<AFileEntry> targets, CancellationToken ct)
+        {
+            using var sem = new SemaphoreSlim(4);
+            var tasks = new List<Task>();
+
+            foreach (var entry in targets)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    await sem.WaitAsync(ct);
+                    try
+                    {
+                        if (ct.IsCancellationRequested) return;
+                        entry.ThumbState = ThumbnailState.Pending;
+
+                        string full = FileUtility.JoinPanelPath(path, entry.Name);
+                        var stat = provider.Stat(full);
+                        long size = stat?.Size ?? 0;
+                        long mt = stat?.LastModified.Ticks ?? 0;
+
+                        var bmp = await ThumbnailCache.GetOrCreateAsync(
+                            provider, full, entry.Name, grid.ThumbnailSize, size, mt, ct);
+
+                        if (ct.IsCancellationRequested) return;
+
+                        entry.Thumbnail = bmp;
+                        entry.ThumbState = bmp != null ? ThumbnailState.Loaded : ThumbnailState.Failed;
+
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (!ct.IsCancellationRequested && grid.ViewMode == GridViewMode.Thumbnails)
+                                grid.ReRender();
+                        });
+                    }
+                    catch (OperationCanceledException) { }
+                    catch { entry.ThumbState = ThumbnailState.Failed; }
+                    finally { sem.Release(); }
+                }, ct));
+            }
+
+            try { await Task.WhenAll(tasks); } catch { /* cancellations/failures already handled per-item */ }
+        }
+
+        // ---- Per-panel List / Thumbnails view toggle ----
+
+        private void LPviewToggle_Click(object? sender, RoutedEventArgs e) => ToggleViewMode(LPgrid, isLeft: true);
+        private void RPviewToggle_Click(object? sender, RoutedEventArgs e) => ToggleViewMode(RPgrid, isLeft: false);
+
+        private void ToggleViewMode(TaiDataGrid grid, bool isLeft)
+        {
+            var next = grid.ViewMode == GridViewMode.List ? GridViewMode.Thumbnails : GridViewMode.List;
+            ApplyViewMode(grid, isLeft, next);
+        }
+
+        /// <summary>Applies a view mode to a panel: sets the grid, remembers it (persisted on close),
+        /// updates the toggle glyph, and kicks off thumbnail generation if switching to Thumbnails.</summary>
+        private void ApplyViewMode(TaiDataGrid grid, bool isLeft, GridViewMode mode)
+        {
+            grid.ViewMode = mode;   // no-op + no redraw if unchanged
+            if (isLeft) AppOptions.LeftViewMode = mode; else AppOptions.RightViewMode = mode;
+            UpdateViewToggleGlyph(isLeft ? LPviewToggle : RPviewToggle, mode);
+            RequestThumbnails(grid);
+        }
+
+        /// <summary>The toggle shows the icon of the view you'd switch TO.</summary>
+        private void UpdateViewToggleGlyph(Button btn, GridViewMode mode)
+        {
+            btn.Content = mode == GridViewMode.List ? "▦" : "☰";
+        }
+
         /// <summary>
         /// Fires when a panel has finished (re)populating — including the asynchronous completion of
         /// a remote/cloud listing. Captures the *real* item list as the unfiltered baseline and
@@ -3685,6 +3854,7 @@ namespace DirOpusReImagined
                     grid.Items = new List<object>(unfilteredItems);
                     grid.SuspendRendering = false;
                 }
+                RequestThumbnails(grid);
                 return;
             }
 
@@ -3700,6 +3870,7 @@ namespace DirOpusReImagined
             grid.SuspendRendering = true;
             grid.Items = filtered;
             grid.SuspendRendering = false;
+            RequestThumbnails(grid);
         }
 
         private void LPfilter_KeyUp(object? sender, KeyEventArgs e)
