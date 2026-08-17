@@ -256,6 +256,9 @@ namespace DirOpusReImagined
             LPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
             RPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
 
+            LPgrid.GridContextCalculateAllSizes += Handle_CalculateAllFolderSizes;
+            RPgrid.GridContextCalculateAllSizes += Handle_CalculateAllFolderSizes;
+
             LPgrid.GridContextPermissions += Handle_Permissions;
             RPgrid.GridContextPermissions += Handle_Permissions;
 
@@ -390,6 +393,43 @@ namespace DirOpusReImagined
             // Update the entry with the calculated size
             entry.FileSize = entry.ConvertNumberToReadableString(size);
             grid?.ReRender();
+        }
+
+        // Computes recursive sizes for every folder in the panel, filling each row's size cell as it
+        // lands. Sizing runs one folder at a time on a background thread so the UI stays responsive and
+        // the disk isn't hammered by parallel recursive walks. Skipped for remote panels, where a
+        // recursive walk is prohibitively expensive.
+        private async void Handle_CalculateAllFolderSizes(object? sender, EventArgs e)
+        {
+            var grid = sender as TaiDataGrid;
+            if (grid is null) return;
+
+            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
+            if (string.IsNullOrEmpty(currentPath)) return;
+
+            if (ProviderRegistry.For(currentPath).IsRemote) return;
+
+            var separator = Path.DirectorySeparatorChar;
+            var basePath = currentPath.TrimEnd(separator) + separator;
+
+            // Snapshot the folder rows up front; the panel could be navigated away while we run.
+            var folders = grid.Items
+                .OfType<AFileEntry>()
+                .Where(x => x.Typ && x.Name != "." && x.Name != "..")
+                .ToList();
+            if (folders.Count == 0) return;
+
+            // Mark them all as pending, then fill in progressively.
+            foreach (var f in folders) f.FileSize = "...";
+            grid.ReRender();
+
+            foreach (var entry in folders)
+            {
+                var folderPath = basePath + entry.Name;
+                long size = await Task.Run(() => FileUtility.GetDirectorySizeRecursive(folderPath));
+                entry.FileSize = entry.ConvertNumberToReadableString(size);
+                grid.ReRender();
+            }
         }
 
         private async void Handle_Permissions(object? sender, GridHoverItem e)

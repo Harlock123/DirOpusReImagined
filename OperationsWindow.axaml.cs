@@ -37,6 +37,7 @@ namespace DirOpusReImagined
             public ProgressBar Bar = null!;
             public TextBlock Stats = null!;
             public Button Cancel = null!;
+            public Button Retry = null!;
         }
 
         public OperationsWindow()
@@ -111,18 +112,35 @@ namespace DirOpusReImagined
             {
                 Content = "✕",
                 Padding = new Thickness(8, 2),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            cancel.Click += (_, _) => _queue.Cancel(op);
+
+            var retry = new Button
+            {
+                Content = "↻ Retry",
+                Padding = new Thickness(8, 2),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                IsVisible = false   // only shown for failed operations
+            };
+            retry.Click += (_, _) => RetryOp(op);
+
+            var actions = new StackPanel
+            {
+                Spacing = 4,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(8, 0, 0, 0)
             };
-            cancel.Click += (_, _) => _queue.Cancel(op);
-            Grid.SetColumn(cancel, 1);
+            actions.Children.Add(cancel);
+            actions.Children.Add(retry);
+            Grid.SetColumn(actions, 1);
 
             var grid = new Grid
             {
                 ColumnDefinitions = new ColumnDefinitions("*,Auto")
             };
             grid.Children.Add(left);
-            grid.Children.Add(cancel);
+            grid.Children.Add(actions);
 
             var card = new Border
             {
@@ -136,7 +154,7 @@ namespace DirOpusReImagined
             var row = new Row
             {
                 Op = op, Card = card, Title = title, File = file,
-                Bar = bar, Stats = stats, Cancel = cancel
+                Bar = bar, Stats = stats, Cancel = cancel, Retry = retry
             };
             _rows[op] = row;
             OpsPanel.Children.Add(card);
@@ -149,6 +167,9 @@ namespace DirOpusReImagined
             var p = op.Progress;
 
             row.File.Text = string.IsNullOrEmpty(p.CurrentFile) ? "" : p.CurrentFile;
+
+            // Retry is offered only for failed operations; hidden in every other state.
+            row.Retry.IsVisible = op.Status == OperationStatus.Failed;
 
             switch (op.Status)
             {
@@ -228,11 +249,31 @@ namespace DirOpusReImagined
             bool anyFinished = done > 0 || failed > 0 || canceled > 0;
             CancelAllBtn.IsEnabled = anyActive;
             ClearBtn.IsEnabled = anyFinished;
+            RetryAllBtn.IsEnabled = failed > 0;
+        }
+
+        // ---- Retry ----
+
+        /// <summary>Re-enqueues a finished operation as a fresh copy of the same work.</summary>
+        private void RetryOp(FileOperation op)
+        {
+            var again = FileOperation.Retry(op);
+            _queue.Enqueue(again);   // OperationAdded -> OnAdded builds a fresh card automatically
         }
 
         // ---- Toolbar buttons ----
 
         private void CancelAllBtn_Click(object? sender, RoutedEventArgs e) => _queue.CancelAll();
+
+        private void RetryAllBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            // Snapshot first: enqueuing mutates the queue's operation list as we go.
+            var failed = _queue.Operations
+                .Where(o => o.Status == OperationStatus.Failed)
+                .ToList();
+            foreach (var op in failed)
+                RetryOp(op);
+        }
 
         private void ClearBtn_Click(object? sender, RoutedEventArgs e)
         {

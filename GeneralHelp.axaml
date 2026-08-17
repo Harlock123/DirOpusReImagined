@@ -55,6 +55,7 @@
                 <TextBlock Text="• Copy, Move and Delete run in the background and appear in a floating File Operations window, so the app stays responsive and you can keep working while a transfer runs." TextWrapping="Wrap" />
                 <TextBlock Text="• Each operation shows a live progress bar, the current file, and transfer speed / estimated time remaining. A ✕ cancels just that operation; Cancel all stops everything, and Clear finished tidies completed rows." TextWrapping="Wrap" />
                 <TextBlock Text="• Operations run one at a time in the order started, so you can queue several transfers up and let them work through. Failures are shown inline in red — the rest of the queue still runs." TextWrapping="Wrap" />
+                <TextBlock Text="• A failed operation gets a ↻ Retry button to run it again as a fresh operation; Retry all failed (window header) re-queues every failed one at once." TextWrapping="Wrap" />
                 <TextBlock Text="• Optional &quot;Verify copies&quot; (System Wide Settings) re-reads each copied file and compares checksums, failing the copy if they differ. Applies to local disk and Windows/UNC shares; off by default as it roughly doubles reading." TextWrapping="Wrap" />
 
                 <TextBlock Text="Drag and drop" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
@@ -79,6 +80,9 @@
 
                 <TextBlock Text="Open terminal here" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Right-click a panel and choose Terminal Here to open a terminal in that panel's current folder. A terminal is auto-detected for your OS, or set your own in the System Wide Settings tab of the button configuration dialog (the &lt;Terminal&gt; entry in Configuration.xml, using %DIR% for the folder)." TextWrapping="Wrap" />
+
+                <TextBlock Text="Folder sizes" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Right-click a folder and choose Calculate Folder Size to fill in its total (recursive) size. Calculate All Folder Sizes does the same for every folder in the panel at once, filling each row's size as it finishes. Both run in the background; sizing is skipped for remote (cloud) panels where a full walk would be too slow." TextWrapping="Wrap" />
 
                 <TextBlock Text="View files (F3)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Press F3 (or right-click → View) to open a read-only text/hex viewer for the selected file. It auto-detects text vs binary and has a Text/Hex toggle. Works on normal files and on files inside archives alike." TextWrapping="Wrap" />

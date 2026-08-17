@@ -179,7 +179,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.24.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.25.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1475,6 +1475,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.25.0 (2026-08-17) — Retry failed operations & bulk folder sizing
+- **Retry a failed operation.** Each failed card in the **File Operations** window now has a **↻ Retry** button that re-runs the same work as a fresh operation (works for Copy, Move and Delete). A **Retry all failed** button in the window header re-queues every failed operation at once.
+- **Calculate all folder sizes at once.** A new **Calculate All Folder Sizes** right-click item computes the recursive size of *every* folder in the panel, filling each row's size cell as it finishes — no more sizing folders one at a time. Runs off the UI thread; skipped for remote (cloud) panels where a recursive walk would be too expensive.
 
 ### 0.1.24.0 (2026-08-16) — Per-file conflict resolution
 - **Copying or moving onto existing files now asks per item, not once for the whole batch.** When some of the items you're transferring already exist at the destination, a conflict dialog lists each collision and lets you choose **Skip**, **Overwrite**, or **Keep both** (copy under a new, auto-suggested name you can edit). Each row shows the destination vs. source **size and modified date**, with a hint for which side is newer, so you can decide informedly.

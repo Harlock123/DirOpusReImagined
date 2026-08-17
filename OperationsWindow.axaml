@@ -10,12 +10,14 @@
     <Grid Margin="12" RowDefinitions="Auto,*,Auto">
 
         <!-- Header: summary + bulk actions -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
             <TextBlock Grid.Column="0" x:Name="SummaryText" VerticalAlignment="Center"
                        FontSize="15" FontWeight="SemiBold" Text="No operations"/>
-            <Button Grid.Column="1" x:Name="ClearBtn" Content="Clear finished"
+            <Button Grid.Column="1" x:Name="RetryAllBtn" Content="Retry all failed"
+                    Margin="0,0,8,0" Click="RetryAllBtn_Click"/>
+            <Button Grid.Column="2" x:Name="ClearBtn" Content="Clear finished"
                     Margin="0,0,8,0" Click="ClearBtn_Click"/>
-            <Button Grid.Column="2" x:Name="CancelAllBtn" Content="Cancel all"
+            <Button Grid.Column="3" x:Name="CancelAllBtn" Content="Cancel all"
                     Click="CancelAllBtn_Click"/>
         </Grid>
 

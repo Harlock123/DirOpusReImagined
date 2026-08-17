@@ -161,6 +161,23 @@ public sealed class FileOperation
             }, ct));
     }
 
+    /// <summary>
+    /// Builds a fresh operation that repeats the work of a finished one. The original's spent
+    /// <see cref="Cts"/> and completion source can't be reused, so retry reuses only its captured
+    /// <see cref="ExecuteAsync"/> delegate (which covers copy/move <em>and</em> delete, whose targets
+    /// live inside the closure) in a brand-new <see cref="FileOperation"/>.
+    /// </summary>
+    public static FileOperation Retry(FileOperation source)
+    {
+        if (source is null) throw new ArgumentNullException(nameof(source));
+        return new FileOperation(
+            source.Kind,
+            source.Items,
+            source.Title,
+            source.ExecuteAsync,
+            source.DestinationFolder);
+    }
+
     /// <summary>Marks the operation terminal and releases anyone awaiting <see cref="Completion"/>.</summary>
     internal void SignalCompleted() => _completion.TrySetResult();
 }

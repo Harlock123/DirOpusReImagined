@@ -3542,6 +3542,12 @@ namespace DirOpusReImagined
             }
         }
 
+        // Panel-wide: sizes every folder in this panel, regardless of what the mouse is over.
+        private void CalculateAllSizes_Click(object sender, RoutedEventArgs e)
+        {
+            GridContextCalculateAllSizes?.Invoke(this, EventArgs.Empty);
+        }
+
         private void Permissions_Click(object sender, RoutedEventArgs e)
         {
             if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry)
@@ -3652,6 +3658,10 @@ namespace DirOpusReImagined
         public event EventHandler<GridHoverItem> GridItemClick;
 
         public event EventHandler<GridHoverItem> GridContextCalculateSize;
+
+        /// <summary>Raised when "Calculate All Folder Sizes" is chosen. The host computes the recursive
+        /// size of every folder in this panel, so no item under the mouse is required.</summary>
+        public event EventHandler GridContextCalculateAllSizes;
 
         public event EventHandler<GridHoverItem> GridContextPermissions;
 
