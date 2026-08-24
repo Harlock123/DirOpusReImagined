@@ -154,6 +154,16 @@
                               Content="Verify copies (compare checksums after copying)" />
                     <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
                                Text="After each file is copied, re-read both copies and compare their checksums; if they differ the operation fails instead of silently reporting success. Applies to local disk and Windows/UNC network-share copies (where the checksums are comparable) — cloud copies are not verified. Trade-off: this roughly doubles the amount of reading, so large or network copies take longer. Off by default." />
+
+                    <TextBlock Text="Display" FontSize="16" FontWeight="Bold" Margin="0,16,0,0" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Label Content="UI scale" VerticalAlignment="Center" />
+                        <TextBox Name="tbUiScale" Width="90" Watermark="Auto" />
+                    </StackPanel>
+                    <TextBlock Name="tbUiScaleStatus" FontSize="11" TextWrapping="Wrap"
+                               Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
+                               Text="Scales the whole interface — text, controls, spacing and window sizes alike. Leave it blank (or set 0) for Auto, which reads the scale from your desktop at startup. Set a number such as 1.5 or 2 to override that, for example when the desktop reports nothing usable or when a fractional scale needs nudging. Takes effect the next time the app starts, because the toolkit fixes the scale factor when it initialises. You can also pass --scale 1.5 on the command line for a one-off." />
                 </StackPanel>
             </ScrollViewer>
         </TabItem>

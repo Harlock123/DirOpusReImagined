@@ -232,4 +232,6 @@
       <Tab>/Users/lwatson/Pictures/BackgroundImages</Tab>
     </Right>
   </Tabs>
+  <!-- UI scale: 0 = auto-detect from the desktop. Set e.g. 1.5 or 2 to override. Applied at startup. -->
+  <UiScale>0</UiScale>
 </Settings>

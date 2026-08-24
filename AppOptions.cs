@@ -19,6 +19,11 @@ public static class AppOptions
     /// cloud copies are not verified. Roughly doubles read I/O, so it is off by default.</summary>
     public static bool VerifyCopies = false;
 
+    /// <summary>UI scale factor applied to every window. 0 means "auto" — let <see cref="DisplayScaling"/>
+    /// work it out from the desktop. Only read at startup (Avalonia fixes the scale when the windowing
+    /// platform initialises), so a change here needs a restart to take effect.</summary>
+    public static double UiScale = 0;
+
     /// <summary>Per-panel layout mode (detail list vs. thumbnail grid). Persisted per side so each
     /// panel remembers its own view across launches. Default: list.</summary>
     public static GridViewMode LeftViewMode = GridViewMode.List;

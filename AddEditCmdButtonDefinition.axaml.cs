@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -79,8 +80,31 @@ public partial class AddEditCmdButtonDefinition : Window
         LoadTerminalSettings();
     }
 
-    /// <summary>Populates the System Wide Settings tab's Terminal fields from Configuration.xml.</summary>
+    /// <summary>Populates every field on the System Wide Settings tab.</summary>
     private void LoadTerminalSettings()
+    {
+        LoadTerminalFields();
+
+        // Reflect the live keep-rclone-warm option (loaded from config at startup).
+        var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
+        if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
+
+        // Reflect the live verify-copies option (loaded from config at startup).
+        var vc = this.FindControl<CheckBox>("cbVerifyCopies");
+        if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
+
+        LoadUiScaleFields();
+    }
+
+    /// <summary>
+    /// Populates just the Terminal fields from Configuration.xml.
+    ///
+    /// Kept separate because it gives up early when the file is absent or has no &lt;Terminal&gt;
+    /// element. While this lived inline in <see cref="LoadTerminalSettings"/> those early exits also
+    /// skipped every option below it, so the checkboxes silently showed their defaults instead of the
+    /// user's saved settings whenever the app was started from a directory without a Configuration.xml.
+    /// </summary>
+    private void LoadTerminalFields()
     {
         try
         {
@@ -96,14 +120,46 @@ public partial class AddEditCmdButtonDefinition : Window
         {
             // Missing or malformed config just leaves the fields blank.
         }
+    }
 
-        // Reflect the live keep-rclone-warm option (loaded from config at startup).
-        var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
-        if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
+    /// <summary>
+    /// Fills the UI-scale box with the saved override (blank when it is on Auto) and captions it with
+    /// what is actually in force this session, so "Auto" is not a black box — the user can see the
+    /// number it resolved to and where it came from before deciding whether to override it.
+    /// </summary>
+    private void LoadUiScaleFields()
+    {
+        var box = this.FindControl<TextBox>("tbUiScale");
+        if (box != null)
+            box.Text = AppOptions.UiScale > 0
+                ? AppOptions.UiScale.ToString("0.##", CultureInfo.InvariantCulture)
+                : "";
 
-        // Reflect the live verify-copies option (loaded from config at startup).
-        var vc = this.FindControl<CheckBox>("cbVerifyCopies");
-        if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
+        var status = this.FindControl<TextBlock>("tbUiScaleStatus");
+        if (status != null)
+            status.Text = $"Now running at {DisplayScaling.AppliedScale:0.##}x — {DisplayScaling.AppliedSource}. "
+                        + $"Auto detects {DisplayScaling.DetectedScale:0.##}x ({DisplayScaling.DetectedSource}).";
+    }
+
+    /// <summary>
+    /// Persists the UI-scale override. Blank, 0 or unparseable text all mean "auto", which is stored as
+    /// 0 rather than removed so the element stays visible in the config file. The value is not applied
+    /// live: Avalonia fixes the scale factor when its windowing platform initialises, so it is picked
+    /// up by <see cref="DisplayScaling.Bootstrap"/> on the next launch.
+    /// </summary>
+    private void UpsertUiScaleSetting(XDocument doc)
+    {
+        string raw = this.FindControl<TextBox>("tbUiScale")?.Text ?? "";
+
+        double scale = 0;
+        if (!string.IsNullOrWhiteSpace(raw) && DisplayScaling.TryParseScale(raw, out var parsed) && parsed > 0)
+            scale = Math.Round(Math.Clamp(parsed, 0.5, 4.0), 2);
+
+        AppOptions.UiScale = scale;
+
+        var el = doc.Root!.Element("UiScale");
+        if (el == null) { el = new XElement("UiScale"); doc.Root!.Add(el); }
+        el.Value = scale.ToString("0.##", CultureInfo.InvariantCulture);
     }
 
     /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
@@ -139,6 +195,9 @@ public partial class AddEditCmdButtonDefinition : Window
         var verifyEl = doc.Root!.Element("VerifyCopies");
         if (verifyEl == null) { verifyEl = new XElement("VerifyCopies"); doc.Root!.Add(verifyEl); }
         verifyEl.Value = verify ? "true" : "false";
+
+        // Persist the UI scale override. Unlike the options above this one cannot be applied live.
+        UpsertUiScaleSetting(doc);
     }
 
     private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)

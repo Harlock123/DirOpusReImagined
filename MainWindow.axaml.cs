@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -168,6 +168,7 @@ namespace DirOpusReImagined
             LoadUseTrashFromConfig();
             LoadKeepRcloneWarmFromConfig();
             LoadVerifyCopiesFromConfig();
+            LoadUiScaleFromConfig();
             LoadViewModesFromConfig();
 
             // Always clean up any rclone daemon we leaked from a previous crash/force-quit (keeps the
@@ -2465,6 +2466,28 @@ namespace DirOpusReImagined
                 }
             }
             catch { /* keep the default (off) */ }
+        }
+
+        /// <summary>
+        /// Reads the persisted &lt;UiScale&gt; setting (0 = auto) into <see cref="AppOptions"/>.
+        ///
+        /// This does not apply the scale — <see cref="DisplayScaling.Bootstrap"/> already did that in
+        /// Main, long before any window existed, because Avalonia locks the scale factor in when the
+        /// windowing platform starts. This load exists purely so the settings dialog can show and
+        /// round-trip the current value.
+        /// </summary>
+        private void LoadUiScaleFromConfig()
+        {
+            try
+            {
+                if (_configFilePath != null && File.Exists(_configFilePath))
+                {
+                    var el = XDocument.Load(_configFilePath).Descendants("UiScale").FirstOrDefault();
+                    if (el != null && DisplayScaling.TryParseScale(el.Value, out var v) && v >= 0)
+                        AppOptions.UiScale = v;
+                }
+            }
+            catch { /* keep the default (auto) */ }
         }
 
         /// <summary>Reads the persisted per-panel view modes (&lt;LeftViewMode&gt;/&lt;RightViewMode&gt;,
