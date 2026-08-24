@@ -25,6 +25,10 @@ namespace DirOpusReImagined
             // App-wide screenshot hotkey (Ctrl+Shift+P / Cmd+Shift+P) for building the manual.
             ScreenshotService.Register();
 
+            // Stop any window opening larger than the screen it lands on. Must run before the main
+            // window opens, and covers every window in the app via a single class handler.
+            WindowSizing.Install();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();
