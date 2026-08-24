@@ -176,12 +176,12 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// Reads &lt;UiScale&gt; out of Configuration.xml. This runs before MainWindow exists, so it
-        /// repeats MainWindow.FindConfigurationFile's search order rather than sharing state with it:
-        /// working directory, then the executable's folder, then the per-platform config location.
+        /// goes through <see cref="ConfigFile"/> -- the shared resolution order -- rather than
+        /// duplicating it: working directory, executable's folder, then per-platform config location.
         /// </summary>
         private static double ReadConfiguredScale()
         {
-            foreach (string path in ConfigSearchPaths())
+            foreach (string path in ConfigFile.SearchPaths())
             {
                 try
                 {
@@ -193,29 +193,6 @@ namespace DirOpusReImagined
                 catch { /* unreadable or malformed: try the next location */ }
             }
             return 0;
-        }
-
-        /// <summary>The same locations MainWindow searches, in the same order.</summary>
-        private static string[] ConfigSearchPaths()
-        {
-            const string configName = "Configuration.xml";
-            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            string platformPath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                platformPath = Path.Combine(home, "Library", "Application Support", "dori", configName);
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                platformPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dori", configName);
-            else
-                platformPath = Path.Combine(home, ".config", "dori", configName);
-
-            return new[]
-            {
-                Path.Combine(Environment.CurrentDirectory, configName),
-                Path.Combine(AppContext.BaseDirectory, configName),
-                platformPath,
-            };
         }
 
         // ---------------------------------------------------------------- desktop detection

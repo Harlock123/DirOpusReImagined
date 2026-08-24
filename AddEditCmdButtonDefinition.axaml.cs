@@ -80,6 +80,13 @@ public partial class AddEditCmdButtonDefinition : Window
         LoadTerminalSettings();
     }
 
+    /// <summary>
+    /// The config file to read and write. Prefers the path the owning <see cref="MainWindow"/>
+    /// actually loaded, so the dialog can never edit a different file than the app is using; falls
+    /// back to the shared resolution order when this dialog was opened without an owner.
+    /// </summary>
+    private string ConfigPath() => TheMainWindow?.ConfigFilePath ?? ConfigFile.Resolve();
+
     /// <summary>Populates every field on the System Wide Settings tab.</summary>
     private void LoadTerminalSettings()
     {
@@ -108,9 +115,11 @@ public partial class AddEditCmdButtonDefinition : Window
     {
         try
         {
-            if (!File.Exists("Configuration.xml")) return;
+            // Same file MainWindow loaded -- not whatever happens to sit in the working directory.
+            string path = ConfigPath();
+            if (!File.Exists(path)) return;
 
-            var terminal = XDocument.Load("Configuration.xml").Descendants("Terminal").FirstOrDefault();
+            var terminal = XDocument.Load(path).Descendants("Terminal").FirstOrDefault();
             if (terminal == null) return;
 
             this.FindControl<TextBox>("tbTerminalCommand").Text = (string?)terminal.Element("Command") ?? "";
@@ -532,8 +541,16 @@ public partial class AddEditCmdButtonDefinition : Window
         
         string xml = SerializeButtonSettingsListToXml(theButtonSettings);
         
-        // Load the Configuration.xml file into an XDocument
-        var doc = XDocument.Load("Configuration.xml");
+        // Load the same config the app is actually using. Resolving this per-call against the
+        // working directory used to mean the dialog could edit a different file than the one loaded.
+        string configPath = ConfigPath();
+        if (!File.Exists(configPath))
+        {
+            new MessageBox($"No configuration file found at:\n{configPath}", "Save").ShowDialog(this);
+            return;
+        }
+
+        var doc = XDocument.Load(configPath);
 
         // Parse the xml string into an XElement
         var newElement = XElement.Parse("<Buttons>" + xml + "</Buttons>").Elements();
@@ -551,8 +568,9 @@ public partial class AddEditCmdButtonDefinition : Window
             // Persist the System Wide Settings (Terminal) alongside the buttons.
             UpsertTerminalSettings(doc);
 
-            // Save the modifications back to the Configuration.xml file
-            doc.Save("Configuration.xml");
+            // Save the modifications back to the same file they came from.
+            ConfigFile.EnsureDirectory(configPath);
+            doc.Save(configPath);
 
             TheMainWindow.DoButtonRefresh();
         }

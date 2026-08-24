@@ -2736,17 +2736,14 @@ namespace DirOpusReImagined
         }
 
         /// <summary>Platform-appropriate, user-writable path for a config file when none was found.</summary>
-        private string GetWritableConfigPath()
-        {
-            const string configName = "Configuration.xml";
-            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return Path.Combine(home, "Library", "Application Support", "dori", configName);
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dori", configName);
-            return Path.Combine(home, ".config", "dori", configName);
-        }
+        /// <summary>The config file this window loaded, or the location one would be created in.
+        /// Exposed so the settings dialog edits the same file rather than resolving its own.</summary>
+        public string ConfigFilePath => _configFilePath ?? ConfigFile.GetWritablePath();
+
+        /// <summary>The per-platform location the config may always be written to.
+        /// Resolution lives in <see cref="ConfigFile"/> so every caller agrees on it.</summary>
+        private string GetWritableConfigPath() => ConfigFile.GetWritablePath();
 
         #region Folder tabs
 
@@ -4026,44 +4023,10 @@ namespace DirOpusReImagined
             return null;
         }
 
-        private string FindConfigurationFile()
-        {
-            const string configName = "Configuration.xml";
-
-            // 1. Current working directory
-            string path = Path.Combine(Environment.CurrentDirectory, configName);
-            if (File.Exists(path)) return path;
-
-            // 2. Directory where the executable lives
-            string exeDir = AppContext.BaseDirectory;
-            path = Path.Combine(exeDir, configName);
-            if (File.Exists(path)) return path;
-
-            // 3. Platform-specific config locations
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                path = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "Library", "Application Support", "dori", configName);
-                if (File.Exists(path)) return path;
-            }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                path = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    ".config", "dori", configName);
-                if (File.Exists(path)) return path;
-            }
-            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                path = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "dori", configName);
-                if (File.Exists(path)) return path;
-            }
-
-            return null;
-        }
+        /// <summary>The config the app should load: working directory, then the executable's folder,
+        /// then the per-platform user config location; null when none exists yet.
+        /// Resolution lives in <see cref="ConfigFile"/> so every caller agrees on it.</summary>
+        private string FindConfigurationFile() => ConfigFile.Find();
 
         private string GetRootDirectoryPath()
         {
