@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=DirOpus ReImagined
+GenericName=File Manager
+Comment=Dual-pane file manager in the spirit of Directory Opus
+Exec=diropus
+Terminal=false
+Categories=System;FileTools;
+Keywords=file;manager;dual;pane;explorer;commander;
+Icon=system-file-manager
+StartupWMClass=DirOpusReImagined
