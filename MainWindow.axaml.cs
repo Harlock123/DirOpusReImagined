@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1291,13 +1292,13 @@ namespace DirOpusReImagined
                     {
                         try
                         {
-                            if (newaction.Contains(","))
+                            if (newaction.Contains(ArgListSeparator))
                             {
-                                // we have comma seperated arguments so
-                                // we need to split them up and pass them
-                                // to the process start info one at a time
+                                // A multi-file token expands to one entry per selected file, and the
+                                // command is run once per entry. Split on the same separator
+                                // ParseTheArgs joined with - see ArgListSeparator for why not a comma.
 
-                                string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                string[] args = newaction.Split('\0', StringSplitOptions.RemoveEmptyEntries);
 
                                 foreach (string arg in args)
                                 {
@@ -1446,6 +1447,16 @@ namespace DirOpusReImagined
         /// that real path is returned instead — external tools can't open archive:// URIs.
         /// Returns "" if an archive entry couldn't be extracted.
         /// </summary>
+        /// <summary>
+        /// Separates the entries of a multi-file token so the caller can split them apart again.
+        ///
+        /// This was a comma, which a filename may legally contain on every platform DORI targets:
+        /// "Report, Final.txt" is quoted for its space and then split on its comma into two invalid
+        /// paths, and the command runs twice on garbage. A literal comma in a button's own arguments
+        /// (--opt a,b) was split the same way. NUL cannot appear in a path on Windows or Unix.
+        /// </summary>
+        internal const string ArgListSeparator = "\0";
+
         private string ResolveFileArgPath(string panelPath, string name)
         {
             if (ArchivePath.IsArchiveUri(panelPath))
@@ -1532,6 +1543,100 @@ namespace DirOpusReImagined
             return args;
         }
 
+        /// <summary>Tokens resolved relative to which pane has focus, rather than to Left/Right.</summary>
+        private static readonly string[] SourceTargetTokens =
+            { "%SPATH%", "%TPATH%", "%SF1%", "%TF1%", "%SAF%", "%TAF%" };
+
+        private static bool ContainsSourceTargetToken(string bcontent)
+        {
+            foreach (string t in SourceTargetTokens)
+                if (bcontent.Contains(t)) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Substitutes every source/target token present, so a button can pair them.
+        /// Source is the focused pane (see <see cref="SetActivePanel"/>), target is the other one.
+        /// </summary>
+        private string ParseSourceTargetArgs(string bcontent, out string? error)
+        {
+            error = null;
+            string ret = bcontent;
+
+            if (ret.Contains("%SPATH%"))
+                ret = ret.Replace("%SPATH%", QuoteIfNeeded(MakePathEnvSafe(SourcePanePath)));
+
+            if (ret.Contains("%TPATH%"))
+                ret = ret.Replace("%TPATH%", QuoteIfNeeded(MakePathEnvSafe(TargetPanePath)));
+
+            if (ret.Contains("%SF1%"))
+            {
+                var files = SourceGrid.GetListOfSelectedFiles();
+                if (files.Count == 0)
+                {
+                    error = "You have to have a file selected in the active panel";
+                    return "%ERROR%";
+                }
+                ret = ret.Replace("%SF1%", ResolveFileArgPath(SourcePanePath, files[0].Name));
+            }
+
+            if (ret.Contains("%TF1%"))
+            {
+                var files = TargetGrid.GetListOfSelectedFiles();
+                if (files.Count == 0)
+                {
+                    error = "You have to have a file selected in the other panel";
+                    return "%ERROR%";
+                }
+                ret = ret.Replace("%TF1%", ResolveFileArgPath(TargetPanePath, files[0].Name));
+            }
+
+            if (ret.Contains("%SAF%"))
+            {
+                var files = SourceGrid.GetListOfSelectedFiles();
+                if (files.Count == 0)
+                {
+                    error = "You have to have at least one file selected in the active panel";
+                    return "%ERROR%";
+                }
+                ret = ret.Replace("%SAF%", JoinFileArgs(SourcePanePath, files));
+            }
+
+            if (ret.Contains("%TAF%"))
+            {
+                var files = TargetGrid.GetListOfSelectedFiles();
+                if (files.Count == 0)
+                {
+                    error = "You have to have at least one file selected in the other panel";
+                    return "%ERROR%";
+                }
+                ret = ret.Replace("%TAF%", JoinFileArgs(TargetPanePath, files));
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Joins the selected files with spaces, so the command runs ONCE with every file as an
+        /// argument - matching %AF%, and unlike %LAF%/%LPAF%/%RPAF%, which use ArgListSeparator and
+        /// therefore run the command once per file.
+        ///
+        /// Space is right for the source/target workload: "rsync -av %SAF% %TPATH%" and
+        /// "tar czf out.tgz %SAF%" both need one invocation. Per-file invocation would make the
+        /// first copy N times and the second overwrite its own archive N times. Every entry is
+        /// quoted by ResolveFileArgPath, so spaces inside a filename survive.
+        /// </summary>
+        private string JoinFileArgs(string panePath, List<AFileEntry> files)
+        {
+            var sb = new StringBuilder();
+            foreach (AFileEntry af in files)
+            {
+                if (sb.Length > 0) sb.Append(' ');
+                sb.Append(ResolveFileArgPath(panePath, af.Name));
+            }
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Substitutes the %TOKEN% placeholders in a button's arguments.
         /// </summary>
@@ -1544,6 +1649,13 @@ namespace DirOpusReImagined
         private string ParseTheArgs(string bcontent, out string? error)
         {
             error = null;
+
+            // Source/target tokens are handled together and up front. Unlike the Left/Right tokens
+            // below - which substitute the first match and return, so only one can appear per button
+            // - these compose, because the whole point of them is pairing a selection with the other
+            // pane's path ("%SAF% %TPATH%").
+            if (ContainsSourceTargetToken(bcontent))
+                return ParseSourceTargetArgs(bcontent, out error);
 
             // this will attempt to parse the bcontent string and
             // return the action to be performed
@@ -1646,7 +1758,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ",";
+                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ArgListSeparator;
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1660,7 +1772,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ",";
+                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ArgListSeparator;
                     }
 
                     string ret = bcontent.Replace("%LAF%", PTH);
@@ -1792,7 +1904,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in RPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ",";
+                        PTH += ResolveFileArgPath(RPpath.Text, af.Name) + ArgListSeparator;
                     }
 
                     string ret = bcontent.Replace("%RPAF%", PTH);
@@ -1825,7 +1937,7 @@ namespace DirOpusReImagined
 
                     foreach (AFileEntry af in LPgrid.GetListOfSelectedFiles())
                     {
-                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ",";
+                        PTH += ResolveFileArgPath(LPpath.Text, af.Name) + ArgListSeparator;
                     }
 
                     string ret = bcontent.Replace("%LPAF%", PTH);
@@ -2969,6 +3081,18 @@ namespace DirOpusReImagined
         /// Marks <paramref name="grid"/> as the active panel and updates the active-panel frame
         /// on both grids so exactly one shows the focus border.
         /// </summary>
+        /// <summary>The pane the user last worked in; the one source-side tokens read from.</summary>
+        private TaiDataGrid SourceGrid => _activeGrid ?? LPgrid;
+
+        /// <summary>The other pane - what target-side tokens read from.</summary>
+        private TaiDataGrid TargetGrid => ReferenceEquals(SourceGrid, LPgrid) ? RPgrid : LPgrid;
+
+        private string SourcePanePath =>
+            (ReferenceEquals(SourceGrid, LPgrid) ? LPpath.Text : RPpath.Text) ?? "";
+
+        private string TargetPanePath =>
+            (ReferenceEquals(SourceGrid, LPgrid) ? RPpath.Text : LPpath.Text) ?? "";
+
         private void SetActivePanel(TaiDataGrid grid)
         {
             _activeGrid = grid;

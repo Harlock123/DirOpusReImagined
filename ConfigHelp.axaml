@@ -3,9 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="640"
         x:Class="DirOpusReImagined.ConfigHelp"
-        Height="400" Width="800" WindowStartupLocation="CenterOwner"
+        Height="640" Width="800" MinHeight="320" WindowStartupLocation="CenterOwner"
         Title="Configuration Help">
         
     <DockPanel LastChildFill="True">
@@ -34,6 +34,18 @@
                         <TextBlock Text="%DRIVEINFO%" FontWeight="Bold" FontSize="16"></TextBlock>
                         <TextBlock Text="  Will bring up the VOLUME Information Dialog" FontWeight="16"></TextBlock>
                     </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%RCLONEDIAG%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will bring up the Rclone Diagnostics dialog" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%RCLONECONFIG%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will bring up the Rclone remote configuration dialog" FontWeight="16"></TextBlock>
+                    </StackPanel>
                 
                     <TextBlock Text="The following commands can be used in the ARGUMENTS field of a button:" FontSize="20" Margin="10"/>
                 
@@ -46,13 +58,13 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="    -"></TextBlock>
                         <TextBlock Text="%AF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                        <TextBlock Text="  Will inject the path to the first selected file in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                        <TextBlock Text="  Will inject every file selected in the Left panel, or the Right if none, space separated, in one command" FontWeight="16"></TextBlock>
                     </StackPanel>
                 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="    -"></TextBlock>
                         <TextBlock Text="%LAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                        <TextBlock Text="  Will inject the comma seperated list of files in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                        <TextBlock Text="  Will inject the files selected in the Left panel, or the Right if none - the command runs once per file" FontWeight="16"></TextBlock>
                     </StackPanel>
                 
                     <StackPanel Orientation="Horizontal">
@@ -70,13 +82,13 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="    -"></TextBlock>
                         <TextBlock Text="%LPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                        <TextBlock Text="  Will inject the comma seperated list of files in the Left panel" FontWeight="16"></TextBlock>
+                        <TextBlock Text="  Will inject the files selected in the Left panel - the command runs once per file" FontWeight="16"></TextBlock>
                     </StackPanel>
                 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="    -"></TextBlock>
                         <TextBlock Text="%RPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                        <TextBlock Text="  Will inject the comma seperated list of files in the Right panel" FontWeight="16"></TextBlock>
+                        <TextBlock Text="  Will inject the files selected in the Right panel - the command runs once per file" FontWeight="16"></TextBlock>
                     </StackPanel>
                 
                     <StackPanel Orientation="Horizontal">
@@ -90,7 +102,47 @@
                         <TextBlock Text="%RPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
                         <TextBlock Text="  Will inject the PATH currently selected in the Right panel" FontWeight="16"></TextBlock>
                     </StackPanel>
-                
+
+                    <TextBlock Text="Active-panel parameters" FontSize="20" FontWeight="Bold" Margin="10,20,10,4"/>
+                    <TextBlock TextWrapping="Wrap" Margin="10,0,10,10"
+                               Text="These resolve against whichever panel you last clicked in - the SOURCE - and the other one - the TARGET. Unlike the Left/Right parameters above, several of these may be used in the same button, so one button works in both directions instead of needing a separate Left-to-Right and Right-to-Left copy. Example: rsync -av %SAF% %TPATH%"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%SPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the PATH shown in the SOURCE (active) panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%TPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the PATH shown in the TARGET (other) panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%SF1%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected file in the SOURCE panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%TF1%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected file in the TARGET panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%SAF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject every file selected in the SOURCE panel, space separated, in one command" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%TAF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject every file selected in the TARGET panel, space separated, in one command" FontWeight="16"></TextBlock>
+                    </StackPanel>
+
                 </StackPanel>
             </ScrollViewer>
     </DockPanel>

@@ -100,6 +100,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - A grid of 36 user-configurable command buttons below the panels
 - Each button can launch any external program with flexible argument substitution
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
+- Active-panel placeholders (`%SPATH%`, `%TPATH%`, `%SAF%`, …) let one button work in both directions instead of needing a separate Left-to-Right and Right-to-Left copy
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
 
 ### Bookmarks
@@ -407,7 +408,7 @@ The `<Args> </Args>` parameter can contain the following entries
 
 * `%AF%` - All Files in the Left or Right Panel Left Panel is searched first. Each argument is separated by a space
 
-* `%LAF%` - All Files in the Left or Right Panel . Each argument is separated by a space Left panel is searched first
+* `%LAF%` - All Files in the Left Panel, or the Right if the Left has no selection. The command is run **once per file**
 
 * `%RF1%` - Full Path of the file selected in the Right Panel
 
@@ -417,13 +418,46 @@ The `<Args> </Args>` parameter can contain the following entries
     To allow handing a file from each panel to a command. For example a diff command
     as shown in the above example configuration file
 
-* `%RPAF%` - Full Path All Files in the Right Panel . Each argument is separated by a space
+* `%RPAF%` - Full Path All Files in the Right Panel. The command is run **once per file**
 
-* `%LPAF%` - Full Path All Files in the Left Panel . Each argument is separated by a space
+* `%LPAF%` - Full Path All Files in the Left Panel. The command is run **once per file**
 
 * `%LPATH%` - Full Path of what is currently being shown in the LEFT Panel
 
 * `%RPATH%` - Full Path of what is currently being shown in the RIGHT Panel
+
+**Active-panel (source/target) parameters**
+
+These resolve against whichever panel you last clicked in — the **source** — and the other one — the
+**target**. Unlike the Left/Right parameters above, of which only the first present in a button is
+substituted, several of these may be combined in one button. That is the point of them: a single
+button can copy, sync or compare in whichever direction you are currently working, instead of
+needing a separate Left-to-Right and Right-to-Left copy.
+
+* `%SPATH%` - Full Path of what is currently being shown in the SOURCE (active) Panel
+
+* `%TPATH%` - Full Path of what is currently being shown in the TARGET (other) Panel
+
+* `%SF1%` - Full Path of the first file selected in the SOURCE Panel
+
+* `%TF1%` - Full Path of the first file selected in the TARGET Panel
+
+* `%SAF%` - Every file selected in the SOURCE Panel, space separated, passed to a **single** command
+
+* `%TAF%` - Every file selected in the TARGET Panel, space separated, passed to a **single** command
+
+Example — one button that syncs the current selection to the other panel, whichever way round you
+are working:
+
+```xml
+<Button>
+    <Name>LpButton10</Name>
+    <Content>Sync to other pane</Content>
+    <Action>rsync</Action>
+    <Args>-av %SAF% %TPATH%</Args>
+    <ToolTip>Copy the selected files to the folder open in the other panel</ToolTip>
+</Button>
+```
 
 
 
