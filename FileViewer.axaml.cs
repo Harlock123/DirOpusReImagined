@@ -163,7 +163,7 @@ public partial class FileViewer : Window
             : Avalonia.Media.TextWrapping.NoWrap;
     }
 
-    private void DismissButton_Click(object? sender, RoutedEventArgs e) => Close();
+    private void OkButton_Click(object? sender, RoutedEventArgs e) => Close();
 
     protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
     {

@@ -9,11 +9,12 @@
 
     <DockPanel LastChildFill="True">
 
-        <!-- Dismiss bar pinned to the bottom, always visible regardless of scroll -->
+        <!-- Dismiss bar pinned to the bottom, always visible regardless of scroll.
+             Matches ConfigHelp: same label, and Enter/Escape both close. -->
         <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="#40808080" Padding="10">
-            <Button Name="DismissButton" Content="Dismiss" Click="DismissButton_Click"
+            <Button Name="OkButton" Content="OK" Click="OkButton_Click"
                     HorizontalAlignment="Right" MinWidth="90" Padding="14,4"
-                    FontWeight="Bold" />
+                    FontWeight="Bold" IsDefault="True" IsCancel="True" />
         </Border>
 
         <!-- The right margin lives on the content (not ScrollViewer.Padding, which doesn't

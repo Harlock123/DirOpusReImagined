@@ -11,7 +11,7 @@ public partial class GeneralHelp : Window
         InitializeComponent();
     }
 
-    private void DismissButton_Click(object? sender, RoutedEventArgs e)
+    private void OkButton_Click(object? sender, RoutedEventArgs e)
     {
         Close();
     }

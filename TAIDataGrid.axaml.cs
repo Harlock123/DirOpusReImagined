@@ -1876,9 +1876,9 @@ namespace DirOpusReImagined
                 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //Debug.WriteLine(ex.Message);
+                // Rendering is best-effort here; a failure just leaves the previous frame up.
             }
         }
 
@@ -2772,7 +2772,7 @@ namespace DirOpusReImagined
         /// <summary>
         /// The item currently under the keyboard cursor, or null if the cursor is unset/out of range.
         /// </summary>
-        public object CursorItem
+        public object? CursorItem
         {
             get
             {

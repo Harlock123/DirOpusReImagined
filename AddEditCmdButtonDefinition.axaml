@@ -2,9 +2,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="680"
         x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
-        Title="DORI Settings" Width="800" Height="600" WindowStartupLocation="CenterOwner">
+        Title="DORI Settings" Width="900" Height="680" MinHeight="420" MinWidth="640"
+        WindowStartupLocation="CenterOwner">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save" Click="Save_OnClick" Margin="5"/>
@@ -14,115 +15,106 @@
         <TabControl>
         <TabItem Header="Command Buttons">
         <DockPanel>
-        <ScrollViewer DockPanel.Dock="Left"
-                      VerticalScrollBarVisibility="Visible"
-                      >
-        <StackPanel Width="140" Spacing="4">
-            <Button Name="LPB1" Width="125"  Content="LPBUTTON 1"></Button>
-            <Button Name="LPB2" Width="125"  Content="LPBUTTON 2"></Button>
-            <Button Name="LPB3" Width="125"  Content="LPBUTTON 3"></Button>
-            <Button Name="LPB4" Width="125"  Content="LPBUTTON 4"></Button>
-            <Button Name="LPB5" Width="125"  Content="LPBUTTON 5"></Button>
-            <Button Name="LPB6" Width="125"  Content="LPBUTTON 6"></Button>
-            <Button Name="LPB7" Width="125"  Content="LPBUTTON 7"></Button>
-            <Button Name="LPB8" Width="125"  Content="LPBUTTON 8"></Button>
-            <Button Name="LPB9" Width="125"  Content="LPBUTTON 9"></Button>
-            <Button Name="LPB10" Width="125"  Content="LPBUTTON 10"></Button>
-            <Button Name="LPB11" Width="125"  Content="LPBUTTON 11"></Button>
-            <Button Name="LPB12" Width="125"  Content="LPBUTTON 12"></Button>
-            <Button Name="LPB13" Width="125"  Content="LPBUTTON 13"></Button>
-            <Button Name="LPB14" Width="125"  Content="LPBUTTON 14"></Button>
-            <Button Name="LPB15" Width="125"  Content="LPBUTTON 15"></Button>
-            <Button Name="LPB16" Width="125"  Content="LPBUTTON 16"></Button>
-            <Button Name="LPB17" Width="125"  Content="LPBUTTON 17"></Button>
-            <Button Name="LPB18" Width="125"  Content="LPBUTTON 18"></Button>
-            <Button Name="LPB19" Width="125"  Content="LPBUTTON 19"></Button>
-            <Button Name="LPB20" Width="125"  Content="LPBUTTON 20"></Button>
-            <Button Name="LPB21" Width="125"  Content="LPBUTTON 21"></Button>
-            <Button Name="LPB22" Width="125"  Content="LPBUTTON 22"></Button>
-            <Button Name="LPB23" Width="125"  Content="LPBUTTON 23"></Button>
-            <Button Name="LPB24" Width="125"  Content="LPBUTTON 24"></Button>
-            <Button Name="LPB25" Width="125"  Content="LPBUTTON 25"></Button>
-            <Button Name="LPB26" Width="125"  Content="LPBUTTON 26"></Button>
-            <Button Name="LPB27" Width="125"  Content="LPBUTTON 27"></Button>
-            <Button Name="LPB28" Width="125"  Content="LPBUTTON 28"></Button>
-            <Button Name="LPB29" Width="125"  Content="LPBUTTON 29"></Button>
-            <Button Name="LPB30" Width="125"  Content="LPBUTTON 30"></Button>
-            <Button Name="LPB31" Width="125"  Content="LPBUTTON 31"></Button>
-            <Button Name="LPB32" Width="125"  Content="LPBUTTON 32"></Button>
-            <Button Name="LPB33" Width="125"  Content="LPBUTTON 33"></Button>
-            <Button Name="LPB34" Width="125"  Content="LPBUTTON 34"></Button>
-            <Button Name="LPB35" Width="125"  Content="LPBUTTON 35"></Button>
-            <Button Name="LPB36" Width="125"  Content="LPBUTTON 36"></Button>
-        </StackPanel>
+        <!-- One row per slot, bound to a collection. The 36 slots used to be 36 hand-written
+             Buttons here, re-walked by index in three separate loops in the code-behind. -->
+        <ListBox DockPanel.Dock="Left" Name="SlotList" Width="210"
+                 SelectionMode="Single"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="Auto,Auto,*" Margin="0,2">
+                        <TextBlock Grid.Column="0" Text="{Binding Number}"
+                                   Width="26" Opacity="0.55" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Width="14" Height="14" Margin="0,0,6,0"
+                                CornerRadius="2" VerticalAlignment="Center"
+                                Background="{Binding Swatch}"
+                                BorderBrush="#40808080" BorderThickness="1"
+                                IsVisible="{Binding IsConfigured}" />
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"
+                                       FontStyle="{Binding LabelStyle}"
+                                       Opacity="{Binding LabelOpacity}" />
+                            <TextBlock Text="{Binding Detail}" FontSize="10" Opacity="0.6"
+                                       TextTrimming="CharacterEllipsis"
+                                       IsVisible="{Binding IsConfigured}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <!-- Scrolls rather than clips: the form is taller than it looks, and WindowSizing
+             shrinks any window that would not fit its screen, so on a small display or at a
+             high UI scale the bottom of this panel (the ToolTip box) used to be cut off with
+             no way to reach it. Matches the System Wide Settings tab, which already scrolls. -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="4,0,4,8">
+                <Label 
+                    Padding="4" Content="Button Label" />
+            
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="460"
+                             Padding="4" Name="tbContent" />
+                
+                </StackPanel>
+            
+                <Label 
+                    Padding="4" Content="Command To Run"/>
+            
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                
+                    <TextBox Width="460"
+                        Padding="4" Name="tbCommand" />
+                    <Button Name="btnCommandHelp" Content="Show Command Help"  />
+                
+                </StackPanel>
+            
+                <Label
+                    Padding="4" Content="Arguments"/>
+            
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBox Width="460"
+                        Padding="4" Name="tbArguments" />
+                    <Button Name="btnArgHelp" Content="Show Argument Help"  />
+                
+                </StackPanel>
+            
+            
+            
+            
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <StackPanel>
+                        <Label Padding="4" Content="Foreground Color"></Label>
+                        <ComboBox Name="cbFOREGROUND" Width="180"></ComboBox>
+                        <Label Padding="4" Content="Background Color"></Label>
+                        <ComboBox Name="cbBACKGROUND" Width="180"></ComboBox>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Padding="4" Content="Horizontal Alignment"></Label>
+                        <ComboBox Name="cbHorizontal" Width="180">
+                        
+                        </ComboBox>
+                        <Label Padding="4" Content="Vertical Alignment"></Label>
+                        <ComboBox Name="cbVertical" Width="180">
+                        
+                        </ComboBox>
+                    </StackPanel>
+                    <Button Name="SampleButton" Content="Sample Button" Width="180" Height="38" />
+                </StackPanel>
+                <CheckBox 
+                    Padding="4" Name="cbShellExecute">Shell Execute</CheckBox>
+                <CheckBox 
+                    Padding="4" Name="cbShowWindow">Show Window</CheckBox>
+                <Label 
+                    Padding="4" Content="ToolTip"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="140">
+                    <TextBox Name="tbToolTip"
+                             Padding="4"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             />
+                </ScrollViewer>
+            </StackPanel>
         </ScrollViewer>
-        <StackPanel Margin="4,0,4,0">
-            <Label 
-                Padding="4" Content="Button Label" />
-            
-            <StackPanel Orientation="Horizontal">
-                <TextBox Width="460"
-                         Padding="4" Name="tbContent" />
-                
-            </StackPanel>
-            
-            <Label 
-                Padding="4" Content="Command To Run"/>
-            
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                
-                <TextBox Width="460"
-                    Padding="4" Name="tbCommand" />
-                <Button Name="btnCommandHelp" Content="Show Command Help"  />
-                
-            </StackPanel>
-            
-            <Label
-                Padding="4" Content="Arguments"/>
-            
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBox Width="460"
-                    Padding="4" Name="tbArguments" />
-                <Button Name="btnArgHelp" Content="Show Argument Help"  />
-                
-            </StackPanel>
-            
-            
-            
-            
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <StackPanel>
-                    <Label Padding="4" Content="Foreground Color"></Label>
-                    <ComboBox Name="cbFOREGROUND" Width="180"></ComboBox>
-                    <Label Padding="4" Content="Background Color"></Label>
-                    <ComboBox Name="cbBACKGROUND" Width="180"></ComboBox>
-                </StackPanel>
-                <StackPanel>
-                    <Label Padding="4" Content="Horizontal Alignment"></Label>
-                    <ComboBox Name="cbHorizontal" Width="180">
-                        
-                    </ComboBox>
-                    <Label Padding="4" Content="Vertical Alignment"></Label>
-                    <ComboBox Name="cbVertical" Width="180">
-                        
-                    </ComboBox>
-                </StackPanel>
-                <Button Name="SampleButton" Content="Sample Button" Width="180" Height="38" />
-            </StackPanel>
-            <CheckBox 
-                Padding="4" Name="cbShellExecute">Shell Execute</CheckBox>
-            <CheckBox 
-                Padding="4" Name="cbShowWindow">Show Window</CheckBox>
-            <Label 
-                Padding="4" Content="ToolTip"/>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="140">
-                <TextBox Name="tbToolTip"
-                         Padding="4"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         />
-            </ScrollViewer>
-        </StackPanel>
         </DockPanel>
         </TabItem>
         <TabItem Header="System Wide Settings">

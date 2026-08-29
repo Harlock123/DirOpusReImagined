@@ -732,8 +732,9 @@ namespace DirOpusReImagined
 
             #region CheckBox Handlers
             
-            ChkShowHidden.Checked += ChkShowHidden_Checked;
-            ChkShowHidden.Unchecked += ChkShowHidden_Checked;
+            // One event for both transitions: Checked and Unchecked are obsolete, and both were
+            // already wired to the same handler.
+            ChkShowHidden.IsCheckedChanged += ChkShowHidden_Checked;
 
             // Sorting is driven by clicking column headers (see GridHeaderClicked wiring below).
 
@@ -1460,7 +1461,7 @@ namespace DirOpusReImagined
         /// on failure). Shows a one-time note that edits to the extracted copy won't be written back
         /// into the read-only archive.
         /// </summary>
-        private string ExtractArchiveEntryToTemp(string panelPath, string name)
+        private string? ExtractArchiveEntryToTemp(string panelPath, string name)
         {
             try
             {
@@ -3226,35 +3227,37 @@ namespace DirOpusReImagined
             return result;
         }
 
+        /// <summary>
+        /// Whether a name looks executable by its extension. Windows only, by design: extensions carry
+        /// no such meaning on Unix, where executability is a permission bit. Callers pair this with
+        /// <see cref="IsExecutableOnUnixNet6"/>, which reads that bit.
+        /// </summary>
+        /// <remarks>
+        /// There used to be a Unix/macOS branch here containing nothing but a local function that
+        /// called itself and was never invoked. It could not run - it only compiled without a
+        /// dead-code warning because the self-reference counted as a use - so removing it changes
+        /// no behaviour: the method already returned false on Unix.
+        /// </remarks>
         private bool FileExtensionIsExecutable(string v)
         {
-            bool result = false;
+            if (PlatformID.Win32NT != Environment.OSVersion.Platform) return false;
 
-            if (PlatformID.Win32NT == Environment.OSVersion.Platform)
+            foreach (string s in ExecutableStuff)
             {
-                foreach (string s in ExecutableStuff)
-                {
-                    if (v.ToUpper().EndsWith(s))
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-            else if (PlatformID.Unix == Environment.OSVersion.Platform ||
-                     PlatformID.MacOSX == Environment.OSVersion.Platform)
-            {
-                bool IsExecutableOnUnixNet6(string path)
-                {
-                    return IsExecutableOnUnixNet6(v);
-                }
+                if (v.ToUpper().EndsWith(s)) return true;
             }
 
-            return result;
+            return false;
         }
         
         private bool IsExecutableOnUnixNet6(string path)
         {
+            // Callers already branch on Environment.OSVersion.Platform, but the platform analyser
+            // does not recognise that as a guard (it understands OperatingSystem.IsWindows and
+            // RuntimeInformation.IsOSPlatform). Guarding here satisfies it and makes the method safe
+            // to call from anywhere - GetUnixFileMode throws PlatformNotSupportedException on Windows.
+            if (OperatingSystem.IsWindows()) return false;
+
             if (!File.Exists(path)) return false;
             var mode = File.GetUnixFileMode(path);
             // Check any of the execute bits
@@ -4005,7 +4008,7 @@ namespace DirOpusReImagined
             return $"{val:0.##} {units[unit]}";
         }
 
-        private string FindAssetsDirectory()
+        private string? FindAssetsDirectory()
         {
             // 1. Current working directory
             string path = Path.Combine(Environment.CurrentDirectory, "Assets");
@@ -4021,7 +4024,7 @@ namespace DirOpusReImagined
         /// <summary>The config the app should load: working directory, then the executable's folder,
         /// then the per-platform user config location; null when none exists yet.
         /// Resolution lives in <see cref="ConfigFile"/> so every caller agrees on it.</summary>
-        private string FindConfigurationFile() => ConfigFile.Find();
+        private string? FindConfigurationFile() => ConfigFile.Find();
 
         private string GetRootDirectoryPath()
         {
@@ -4501,18 +4504,24 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Reloads the lower button bar from the config file after the settings dialog saves.
+        /// </summary>
+        /// <remarks>
+        /// Reads <see cref="ConfigFilePath"/> - the file startup actually resolved and the settings
+        /// dialog actually wrote. This used to hardcode the working directory with an empty else, so
+        /// anywhere without a Configuration.xml beside the process (i.e. every installed copy) the
+        /// save landed correctly and then the refresh silently did nothing, leaving the old buttons
+        /// on screen until the app was restarted.
+        /// </remarks>
         public void DoButtonRefresh()
         {
-            if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
-            {
-                ClearLowerButtons();
-                ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
-            }
-            else
-            {
-                // Look in the alternate places here based on OS
+            string configPath = ConfigFilePath;
 
-            }
+            if (!File.Exists(configPath)) return;
+
+            ClearLowerButtons();
+            ApplyButtonSettingsFromXml(configPath, this);
         }
 
         private void ShowRcloneDiagnostics()
@@ -4538,7 +4547,7 @@ namespace DirOpusReImagined
         /// archive climbs the entry tree and, at the archive root, steps back out to the real folder
         /// that contains the archive file. Falls back to the filesystem parent otherwise.
         /// </summary>
-        private static string ParentOf(string path)
+        private static string? ParentOf(string path)
         {
             if (ArchivePath.IsArchiveUri(path))
                 return ArchivePath.Parse(path).ParentUri();

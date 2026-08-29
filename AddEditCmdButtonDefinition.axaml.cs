@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml.Linq;
@@ -26,7 +29,18 @@ public partial class AddEditCmdButtonDefinition : Window
     
     public MainWindow? TheMainWindow ;//= null;
 
-    private Button? TheCurrentButton ;//= null;
+    /// <summary>
+    /// How many slots the editor offers. Capped to match the buttons MainWindow.axaml declares:
+    /// the main window still resolves each saved button to a control named LpButtonNN, so a slot
+    /// past this number could be edited and saved but never rendered.
+    /// </summary>
+    private const int SlotCount = 36;
+
+    /// <summary>The editable slots, one per row of SlotList.</summary>
+    private readonly ObservableCollection<ButtonSlot> _slots = new();
+
+    /// <summary>The slot the form is currently editing, or null when nothing is selected.</summary>
+    private ButtonSlot? _currentSlot;
 
     /// <summary>
     /// Set by any edit the user makes, cleared by a successful save. Nothing typed here reaches the
@@ -44,6 +58,13 @@ public partial class AddEditCmdButtonDefinition : Window
 
     /// <summary>Set once the user has confirmed a discard, so the re-issued Close is not re-prompted.</summary>
     private bool _closeConfirmed;
+
+    /// <summary>
+    /// Whether the form has been touched since the current slot was loaded into it. Distinct from
+    /// <see cref="_dirty"/>, which covers the whole dialog: this one decides whether an unused slot
+    /// has earned a ButtonSettings, so browsing the list does not fill the config with placeholders.
+    /// </summary>
+    private bool _formEdited;
     
     //SolidColorBrush theDefaultBackground = new SolidColorBrush((Color)Color.Parse("Grey"));
     
@@ -89,11 +110,9 @@ public partial class AddEditCmdButtonDefinition : Window
         
         this.FindControl<TextBox>("tbContent").KeyUp += HandleButtonContentChanged;    
         
-        for(int i=1;i<=36;i++)
-        {
-            Button b = this.FindControl<Button>("LPB" + i.ToString());
-            b.Click += HandleButtonClicked;
-        }
+        var list = this.FindControl<ListBox>("SlotList");
+        list.ItemsSource = _slots;
+        list.SelectionChanged += HandleSlotSelected;
 
         LoadTerminalSettings();
 
@@ -105,7 +124,9 @@ public partial class AddEditCmdButtonDefinition : Window
     /// <summary>Marks the dialog modified unless the change came from the dialog populating itself.</summary>
     private void MarkDirty()
     {
-        if (!_loading) _dirty = true;
+        if (_loading) return;
+        _dirty = true;
+        _formEdited = true;
     }
 
     /// <summary>
@@ -268,21 +289,16 @@ public partial class AddEditCmdButtonDefinition : Window
             UpsertUiScaleSetting(doc);
         }
 
-        private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
+        // Awaited, like the other modals in this dialog: an unawaited ShowDialog leaves a window
+        // outliving the handler that opened it.
+        private async void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
         {
-            // we need to open the button config window
-            ConfigHelp BC = new ConfigHelp();
-            //BC.TheMainWindow = this;
-            BC.ShowDialog(this);
-        
+            await new ConfigHelp().ShowDialog(this);
         }
-    
-        private void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
+
+        private async void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
         {
-            // we need to open the button config window
-            ConfigHelp BC = new ConfigHelp();
-            //BC.TheMainWindow = this;
-            BC.ShowDialog(this);
+            await new ConfigHelp().ShowDialog(this);
         }
 
         private void HandleButtonContentChanged(object? sender, KeyEventArgs e)
@@ -291,119 +307,76 @@ public partial class AddEditCmdButtonDefinition : Window
             this.FindControl<Button>("SampleButton").Content = tb.Text;
         }
 
-        private void PersistCurrentButtonInterface()
+        /// <summary>
+    /// Copies the form back into the selected slot. Materialises the slot's ButtonSettings on the
+    /// first real edit -- see <see cref="HandleSlotSelected"/> for why not on selection.
+    /// </summary>
+    private void PersistCurrentButtonInterface()
+    {
+        if (_currentSlot == null) return;
+
+        // An unused slot that was only looked at keeps its ButtonSettings null, so Save leaves it
+        // out of the file. Without this, arrow-keying down the list would write 36 placeholders.
+        if (_currentSlot.Settings == null && !_formEdited) return;
+
+        ButtonSettings bs = _currentSlot.Settings ?? new ButtonSettings { Name = _currentSlot.Name };
+
+        bs.Content = this.FindControl<TextBox>("tbContent").Text;
+        bs.Background = this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem + "";
+        bs.Foreground = this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem + "";
+        bs.HorizontalAlignment = this.FindControl<ComboBox>("cbHorizontal").SelectedItem + "";
+        bs.VerticalAlignment = this.FindControl<ComboBox>("cbVertical").SelectedItem + "";
+        bs.Action = this.FindControl<TextBox>("tbCommand").Text;
+        bs.Args = this.FindControl<TextBox>("tbArguments").Text;
+        bs.ShellExecute = this.FindControl<CheckBox>("cbShellExecute").IsChecked + "";
+        bs.ShowWindow = this.FindControl<CheckBox>("cbShowWindow").IsChecked + "";
+        bs.ToolTip = this.FindControl<TextBox>("tbToolTip").Text;
+
+        _currentSlot.Settings = bs;
+    }
+
+        /// <summary>
+    /// Loads the newly selected slot into the form, flushing the previous one first.
+    /// </summary>
+    /// <remarks>
+    /// An unconfigured slot is shown with placeholder text but is NOT materialised here. The old
+    /// code created a ButtonSettings the moment a slot button was clicked, which Save then wrote
+    /// out; harmless with 36 separate buttons you had to click deliberately, but a ListBox can be
+    /// arrow-keyed, and walking the list would otherwise have written 36 placeholder buttons into
+    /// the config. The slot becomes real on the first edit instead - see PersistCurrentButtonInterface.
+    /// </remarks>
+    private void HandleSlotSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        PersistCurrentButtonInterface();
+
+        _currentSlot = this.FindControl<ListBox>("SlotList").SelectedItem as ButtonSlot;
+        if (_currentSlot == null) return;
+
+        ButtonSettings bs = _currentSlot.Settings ?? ButtonSlot.Placeholder(_currentSlot.Name);
+
+        bs.ShellExecute ??= "False";
+        bs.ShowWindow ??= "False";
+
+        // Filling the form fires the same events typing does; this is not a user edit.
+        _loading = true;
+        try
         {
-            if (TheCurrentButton == null)
-            {
-                return;
-            }
-
-            ButtonSettings bs = (ButtonSettings)TheCurrentButton.Tag; 
-        
-            if (bs == null)
-            {
-                return;
-
-                // bs = new ButtonSettings();
-                // bs.Content = "{What Will Show}";
-                //
-                // bs.Action = "{Action}";
-                // bs.Args = "{Arguments}";
-                // bs.Background = "LightGray";
-                // bs.Foreground = "Black";
-                // bs.Name = TheCurrentButton.Name;
-                // bs.Name = bs.Name.Replace("LPB", "LPButton");
-                // bs.HorizontalAlignment = "Center";
-                // bs.VerticalAlignment = "Center";
-                // bs.ShellExecute = "False";
-                // bs.ShowWindow = "False";
-                // bs.ToolTip = "{ToolTip}";
-                //
-                // TheCurrentButton.Tag = bs;
-            }
-        
-            bs.Content = this.FindControl<TextBox>("tbContent").Text;
-            bs.Background = this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem + "";
-            bs.Foreground = this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem + "";
-            bs.HorizontalAlignment = this.FindControl<ComboBox>("cbHorizontal").SelectedItem + "";
-            bs.VerticalAlignment = this.FindControl<ComboBox>("cbVertical").SelectedItem + "";
-            bs.Action = this.FindControl<TextBox>("tbCommand").Text;
-            bs.Args = this.FindControl<TextBox>("tbArguments").Text;
-            bs.ShellExecute = this.FindControl<CheckBox>("cbShellExecute").IsChecked + "";
-            bs.ShowWindow = this.FindControl<CheckBox>("cbShowWindow").IsChecked + "";
-            bs.ToolTip = this.FindControl<TextBox>("tbToolTip").Text;
-        
-            Button b = this.FindControl<Button>(TheCurrentButton.Name);
-        
-            b.Tag = bs;
-            b.Content = bs.Content;
-            b.Background = new SolidColorBrush((Color)Color.Parse(bs.Background));
-            b.Foreground = new SolidColorBrush((Color)Color.Parse(bs.Foreground));
-            //b.VerticalAlignment = (VerticalAlignment)Enum.Parse(typeof(VerticalAlignment), bs.VerticalAlignment);
-        }
-
-        private void HandleButtonClicked(object? sender, RoutedEventArgs e)
-        {
-            Button b= (Button)sender;
-        
-            PersistCurrentButtonInterface();
-        
-            TheCurrentButton = b;
-        
-            if (b.Tag == null)
-            {
-                ButtonSettings bs1 = new ButtonSettings();
-            
-                bs1.Content = "{What Will Show}";
-            
-                bs1.Action = "{Action}";
-                bs1.Args = "{Arguments}";
-                bs1.Background = "LightGray";
-                bs1.Foreground = "Black";
-                bs1.Name = TheCurrentButton.Name;
-                bs1.Name = bs1.Name.Replace("LPB", "LPButton");
-                bs1.HorizontalAlignment = "Center";
-                bs1.VerticalAlignment = "Center";
-                bs1.ShellExecute = "False";
-                bs1.ShowWindow = "False";
-                bs1.ToolTip = "{ToolTip}";
-            
-                TheCurrentButton.Tag = bs1;
-            
-             
-            }
-        
-            ButtonSettings bs = (ButtonSettings)b.Tag;
-        
-            // if the sheelexecute or showwindow elements are null then set them to false
-            if (bs.ShellExecute == null)
-            {
-                bs.ShellExecute = "False";
-            }
-            if (bs.ShowWindow == null)
-            {
-                bs.ShowWindow = "False";
-            }   
-
-            //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
-        
-            // Filling the form fires the same events typing does; this is not a user edit.
-            _loading = true;
-            try
-            {
             this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
             this.FindControl<Button>("SampleButton").Content = bs.Content;
             this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = bs.Background + "";
-            this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = bs.Foreground  + "";
+            this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = bs.Foreground + "";
             this.FindControl<ComboBox>("cbHorizontal").SelectedItem = bs.HorizontalAlignment + "";
             this.FindControl<ComboBox>("cbVertical").SelectedItem = bs.VerticalAlignment + "";
             this.FindControl<TextBox>("tbCommand").Text = bs.Action + "";
             this.FindControl<TextBox>("tbArguments").Text = bs.Args + "";
-            this.FindControl<CheckBox>("cbShellExecute").IsChecked = bool.Parse(bs.ShellExecute + "");
-            this.FindControl<CheckBox>("cbShowWindow").IsChecked = bool.Parse(bs.ShowWindow + "");
+            this.FindControl<CheckBox>("cbShellExecute").IsChecked = bool.TryParse(bs.ShellExecute, out var se) && se;
+            this.FindControl<CheckBox>("cbShowWindow").IsChecked = bool.TryParse(bs.ShowWindow, out var sw) && sw;
             this.FindControl<TextBox>("tbToolTip").Text = bs.ToolTip + "";
         }
         finally { _loading = false; }
+
+        // The form now mirrors the slot; nothing has been edited against it yet.
+        _formEdited = false;
     }
 
     private void InitializeComponent()
@@ -411,49 +384,44 @@ public partial class AddEditCmdButtonDefinition : Window
         AvaloniaXamlLoader.Load(this);
     }
 
+    /// <summary>
+    /// Builds the 36 slot rows and attaches each saved button to the slot its name points at.
+    /// </summary>
+    /// <remarks>
+    /// The slot is chosen by parsing the trailing digits of the stored name rather than by
+    /// rewriting the name into a control name and calling FindControl. The old code tried
+    /// Replace("LpButton","LPB"), then Replace("LPButton","LPB") as a fallback -- both spellings
+    /// occur in the shipped configs -- and then dereferenced the result with no null check, so any
+    /// third spelling or a slot number past the last control took the dialog down on open.
+    /// Anything unparseable or out of range is now skipped.
+    /// </remarks>
     private void DeployButtonSettings()
     {
-        
-        
-        for (int i = 1; i <= 36; i++)
-        {
-            Button B = this.FindControl<Button>("LPB" + i.ToString());
-            B.Content = "";
-            
-            B.Background = new SolidColorBrush(Colors.LightGray);
-            B.Foreground = new SolidColorBrush(Colors.Black);
-        }
-        
+        _slots.Clear();
+        for (int i = 1; i <= SlotCount; i++) _slots.Add(new ButtonSlot(i));
+
         foreach (ButtonSettings b in TheButtons)
         {
-            string name = b.Name.Replace("LpButton", "LPB");
-            Button theButton = this.FindControl<Button>(name);
+            int index = SlotIndexOf(b.Name);
+            if (index < 1 || index > SlotCount) continue;
 
-            if (theButton == null)
-            {
-                name = b.Name.Replace("LPButton", "LPB");
-                theButton = this.FindControl<Button>(name);
-            }
-            
-            theButton.Content = b.Content;
-            
-            if (b.Background == null)
-            {
-                b.Background = "LightGray"; 
-            }
-            
-            if (b.Foreground == null)
-            {
-                b.Foreground = "Black"; 
-            }   
-            
-            theButton.Background = new SolidColorBrush((Color)Color.Parse(b.Background));
-            theButton.Foreground = new SolidColorBrush((Color)Color.Parse(b.Foreground));
-            
-            theButton.Tag = b;
-            
-            
+            b.Background ??= "LightGray";
+            b.Foreground ??= "Black";
+
+            _slots[index - 1].Settings = b;
         }
+    }
+
+    /// <summary>
+    /// The slot number embedded in a stored button name, or -1 when there isn't one.
+    /// Matches the trailing digits of any casing -- LpButton7, LPButton7, LPB7 all give 7.
+    /// </summary>
+    private static int SlotIndexOf(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return -1;
+        var m = Regex.Match(name, @"(\d+)\s*$");
+        if (!m.Success) return -1;
+        return int.TryParse(m.Groups[1].Value, out int n) ? n : -1;
     }
 
     private void CbVertical_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -590,18 +558,12 @@ public partial class AddEditCmdButtonDefinition : Window
         
         PersistCurrentButtonInterface();
         
-        List<ButtonSettings> theButtonSettings = new List<ButtonSettings>();
-        
-        for (int i=1;i<=36;i++)
-        {
-            Button b = this.FindControl<Button>("LPB" + i.ToString());
-            ButtonSettings bs = (ButtonSettings)b.Tag;
-            if (bs != null)
-            {
-                theButtonSettings.Add(bs);
-            }
-            //theButtonSettings.Add(bs);
-        }
+        // Configured slots only, in slot order. Unconfigured ones are simply absent from the
+        // file, which is what the reader already expects.
+        List<ButtonSettings> theButtonSettings = _slots
+            .Where(slot => slot.Settings != null)
+            .Select(slot => slot.Settings!)
+            .ToList();
         
         string xml = SerializeButtonSettingsListToXml(theButtonSettings);
         
@@ -669,7 +631,8 @@ public partial class AddEditCmdButtonDefinition : Window
         }
         finally { _loading = false; }
 
-        TheCurrentButton = null;
+        _currentSlot = null;
+        this.FindControl<ListBox>("SlotList").SelectedItem = null;
     }
 
     private void Exit_OnClick(object sender, RoutedEventArgs e)

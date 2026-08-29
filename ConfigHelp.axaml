@@ -8,78 +8,91 @@
         Height="400" Width="800" WindowStartupLocation="CenterOwner"
         Title="Configuration Help">
         
-        <ScrollViewer>
-            <StackPanel>
-                <TextBlock Text="Rundown of the various ARGUMENT parameters that can be used on Buttons" FontSize="20" FontWeight="Bold" Margin="10"/>
-                <TextBlock Text="The following commands can be used in the COMMAND TO RUN field of a button:" FontSize="20" Margin="10"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%BUTTONCONFIG%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will bring up the Add Edit buttons interface of DORI" FontWeight="16"></TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%DRIVEINFO%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will bring up the VOLUME Information Dialog" FontWeight="16"></TextBlock>
-                </StackPanel>
+    <DockPanel LastChildFill="True">
+
+        <!-- Dismiss bar pinned to the bottom, always visible regardless of scroll.
+             Mirrors GeneralHelp. Without it this window had no dismiss control at all,
+             which on a tiling compositor leaves nothing to click. IsDefault/IsCancel also
+             make Enter and Escape close it. -->
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="#40808080" Padding="10">
+            <Button Name="OkButton" Content="OK" Click="OkButton_Click"
+                    HorizontalAlignment="Right" MinWidth="90" Padding="14,4"
+                    FontWeight="Bold" IsDefault="True" IsCancel="True" />
+        </Border>
+
+            <ScrollViewer>
+                <StackPanel>
+                    <TextBlock Text="Rundown of the various ARGUMENT parameters that can be used on Buttons" FontSize="20" FontWeight="Bold" Margin="10"/>
+                    <TextBlock Text="The following commands can be used in the COMMAND TO RUN field of a button:" FontSize="20" Margin="10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%BUTTONCONFIG%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will bring up the Add Edit buttons interface of DORI" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%DRIVEINFO%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will bring up the VOLUME Information Dialog" FontWeight="16"></TextBlock>
+                    </StackPanel>
                 
-                <TextBlock Text="The following commands can be used in the ARGUMENTS field of a button:" FontSize="20" Margin="10"/>
+                    <TextBlock Text="The following commands can be used in the ARGUMENTS field of a button:" FontSize="20" Margin="10"/>
                 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%FD%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the path to the first selected folder in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%FD%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected folder in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%AF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected file in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%LAF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the comma seperated list of files in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%LF1%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected file in the Left panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%RF1%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the path to the first selected file in the Right panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%LPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the comma seperated list of files in the Left panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%RPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the comma seperated list of files in the Right panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%LPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the PATH currently selected in the Left panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="    -"></TextBlock>
+                        <TextBlock Text="%RPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
+                        <TextBlock Text="  Will inject the PATH currently selected in the Right panel" FontWeight="16"></TextBlock>
+                    </StackPanel>
+                
                 </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%AF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the path to the first selected file in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%LAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the comma seperated list of files in the Left panel or the right panel. Left panel first" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%LF1%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the path to the first selected file in the Left panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%RF1%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the path to the first selected file in the Right panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%LPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the comma seperated list of files in the Left panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%RPAF%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the comma seperated list of files in the Right panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%LPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the PATH currently selected in the Left panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="    -"></TextBlock>
-                    <TextBlock Text="%RPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
-                    <TextBlock Text="  Will inject the PATH currently selected in the Right panel" FontWeight="16"></TextBlock>
-                </StackPanel>
-                
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+    </DockPanel>
      
 </Window>

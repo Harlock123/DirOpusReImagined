@@ -43,6 +43,10 @@ public partial class PermissionsDialog : Window
 
     private void LoadPermissions()
     {
+        // Unix permission bits do not exist on Windows: GetUnixFileMode throws there. The dialog is
+        // only offered on Unix, but guard explicitly so the platform analyser can see it.
+        if (OperatingSystem.IsWindows()) return;
+
         try
         {
             var mode = File.GetUnixFileMode(_filePath);
@@ -166,6 +170,8 @@ public partial class PermissionsDialog : Window
 
     private void ApplyButton_Click(object? sender, RoutedEventArgs e)
     {
+        if (OperatingSystem.IsWindows()) { this.Close(); return; }
+
         try
         {
             var newMode = BuildModeFromCheckboxes();

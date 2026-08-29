@@ -21,13 +21,14 @@
             </Grid>
         </Border>
 
-        <!-- Dismiss bar -->
+        <!-- Dismiss bar. IsCancel only, no IsDefault: the content is a focusable multiline
+             TextBox, and Enter closing the viewer mid-read would be a poor trade for consistency. -->
         <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="10,6">
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Name="StatusText" Grid.Column="0" VerticalAlignment="Center"
                            Foreground="{DynamicResource MutedTextBrush}" />
-                <Button Name="DismissButton" Grid.Column="1" Content="Dismiss" MinWidth="90"
-                        FontWeight="Bold" Click="DismissButton_Click" />
+                <Button Name="OkButton" Grid.Column="1" Content="OK" MinWidth="90"
+                        FontWeight="Bold" Click="OkButton_Click" IsCancel="True" />
             </Grid>
         </Border>
 
