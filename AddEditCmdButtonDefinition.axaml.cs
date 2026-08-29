@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml.Linq;
 using Avalonia;
@@ -26,6 +27,23 @@ public partial class AddEditCmdButtonDefinition : Window
     public MainWindow? TheMainWindow ;//= null;
 
     private Button? TheCurrentButton ;//= null;
+
+    /// <summary>
+    /// Set by any edit the user makes, cleared by a successful save. Nothing typed here reaches the
+    /// config file until Save runs, so without this the Exit button and the window's close box threw
+    /// the work away silently.
+    /// </summary>
+    private bool _dirty;
+
+    /// <summary>
+    /// Suppresses dirty-tracking while the dialog fills its own controls. Loading a button into the
+    /// form raises the same TextChanged and SelectionChanged events typing does, so without this the
+    /// dialog would believe it had been modified before the user touched anything.
+    /// </summary>
+    private bool _loading;
+
+    /// <summary>Set once the user has confirmed a discard, so the re-issued Close is not re-prompted.</summary>
+    private bool _closeConfirmed;
     
     //SolidColorBrush theDefaultBackground = new SolidColorBrush((Color)Color.Parse("Grey"));
     
@@ -78,6 +96,42 @@ public partial class AddEditCmdButtonDefinition : Window
         }
 
         LoadTerminalSettings();
+
+        // Last: LoadTerminalSettings populates controls, and wiring before it would record those
+        // programmatic writes as user edits.
+        WireDirtyTracking();
+    }
+
+    /// <summary>Marks the dialog modified unless the change came from the dialog populating itself.</summary>
+    private void MarkDirty()
+    {
+        if (!_loading) _dirty = true;
+    }
+
+    /// <summary>
+    /// Subscribes every editable control to the dirty flag. Done in one place rather than per-handler
+    /// so a control added to the XAML later is one string away from being covered.
+    /// </summary>
+    private void WireDirtyTracking()
+    {
+        foreach (var name in new[] { "tbContent", "tbCommand", "tbArguments", "tbToolTip",
+                                     "tbTerminalCommand", "tbTerminalArgs", "tbUiScale" })
+        {
+            var box = this.FindControl<TextBox>(name);
+            if (box != null) box.TextChanged += (_, _) => MarkDirty();
+        }
+
+        foreach (var name in new[] { "cbShellExecute", "cbShowWindow", "cbKeepRcloneWarm", "cbVerifyCopies" })
+        {
+            var check = this.FindControl<CheckBox>(name);
+            if (check != null) check.IsCheckedChanged += (_, _) => MarkDirty();
+        }
+
+        foreach (var name in new[] { "cbBACKGROUND", "cbFOREGROUND", "cbHorizontal", "cbVertical" })
+        {
+            var combo = this.FindControl<ComboBox>(name);
+            if (combo != null) combo.SelectionChanged += (_, _) => MarkDirty();
+        }
     }
 
     /// <summary>
@@ -90,17 +144,22 @@ public partial class AddEditCmdButtonDefinition : Window
     /// <summary>Populates every field on the System Wide Settings tab.</summary>
     private void LoadTerminalSettings()
     {
-        LoadTerminalFields();
+        _loading = true;
+        try
+        {
+            LoadTerminalFields();
 
-        // Reflect the live keep-rclone-warm option (loaded from config at startup).
-        var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
-        if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
+            // Reflect the live keep-rclone-warm option (loaded from config at startup).
+            var cb = this.FindControl<CheckBox>("cbKeepRcloneWarm");
+            if (cb != null) cb.IsChecked = AppOptions.KeepRcloneWarm;
 
-        // Reflect the live verify-copies option (loaded from config at startup).
-        var vc = this.FindControl<CheckBox>("cbVerifyCopies");
-        if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
+            // Reflect the live verify-copies option (loaded from config at startup).
+            var vc = this.FindControl<CheckBox>("cbVerifyCopies");
+            if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
 
-        LoadUiScaleFields();
+            LoadUiScaleFields();
+        }
+        finally { _loading = false; }
     }
 
     /// <summary>
@@ -115,231 +174,236 @@ public partial class AddEditCmdButtonDefinition : Window
     {
         try
         {
-            // Same file MainWindow loaded -- not whatever happens to sit in the working directory.
-            string path = ConfigPath();
-            if (!File.Exists(path)) return;
+                // Same file MainWindow loaded -- not whatever happens to sit in the working directory.
+                string path = ConfigPath();
+                if (!File.Exists(path)) return;
 
-            var terminal = XDocument.Load(path).Descendants("Terminal").FirstOrDefault();
-            if (terminal == null) return;
+                var terminal = XDocument.Load(path).Descendants("Terminal").FirstOrDefault();
+                if (terminal == null) return;
 
-            this.FindControl<TextBox>("tbTerminalCommand").Text = (string?)terminal.Element("Command") ?? "";
-            this.FindControl<TextBox>("tbTerminalArgs").Text = (string?)terminal.Element("Args") ?? "";
+                this.FindControl<TextBox>("tbTerminalCommand").Text = (string?)terminal.Element("Command") ?? "";
+                this.FindControl<TextBox>("tbTerminalArgs").Text = (string?)terminal.Element("Args") ?? "";
+            }
+            catch
+            {
+                // Missing or malformed config just leaves the fields blank.
+            }
         }
-        catch
+
+        /// <summary>
+        /// Fills the UI-scale box with the saved override (blank when it is on Auto) and captions it with
+        /// what is actually in force this session, so "Auto" is not a black box — the user can see the
+        /// number it resolved to and where it came from before deciding whether to override it.
+        /// </summary>
+        private void LoadUiScaleFields()
         {
-            // Missing or malformed config just leaves the fields blank.
+            var box = this.FindControl<TextBox>("tbUiScale");
+            if (box != null)
+                box.Text = AppOptions.UiScale > 0
+                    ? AppOptions.UiScale.ToString("0.##", CultureInfo.InvariantCulture)
+                    : "";
+
+            var status = this.FindControl<TextBlock>("tbUiScaleStatus");
+            if (status != null)
+                status.Text = $"Now running at {DisplayScaling.AppliedScale:0.##}x — {DisplayScaling.AppliedSource}. "
+                            + $"Auto detects {DisplayScaling.DetectedScale:0.##}x ({DisplayScaling.DetectedSource}).";
         }
-    }
 
-    /// <summary>
-    /// Fills the UI-scale box with the saved override (blank when it is on Auto) and captions it with
-    /// what is actually in force this session, so "Auto" is not a black box — the user can see the
-    /// number it resolved to and where it came from before deciding whether to override it.
-    /// </summary>
-    private void LoadUiScaleFields()
-    {
-        var box = this.FindControl<TextBox>("tbUiScale");
-        if (box != null)
-            box.Text = AppOptions.UiScale > 0
-                ? AppOptions.UiScale.ToString("0.##", CultureInfo.InvariantCulture)
-                : "";
-
-        var status = this.FindControl<TextBlock>("tbUiScaleStatus");
-        if (status != null)
-            status.Text = $"Now running at {DisplayScaling.AppliedScale:0.##}x — {DisplayScaling.AppliedSource}. "
-                        + $"Auto detects {DisplayScaling.DetectedScale:0.##}x ({DisplayScaling.DetectedSource}).";
-    }
-
-    /// <summary>
-    /// Persists the UI-scale override. Blank, 0 or unparseable text all mean "auto", which is stored as
-    /// 0 rather than removed so the element stays visible in the config file. The value is not applied
-    /// live: Avalonia fixes the scale factor when its windowing platform initialises, so it is picked
-    /// up by <see cref="DisplayScaling.Bootstrap"/> on the next launch.
-    /// </summary>
-    private void UpsertUiScaleSetting(XDocument doc)
-    {
-        string raw = this.FindControl<TextBox>("tbUiScale")?.Text ?? "";
-
-        double scale = 0;
-        if (!string.IsNullOrWhiteSpace(raw) && DisplayScaling.TryParseScale(raw, out var parsed) && parsed > 0)
-            scale = Math.Round(Math.Clamp(parsed, 0.5, 4.0), 2);
-
-        AppOptions.UiScale = scale;
-
-        var el = doc.Root!.Element("UiScale");
-        if (el == null) { el = new XElement("UiScale"); doc.Root!.Add(el); }
-        el.Value = scale.ToString("0.##", CultureInfo.InvariantCulture);
-    }
-
-    /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
-    private void UpsertTerminalSettings(XDocument doc)
-    {
-        var command = this.FindControl<TextBox>("tbTerminalCommand").Text ?? "";
-        var args = this.FindControl<TextBox>("tbTerminalArgs").Text ?? "";
-
-        var terminal = doc.Descendants("Terminal").FirstOrDefault();
-        if (terminal == null)
+        /// <summary>
+        /// Persists the UI-scale override. Blank, 0 or unparseable text all mean "auto", which is stored as
+        /// 0 rather than removed so the element stays visible in the config file. The value is not applied
+        /// live: Avalonia fixes the scale factor when its windowing platform initialises, so it is picked
+        /// up by <see cref="DisplayScaling.Bootstrap"/> on the next launch.
+        /// </summary>
+        private void UpsertUiScaleSetting(XDocument doc)
         {
-            terminal = new XElement("Terminal");
-            doc.Root!.Add(terminal);
+            string raw = this.FindControl<TextBox>("tbUiScale")?.Text ?? "";
+
+            double scale = 0;
+            if (!string.IsNullOrWhiteSpace(raw) && DisplayScaling.TryParseScale(raw, out var parsed) && parsed > 0)
+                scale = Math.Round(Math.Clamp(parsed, 0.5, 4.0), 2);
+
+            AppOptions.UiScale = scale;
+
+            var el = doc.Root!.Element("UiScale");
+            if (el == null) { el = new XElement("UiScale"); doc.Root!.Add(el); }
+            el.Value = scale.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
-        terminal.RemoveAll();
-        terminal.Add(new XElement("Command", command));
-        terminal.Add(new XElement("Args", args));
+        /// <summary>Writes the Terminal fields into <paramref name="doc"/>, creating the element if absent.</summary>
+        private void UpsertTerminalSettings(XDocument doc)
+        {
+            var command = this.FindControl<TextBox>("tbTerminalCommand").Text ?? "";
+            var args = this.FindControl<TextBox>("tbTerminalArgs").Text ?? "";
 
-        // Persist the keep-rclone-warm option and apply it live so it takes effect this session.
-        bool keepWarm = this.FindControl<CheckBox>("cbKeepRcloneWarm")?.IsChecked ?? false;
-        AppOptions.KeepRcloneWarm = keepWarm;
-        DirOpusReImagined.FileSystem.Rclone.RcloneService.KeepWarm = keepWarm;
+            var terminal = doc.Descendants("Terminal").FirstOrDefault();
+            if (terminal == null)
+            {
+                terminal = new XElement("Terminal");
+                doc.Root!.Add(terminal);
+            }
 
-        var warmEl = doc.Root!.Element("KeepRcloneWarm");
-        if (warmEl == null) { warmEl = new XElement("KeepRcloneWarm"); doc.Root!.Add(warmEl); }
-        warmEl.Value = keepWarm ? "true" : "false";
+            terminal.RemoveAll();
+            terminal.Add(new XElement("Command", command));
+            terminal.Add(new XElement("Args", args));
 
-        // Persist the verify-copies option and apply it live so it takes effect this session.
-        bool verify = this.FindControl<CheckBox>("cbVerifyCopies")?.IsChecked ?? false;
-        AppOptions.VerifyCopies = verify;
+            // Persist the keep-rclone-warm option and apply it live so it takes effect this session.
+            bool keepWarm = this.FindControl<CheckBox>("cbKeepRcloneWarm")?.IsChecked ?? false;
+            AppOptions.KeepRcloneWarm = keepWarm;
+            DirOpusReImagined.FileSystem.Rclone.RcloneService.KeepWarm = keepWarm;
 
-        var verifyEl = doc.Root!.Element("VerifyCopies");
-        if (verifyEl == null) { verifyEl = new XElement("VerifyCopies"); doc.Root!.Add(verifyEl); }
-        verifyEl.Value = verify ? "true" : "false";
+            var warmEl = doc.Root!.Element("KeepRcloneWarm");
+            if (warmEl == null) { warmEl = new XElement("KeepRcloneWarm"); doc.Root!.Add(warmEl); }
+            warmEl.Value = keepWarm ? "true" : "false";
 
-        // Persist the UI scale override. Unlike the options above this one cannot be applied live.
-        UpsertUiScaleSetting(doc);
-    }
+            // Persist the verify-copies option and apply it live so it takes effect this session.
+            bool verify = this.FindControl<CheckBox>("cbVerifyCopies")?.IsChecked ?? false;
+            AppOptions.VerifyCopies = verify;
 
-    private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
-    {
-        // we need to open the button config window
-        ConfigHelp BC = new ConfigHelp();
-        //BC.TheMainWindow = this;
-        BC.ShowDialog(this);
+            var verifyEl = doc.Root!.Element("VerifyCopies");
+            if (verifyEl == null) { verifyEl = new XElement("VerifyCopies"); doc.Root!.Add(verifyEl); }
+            verifyEl.Value = verify ? "true" : "false";
+
+            // Persist the UI scale override. Unlike the options above this one cannot be applied live.
+            UpsertUiScaleSetting(doc);
+        }
+
+        private void ArgHelp_OnClick(object? sender, RoutedEventArgs e)
+        {
+            // we need to open the button config window
+            ConfigHelp BC = new ConfigHelp();
+            //BC.TheMainWindow = this;
+            BC.ShowDialog(this);
         
-    }
+        }
     
-    private void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
-    {
-        // we need to open the button config window
-        ConfigHelp BC = new ConfigHelp();
-        //BC.TheMainWindow = this;
-        BC.ShowDialog(this);
-    }
-
-    private void HandleButtonContentChanged(object? sender, KeyEventArgs e)
-    {
-        TextBox tb = (TextBox)sender;
-        this.FindControl<Button>("SampleButton").Content = tb.Text;
-    }
-
-    private void PersistCurrentButtonInterface()
-    {
-        if (TheCurrentButton == null)
+        private void CommandHelp_OnClick(object? sender, RoutedEventArgs e)
         {
-            return;
+            // we need to open the button config window
+            ConfigHelp BC = new ConfigHelp();
+            //BC.TheMainWindow = this;
+            BC.ShowDialog(this);
         }
 
-        ButtonSettings bs = (ButtonSettings)TheCurrentButton.Tag; 
-        
-        if (bs == null)
+        private void HandleButtonContentChanged(object? sender, KeyEventArgs e)
         {
-            return;
-
-            // bs = new ButtonSettings();
-            // bs.Content = "{What Will Show}";
-            //
-            // bs.Action = "{Action}";
-            // bs.Args = "{Arguments}";
-            // bs.Background = "LightGray";
-            // bs.Foreground = "Black";
-            // bs.Name = TheCurrentButton.Name;
-            // bs.Name = bs.Name.Replace("LPB", "LPButton");
-            // bs.HorizontalAlignment = "Center";
-            // bs.VerticalAlignment = "Center";
-            // bs.ShellExecute = "False";
-            // bs.ShowWindow = "False";
-            // bs.ToolTip = "{ToolTip}";
-            //
-            // TheCurrentButton.Tag = bs;
+            TextBox tb = (TextBox)sender;
+            this.FindControl<Button>("SampleButton").Content = tb.Text;
         }
-        
-        bs.Content = this.FindControl<TextBox>("tbContent").Text;
-        bs.Background = this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem + "";
-        bs.Foreground = this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem + "";
-        bs.HorizontalAlignment = this.FindControl<ComboBox>("cbHorizontal").SelectedItem + "";
-        bs.VerticalAlignment = this.FindControl<ComboBox>("cbVertical").SelectedItem + "";
-        bs.Action = this.FindControl<TextBox>("tbCommand").Text;
-        bs.Args = this.FindControl<TextBox>("tbArguments").Text;
-        bs.ShellExecute = this.FindControl<CheckBox>("cbShellExecute").IsChecked + "";
-        bs.ShowWindow = this.FindControl<CheckBox>("cbShowWindow").IsChecked + "";
-        bs.ToolTip = this.FindControl<TextBox>("tbToolTip").Text;
-        
-        Button b = this.FindControl<Button>(TheCurrentButton.Name);
-        
-        b.Tag = bs;
-        b.Content = bs.Content;
-        b.Background = new SolidColorBrush((Color)Color.Parse(bs.Background));
-        b.Foreground = new SolidColorBrush((Color)Color.Parse(bs.Foreground));
-        //b.VerticalAlignment = (VerticalAlignment)Enum.Parse(typeof(VerticalAlignment), bs.VerticalAlignment);
-    }
 
-    private void HandleButtonClicked(object? sender, RoutedEventArgs e)
-    {
-        Button b= (Button)sender;
-        
-        PersistCurrentButtonInterface();
-        
-        TheCurrentButton = b;
-        
-        if (b.Tag == null)
+        private void PersistCurrentButtonInterface()
         {
-            ButtonSettings bs1 = new ButtonSettings();
+            if (TheCurrentButton == null)
+            {
+                return;
+            }
+
+            ButtonSettings bs = (ButtonSettings)TheCurrentButton.Tag; 
+        
+            if (bs == null)
+            {
+                return;
+
+                // bs = new ButtonSettings();
+                // bs.Content = "{What Will Show}";
+                //
+                // bs.Action = "{Action}";
+                // bs.Args = "{Arguments}";
+                // bs.Background = "LightGray";
+                // bs.Foreground = "Black";
+                // bs.Name = TheCurrentButton.Name;
+                // bs.Name = bs.Name.Replace("LPB", "LPButton");
+                // bs.HorizontalAlignment = "Center";
+                // bs.VerticalAlignment = "Center";
+                // bs.ShellExecute = "False";
+                // bs.ShowWindow = "False";
+                // bs.ToolTip = "{ToolTip}";
+                //
+                // TheCurrentButton.Tag = bs;
+            }
+        
+            bs.Content = this.FindControl<TextBox>("tbContent").Text;
+            bs.Background = this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem + "";
+            bs.Foreground = this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem + "";
+            bs.HorizontalAlignment = this.FindControl<ComboBox>("cbHorizontal").SelectedItem + "";
+            bs.VerticalAlignment = this.FindControl<ComboBox>("cbVertical").SelectedItem + "";
+            bs.Action = this.FindControl<TextBox>("tbCommand").Text;
+            bs.Args = this.FindControl<TextBox>("tbArguments").Text;
+            bs.ShellExecute = this.FindControl<CheckBox>("cbShellExecute").IsChecked + "";
+            bs.ShowWindow = this.FindControl<CheckBox>("cbShowWindow").IsChecked + "";
+            bs.ToolTip = this.FindControl<TextBox>("tbToolTip").Text;
+        
+            Button b = this.FindControl<Button>(TheCurrentButton.Name);
+        
+            b.Tag = bs;
+            b.Content = bs.Content;
+            b.Background = new SolidColorBrush((Color)Color.Parse(bs.Background));
+            b.Foreground = new SolidColorBrush((Color)Color.Parse(bs.Foreground));
+            //b.VerticalAlignment = (VerticalAlignment)Enum.Parse(typeof(VerticalAlignment), bs.VerticalAlignment);
+        }
+
+        private void HandleButtonClicked(object? sender, RoutedEventArgs e)
+        {
+            Button b= (Button)sender;
+        
+            PersistCurrentButtonInterface();
+        
+            TheCurrentButton = b;
+        
+            if (b.Tag == null)
+            {
+                ButtonSettings bs1 = new ButtonSettings();
             
-            bs1.Content = "{What Will Show}";
+                bs1.Content = "{What Will Show}";
             
-            bs1.Action = "{Action}";
-            bs1.Args = "{Arguments}";
-            bs1.Background = "LightGray";
-            bs1.Foreground = "Black";
-            bs1.Name = TheCurrentButton.Name;
-            bs1.Name = bs1.Name.Replace("LPB", "LPButton");
-            bs1.HorizontalAlignment = "Center";
-            bs1.VerticalAlignment = "Center";
-            bs1.ShellExecute = "False";
-            bs1.ShowWindow = "False";
-            bs1.ToolTip = "{ToolTip}";
+                bs1.Action = "{Action}";
+                bs1.Args = "{Arguments}";
+                bs1.Background = "LightGray";
+                bs1.Foreground = "Black";
+                bs1.Name = TheCurrentButton.Name;
+                bs1.Name = bs1.Name.Replace("LPB", "LPButton");
+                bs1.HorizontalAlignment = "Center";
+                bs1.VerticalAlignment = "Center";
+                bs1.ShellExecute = "False";
+                bs1.ShowWindow = "False";
+                bs1.ToolTip = "{ToolTip}";
             
-            TheCurrentButton.Tag = bs1;
+                TheCurrentButton.Tag = bs1;
             
              
-        }
+            }
         
-        ButtonSettings bs = (ButtonSettings)b.Tag;
+            ButtonSettings bs = (ButtonSettings)b.Tag;
         
-        // if the sheelexecute or showwindow elements are null then set them to false
-        if (bs.ShellExecute == null)
-        {
-            bs.ShellExecute = "False";
-        }
-        if (bs.ShowWindow == null)
-        {
-            bs.ShowWindow = "False";
-        }   
+            // if the sheelexecute or showwindow elements are null then set them to false
+            if (bs.ShellExecute == null)
+            {
+                bs.ShellExecute = "False";
+            }
+            if (bs.ShowWindow == null)
+            {
+                bs.ShowWindow = "False";
+            }   
 
-        //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
+            //ComboBox cb = this.FindControl<ComboBox>("cbHorizontal");
         
-        this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
-        this.FindControl<Button>("SampleButton").Content = bs.Content;
-        this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = bs.Background + "";
-        this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = bs.Foreground  + "";
-        this.FindControl<ComboBox>("cbHorizontal").SelectedItem = bs.HorizontalAlignment + "";
-        this.FindControl<ComboBox>("cbVertical").SelectedItem = bs.VerticalAlignment + "";
-        this.FindControl<TextBox>("tbCommand").Text = bs.Action + "";
-        this.FindControl<TextBox>("tbArguments").Text = bs.Args + "";
-        this.FindControl<CheckBox>("cbShellExecute").IsChecked = bool.Parse(bs.ShellExecute + "");
-        this.FindControl<CheckBox>("cbShowWindow").IsChecked = bool.Parse(bs.ShowWindow + "");
-        this.FindControl<TextBox>("tbToolTip").Text = bs.ToolTip + "";
-
+            // Filling the form fires the same events typing does; this is not a user edit.
+            _loading = true;
+            try
+            {
+            this.FindControl<TextBox>("tbContent").Text = bs.Content + "";
+            this.FindControl<Button>("SampleButton").Content = bs.Content;
+            this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = bs.Background + "";
+            this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = bs.Foreground  + "";
+            this.FindControl<ComboBox>("cbHorizontal").SelectedItem = bs.HorizontalAlignment + "";
+            this.FindControl<ComboBox>("cbVertical").SelectedItem = bs.VerticalAlignment + "";
+            this.FindControl<TextBox>("tbCommand").Text = bs.Action + "";
+            this.FindControl<TextBox>("tbArguments").Text = bs.Args + "";
+            this.FindControl<CheckBox>("cbShellExecute").IsChecked = bool.Parse(bs.ShellExecute + "");
+            this.FindControl<CheckBox>("cbShowWindow").IsChecked = bool.Parse(bs.ShowWindow + "");
+            this.FindControl<TextBox>("tbToolTip").Text = bs.ToolTip + "";
+        }
+        finally { _loading = false; }
     }
 
     private void InitializeComponent()
@@ -573,6 +637,9 @@ public partial class AddEditCmdButtonDefinition : Window
             doc.Save(configPath);
 
             TheMainWindow.DoButtonRefresh();
+
+            // Only here: the early return above and the else below both leave the file untouched.
+            _dirty = false;
         }
         else
         {
@@ -583,25 +650,66 @@ public partial class AddEditCmdButtonDefinition : Window
 
     private void Clear_OnClick(object sender, RoutedEventArgs e)
     {
-        this.FindControl<TextBox>("tbContent").Text = "";
-        this.FindControl<Button>("SampleButton").Content = "";
-        this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = "";
-        this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = "";
-        this.FindControl<ComboBox>("cbHorizontal").SelectedItem = "";
-        this.FindControl<ComboBox>("cbVertical").SelectedItem = "";
-        this.FindControl<TextBox>("tbCommand").Text = "";
-        this.FindControl<TextBox>("tbArguments").Text = "";
-        this.FindControl<CheckBox>("cbShellExecute").IsChecked = false;
-        this.FindControl<CheckBox>("cbShowWindow").IsChecked = false;
-        this.FindControl<TextBox>("tbToolTip").Text = "";
-        
+        // Blanking the form abandons the current selection instead of changing stored data, so it
+        // must not raise the unsaved-changes flag. An edit made *before* this still leaves it set.
+        _loading = true;
+        try
+        {
+            this.FindControl<TextBox>("tbContent").Text = "";
+            this.FindControl<Button>("SampleButton").Content = "";
+            this.FindControl<ComboBox>("cbBACKGROUND").SelectedItem = "";
+            this.FindControl<ComboBox>("cbFOREGROUND").SelectedItem = "";
+            this.FindControl<ComboBox>("cbHorizontal").SelectedItem = "";
+            this.FindControl<ComboBox>("cbVertical").SelectedItem = "";
+            this.FindControl<TextBox>("tbCommand").Text = "";
+            this.FindControl<TextBox>("tbArguments").Text = "";
+            this.FindControl<CheckBox>("cbShellExecute").IsChecked = false;
+            this.FindControl<CheckBox>("cbShowWindow").IsChecked = false;
+            this.FindControl<TextBox>("tbToolTip").Text = "";
+        }
+        finally { _loading = false; }
+
         TheCurrentButton = null;
     }
 
     private void Exit_OnClick(object sender, RoutedEventArgs e)
     {
-        // Implement delete logic here.
+        // The unsaved-changes guard lives in OnClosing so the window's own close box is covered too,
+        // not just this button.
         this.Close();
+    }
+
+    /// <summary>
+    /// Intercepts every close - the Exit button, the title-bar close box, Alt+F4 - and offers to keep
+    /// editing when there are unsaved changes. The confirmation is itself a dialog, so the close has
+    /// to be cancelled and re-issued once the answer comes back.
+    /// </summary>
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        if (_dirty && !_closeConfirmed)
+        {
+            e.Cancel = true;
+            _ = ConfirmThenClose();
+            return;
+        }
+
+        base.OnClosing(e);
+    }
+
+    private async Task ConfirmThenClose()
+    {
+        bool discard = await new MessageBox(
+            "You have unsaved changes. Close without saving?",
+            showCancel: true,
+            okText: "Discard",
+            cancelText: "Keep Editing",
+            title: "Unsaved Changes").ShowDialog<bool>(this);
+
+        // Closing the prompt itself yields false, which keeps the editor open - the safe default.
+        if (!discard) return;
+
+        _closeConfirmed = true;
+        Close();
     }
 
     

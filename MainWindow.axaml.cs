@@ -1233,7 +1233,9 @@ namespace DirOpusReImagined
             LPgrid.ReRender();
         }
 
-        private void Handle_Lower_Panel_Button_Clicks(object? sender, RoutedEventArgs e)
+        // async void: this is an event handler, and the argument-error path now awaits a modal
+        // instead of firing one off unawaited.
+        private async void Handle_Lower_Panel_Button_Clicks(object? sender, RoutedEventArgs e)
         {
             // This will handle all the lower panel button clicks
             if (sender is null)
@@ -1257,13 +1259,13 @@ namespace DirOpusReImagined
                         // we need to open the button config window
                         AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
                         BC.TheMainWindow = this;
-                        BC.ShowDialog(this);
+                        await BC.ShowDialog(this);
                         break;
                     }
                     if (item.Bcontent.ToUpper().Trim() == "%DRIVEINFO%")
                     {
                         DriveInfoDialog DI = new DriveInfoDialog();
-                        DI.ShowDialog(this);
+                        await DI.ShowDialog(this);
                         break;
                     }
                     if (item.Bcontent.ToUpper().Trim() == "%RCLONEDIAG%")
@@ -1276,7 +1278,13 @@ namespace DirOpusReImagined
                         ShowRcloneConfig();
                         break;
                     }
-                    string newaction = ParseTheArgs(item.Bargs);
+                    string newaction = ParseTheArgs(item.Bargs, out string? argError);
+
+                    if (argError != null)
+                    {
+                        await new MessageBox(argError, "Nothing Selected").ShowDialog(this);
+                        break;
+                    }
 
                     if (newaction != "%ERROR%")
                     {
@@ -1302,11 +1310,9 @@ namespace DirOpusReImagined
                         }
                         catch (Exception ex)
                         {
-                            ProgressWindow PW = new ProgressWindow();
-
-                            PW.MessageText.Text = "Error: " + ex.Message;
-
-                            PW.ShowDialog(this);
+                            // Was a button-less ProgressWindow shown unawaited: no way to dismiss it,
+                            // and the modal outlived the handler that opened it.
+                            await new MessageBox(ex.Message, "Launch Failed").ShowDialog(this);
                         }
                     }
 
@@ -1525,8 +1531,19 @@ namespace DirOpusReImagined
             return args;
         }
 
-        private string ParseTheArgs(string bcontent)
+        /// <summary>
+        /// Substitutes the %TOKEN% placeholders in a button's arguments.
+        /// </summary>
+        /// <param name="error">
+        /// Set to the reason when the selection does not satisfy the token, in which case
+        /// "%ERROR%" is returned. Returned rather than shown: this method is synchronous, so
+        /// displaying a dialog here left an unawaited modal behind - the same failure already
+        /// documented on FileUtility.TryDeleteFolder.
+        /// </param>
+        private string ParseTheArgs(string bcontent, out string? error)
         {
+            error = null;
+
             // this will attempt to parse the bcontent string and
             // return the action to be performed
 
@@ -1563,13 +1580,9 @@ namespace DirOpusReImagined
                 {
                     // neither grid has a folder selected
                     // do nothing
-                    ProgressWindow PW =
-                    new ProgressWindow("Error",
-                    "You have to have at least one Folder selected in either Pane");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have at least one Folder selected in either Pane";
 
                     return "%ERROR%";
                 }
@@ -1612,13 +1625,9 @@ namespace DirOpusReImagined
                 {
                     // neither grid has a folder selected
                     // do nothing
-                    ProgressWindow PW =
-                    new ProgressWindow("Error",
-                    "You have to have at least one file selected in either pane");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have at least one file selected in either pane";
 
                     return "%ERROR%";
                 }
@@ -1664,13 +1673,9 @@ namespace DirOpusReImagined
                     // do nothing
 
 
-                    ProgressWindow PW = 
-                        new ProgressWindow("Error", 
-                        "You have to have at least one file selected in either pane");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have at least one file selected in either pane";
 
                     return "%ERROR%";
                 }
@@ -1702,11 +1707,9 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    ProgressWindow PW = new ProgressWindow("Error","You have to have a file selected in each panel");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have a file selected in each panel";
 
                     return "%ERROR%";
                 }
@@ -1736,11 +1739,9 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    ProgressWindow PW = new ProgressWindow("Error", "You have to have a file selected in the left panel");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have a file selected in the left panel";
 
                     return "%ERROR%";
                 }
@@ -1770,11 +1771,9 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    ProgressWindow PW = new ProgressWindow("Error", "You have to have a file selected in the right panel");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have a file selected in the right panel";
 
                     return "%ERROR%";
                 }
@@ -1805,11 +1804,9 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    ProgressWindow PW = new ProgressWindow("Error", "You have to have at least one file selected in the right panel");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have at least one file selected in the right panel";
 
                     return "%ERROR%";
                 }
@@ -1840,11 +1837,9 @@ namespace DirOpusReImagined
                     // neither grid has a folder selected
                     // do nothing
 
-                    ProgressWindow PW = new ProgressWindow("Error", "You have to have at least one file selected in the left panel");
-
-                    PW.ShowDialog(this);
-
-                    //PW.Close();
+                    // Reported by the caller, which can await a real modal. Showing it here meant an
+                    // unawaited ShowDialog from a synchronous method.
+                    error = "You have to have at least one file selected in the left panel";
 
                     return "%ERROR%";
                 }

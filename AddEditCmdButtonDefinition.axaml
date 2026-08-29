@@ -4,11 +4,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
-        Title="AddEditCmdButtonDefinition" Width="800" Height="600" WindowStartupLocation="CenterOwner">
+        Title="DORI Settings" Width="800" Height="600" WindowStartupLocation="CenterOwner">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save" Click="Save_OnClick" Margin="5"/>
-            <Button Content="Clear" Click="Clear_OnClick" Margin="5" />
+            <Button Content="Reset Fields" Click="Clear_OnClick" Margin="5" />
             <Button Content="Exit" Click="Exit_OnClick" Margin="5" />
         </StackPanel>
         <TabControl>
@@ -92,7 +92,7 @@
             
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <StackPanel>
-                    <Label Padding="4" Content="Forground Color"></Label>
+                    <Label Padding="4" Content="Foreground Color"></Label>
                     <ComboBox Name="cbFOREGROUND" Width="180"></ComboBox>
                     <Label Padding="4" Content="Background Color"></Label>
                     <ComboBox Name="cbBACKGROUND" Width="180"></ComboBox>
@@ -102,7 +102,7 @@
                     <ComboBox Name="cbHorizontal" Width="180">
                         
                     </ComboBox>
-                    <Label Padding="4" Content= "Veritcal Alignment"></Label>
+                    <Label Padding="4" Content="Vertical Alignment"></Label>
                     <ComboBox Name="cbVertical" Width="180">
                         
                     </ComboBox>

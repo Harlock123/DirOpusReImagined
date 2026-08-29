@@ -4,7 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         x:Class="DirOpusReImagined.ProgressWindow"
-        Width="400" Height="200" Title="Progress">
+        Width="400" Height="200" Title="Progress"
+        WindowStartupLocation="CenterOwner">
 	<Grid>
 		<TextBlock Name="MessageText" 
 				   Text="One Moment Please..." 
