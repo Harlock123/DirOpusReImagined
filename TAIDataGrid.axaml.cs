@@ -279,6 +279,12 @@ namespace DirOpusReImagined
         private int _scrollMultiplier = 3;
 
         /// <summary>
+        /// Pixels moved per unit of <see cref="ScrollMultiplier"/> when wheeling sideways. The
+        /// horizontal bar is ranged in pixels, so without this a notch would move three pixels.
+        /// </summary>
+        private const int HorizontalWheelStep = 16;
+
+        /// <summary>
         /// This variable indicates whether the rendering is currently suspended.
         /// </summary>
         private bool _suspendRendering;
@@ -502,6 +508,10 @@ namespace DirOpusReImagined
         /// The maximum number of characters for truncating a column in a data table.
         /// </summary>
         private int _truncateColumnLength = 30;
+
+        private int _flexColumn = -1;
+        private bool _needsHorizontalScroll = true;
+        private int _flexColumnMinWidth = 140;
 
         /// The Backing Canvas as an attempt to double buffer rendering
         private Canvas BackingCanvas = null;
@@ -1218,6 +1228,35 @@ namespace DirOpusReImagined
             }
         }
 
+        /// <summary>
+        /// Index of the column that absorbs whatever horizontal space the other columns leave, or
+        /// -1 for none. Every other column stays sized to its content; this one is stretched (or
+        /// squeezed) so the columns together fill the grid exactly.
+        /// </summary>
+        /// <remarks>
+        /// Without this the grid is only ever as wide as its content: on a wide monitor, or with the
+        /// window on its own workspace, the panels were far wider than the columns drawn in them and
+        /// the surplus was simply dead space, while names went on being cut at
+        /// <see cref="TruncateColumnLength"/> characters regardless of the room available.
+        ///
+        /// A flex column ignores that character limit and is trimmed to its actual pixel width at
+        /// render time instead, so a name is only shortened when it genuinely does not fit.
+        /// </remarks>
+        [DefaultValue(-1)]
+        public int FlexColumn
+        {
+            get { return _flexColumn; }
+            set { _flexColumn = value; ReRender(); }
+        }
+
+        /// <summary>Floor for the flex column, so a narrow panel cannot squeeze it to nothing.</summary>
+        [DefaultValue(140)]
+        public int FlexColumnMinWidth
+        {
+            get { return _flexColumnMinWidth; }
+            set { _flexColumnMinWidth = value; ReRender(); }
+        }
+
         #endregion
 
         #region Public Methods
@@ -1487,7 +1526,10 @@ namespace DirOpusReImagined
 
                                         string thestringtomeasure = property.GetValue(item)?.ToString() + "";
 
-                                        if (_truncateColumns.Contains(idx))
+                                        // The flex column is measured in full: its width is decided by
+                                        // ApplyFlexColumn from the space available, not by its content,
+                                        // and it is trimmed to that width when drawn.
+                                        if (!IsFlexColumn(idx) && _truncateColumns.Contains(idx))
                                         {
                                             if (thestringtomeasure.Length > _truncateColumnLength)
                                             {
@@ -1521,6 +1563,11 @@ namespace DirOpusReImagined
 
                                 }
                             }
+
+                            // Content-driven widths are settled; hand the leftover width to the
+                            // flex column so the columns fill the panel instead of leaving dead space.
+                            ApplyFlexColumn();
+                            UpdateHorizontalScrollNeed();
                         }
 
 
@@ -1771,7 +1818,15 @@ namespace DirOpusReImagined
 
                                                 string thestringtoprint = property.GetValue(item)?.ToString() + "";
 
-                                                if (_truncateColumns.Contains(idx))
+                                                if (IsFlexColumn(idx))
+                                                {
+                                                    // Trim to what the column actually is, not to a
+                                                    // fixed character count: on a wide panel nothing is
+                                                    // cut at all. The 4px allows for the 2px left inset.
+                                                    thestringtoprint =
+                                                        TrimToWidth(thestringtoprint, _colWidths[idx] - 4);
+                                                }
+                                                else if (_truncateColumns.Contains(idx))
                                                 {
                                                     // here we need to truncate the string being rendered
                                                     if (thestringtoprint.Length > _truncateColumnLength)
@@ -1825,7 +1880,8 @@ namespace DirOpusReImagined
                         TheVerticleScrollBar.Minimum = 0;
                         TheVerticleScrollBar.Maximum = _items.Count;
                         TheVerticleScrollBar.ViewportSize = 10;   // list default (may have been changed by Thumbnails view)
-                        TheHorizontalScrollBar.IsVisible = true;  // list view can scroll wide columns
+                        // List view can scroll wide columns - but only bother when they are wide.
+                        TheHorizontalScrollBar.IsVisible = _needsHorizontalScroll;
 
                         //if (this.showCrossHairs)
                         //{
@@ -2308,6 +2364,115 @@ namespace DirOpusReImagined
             ReRender();
         }
 
+        /// <summary>True when <paramref name="idx"/> is the column that absorbs spare width.</summary>
+        private bool IsFlexColumn(int idx) => _flexColumn >= 0 && idx == _flexColumn;
+
+        /// <summary>
+        /// Stretches or squeezes the flex column so the columns together fill the canvas exactly.
+        /// Called once the content-driven widths are known.
+        /// </summary>
+        private void ApplyFlexColumn()
+        {
+            if (_flexColumn < 0 || _colWidths == null || _flexColumn >= _colWidths.Length) return;
+
+            int canvasWidth = (int)TheCanvas.Width;
+            if (canvasWidth <= 0) return;
+
+            int others = 0;
+            for (int i = 0; i < _colWidths.Length; i++)
+                if (i != _flexColumn) others += _colWidths[i];
+
+            // Leave a couple of pixels so the last column does not sit flush against the edge.
+            int available = canvasWidth - others - 4;
+            if (available < _flexColumnMinWidth) available = _flexColumnMinWidth;
+
+            _colWidths[_flexColumn] = available;
+        }
+
+        /// <summary>
+        /// Works out whether the columns actually overflow the canvas, so the horizontal scrollbar
+        /// can be shown only when it is of some use.
+        /// </summary>
+        /// <remarks>
+        /// Recomputed on every render rather than decided once: ReRender runs from SetGridSize, so
+        /// resizing the window, tiling it to half the screen, or moving it to a workspace of a
+        /// different size all re-answer the question. A panel that needed scrolling at half width
+        /// stops needing it at full width, and the other way round.
+        ///
+        /// With a flex column the columns normally add up to exactly the canvas width, so the answer
+        /// is usually "no". It becomes "yes" when the panel is too narrow for the fixed columns plus
+        /// <see cref="FlexColumnMinWidth"/> - the half-screen case.
+        /// </remarks>
+        private void UpdateHorizontalScrollNeed()
+        {
+            if (_colWidths == null || _colWidths.Length == 0)
+            {
+                _needsHorizontalScroll = false;
+                return;
+            }
+
+            int canvasWidth = (int)TheCanvas.Width;
+            int total = 0;
+            foreach (int w in _colWidths) total += w;
+
+            _needsHorizontalScroll = canvasWidth > 0 && total > canvasWidth;
+
+            // Nothing to scroll to any more: drop any shift left over from when it was narrower,
+            // otherwise the columns stay pushed off to the left with no way to bring them back.
+            if (!_needsHorizontalScroll)
+            {
+                _gridXShift = 0;
+                TheHorizontalScrollBar.Value = 0;
+                return;
+            }
+
+            // Range the bar in PIXELS of overflow rather than the fixed 0-100 it was declared with
+            // in the XAML and never updated from. Value is then the shift directly, and because
+            // Avalonia sizes the thumb as ViewportSize / (Maximum - Minimum + ViewportSize), the
+            // thumb comes out as canvasWidth / total - the fraction of the columns on screen.
+            // Previously the thumb was a permanent ~10% whatever the content, and Value 100 shifted
+            // the columns by their whole width, scrolling them completely out of sight.
+            int overflow = total - canvasWidth;
+
+            TheHorizontalScrollBar.Minimum = 0;
+            TheHorizontalScrollBar.Maximum = overflow;
+            TheHorizontalScrollBar.ViewportSize = canvasWidth;
+
+            // A narrower panel may leave the old shift past the new end of the range.
+            if (_gridXShift > overflow) _gridXShift = overflow;
+            if (_gridXShift < 0) _gridXShift = 0;
+            TheHorizontalScrollBar.Value = _gridXShift;
+        }
+
+        /// <summary>
+        /// Shortens <paramref name="text"/> with a trailing ellipsis until it fits
+        /// <paramref name="maxWidth"/> pixels in the current cell font. Returns it unchanged when it
+        /// already fits, so a name is only cut when the column really is too narrow for it.
+        /// </summary>
+        private string TrimToWidth(string text, int maxWidth)
+        {
+            if (string.IsNullOrEmpty(text) || maxWidth <= 0) return text;
+
+            if (MeasureCellWidth(text) <= maxWidth) return text;
+
+            const string ellipsis = "...";
+
+            // Binary search the longest prefix that still fits once the ellipsis is added.
+            int lo = 0, hi = text.Length;
+            while (lo < hi)
+            {
+                int mid = (lo + hi + 1) / 2;
+                if (MeasureCellWidth(text.Substring(0, mid) + ellipsis) <= maxWidth) lo = mid;
+                else hi = mid - 1;
+            }
+
+            return lo <= 0 ? ellipsis : text.Substring(0, lo) + ellipsis;
+        }
+
+        private double MeasureCellWidth(string text) =>
+            new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                _gridTypeface, _gridFontSize, _gridCellBrush).Width;
+
         /// <summary>
         /// SetGridSize method sets the width and height of the canvas and the control itself based on the specified width and height values.
         /// </summary>
@@ -2580,7 +2745,9 @@ namespace DirOpusReImagined
             {
                 // We are scrolling Horizontally
 
-                double d = TheHorizontalScrollBar.Value - (e.Delta.Y * _scrollMultiplier);
+                // The bar is ranged in pixels of overflow, so Value IS the shift - no conversion.
+                // HorizontalWheelStep keeps a notch a sensible distance now that a unit is one pixel.
+                double d = TheHorizontalScrollBar.Value - (e.Delta.Y * _scrollMultiplier * HorizontalWheelStep);
                 if (d < 0)
                 {
                     d = 0;
@@ -2590,16 +2757,7 @@ namespace DirOpusReImagined
                     d = TheHorizontalScrollBar.Maximum;
                 }
 
-                int maxposition = 0;
-
-                for (int i = 0; i < _colWidths.Length; i++)
-                {
-                    maxposition += _colWidths[i];
-                }
-
-                double delta = (maxposition / 100) * d;
-
-                _gridXShift = (int)delta;
+                _gridXShift = (int)d;
 
                 TheHorizontalScrollBar.Value = d;
 
@@ -3836,16 +3994,9 @@ namespace DirOpusReImagined
         {
             if (_items.Count > 0)
             {
-                int maxposition = 0;
-
-                for (int i = 0; i < _colWidths.Length; i++)
-                {
-                    maxposition += _colWidths[i];
-                }
-
-                double delta = (maxposition / 100) * e.NewValue;
-
-                _gridXShift = (int)delta;
+                // Ranged in pixels of overflow by UpdateHorizontalScrollNeed, so the new value is
+                // the shift directly.
+                _gridXShift = (int)e.NewValue;
 
                 ReRender();
             }

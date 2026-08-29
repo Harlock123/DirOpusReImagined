@@ -246,8 +246,12 @@ namespace DirOpusReImagined
             RPgrid.TruncateColumnLength = 30;
             LPgrid.TruncateColumnLength = 30;
 
-            RPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
-            LPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
+            // Column 1 is NAME. It takes whatever width the other columns leave, so the panels fill
+            // out on a wide display instead of drawing narrow columns against dead space, and names
+            // are trimmed to the room actually available rather than to a flat 30 characters.
+            // TruncateColumns deliberately no longer lists it: the flex column trims by pixel width.
+            RPgrid.FlexColumn = 1;
+            LPgrid.FlexColumn = 1;
 
             LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
             RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;
