@@ -168,6 +168,47 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - Platform-specific configuration files (Configuration.xml, MACConfiguration.xml, LINUXConfiguration.xml)
 - Handles platform differences in path separators, special folders, and executable detection
 
+### Linux Notes
+
+#### Hyprland — the pointer jumps back to the middle of a dialog
+
+On Hyprland with its default settings, moving the mouse off a modal dialog makes the pointer
+teleport back to the centre of that dialog. Aiming at a button near the dialog's edge — an **OK**
+in a bottom corner, say — becomes a fight.
+
+This is compositor behaviour, not an application bug. On Wayland a client cannot move the pointer
+at all, so nothing in DORI can cause or prevent it. Three Hyprland settings interact:
+
+| Setting | Default | Part it plays |
+|---|---|---|
+| `input:follow_mouse` | `1` | Pointer leaving the dialog focuses the parent window |
+| `misc:focus_on_activate` | `true` | The app re-activates its modal, and Hyprland obeys |
+| `cursor:no_warps` | `false` | Hyprland is therefore allowed to move the pointer |
+
+The parent gets focus, the modal immediately asks for it back, and the pointer is warped to the
+newly focused window's centre.
+
+Fix it by stopping the first step. Add to `~/.config/hypr/hyprland.lua`:
+
+```lua
+o.window("^(DirOpusReImagined)$", { no_follow_mouse = true })
+```
+
+Or, without the Omarchy Lua helper, the equivalent Hyprland window rule for your config format.
+[Omarchy](https://omarchy.org/) ships this same rule for JetBrains applications, which misbehave
+in the same way for the same reason.
+
+The trade-off: DORI no longer takes focus when you merely hover over it from another window — you
+click to focus. Focus *inside* DORI is unaffected, since both panels live in one window.
+
+A broader alternative is `cursor:no_warps = true`, which stops the pointer teleporting for every
+application, but leaves the focus flip-flop in place.
+
+**Other desktops are not affected.** Windows and macOS never warp the pointer on a focus change.
+GNOME and KDE default to click-to-focus, so the sequence never starts. Other tiling compositors
+(sway, i3) can warp on focus, but by default only when focus moves between *monitors*, which is far
+less intrusive.
+
 ### Configuration
 - XML-based configuration file (`Configuration.xml`) for all customization
 - Configurable executable file extensions for double-click launching
