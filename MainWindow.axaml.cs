@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -177,6 +178,12 @@ namespace DirOpusReImagined
             RcloneService.CleanupOrphans();
 
             MainWindowGridContainer.SizeChanged += MainWindowGridContainer_SizeChanged;
+
+            // Alt+wheel zooms every region at once, wherever the pointer happens to be. Registered
+            // on the window with handledEventsToo so it still runs when a child - a panel, a
+            // ScrollViewer - has already marked the event handled.
+            AddHandler(InputElement.PointerWheelChangedEvent, GlobalWheelZoom,
+                RoutingStrategies.Bubble, handledEventsToo: true);
 
             //Bitmap B1 = LoadImage(ImageStrings.BackButton);
 
@@ -3392,6 +3399,84 @@ namespace DirOpusReImagined
             return  mode.HasFlag(UnixFileMode.UserExecute)
                      || mode.HasFlag(UnixFileMode.GroupExecute)
                      || mode.HasFlag(UnixFileMode.OtherExecute);
+        }
+
+        /// <summary>Smallest and largest font the command buttons will zoom to.</summary>
+        private const int MinButtonFontSize = 7;
+        private const int MaxButtonFontSize = 24;
+
+        /// <summary>
+        /// Offset applied to every command button's own font size, adjusted by Alt+wheel.
+        /// </summary>
+        /// <remarks>
+        /// An offset rather than an absolute size: the 36 buttons are laid out with sizes from 9 to
+        /// 14 in the XAML, and flattening them all to one number would throw that away. Each button
+        /// keeps its designed size and moves by the same number of points.
+        /// </remarks>
+        private int _buttonFontDelta;
+
+        /// <summary>Each button's size as designed, captured before any zoom is applied.</summary>
+        private readonly Dictionary<Button, double> _buttonBaseFontSizes = new();
+
+        /// <summary>
+        /// Alt+wheel anywhere in the window zooms the whole interface a step.
+        /// </summary>
+        /// <remarks>
+        /// One handler rather than one per region: the panels used to zoom only while the pointer was
+        /// over a panel, and nothing else zoomed at all, so the text in the panels and the text on the
+        /// buttons drifted out of step with each other. Whichever region the pointer is over now moves
+        /// everything together.
+        ///
+        /// Each region keeps its own limits, so one may stop at its ceiling while another still has
+        /// room - that is the point of having separate caps.
+        /// </remarks>
+        private void GlobalWheelZoom(object? sender, PointerWheelEventArgs e)
+        {
+            if (e.KeyModifiers != KeyModifiers.Alt) return;
+
+            int delta = e.Delta.Y > 0 ? 1 : -1;
+
+            LPgrid.ChangeFontSize(delta);
+            RPgrid.ChangeFontSize(delta);
+            ChangeButtonFontSize(delta, ButtonGrid, CenterPanel);
+
+            // Stop it also being read as a scroll.
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Moves the text of every button in <paramref name="containers"/> by
+        /// <paramref name="delta"/> points, clamped so none ends up outside
+        /// [MinButtonFontSize, MaxButtonFontSize].
+        /// </summary>
+        private void ChangeButtonFontSize(int delta, params Control[] containers)
+        {
+            var buttons = containers
+                .Where(c => c != null)
+                .SelectMany(c => c.GetLogicalDescendants().OfType<Button>())
+                .ToList();
+
+            if (buttons.Count == 0) return;
+
+            foreach (Button b in buttons)
+                if (!_buttonBaseFontSizes.ContainsKey(b))
+                    _buttonBaseFontSizes[b] = b.FontSize;
+
+            // Clamp against the smallest and largest designed sizes together, so the whole set stays
+            // inside the bounds and their relative sizes are preserved.
+            double smallest = buttons.Min(b => _buttonBaseFontSizes[b]);
+            double largest = buttons.Max(b => _buttonBaseFontSizes[b]);
+
+            int lowest = (int)Math.Round(MinButtonFontSize - smallest);
+            int highest = (int)Math.Round(MaxButtonFontSize - largest);
+
+            int wanted = Math.Clamp(_buttonFontDelta + delta, lowest, highest);
+            if (wanted == _buttonFontDelta) return;
+
+            _buttonFontDelta = wanted;
+
+            foreach (Button b in buttons)
+                b.FontSize = _buttonBaseFontSizes[b] + _buttonFontDelta;
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)

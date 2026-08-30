@@ -21,13 +21,26 @@ RID="${RID:-linux-x64}"
 
 BUILD_DIR="$REPO_ROOT/dist/$MODE/$RID"
 
-# BOOKMARKS.MD is written next to the binary (BookmarkStore uses AppContext.BaseDirectory)
-# AND is shipped by the build as an empty stub, so a reinstall would overwrite the
-# user's bookmarks. Stash them and put them back after the copy.
-BOOKMARKS_BACKUP=""
-if [[ -s "$INSTALL_DIR/BOOKMARKS.MD" ]]; then
-  BOOKMARKS_BACKUP="$(mktemp)"
-  cp "$INSTALL_DIR/BOOKMARKS.MD" "$BOOKMARKS_BACKUP"
+# Files the running app writes into its own directory, and which the build also ships fresh
+# copies of. Without carrying them across, every reinstall silently reverts them to stock:
+#
+#   Configuration.xml  everything the settings dialog saves - panel fonts, titles, start paths,
+#                      terminal command, UI scale, and all 36 button definitions. The app resolves
+#                      it through AppContext.BaseDirectory, so on an installed copy this IS the
+#                      user's settings file, not a template.
+#   BOOKMARKS.MD       saved bookmarks (BookmarkStore, same base directory).
+#
+# Set RESET_CONFIG=1 to deliberately take the shipped defaults instead.
+USER_DATA=(Configuration.xml BOOKMARKS.MD)
+
+USER_DATA_STASH=""
+if [[ -z ${RESET_CONFIG:-} ]]; then
+  USER_DATA_STASH="$(mktemp -d)"
+  for f in "${USER_DATA[@]}"; do
+    if [[ -s "$INSTALL_DIR/$f" ]]; then
+      cp "$INSTALL_DIR/$f" "$USER_DATA_STASH/$f"
+    fi
+  done
 fi
 
 rm -rf "$INSTALL_DIR"
@@ -38,11 +51,16 @@ mkdir -p "$INSTALL_DIR" "$BIN_DIR" "$DESKTOP_DIR"
 cp -a "$BUILD_DIR/." "$INSTALL_DIR/"
 chmod 755 "$INSTALL_DIR/DirOpusReImagined"
 
-# An if, not an && chain: under `set -e` a false [[ ]] at the head of an && list
-# takes the whole script down.
-if [[ -n $BOOKMARKS_BACKUP ]]; then
-  cp "$BOOKMARKS_BACKUP" "$INSTALL_DIR/BOOKMARKS.MD"
-  rm -f "$BOOKMARKS_BACKUP"
+# Put the user's own files back over the freshly shipped ones. Ifs, not && chains: under
+# `set -e` a false [[ ]] at the head of an && list takes the whole script down.
+if [[ -n $USER_DATA_STASH ]]; then
+  for f in "${USER_DATA[@]}"; do
+    if [[ -f "$USER_DATA_STASH/$f" ]]; then
+      cp "$USER_DATA_STASH/$f" "$INSTALL_DIR/$f"
+      echo "kept your existing $f"
+    fi
+  done
+  rm -rf "$USER_DATA_STASH"
 fi
 
 ln -sfn "$INSTALL_DIR/DirOpusReImagined" "$BIN_DIR/$APP"
@@ -53,3 +71,8 @@ command -v update-desktop-database >/dev/null && update-desktop-database "$DESKT
 echo
 echo "Installed $MODE build to $INSTALL_DIR ($(du -sh "$INSTALL_DIR" | cut -f1))"
 echo "Run: $APP   (ensure $BIN_DIR is on your PATH)"
+if [[ -n ${RESET_CONFIG:-} ]]; then
+  echo "RESET_CONFIG was set: Configuration.xml and BOOKMARKS.MD are the shipped defaults."
+else
+  echo "Configuration.xml and BOOKMARKS.MD are preserved across reinstalls (RESET_CONFIG=1 to reset)."
+fi

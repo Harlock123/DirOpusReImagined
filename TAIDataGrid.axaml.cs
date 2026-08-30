@@ -2364,6 +2364,39 @@ namespace DirOpusReImagined
             ReRender();
         }
 
+        /// <summary>Smallest grid font the zoom will go down to.</summary>
+        public const int MinGridFontSize = 6;
+
+        /// <summary>Largest grid font the zoom will go up to.</summary>
+        public const int MaxGridFontSize = 32;
+
+        /// <summary>
+        /// Moves the cell, header and title fonts together by <paramref name="delta"/> points,
+        /// clamped to [<see cref="MinGridFontSize"/>, <see cref="MaxGridFontSize"/>].
+        /// </summary>
+        /// <returns>False when already at the limit, so a caller can stop rather than re-render.</returns>
+        /// <remarks>
+        /// The three call sites that used to adjust these (the two context-menu items and Alt+wheel)
+        /// each did "+= 1" / "+= -1" on all three properties with no bound at all, so the fonts could
+        /// be driven to zero and negative - an unreadable grid with no way back except editing the
+        /// config. Each property setter also re-renders, so a single step re-rendered three times.
+        /// </remarks>
+        public bool ChangeFontSize(int delta)
+        {
+            int clamped = Math.Clamp(_gridFontSize + delta, MinGridFontSize, MaxGridFontSize);
+            int applied = clamped - _gridFontSize;
+
+            if (applied == 0) return false;
+
+            // Fields, not properties: one re-render for the whole change.
+            _gridFontSize += applied;
+            _gridheaderFontSize += applied;
+            _gridTitleFontSize += applied;
+
+            ReRender();
+            return true;
+        }
+
         /// <summary>True when <paramref name="idx"/> is the column that absorbs spare width.</summary>
         private bool IsFlexColumn(int idx) => _flexColumn >= 0 && idx == _flexColumn;
 
@@ -2739,7 +2772,10 @@ namespace DirOpusReImagined
         /// <param name="e">The event arguments containing information about the pointer wheel change.</param>
         private void OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
         {
-            // Your logic here
+            // Alt+wheel is the whole-window zoom, handled once by MainWindow so that the panels, the
+            // command buttons and the centre column all move together. Applying it here as well would
+            // step the panel font twice for every notch, and only while the pointer was over a panel.
+            if (e.KeyModifiers == KeyModifiers.Alt) return;
 
             if (e.KeyModifiers == KeyModifiers.Control)
             {
@@ -2766,29 +2802,6 @@ namespace DirOpusReImagined
             }
             else
             {
-
-                if (e.KeyModifiers == KeyModifiers.Alt)
-                {
-                    // Lets Scroll on the grid Font Size
-
-                    if (e.Delta.Y > 0)
-                    {
-                        // Increase Font Size
-                        GridFontSize += 1;
-                        GridHeaderFontSize += 1;
-                        GridTitleFontSize += 1;
-                    }
-                    else
-                    {
-                        // Decrease Font Size
-                        GridFontSize += -1;
-                        GridHeaderFontSize += -1;
-                        GridTitleFontSize += -1;
-                    }
-
-                    ReRender();
-                }
-                else
                 {
                     // We are scrolling Vertically. In Thumbnails mode the scrollbar counts tile ROWS
                     // (one step per notch feels right); in List mode it counts item rows.
@@ -4089,12 +4102,7 @@ namespace DirOpusReImagined
 
         private void Option1_Click(object sender, RoutedEventArgs e)
         {
-            this.GridFontSize += 1;
-            this.GridTitleFontSize += 1;
-            this.GridHeaderFontSize += 1;
-            
-            
-
+            ChangeFontSize(1);
         }
 
         /// <summary>
@@ -4105,12 +4113,7 @@ namespace DirOpusReImagined
         /// <param name="e">The event arguments.</param>
         private void Option2_Click(object sender, RoutedEventArgs e)
         {
-            // Implement the action for Option 2
-            
-            this.GridFontSize += -1;
-            this.GridTitleFontSize += -1;
-            this.GridHeaderFontSize += -1;
-            
+            ChangeFontSize(-1);
         }
 
         #endregion

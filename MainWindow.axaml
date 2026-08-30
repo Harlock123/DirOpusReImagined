@@ -49,7 +49,8 @@
 			</StackPanel>
 		</StackPanel>
 		
-		<StackPanel Orientation="Vertical"
+		<StackPanel Name="CenterPanel"
+					Orientation="Vertical"
 					VerticalAlignment="Center"
 					HorizontalAlignment="Center"
 					Grid.Column="1"
