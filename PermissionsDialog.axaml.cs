@@ -43,6 +43,15 @@ public partial class PermissionsDialog : Window
 
     private void LoadPermissions()
     {
+        if (OperatingSystem.IsWindows())
+        {
+            // Unix permission bits don't exist on Windows and File.GetUnixFileMode throws there,
+            // so say so plainly instead of surfacing a PlatformNotSupportedException.
+            FileNameLabel.Text = $"{Path.GetFileName(_filePath)} - Unix permissions are not available on Windows.";
+            ApplyButton.IsEnabled = false;
+            return;
+        }
+
         try
         {
             var mode = File.GetUnixFileMode(_filePath);
@@ -166,6 +175,10 @@ public partial class PermissionsDialog : Window
 
     private void ApplyButton_Click(object? sender, RoutedEventArgs e)
     {
+        // Apply is disabled on Windows (see LoadPermissions); guard anyway so the
+        // unsupported SetUnixFileMode call can never be reached there.
+        if (OperatingSystem.IsWindows()) return;
+
         try
         {
             var newMode = BuildModeFromCheckboxes();

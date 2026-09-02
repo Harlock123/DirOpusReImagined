@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
-//using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -732,8 +731,7 @@ namespace DirOpusReImagined
 
             #region CheckBox Handlers
             
-            ChkShowHidden.Checked += ChkShowHidden_Checked;
-            ChkShowHidden.Unchecked += ChkShowHidden_Checked;
+            ChkShowHidden.IsCheckedChanged += ChkShowHidden_Checked;
 
             // Sorting is driven by clicking column headers (see GridHeaderClicked wiring below).
 
@@ -1454,7 +1452,7 @@ namespace DirOpusReImagined
         /// on failure). Shows a one-time note that edits to the extracted copy won't be written back
         /// into the read-only archive.
         /// </summary>
-        private string ExtractArchiveEntryToTemp(string panelPath, string name)
+        private string? ExtractArchiveEntryToTemp(string panelPath, string name)
         {
             try
             {
@@ -3231,6 +3229,16 @@ namespace DirOpusReImagined
             return result;
         }
 
+        /// <summary>
+        /// Whether <paramref name="v"/> ends with one of the configured executable extensions
+        /// (<c>ExecutableStuff</c>). This is a name-only test and applies to Windows, where the
+        /// extension is what makes a file executable.
+        /// </summary>
+        /// <remarks>
+        /// On Unix and macOS the equivalent question is whether the file carries an execute bit,
+        /// which needs a full path rather than a name; callers pair this with
+        /// <see cref="IsExecutableOnUnixNet6"/> for that.
+        /// </remarks>
         private bool FileExtensionIsExecutable(string v)
         {
             bool result = false;
@@ -3246,20 +3254,15 @@ namespace DirOpusReImagined
                     }
                 }
             }
-            else if (PlatformID.Unix == Environment.OSVersion.Platform ||
-                     PlatformID.MacOSX == Environment.OSVersion.Platform)
-            {
-                bool IsExecutableOnUnixNet6(string path)
-                {
-                    return IsExecutableOnUnixNet6(v);
-                }
-            }
 
             return result;
         }
         
         private bool IsExecutableOnUnixNet6(string path)
         {
+            // GetUnixFileMode throws PlatformNotSupportedException on Windows, and the execute
+            // bits it reports only mean anything on Unix-like systems in the first place.
+            if (OperatingSystem.IsWindows()) return false;
             if (!File.Exists(path)) return false;
             var mode = File.GetUnixFileMode(path);
             // Check any of the execute bits
@@ -4010,7 +4013,7 @@ namespace DirOpusReImagined
             return $"{val:0.##} {units[unit]}";
         }
 
-        private string FindAssetsDirectory()
+        private string? FindAssetsDirectory()
         {
             // 1. Current working directory
             string path = Path.Combine(Environment.CurrentDirectory, "Assets");
@@ -4026,7 +4029,7 @@ namespace DirOpusReImagined
         /// <summary>The config the app should load: working directory, then the executable's folder,
         /// then the per-platform user config location; null when none exists yet.
         /// Resolution lives in <see cref="ConfigFile"/> so every caller agrees on it.</summary>
-        private string FindConfigurationFile() => ConfigFile.Find();
+        private string? FindConfigurationFile() => ConfigFile.Find();
 
         private string GetRootDirectoryPath()
         {
@@ -4543,7 +4546,7 @@ namespace DirOpusReImagined
         /// archive climbs the entry tree and, at the archive root, steps back out to the real folder
         /// that contains the archive file. Falls back to the filesystem parent otherwise.
         /// </summary>
-        private static string ParentOf(string path)
+        private static string? ParentOf(string path)
         {
             if (ArchivePath.IsArchiveUri(path))
                 return ArchivePath.Parse(path).ParentUri();

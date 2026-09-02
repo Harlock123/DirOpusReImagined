@@ -385,6 +385,16 @@ namespace DirOpusReImagined
         #region Drag and Drop
 
         /// <summary>Private clipboard format for intra-app panel-to-panel drags.</summary>
+        /// <remarks>
+        /// This format carries an <see cref="InternalDragPayload"/> object, so the drag/drop code
+        /// below still uses the obsolete <c>DataObject</c> / <c>DragEventArgs.Data</c> API. Avalonia's
+        /// replacement <c>DataTransfer</c> API can only express custom formats over <c>string</c> or
+        /// <c>byte[]</c> (<c>DataFormat.CreateStringApplicationFormat</c> /
+        /// <c>CreateBytesApplicationFormat</c>) - there is no public way to build a
+        /// <c>DataFormat&lt;InternalDragPayload&gt;</c> - so migrating would mean serializing the
+        /// payload or handing it over out-of-band. Revisit if Avalonia adds an object-typed
+        /// application format. The obsolete API remains functional in Avalonia 11.3.x.
+        /// </remarks>
         public const string InternalDragFormat = "application/x-diropus-entries";
 
         /// <summary>How far the pointer must move (px) after a press before a drag begins.</summary>
@@ -1876,9 +1886,9 @@ namespace DirOpusReImagined
                 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //Debug.WriteLine(ex.Message);
+                // Rendering is best-effort; a failure here must not tear down the grid.
             }
         }
 
@@ -2772,7 +2782,7 @@ namespace DirOpusReImagined
         /// <summary>
         /// The item currently under the keyboard cursor, or null if the cursor is unset/out of range.
         /// </summary>
-        public object CursorItem
+        public object? CursorItem
         {
             get
             {
@@ -3610,10 +3620,12 @@ namespace DirOpusReImagined
                 if (entries.Count == 0) return;
 
                 var payload = new InternalDragPayload { SourcePath = SourcePath, Entries = entries };
+#pragma warning disable CS0618 // Object-carrying drag format; see InternalDragFormat remarks.
                 var data = new DataObject();
                 data.Set(InternalDragFormat, payload);
 
                 await DragDrop.DoDragDrop(e, data, DragDropEffects.Copy | DragDropEffects.Move);
+#pragma warning restore CS0618
             }
             catch
             {
@@ -3634,7 +3646,9 @@ namespace DirOpusReImagined
         /// <summary>Highlights the folder row under the pointer (if any) and sets Copy/Move by modifier.</summary>
         private void OnDragOver(object sender, DragEventArgs e)
         {
+#pragma warning disable CS0618 // Object-carrying drag format; see InternalDragFormat remarks.
             if (!e.Data.Contains(InternalDragFormat))
+#pragma warning restore CS0618
             {
                 e.DragEffects = DragDropEffects.None;
                 return;
@@ -3683,8 +3697,10 @@ namespace DirOpusReImagined
             _dropHighlightItem = null;
             _dragIndicatorText = null;
 
+#pragma warning disable CS0618 // Object-carrying drag format; see InternalDragFormat remarks.
             if (!e.Data.Contains(InternalDragFormat) ||
                 e.Data.Get(InternalDragFormat) is not InternalDragPayload payload ||
+#pragma warning restore CS0618
                 payload.Entries == null || payload.Entries.Count == 0)
             {
                 ReRender();

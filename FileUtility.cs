@@ -9,7 +9,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using DirOpusReImagined.FileSystem;
-//using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DirOpusReImagined
 {

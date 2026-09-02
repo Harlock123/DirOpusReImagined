@@ -15,7 +15,6 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DirOpusReImagined;
 
