@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using DirOpusReImagined.FileSystem.Preview;
+using SyntaxColorizer;
 
 namespace DirOpusReImagined;
 
@@ -120,13 +121,8 @@ public partial class FileViewer : Window
         // Hex only means something for a byte preview; start binary content in hex, text in text.
         _hexMode = result is PreviewResult.Bytes { IsBinary: true };
         ModeButton.IsEnabled = result is PreviewResult.Bytes;
-        WrapCheck.IsEnabled = result is PreviewResult.Bytes;
 
-        bool isImage = result is PreviewResult.Image;
-        PreviewImage.IsVisible = isImage;
-        Scroller.IsVisible = !isImage;
-
-        if (!isImage) PreviewImage.Source = null;
+        if (result is not PreviewResult.Image) PreviewImage.Source = null;
 
         Render();
     }
@@ -140,16 +136,46 @@ public partial class FileViewer : Window
         {
             case PreviewResult.Bytes b:
             {
-                ContentBox.Text = _hexMode ? PreviewText.BuildHex(b.Data) : PreviewText.DecodeText(b.Data);
                 string size = b.Truncated
                     ? $"first {MaxBytes / 1024} KB of {PreviewText.FormatSize(b.TotalBytes)} (truncated)"
                     : PreviewText.FormatSize(b.TotalBytes);
-                StatusText.Text = $"{(_hexMode ? "hex" : "text")} · {size}";
+
+                if (_hexMode)
+                {
+                    ShowSurface(Surface.PlainText);
+                    ContentBox.Text = PreviewText.BuildHex(b.Data);
+                    StatusText.Text = $"hex · {size}";
+                    break;
+                }
+
+                string text = PreviewText.DecodeText(b.Data);
+                var language = SyntaxMapping.ForFileName(_displayName);
+
+                // Highlight only when the language is known and the file is small enough that
+                // tokenising it on every cursor move stays cheap; otherwise plain text.
+                bool highlight = language != SyntaxLanguage.None
+                                 && b.Data.Length <= SyntaxMapping.MaxHighlightBytes;
+
+                if (highlight)
+                {
+                    ShowSurface(Surface.Highlighted);
+                    SyntaxBox.SyntaxTheme = SyntaxMapping.ForTheme(ThemeManager.Current);
+                    SyntaxBox.Language = language;
+                    SyntaxBox.Text = text;
+                    StatusText.Text = $"{language} · {size}";
+                }
+                else
+                {
+                    ShowSurface(Surface.PlainText);
+                    ContentBox.Text = text;
+                    StatusText.Text = $"text · {size}";
+                }
                 break;
             }
 
             case PreviewResult.Image img:
             {
+                ShowSurface(Surface.Image);
                 PreviewImage.Source = img.Bitmap;
                 string dims = $"{img.SourceWidth} × {img.SourceHeight}";
                 string scaled = img.Scaled ? " · scaled to fit" : "";
@@ -159,6 +185,7 @@ public partial class FileViewer : Window
 
             case PreviewResult.Info info:
             {
+                ShowSurface(Surface.PlainText);
                 var sb = new System.Text.StringBuilder();
                 int width = 0;
                 foreach (var f in info.Fields) width = Math.Max(width, f.Label.Length);
@@ -170,21 +197,45 @@ public partial class FileViewer : Window
             }
 
             case PreviewResult.Message m:
+                ShowSurface(Surface.PlainText);
                 ContentBox.Text = m.Detail;
                 InfoText.Text = m.Header;
                 StatusText.Text = "";
                 break;
 
             case PreviewResult.Error e:
+                ShowSurface(Surface.PlainText);
                 ContentBox.Text = "Could not preview this file:\n\n" + e.Reason;
                 StatusText.Text = "error";
                 break;
 
             default:
+                ShowSurface(Surface.PlainText);
                 ContentBox.Text = "";
                 StatusText.Text = "";
                 break;
         }
+    }
+
+    /// <summary>The three mutually exclusive content surfaces the window can show.</summary>
+    private enum Surface { PlainText, Highlighted, Image }
+
+    /// <summary>
+    /// Shows one content surface and hides the others. Clearing the hidden ones matters: a stale
+    /// bitmap or a large highlighted document left behind would keep its memory alive for as long
+    /// as the window stays open, which for the follow-mode preview is the whole session.
+    /// </summary>
+    private void ShowSurface(Surface surface)
+    {
+        Scroller.IsVisible = surface == Surface.PlainText;
+        SyntaxBox.IsVisible = surface == Surface.Highlighted;
+        PreviewImage.IsVisible = surface == Surface.Image;
+
+        if (surface != Surface.Highlighted) SyntaxBox.Text = "";
+        if (surface != Surface.Image) PreviewImage.Source = null;
+
+        // Wrap applies to the plain text box only; hex and highlighted code are laid out by column.
+        WrapCheck.IsEnabled = surface == Surface.PlainText && _result is PreviewResult.Bytes;
     }
 
     private void ModeButton_Click(object? sender, RoutedEventArgs e)

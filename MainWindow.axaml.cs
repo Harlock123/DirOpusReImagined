@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -119,6 +120,7 @@ namespace DirOpusReImagined
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
             Closing += (_, _) => SaveUseTrashToConfig();
+            Closing += (_, _) => { CapturePreviewSize(); SavePreviewSizeToConfig(); };
             Closing += (_, _) => SaveViewModesToConfig();
 
             // Panel-to-panel (and folder-drop) drag and drop.
@@ -174,6 +176,7 @@ namespace DirOpusReImagined
             LoadUseTrashFromConfig();
             LoadKeepRcloneWarmFromConfig();
             LoadVerifyCopiesFromConfig();
+            LoadPreviewSizeFromConfig();
             LoadUiScaleFromConfig();
             LoadViewModesFromConfig();
 
@@ -2393,11 +2396,19 @@ namespace DirOpusReImagined
                 FollowSelection = true,
                 ShowActivated = false,
                 ShowInTaskbar = false,
-                Width = 700,
-                Height = 500,
+                Width = AppOptions.PreviewWidth,
+                Height = AppOptions.PreviewHeight,
+
+                // A saved position only takes effect under Manual; the XAML default centres the
+                // window on its owner, which is the right behaviour the first time it is opened.
+                WindowStartupLocation = AppOptions.PreviewX.HasValue && AppOptions.PreviewY.HasValue
+                    ? WindowStartupLocation.Manual
+                    : WindowStartupLocation.CenterOwner,
             };
             _previewViewer.Closed += (_, _) =>
             {
+                // Remember how the user left it before the reference goes away.
+                CapturePreviewSize();
                 _previewViewer = null;
                 _previewTimer?.Stop();
             };
@@ -2405,6 +2416,9 @@ namespace DirOpusReImagined
             // Owned, not Topmost: stays above MainWindow and closes with it, without floating over
             // unrelated applications.
             _previewViewer.Show(this);
+
+            // After Show: the platform window has to exist before it can be positioned.
+            RestorePreviewPosition();
 
             // ShowActivated = false is advisory and several window managers ignore it, focusing a
             // newly mapped window regardless - which would leave the arrow keys driving the preview
@@ -2469,6 +2483,141 @@ namespace DirOpusReImagined
             }
 
             _previewViewer.LoadFrom(fullPath, entry.Name);
+        }
+
+        /// <summary>
+        /// Records the preview window's current size and position into <see cref="AppOptions"/>.
+        ///
+        /// <para>Reads <see cref="Visual.Bounds"/> rather than Width/Height: those are the values
+        /// *we* set when opening the window and go stale the moment the window manager resizes it,
+        /// which is exactly the case worth remembering. Absurd sizes are ignored so a window left
+        /// collapsed by a tiling compositor cannot poison the saved value; the position is always
+        /// taken, since it is validated against the available screens when it is used again.</para>
+        /// </summary>
+        private void CapturePreviewSize()
+        {
+            if (_previewViewer == null) return;
+
+            double w = _previewViewer.Bounds.Width;
+            double h = _previewViewer.Bounds.Height;
+            if (w >= 200 && h >= 150)
+            {
+                AppOptions.PreviewWidth = w;
+                AppOptions.PreviewHeight = h;
+            }
+
+            var pos = _previewViewer.Position;
+            AppOptions.PreviewX = pos.X;
+            AppOptions.PreviewY = pos.Y;
+        }
+
+        /// <summary>
+        /// Moves the preview window to its saved position, clamped onto a screen that actually
+        /// exists.
+        ///
+        /// <para>The clamp matters because monitors come and go: a window last closed on a second
+        /// display would otherwise reopen at coordinates that are now nowhere, leaving it invisible
+        /// and — on a compositor that will not let you drag what you cannot see — unrecoverable.
+        /// <see cref="WindowSizing"/> guards startup placement the same way, but it runs during
+        /// WindowOpened, before this position is applied, so the check is repeated here.</para>
+        /// </summary>
+        private void RestorePreviewPosition()
+        {
+            if (_previewViewer == null) return;
+            if (AppOptions.PreviewX is not int savedX || AppOptions.PreviewY is not int savedY) return;
+
+            try
+            {
+                var screens = _previewViewer.Screens;
+                var screen = screens?.ScreenFromPoint(new PixelPoint(savedX, savedY)) ?? screens?.Primary;
+                if (screen == null)
+                {
+                    // No screen information at all - better to leave the window where the platform
+                    // put it than to move it somewhere unverifiable.
+                    return;
+                }
+
+                var area = screen.WorkingArea;
+                double scaling = screen.Scaling > 0 ? screen.Scaling : 1.0;
+                var frame = _previewViewer.FrameSize ?? _previewViewer.ClientSize;
+                int w = (int)Math.Round(frame.Width * scaling);
+                int h = (int)Math.Round(frame.Height * scaling);
+                if (w <= 0 || h <= 0) return;
+
+                var (x, y) = WindowSizing.FitPosition(savedX, savedY, w, h,
+                                                      area.X, area.Y, area.Width, area.Height);
+                _previewViewer.Position = new PixelPoint(x, y);
+            }
+            catch
+            {
+                // Placement is a convenience; a window that opens in the wrong spot beats one that
+                // throws on open.
+            }
+        }
+
+        /// <summary>Reads the persisted preview window size into <see cref="AppOptions"/>.</summary>
+        private void LoadPreviewSizeFromConfig()
+        {
+            try
+            {
+                if (_configFilePath == null || !File.Exists(_configFilePath)) return;
+
+                var doc = XDocument.Load(_configFilePath);
+
+                var w = doc.Descendants("PreviewWidth").FirstOrDefault();
+                if (w != null && double.TryParse(w.Value.Trim(), NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var width) && width >= 200)
+                    AppOptions.PreviewWidth = width;
+
+                var h = doc.Descendants("PreviewHeight").FirstOrDefault();
+                if (h != null && double.TryParse(h.Value.Trim(), NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var height) && height >= 150)
+                    AppOptions.PreviewHeight = height;
+
+                // Position may legitimately be negative (a monitor left of the primary), so it is
+                // range-checked only for being parseable, and validated against real screens on use.
+                var x = doc.Descendants("PreviewX").FirstOrDefault();
+                if (x != null && int.TryParse(x.Value.Trim(), NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out var px))
+                    AppOptions.PreviewX = px;
+
+                var y = doc.Descendants("PreviewY").FirstOrDefault();
+                if (y != null && int.TryParse(y.Value.Trim(), NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out var py))
+                    AppOptions.PreviewY = py;
+            }
+            catch { /* keep the defaults */ }
+        }
+
+        /// <summary>Writes the preview window size to the config file.</summary>
+        private void SavePreviewSizeToConfig()
+        {
+            try
+            {
+                string path = _configFilePath ?? GetWritableConfigPath();
+                XDocument doc = File.Exists(path) ? XDocument.Load(path) : new XDocument(new XElement("Settings"));
+                var root = doc.Root ?? new XElement("Settings");
+                if (doc.Root == null) doc.Add(root);
+
+                void Set(string name, double value)
+                {
+                    var el = root.Element(name);
+                    if (el == null) { el = new XElement(name); root.Add(el); }
+                    // Invariant culture: a config written on a comma-decimal locale must still be
+                    // readable on a dot-decimal one, and vice versa.
+                    el.Value = Math.Round(value).ToString(CultureInfo.InvariantCulture);
+                }
+
+                Set("PreviewWidth", AppOptions.PreviewWidth);
+                Set("PreviewHeight", AppOptions.PreviewHeight);
+                if (AppOptions.PreviewX is int savedX) Set("PreviewX", savedX);
+                if (AppOptions.PreviewY is int savedY) Set("PreviewY", savedY);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                doc.Save(path);
+                _configFilePath = path;
+            }
+            catch { /* best-effort */ }
         }
 
         #endregion

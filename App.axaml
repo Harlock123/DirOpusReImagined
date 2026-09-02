@@ -4,6 +4,10 @@
              RequestedThemeVariant="Light">
     <Application.Styles>
         <FluentTheme/>
+        <!-- Control template for SyntaxColorizer's SyntaxHighlightingTextBox, used by the file
+             viewer for syntax-highlighted text previews. The styles ship embedded in the package
+             assembly, so this include is all that is needed to make the control usable. -->
+        <StyleInclude Source="avares://SyntaxColorizer/Controls/SyntaxHighlightingTextBox.axaml" />
     </Application.Styles>
 
     <!--

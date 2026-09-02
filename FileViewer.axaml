@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="820" d:DesignHeight="600"
+        xmlns:sc="clr-namespace:SyntaxColorizer.Controls;assembly=SyntaxColorizer"
         x:Class="DirOpusReImagined.FileViewer"
         Width="820" Height="600" WindowStartupLocation="CenterOwner"
         Title="View">
@@ -43,6 +44,12 @@
                  blown up to fill the window. -->
             <Image Name="PreviewImage" IsVisible="False" Margin="8"
                    Stretch="Uniform" StretchDirection="DownOnly" />
+
+            <!-- Syntax-highlighted text, used in place of the plain TextBox when the file is a
+                 recognised source file and small enough to tokenise cheaply. -->
+            <sc:SyntaxHighlightingTextBox Name="SyntaxBox" IsVisible="False"
+                                          IsReadOnly="True" ShowLineNumbers="True"
+                                          FontFamily="Cascadia Mono,Consolas,Menlo,monospace" />
         </Panel>
     </DockPanel>
 </Window>

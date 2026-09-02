@@ -24,6 +24,20 @@ public static class AppOptions
     /// platform initialises), so a change here needs a restart to take effect.</summary>
     public static double UiScale = 0;
 
+    /// <summary>Size of the F9 preview window, in device-independent pixels. Persisted so the window
+    /// reopens at whatever size it was last left, rather than resetting every time it is toggled.
+    /// Defaults are a comfortable starting size on a 1080p screen; <see cref="WindowSizing"/> clamps
+    /// them if the saved size no longer fits the screen the window lands on.</summary>
+    public static double PreviewWidth = 700;
+    public static double PreviewHeight = 500;
+
+    /// <summary>Screen position of the F9 preview window, in physical pixels, or null when it has
+    /// never been placed. Null means "let the window centre on its owner"; a saved position is
+    /// validated against the screens actually present before it is used, so a window saved on a
+    /// monitor that is no longer attached does not open off-screen.</summary>
+    public static int? PreviewX;
+    public static int? PreviewY;
+
     /// <summary>Per-panel layout mode (detail list vs. thumbnail grid). Persisted per side so each
     /// panel remembers its own view across launches. Default: list.</summary>
     public static GridViewMode LeftViewMode = GridViewMode.List;
