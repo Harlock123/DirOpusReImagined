@@ -21,6 +21,8 @@ public static class PreviewRegistry
     {
         new ImagePreviewProvider(),
         new PdfPreviewProvider(),
+        new OfficePreviewProvider(),
+        new ArchivePreviewProvider(),
         new BytesPreviewProvider(),   // Priority int.MinValue - always last, always succeeds.
     };
 

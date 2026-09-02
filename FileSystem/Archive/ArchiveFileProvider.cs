@@ -25,6 +25,22 @@ public sealed class ArchiveFileProvider : IFileProvider
 
     private sealed record CachedEntry(string Key, bool IsDir, long Size, DateTime Modified);
 
+    /// <summary>One entry in an archive, as reported by <see cref="ListEntries"/>.</summary>
+    public readonly record struct ArchiveEntry(string Key, bool IsDirectory, long Size, DateTime Modified);
+
+    /// <summary>
+    /// Every entry in the archive at <paramref name="archiveFsPath"/>, flat, with '/' separators.
+    ///
+    /// <para>Exposed for callers that want to describe an archive rather than browse it — the
+    /// preview layer, in particular. Goes through the same reader as browsing, so it inherits both
+    /// the random-access/streaming fallback (compression-wrapped tarballs need the latter) and the
+    /// mtime-keyed cache, which means previewing an archive the user then opens costs one read.</para>
+    /// </summary>
+    public IReadOnlyList<ArchiveEntry> ListEntries(string archiveFsPath) =>
+        ReadEntries(archiveFsPath)
+            .Select(e => new ArchiveEntry(e.Key, e.IsDir, e.Size, e.Modified))
+            .ToList();
+
     private readonly Dictionary<string, (DateTime Stamp, List<CachedEntry> Entries)> _cache = new();
 
     /// <summary>

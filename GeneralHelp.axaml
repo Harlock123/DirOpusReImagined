@@ -94,6 +94,8 @@
                 <TextBlock Text="• Press F9 to open a live preview window that follows the cursor as you move through a panel, instead of opening one file at a time. It shows images, text and a hex dump, and switches to whichever panel you start driving. Remote (cloud) files are not read automatically — press F3 to open one deliberately." TextWrapping="Wrap" />
                 <TextBlock Text="• Source files are syntax highlighted with line numbers, in colours that follow the app theme. Files over 100 KB, and types with no recognised language, are shown as plain text. The preview window remembers its size and position between sessions." TextWrapping="Wrap" />
                 <TextBlock Text="• PDFs show an info card instead of a hex dump — version, page count, title, author, producer and dates, read from the document itself." TextWrapping="Wrap" />
+                <TextBlock Text="• Word, Excel and PowerPoint documents (and OpenDocument .odt/.ods/.odp) preview as their text — paragraphs, a cell grid, or a slide-by-slide outline." TextWrapping="Wrap" />
+                <TextBlock Text="• Archives list what is inside them — entry counts, uncompressed size, compression saved, and the first 200 entries. A file whose contents identify it (a .docx, an EPUB, a JAR) is named as that rather than as a plain ZIP." TextWrapping="Wrap" />
 
                 <TextBlock Text="Browse into archives" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Double-click a .zip, .7z, .rar, .tar, or .tar.gz to open it like a folder and browse its contents. Copy or drag files out to a normal folder to extract them (with the usual progress and overwrite prompts). Archives are read-only — extract first, then modify." TextWrapping="Wrap" />

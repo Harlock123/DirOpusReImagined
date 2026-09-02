@@ -25,6 +25,15 @@ public abstract record PreviewResult
         Bitmap Bitmap, int SourceWidth, int SourceHeight,
         string Format, long TotalBytes, bool Scaled) : PreviewResult;
 
+    /// <summary>
+    /// Text extracted from a document, as opposed to the file's own bytes. Distinct from
+    /// <see cref="Bytes"/> because there is no meaningful hex view of it — the bytes on disk are
+    /// compressed XML, not this — and because it should wrap rather than scroll sideways.
+    /// </summary>
+    /// <param name="Wrap">True for prose. False for content laid out in fixed-width columns — a
+    /// spreadsheet grid loses its alignment the moment lines wrap.</param>
+    public sealed record Text(string Content, string Subtitle = "", bool Wrap = true) : PreviewResult;
+
     /// <summary>A labelled field list — the honest fallback for formats that cannot be rendered
     /// but can still be described (page counts, authors, entry totals, codec details).</summary>
     /// <param name="Subtitle">Short summary for the status line; the field count is used when empty.</param>

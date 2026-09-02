@@ -183,12 +183,30 @@ public partial class FileViewer : Window
                 break;
             }
 
+            case PreviewResult.Text t:
+            {
+                ShowSurface(Surface.PlainText);
+                ContentBox.Text = t.Content;
+                // Prose wants wrapping; a spreadsheet grid does not. The file's own bytes are not
+                // on offer here, so the Hex toggle stays disabled (Apply did that already).
+                ContentBox.TextWrapping = t.Wrap
+                    ? Avalonia.Media.TextWrapping.Wrap
+                    : Avalonia.Media.TextWrapping.NoWrap;
+                WrapCheck.IsChecked = t.Wrap;
+                WrapCheck.IsEnabled = true;
+                StatusText.Text = t.Subtitle;
+                break;
+            }
+
             case PreviewResult.Info info:
             {
                 ShowSurface(Surface.PlainText);
                 var sb = new System.Text.StringBuilder();
+                // Pad labels to the longest, but only up to a point: an info card that lists file
+                // paths would otherwise indent every value by the length of the deepest path.
                 int width = 0;
                 foreach (var f in info.Fields) width = Math.Max(width, f.Label.Length);
+                width = Math.Min(width, 32);
                 foreach (var f in info.Fields) sb.Append(f.Label.PadRight(width)).Append("  ").Append(f.Value).Append('\n');
                 ContentBox.Text = sb.ToString();
                 InfoText.Text = info.Title;
@@ -237,7 +255,9 @@ public partial class FileViewer : Window
         if (surface != Surface.Image) PreviewImage.Source = null;
 
         // Wrap applies to the plain text box only; hex and highlighted code are laid out by column.
-        WrapCheck.IsEnabled = surface == Surface.PlainText && _result is PreviewResult.Bytes;
+        // Extracted document text manages its own wrapping in Render().
+        if (_result is not PreviewResult.Text)
+            WrapCheck.IsEnabled = surface == Surface.PlainText && _result is PreviewResult.Bytes;
     }
 
     private void ModeButton_Click(object? sender, RoutedEventArgs e)
