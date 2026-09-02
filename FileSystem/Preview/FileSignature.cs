@@ -24,6 +24,7 @@ public static class FileSignature
         Ole2,                                     // legacy .doc/.xls/.ppt
         Elf, PeExe,                               // executables
         Rtf, Utf8Bom, Utf16Bom,
+        Mp3, Flac, Ogg, Wav, Mp4, Matroska, Avi,  // media
     }
 
     /// <summary>Bytes worth reading for detection. TAR's magic sits at offset 257, which sets the floor.</summary>
@@ -35,8 +36,14 @@ public static class FileSignature
         if (Match(head, 0, 0x89, (byte)'P', (byte)'N', (byte)'G'))                      return Kind.Png;
         if (StartsWith(head, "GIF87a") || StartsWith(head, "GIF89a"))                    return Kind.Gif;
         if (StartsWith(head, "BM"))                                                      return Kind.Bmp;
-        if (StartsWith(head, "RIFF") && head.Length >= 12 &&
-            head.Slice(8, 4).SequenceEqual("WEBP"u8))                                    return Kind.WebP;
+        if (StartsWith(head, "RIFF") && head.Length >= 12)
+        {
+            // RIFF is only a container; the four bytes at offset 8 say which one.
+            var riff = head.Slice(8, 4);
+            if (riff.SequenceEqual("WEBP"u8)) return Kind.WebP;
+            if (riff.SequenceEqual("WAVE"u8)) return Kind.Wav;
+            if (riff.SequenceEqual("AVI "u8)) return Kind.Avi;
+        }
         if (Match(head, 0, 0x49, 0x49, 0x2A, 0x00) || Match(head, 0, 0x4D, 0x4D, 0x00, 0x2A)) return Kind.Tiff;
         if (Match(head, 0, 0x00, 0x00, 0x01, 0x00))                                      return Kind.Ico;
 
@@ -59,6 +66,17 @@ public static class FileSignature
         if (Match(head, 0, 0x7F, (byte)'E', (byte)'L', (byte)'F'))                       return Kind.Elf;
         if (StartsWith(head, "MZ"))                                                      return Kind.PeExe;
 
+        if (StartsWith(head, "fLaC"))                                                    return Kind.Flac;
+        if (StartsWith(head, "OggS"))                                                    return Kind.Ogg;
+        if (Match(head, 0, 0x1A, 0x45, 0xDF, 0xA3))                                      return Kind.Matroska;
+
+        // ISO base media (MP4/M4A/MOV): the brand marker sits at offset 4, not 0.
+        if (head.Length >= 12 && head.Slice(4, 4).SequenceEqual("ftyp"u8))               return Kind.Mp4;
+
+        // MP3: either an ID3v2 tag, or a bare MPEG audio frame sync (11 set bits).
+        if (StartsWith(head, "ID3"))                                                     return Kind.Mp3;
+        if (head.Length >= 2 && head[0] == 0xFF && (head[1] & 0xE0) == 0xE0)             return Kind.Mp3;
+
         if (Match(head, 0, 0xEF, 0xBB, 0xBF))                                            return Kind.Utf8Bom;
         if (Match(head, 0, 0xFF, 0xFE) || Match(head, 0, 0xFE, 0xFF))                    return Kind.Utf16Bom;
 
@@ -79,6 +97,9 @@ public static class FileSignature
         Kind.Gzip => "gzip stream",     Kind.Bzip2 => "bzip2 stream",   Kind.Xz => "xz stream",
         Kind.Tar  => "TAR archive",     Kind.Ole2 => "Legacy Office document (OLE2)",
         Kind.Elf  => "ELF executable",  Kind.PeExe => "Windows executable",
+        Kind.Mp3 => "MP3 audio",        Kind.Flac => "FLAC audio",   Kind.Ogg => "Ogg media",
+        Kind.Wav => "WAV audio",        Kind.Mp4 => "MP4 media",     Kind.Matroska => "Matroska media",
+        Kind.Avi => "AVI video",
         Kind.Utf8Bom or Kind.Utf16Bom => "Text",
         _ => "Unknown",
     };
