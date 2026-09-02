@@ -36,7 +36,6 @@ namespace DirOpusReImagined
         private Avalonia.Rect RRB = new Avalonia.Rect();
         private Avalonia.Size OrigSize = new Avalonia.Size();
 
-        private List<string> ExecutableStuff = new List<string>();
         private List<string> ImageStuff = new List<string>();
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
@@ -755,7 +754,7 @@ namespace DirOpusReImagined
             // First run seeds BOOKMARKS.MD with the common folder presets (Home, Root,
             // Desktop, Documents, Pictures) that used to be hardcoded drive-preset buttons.
             SeedDefaultBookmarksIfEmpty();
-            
+
             #region Pointer Enter/Leave Handlers
 
             LpButton1.PointerEntered += Handle_Lower_Panel_Button_PointerEntered;
@@ -3366,66 +3365,22 @@ namespace DirOpusReImagined
             // Images go to the integrated viewer when it is enabled, on every platform.
             if (TryOpenIntegratedImageViewer(RPpath.Text, it)) return;
 
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                if (it.Typ)
-                {
-                    PushHistory(false, RPpath.Text);
-                    RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
-                }
-                else
-                {
-                    // its an actual file so can we execute it?
-
-                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
-                    {
-                        // we can execute it
-
-                        string thingtoexecute = JoinChildPath(RPpath.Text, it.Name);
-
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = thingtoexecute,
-                            UseShellExecute = true,
-                        });
-
-                    }
-
-                }
-            }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                if (it.Typ)
-                {
-                    PushHistory(false, RPpath.Text);
-
-                    RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
-                    if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
-                }
-                else
-                {
-                    string thingtoexecute = (RPpath.Text + "/" + it.Name);
-
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    {
-                        // macOS — use 'open' which delegates to Launch Services
-                        OpenFileWithDefaultApp(thingtoexecute);
-                    }
-                    else if (FileExtensionIsExecutable(it.Name.ToUpper()) || IsExecutableOnUnixNet6(thingtoexecute))
-                    {
-                        // Linux — try xdg-open for known types, fall back to direct execution
-                        OpenFileWithDefaultApp(thingtoexecute);
-                    }
-                }
-            }
+            if (it == null) return;
 
             if (it.Typ)
             {
+                PushHistory(false, RPpath.Text);
+                RPpath.Text = JoinChildPath(RPpath.Text, it.Name);
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(RPgrid, RPpath.Text, ChkShowHidden.IsChecked.Value, _rpSort);
+
                 RPfilter.Text = "";
                 RefreshRPGridPostActions();
+                return;
             }
+
+            // Every other file goes to whatever the OS has registered for it, on every platform.
+            OpenWithOperatingSystem(RPpath.Text, it);
         }
 
         private void LPgrid_GridItemDoubleClick(object? sender, GridHoverItem e)
@@ -3442,89 +3397,133 @@ namespace DirOpusReImagined
             // Images go to the integrated viewer when it is enabled, on every platform.
             if (TryOpenIntegratedImageViewer(LPpath.Text, it)) return;
 
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                if (it.Typ)
-                {
-                    PushHistory(true, LPpath.Text);
-                    LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
-                    if (ChkShowHidden != null)
-                        FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
-                }
-                else
-                {
-                    // its an actual file so can we execute it?
-
-                    if (FileExtensionIsExecutable(it.Name.ToUpper()))
-                    {
-                        // we can execute it
-
-                        string thingtoexecute = JoinChildPath(LPpath.Text, it.Name);
-
-                        Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = thingtoexecute,
-                            UseShellExecute = true,
-                        });
-
-                    }
-
-                }
-            }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                if (it.Typ)
-                {
-                    PushHistory(true, LPpath.Text);
-
-                    LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
-                    if (ChkShowHidden != null) FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
-                }
-                else
-                {
-                    string thingtoexecute = (LPpath.Text + "/" + it.Name);
-
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    {
-                        // macOS — use 'open' which delegates to Launch Services
-                        OpenFileWithDefaultApp(thingtoexecute);
-                    }
-                    else if (FileExtensionIsExecutable(it.Name.ToUpper()) || IsExecutableOnUnixNet6(thingtoexecute))
-                    {
-                        // Linux — try xdg-open for known types, fall back to direct execution
-                        OpenFileWithDefaultApp(thingtoexecute);
-                    }
-                }
-            }
+            if (it == null) return;
 
             if (it.Typ)
             {
+                PushHistory(true, LPpath.Text);
+                LPpath.Text = JoinChildPath(LPpath.Text, it.Name);
+                if (ChkShowHidden != null)
+                    FileUtility.PopulateFilePanel(LPgrid, LPpath.Text, ChkShowHidden.IsChecked.Value, _lpSort);
+
                 LPfilter.Text = "";
                 RefreshLPGridPostActions();
+                return;
+            }
+
+            // Every other file goes to whatever the OS has registered for it, on every platform.
+            OpenWithOperatingSystem(LPpath.Text, it);
+        }
+
+        /// <summary>
+        /// Hands a file to the operating system to open with whatever handler it has registered —
+        /// the shell on Windows, Launch Services on macOS, the desktop's MIME associations on Linux.
+        /// An executable runs, an image opens in the image viewer, a track plays.
+        ///
+        /// <para>Deliberately not gated on a list of known extensions. Deciding what can open a file
+        /// is the operating system's job and it already knows; an allowlist here could only ever be
+        /// an out-of-date subset of what the machine can actually handle.</para>
+        ///
+        /// <para>On Linux this uses xdg-open even for files carrying an execute bit, so a
+        /// double-click never runs a binary that the desktop would rather open in an editor.
+        /// Windows and macOS put SmartScreen and Gatekeeper in front of launching; Linux has no
+        /// equivalent, so the safer reading of "open" is the one that does not execute.</para>
+        /// </summary>
+        private void OpenWithOperatingSystem(string panelPath, AFileEntry? entry)
+        {
+            if (entry == null || entry.Typ || string.IsNullOrEmpty(panelPath)) return;
+
+            string fullPath = JoinChildPath(panelPath, entry.Name);
+            string localPath = fullPath;
+
+            // The OS can only open a real file, so anything the local provider does not own has to
+            // become one first.
+            if (ProviderRegistry.For(fullPath).IsRemote)
+            {
+                new MessageBox(
+                    $"\"{entry.Name}\" is on a cloud remote.\n\n" +
+                    "Copy it to a local folder first, then open it from there.",
+                    "Cannot open remote file").ShowDialog(this);
+                return;
+            }
+
+            if (ArchivePath.IsArchiveUri(fullPath))
+            {
+                string? temp = ExtractArchiveEntryToTemp(panelPath, entry.Name);
+                if (string.IsNullOrEmpty(temp))
+                {
+                    new MessageBox($"Could not extract \"{entry.Name}\" from the archive.",
+                                   "Cannot open file").ShowDialog(this);
+                    return;
+                }
+                localPath = temp;
+            }
+
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // UseShellExecute is what makes this the shell's decision rather than ours.
+                    Process.Start(new ProcessStartInfo { FileName = localPath, UseShellExecute = true });
+                }
+                else
+                {
+                    WatchLauncher(OpenFileWithDefaultApp(localPath), entry.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                // No registered handler, or no xdg-open on the box. Previously this threw straight
+                // out of the double-click handler.
+                new MessageBox(
+                    $"Could not open \"{entry.Name}\" with the system default application.\n\n{ex.Message}",
+                    "Cannot open file").ShowDialog(this);
             }
         }
 
-        private void OpenFileWithDefaultApp(string filePath)
+        /// <summary>Launches the platform's opener and returns the launcher process.</summary>
+        private Process? OpenFileWithDefaultApp(string filePath)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            string launcher = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "open" : "xdg-open";
+
+            return Process.Start(new ProcessStartInfo
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "open",
-                    Arguments = "\"" + filePath + "\"",
-                    UseShellExecute = false,
-                });
-            }
-            else
+                FileName = launcher,
+                Arguments = "\"" + filePath + "\"",
+                UseShellExecute = false,
+            });
+        }
+
+        /// <summary>
+        /// Reports a launcher that failed to open the file.
+        ///
+        /// <para><c>xdg-open</c> and <c>open</c> signal "no handler for this type" with an exit
+        /// code, not an exception — so without this the launch appears to succeed and simply
+        /// nothing happens, which is the least helpful outcome available.</para>
+        ///
+        /// <para>Only a quick failure is reported. Some xdg-open configurations exec the handler in
+        /// place, so the process can stay alive for as long as the viewer is open; a non-zero exit
+        /// minutes later means the user closed that application, not that the file failed to open.</para>
+        /// </summary>
+        private void WatchLauncher(Process? launcher, string fileName)
+        {
+            if (launcher == null) return;
+
+            var started = DateTime.UtcNow;
+            launcher.EnableRaisingEvents = true;
+            launcher.Exited += (_, _) =>
             {
-                // Linux — use xdg-open
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "xdg-open",
-                    Arguments = "\"" + filePath + "\"",
-                    UseShellExecute = false,
-                });
-            }
+                int code;
+                try { code = launcher.ExitCode; } catch { return; }
+
+                if (code == 0 || DateTime.UtcNow - started > TimeSpan.FromSeconds(2)) return;
+
+                Dispatcher.UIThread.Post(() =>
+                    new MessageBox(
+                        $"Nothing on this system is registered to open \"{fileName}\".\n\n" +
+                        "Set a default application for this file type in your desktop settings.",
+                        "No handler for this file").ShowDialog(this));
+            };
         }
 
         private bool FileExtensionIsImage(string v)
@@ -3541,48 +3540,6 @@ namespace DirOpusReImagined
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Whether <paramref name="v"/> ends with one of the configured executable extensions
-        /// (<c>ExecutableStuff</c>). This is a name-only test and applies to Windows, where the
-        /// extension is what makes a file executable.
-        /// </summary>
-        /// <remarks>
-        /// On Unix and macOS the equivalent question is whether the file carries an execute bit,
-        /// which needs a full path rather than a name; callers pair this with
-        /// <see cref="IsExecutableOnUnixNet6"/> for that.
-        /// </remarks>
-        private bool FileExtensionIsExecutable(string v)
-        {
-            bool result = false;
-
-            if (PlatformID.Win32NT == Environment.OSVersion.Platform)
-            {
-                foreach (string s in ExecutableStuff)
-                {
-                    if (v.ToUpper().EndsWith(s))
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        }
-        
-        private bool IsExecutableOnUnixNet6(string path)
-        {
-            // GetUnixFileMode throws PlatformNotSupportedException on Windows, and the execute
-            // bits it reports only mean anything on Unix-like systems in the first place.
-            if (OperatingSystem.IsWindows()) return false;
-            if (!File.Exists(path)) return false;
-            var mode = File.GetUnixFileMode(path);
-            // Check any of the execute bits
-            return  mode.HasFlag(UnixFileMode.UserExecute)
-                     || mode.HasFlag(UnixFileMode.GroupExecute)
-                     || mode.HasFlag(UnixFileMode.OtherExecute);
         }
 
         private void MainWindowGridContainer_SizeChanged(object? sender, SizeChangedEventArgs e)
@@ -4472,31 +4429,9 @@ namespace DirOpusReImagined
                 // Load XML file
                 XDocument xmlDoc = XDocument.Load(xmlFilePath);
                 
-                // Find the <Extensions> element
-                XElement extensionsElement = xmlDoc.Descendants("Extensions").FirstOrDefault();
-
-                if (extensionsElement != null)
-                {
-                    ExecutableStuff = new List<string>();
-                    string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
-                    // Get the string value inside the <Extensions> element
-                    string extensionsString = Regex.Replace(extensionsElement.Value, pattern, "");
-                    
-                    // Split the string into an array if needed
-                    string[] extensionsArray = extensionsString.Split(',');
-
-                    // Print or use the string or array as needed
-                    Console.WriteLine("Extensions String: " + extensionsString);
-                    //Console.WriteLine("Extensions Array: ");
-
-                    //string pattern = "[\n\r\t\b\f\\\"\'\x0B]";
-                    //string cleanedString = Regex.Replace(input, pattern, "");
-
-                    foreach (string extension in extensionsArray)
-                    {
-                        ExecutableStuff.Add(extension);
-                    }
-                }
+                // <Executable><Extensions> is no longer read: double-click hands every file to
+                // the operating system, which knows better than a list here what can open it. The
+                // element is left in existing config files, simply ignored.
 
                 // find the <Extensions> element in the <Images> element
                 XElement imagesElement = xmlDoc.Descendants("ImageExtensions").FirstOrDefault();
