@@ -2405,10 +2405,13 @@ namespace DirOpusReImagined
                     ? WindowStartupLocation.Manual
                     : WindowStartupLocation.CenterOwner,
             };
+            // Capture on Closing, not Closed: by the time Closed fires the platform window is gone
+            // and Position reads (0,0), which would persist a bogus top-left placement every time
+            // the preview is dismissed before the app itself is closed.
+            _previewViewer.Closing += (_, _) => CapturePreviewSize();
+
             _previewViewer.Closed += (_, _) =>
             {
-                // Remember how the user left it before the reference goes away.
-                CapturePreviewSize();
                 _previewViewer = null;
                 _previewTimer?.Stop();
             };
@@ -2497,6 +2500,10 @@ namespace DirOpusReImagined
         private void CapturePreviewSize()
         {
             if (_previewViewer == null) return;
+
+            // A closed window reports Position (0,0) and an empty Bounds; recording that would
+            // overwrite a good saved placement with a meaningless one.
+            if (!_previewViewer.IsVisible) return;
 
             double w = _previewViewer.Bounds.Width;
             double h = _previewViewer.Bounds.Height;
