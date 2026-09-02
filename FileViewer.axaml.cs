@@ -1,169 +1,214 @@
 using System;
-using System.IO;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using DirOpusReImagined.FileSystem;
+using Avalonia.Threading;
+using DirOpusReImagined.FileSystem.Preview;
 
 namespace DirOpusReImagined;
 
 /// <summary>
-/// Read-only text/hex file viewer. Reads bytes through <see cref="ProviderRegistry"/>, so it works
-/// uniformly for local files and files inside archives (archive://…!/…). The content is sniffed to
-/// pick Text or Hex initially; a toggle switches modes. Large files are capped so the UI stays
-/// responsive.
+/// Read-only file viewer. Content comes from <see cref="PreviewRegistry"/>, so it renders whatever
+/// the registered providers can produce — text, a hex dump, or a decoded image — and picks up new
+/// formats as providers are added, without changes here.
+///
+/// <para>Serves two roles: the one-shot F3 viewer, and (with <see cref="FollowSelection"/>) a live
+/// preview window that is re-pointed at each file as the panel cursor moves.</para>
 /// </summary>
 public partial class FileViewer : Window
 {
-    // Cap how much we read/display so a huge file can't hang the viewer.
+    /// <summary>How much of a file a text/hex preview reads. Enough to be useful, small enough that
+    /// a multi-gigabyte file cannot stall the window.</summary>
     private const int MaxBytes = 256 * 1024;
 
-    private byte[] _bytes = Array.Empty<byte>();
-    private bool _truncated;
+    private PreviewResult? _result;
     private bool _hexMode;
     private string _displayName = "";
+
+    /// <summary>Cancels an in-flight load when the window is re-pointed at another file.</summary>
+    private CancellationTokenSource? _loadCts;
+
+    /// <summary>Increments per load so a slow read that finishes late cannot paint over a newer
+    /// file's content. Compared on the UI thread before anything is rendered.</summary>
+    private int _loadId;
+
+    /// <summary>
+    /// When true this window is a live preview following the panel cursor rather than a one-shot
+    /// view of a single file. Affects presentation only; the host drives which file is shown.
+    /// </summary>
+    public bool FollowSelection { get; init; }
 
     public FileViewer()
     {
         InitializeComponent();
     }
 
-    /// <param name="path">A provider path — a normal filesystem path or an archive:// URI.</param>
-    /// <param name="displayName">Friendly name shown in the title/header.</param>
+    /// <param name="path">A provider path — a filesystem path, an archive:// URI, or a cloud path.</param>
+    /// <param name="displayName">Friendly name shown in the title and header.</param>
     public FileViewer(string path, string displayName) : this()
     {
-        _displayName = displayName;
-        Title = "View — " + displayName;
-
-        try
-        {
-            _bytes = ReadCapped(path, out _truncated);
-        }
-        catch (Exception ex)
-        {
-            InfoText.Text = displayName;
-            ContentBox.Text = "Could not read file:\n\n" + ex.Message;
-            ModeButton.IsEnabled = false;
-            return;
-        }
-
-        _hexMode = LooksBinary(_bytes);
-        Render();
-    }
-
-    private static byte[] ReadCapped(string path, out bool truncated)
-    {
-        var provider = ProviderRegistry.For(path);
-        using var stream = provider.OpenRead(path);
-        using var ms = new MemoryStream();
-
-        var buffer = new byte[64 * 1024];
-        int total = 0, read;
-        while (total < MaxBytes + 1 && (read = stream.Read(buffer, 0, buffer.Length)) > 0)
-        {
-            ms.Write(buffer, 0, read);
-            total += read;
-        }
-
-        var all = ms.ToArray();
-        truncated = all.Length > MaxBytes;
-        if (truncated)
-        {
-            var trimmed = new byte[MaxBytes];
-            Array.Copy(all, trimmed, MaxBytes);
-            return trimmed;
-        }
-        return all;
+        LoadFrom(path, displayName);
     }
 
     /// <summary>
-    /// Heuristic: a file is treated as binary if it contains NUL bytes or a high fraction of
-    /// non-printable, non-whitespace bytes in the sampled region.
+    /// Points this window at a file, replacing whatever it was showing. Returns immediately; the
+    /// read happens on a background thread and the result is applied when it arrives.
     /// </summary>
-    private static bool LooksBinary(byte[] data)
+    public void LoadFrom(string path, string displayName)
     {
-        if (data.Length == 0) return false;
-        int sample = Math.Min(data.Length, 8192);
-        int suspicious = 0;
-        for (int i = 0; i < sample; i++)
+        _displayName = displayName;
+        Title = TitlePrefix + displayName;
+        InfoText.Text = displayName;
+        StatusText.Text = "reading…";
+
+        _loadCts?.Cancel();
+        _loadCts = new CancellationTokenSource();
+
+        var cts = _loadCts;
+        int id = ++_loadId;
+
+        _ = LoadAsyncCore(path, displayName, id, cts.Token);
+    }
+
+    private async Task LoadAsyncCore(string path, string displayName, int id, CancellationToken ct)
+    {
+        PreviewResult result;
+        try
         {
-            byte b = data[i];
-            if (b == 0) return true;                       // NUL → definitely binary
-            bool printable = b >= 0x20 && b < 0x7F;
-            bool ws = b == 0x09 || b == 0x0A || b == 0x0D || b == 0x0C || b == 0x08;
-            if (!printable && !ws && b < 0x80) suspicious++; // control chars (ignore high/UTF-8 bytes)
+            result = await PreviewRegistry.LoadAsync(path, displayName, MaxBytes, ct)
+                                          .ConfigureAwait(false);
         }
-        return suspicious > sample / 10;                   // >10% control chars → binary
+        catch (OperationCanceledException)
+        {
+            return;                       // superseded by a newer file; leave the window alone
+        }
+        catch (Exception ex)
+        {
+            result = new PreviewResult.Error(ex.Message);
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (id != _loadId) return;    // a newer load won the race
+            Apply(result);
+        });
+    }
+
+    /// <summary>
+    /// Shows an explanatory message instead of file content — nothing selected, a folder under the
+    /// cursor, or a file deliberately not read (a remote one).
+    /// </summary>
+    public void ShowMessage(string header, string detail = "")
+    {
+        _loadCts?.Cancel();
+        _loadId++;                        // discard anything still in flight
+
+        _displayName = header;
+        Title = TitlePrefix + header;
+        Apply(new PreviewResult.Message(header, detail));
+    }
+
+    private string TitlePrefix => FollowSelection ? "Preview — " : "View — ";
+
+    /// <summary>Renders a result, switching the window between its text and image surfaces.</summary>
+    private void Apply(PreviewResult result)
+    {
+        _result = result;
+
+        // Hex only means something for a byte preview; start binary content in hex, text in text.
+        _hexMode = result is PreviewResult.Bytes { IsBinary: true };
+        ModeButton.IsEnabled = result is PreviewResult.Bytes;
+        WrapCheck.IsEnabled = result is PreviewResult.Bytes;
+
+        bool isImage = result is PreviewResult.Image;
+        PreviewImage.IsVisible = isImage;
+        Scroller.IsVisible = !isImage;
+
+        if (!isImage) PreviewImage.Source = null;
+
+        Render();
     }
 
     private void Render()
     {
-        ModeButton.Content = _hexMode ? "Text" : "Hex";   // button shows the OTHER mode
-        ContentBox.Text = _hexMode ? BuildHex(_bytes) : DecodeText(_bytes, out _);
-
-        string enc = _hexMode ? "hex" : "text";
-        string size = _truncated ? $"first {MaxBytes / 1024} KB (truncated)" : $"{_bytes.Length:N0} bytes";
         InfoText.Text = _displayName;
-        StatusText.Text = $"{enc} · {size}";
-    }
+        ModeButton.Content = _hexMode ? "Text" : "Hex";   // the button offers the OTHER mode
 
-    private static string DecodeText(byte[] data, out Encoding encoding)
-    {
-        // Honor a BOM if present; otherwise decode as UTF-8 (invalid sequences shown as U+FFFD).
-        if (data.Length >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
-        { encoding = Encoding.UTF8; return new UTF8Encoding(false, false).GetString(data, 3, data.Length - 3); }
-        if (data.Length >= 2 && data[0] == 0xFF && data[1] == 0xFE)
-        { encoding = Encoding.Unicode; return Encoding.Unicode.GetString(data, 2, data.Length - 2); }
-        if (data.Length >= 2 && data[0] == 0xFE && data[1] == 0xFF)
-        { encoding = Encoding.BigEndianUnicode; return Encoding.BigEndianUnicode.GetString(data, 2, data.Length - 2); }
-
-        encoding = Encoding.UTF8;
-        return new UTF8Encoding(false, false).GetString(data);
-    }
-
-    private static string BuildHex(byte[] data)
-    {
-        var sb = new StringBuilder(data.Length * 4);
-        var ascii = new StringBuilder(16);
-        for (int i = 0; i < data.Length; i += 16)
+        switch (_result)
         {
-            sb.Append(i.ToString("X8")).Append("  ");
-            ascii.Clear();
-            for (int j = 0; j < 16; j++)
+            case PreviewResult.Bytes b:
             {
-                if (i + j < data.Length)
-                {
-                    byte b = data[i + j];
-                    sb.Append(b.ToString("X2")).Append(' ');
-                    ascii.Append(b >= 0x20 && b < 0x7F ? (char)b : '.');
-                }
-                else
-                {
-                    sb.Append("   ");
-                }
-                if (j == 7) sb.Append(' ');                 // gap between the two 8-byte halves
+                ContentBox.Text = _hexMode ? PreviewText.BuildHex(b.Data) : PreviewText.DecodeText(b.Data);
+                string size = b.Truncated
+                    ? $"first {MaxBytes / 1024} KB of {PreviewText.FormatSize(b.TotalBytes)} (truncated)"
+                    : PreviewText.FormatSize(b.TotalBytes);
+                StatusText.Text = $"{(_hexMode ? "hex" : "text")} · {size}";
+                break;
             }
-            sb.Append(' ').Append(ascii).Append('\n');
+
+            case PreviewResult.Image img:
+            {
+                PreviewImage.Source = img.Bitmap;
+                string dims = $"{img.SourceWidth} × {img.SourceHeight}";
+                string scaled = img.Scaled ? " · scaled to fit" : "";
+                StatusText.Text = $"{img.Format} · {dims} · {PreviewText.FormatSize(img.TotalBytes)}{scaled}";
+                break;
+            }
+
+            case PreviewResult.Info info:
+            {
+                var sb = new System.Text.StringBuilder();
+                int width = 0;
+                foreach (var f in info.Fields) width = Math.Max(width, f.Label.Length);
+                foreach (var f in info.Fields) sb.Append(f.Label.PadRight(width)).Append("  ").Append(f.Value).Append('\n');
+                ContentBox.Text = sb.ToString();
+                InfoText.Text = info.Title;
+                StatusText.Text = $"{info.Fields.Count} field(s)";
+                break;
+            }
+
+            case PreviewResult.Message m:
+                ContentBox.Text = m.Detail;
+                InfoText.Text = m.Header;
+                StatusText.Text = "";
+                break;
+
+            case PreviewResult.Error e:
+                ContentBox.Text = "Could not preview this file:\n\n" + e.Reason;
+                StatusText.Text = "error";
+                break;
+
+            default:
+                ContentBox.Text = "";
+                StatusText.Text = "";
+                break;
         }
-        return sb.ToString();
     }
 
     private void ModeButton_Click(object? sender, RoutedEventArgs e)
     {
+        if (_result is not PreviewResult.Bytes) return;
         _hexMode = !_hexMode;
         Render();
     }
 
     private void WrapCheck_Changed(object? sender, RoutedEventArgs e)
     {
-        // Wrapping only makes sense in text mode; hex is fixed-width.
+        // Wrapping only makes sense for text; hex is fixed-width by construction.
         ContentBox.TextWrapping = (WrapCheck.IsChecked == true && !_hexMode)
             ? Avalonia.Media.TextWrapping.Wrap
             : Avalonia.Media.TextWrapping.NoWrap;
     }
 
     private void DismissButton_Click(object? sender, RoutedEventArgs e) => Close();
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _loadCts?.Cancel();
+        base.OnClosed(e);
+    }
 
     protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
     {

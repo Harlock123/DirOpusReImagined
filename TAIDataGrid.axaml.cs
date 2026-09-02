@@ -40,7 +40,8 @@ namespace DirOpusReImagined
         Move,
         NewFolder,
         Delete,
-        View
+        View,
+        PreviewToggle
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -3029,6 +3030,7 @@ namespace DirOpusReImagined
             {
                 case Key.F2: RaiseVerb(GridVerb.Rename);    e.Handled = true; return;
                 case Key.F3: RaiseVerb(GridVerb.View);      e.Handled = true; return;
+                case Key.F9: RaiseVerb(GridVerb.PreviewToggle); e.Handled = true; return;
                 case Key.F5: RaiseVerb(GridVerb.Copy);      e.Handled = true; return;
                 case Key.F6: RaiseVerb(GridVerb.Move);      e.Handled = true; return;
                 case Key.F7: RaiseVerb(GridVerb.NewFolder); e.Handled = true; return;

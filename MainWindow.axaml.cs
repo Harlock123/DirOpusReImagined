@@ -108,6 +108,13 @@ namespace DirOpusReImagined
             ProviderRegistry.Register(new RcloneFileProvider());
             ProviderRegistry.Register(new ArchiveFileProvider());
             FileUtility.PanelPopulated += OnPanelPopulated;
+            // Give the left panel keyboard focus once the window is up. Without this nothing holds
+            // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
+            // until the user clicks a panel. Focus() needs the control attached to the visual tree,
+            // which Opened guarantees and the constructor does not. GotFocus (wired below) also
+            // paints the active-panel frame, so the active side is visible from the first frame.
+            Opened += (_, _) => LPgrid.Focus();
+
             Closing += (_, _) => RcloneService.Shutdown();
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
@@ -304,6 +311,11 @@ namespace DirOpusReImagined
 
             LPgrid.GridItemClick += (_, _) => UpdateStatusBar();
             RPgrid.GridItemClick += (_, _) => UpdateStatusBar();
+
+            // The preview window tracks whichever panel the user is driving, not the one that
+            // opened it, so switching panels retargets it without a second keystroke.
+            LPgrid.GridItemClick += (_, _) => { _previewFromLeft = true;  SchedulePreviewRefresh(); };
+            RPgrid.GridItemClick += (_, _) => { _previewFromLeft = false; SchedulePreviewRefresh(); };
 
             //ChkShowHidden.PointerReleased += ChkShowHidden_Checked;
 
@@ -2282,6 +2294,9 @@ namespace DirOpusReImagined
                 case GridVerb.View:
                     ViewActivePanelFile(left ? LPgrid : RPgrid, left ? LPpath.Text : RPpath.Text);
                     break;
+                case GridVerb.PreviewToggle:
+                    TogglePreviewFollow(left);
+                    break;
             }
         }
 
@@ -2320,6 +2335,143 @@ namespace DirOpusReImagined
             var viewer = new FileViewer(fullPath, fileName);
             viewer.Show(this);
         }
+
+        /// <summary>
+        /// Opens an image in the integrated viewer, and reports whether it did — so a double-click
+        /// handler can stop there instead of also handing the file to the OS. Honours the
+        /// &lt;UseIntegratedImageViewer&gt; setting; off by default, in which case images keep going
+        /// to the system default application as before.
+        /// </summary>
+        /// <remarks>
+        /// Uses <see cref="FileViewer"/> rather than a separate image window. It already renders
+        /// whatever <c>PreviewRegistry</c> returns — including images — so a dedicated image window
+        /// would be a second copy of the same loading, sizing and error handling, free to drift out
+        /// of step with this one. Same reason the F3 viewer and the F9 preview share it.
+        /// </remarks>
+        private bool TryOpenIntegratedImageViewer(string panelPath, AFileEntry? entry)
+        {
+            if (!UseIntegratedImageViewer) return false;
+            if (entry == null || entry.Typ) return false;
+            if (string.IsNullOrEmpty(panelPath)) return false;
+            if (!FileExtensionIsImage(entry.Name)) return false;
+
+            // JoinChildPath keeps archive:// and cloud paths intact, and the viewer reads through
+            // the provider layer, so an image inside a ZIP opens the same as one on disk.
+            OpenFileViewer(panelPath, entry.Name);
+            return true;
+        }
+
+        #region Preview window
+
+        // A single FileViewer, opened with F9, that re-points itself at whatever the panel cursor
+        // lands on. It is a window rather than a docked pane so that showing a preview costs the
+        // file grids no space and needs no change to their manual pixel sizing (see
+        // MainWindowGridContainer_SizeChanged).
+
+        /// <summary>The live preview window, or null when it is closed. Only ever one exists.</summary>
+        private FileViewer? _previewViewer;
+
+        /// <summary>Debounce timer for preview refreshes; created on first use.</summary>
+        private DispatcherTimer? _previewTimer;
+
+        /// <summary>Which panel the preview is currently following.</summary>
+        private bool _previewFromLeft = true;
+
+        /// <summary>F9: opens the preview window, or closes it if it is already open.</summary>
+        private void TogglePreviewFollow(bool left)
+        {
+            if (_previewViewer != null)
+            {
+                _previewViewer.Close();          // the Closed handler clears the field
+                return;
+            }
+
+            _previewFromLeft = left;
+
+            _previewViewer = new FileViewer
+            {
+                FollowSelection = true,
+                ShowActivated = false,
+                ShowInTaskbar = false,
+                Width = 700,
+                Height = 500,
+            };
+            _previewViewer.Closed += (_, _) =>
+            {
+                _previewViewer = null;
+                _previewTimer?.Stop();
+            };
+
+            // Owned, not Topmost: stays above MainWindow and closes with it, without floating over
+            // unrelated applications.
+            _previewViewer.Show(this);
+
+            // ShowActivated = false is advisory and several window managers ignore it, focusing a
+            // newly mapped window regardless - which would leave the arrow keys driving the preview
+            // instead of the panel. Measured doing exactly that on Hyprland/XWayland. Taking focus
+            // back explicitly is what actually keeps the keyboard in the file grid.
+            Activate();
+            (left ? LPgrid : RPgrid).Focus();
+
+            RefreshPreviewNow();
+        }
+
+        /// <summary>
+        /// Debounces preview refreshes. Holding an arrow key fires a selection change per row; only
+        /// the last one in a burst should actually read a file.
+        /// </summary>
+        private void SchedulePreviewRefresh()
+        {
+            if (_previewViewer == null) return;
+
+            if (_previewTimer == null)
+            {
+                _previewTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+                _previewTimer.Tick += (_, _) =>
+                {
+                    _previewTimer!.Stop();
+                    RefreshPreviewNow();
+                };
+            }
+
+            _previewTimer.Stop();                // restart the window on every change
+            _previewTimer.Start();
+        }
+
+        /// <summary>Points the preview window at the tracked panel's cursor row.</summary>
+        private void RefreshPreviewNow()
+        {
+            if (_previewViewer == null) return;
+
+            var grid = _previewFromLeft ? LPgrid : RPgrid;
+            string panelPath = _previewFromLeft ? LPpath.Text : RPpath.Text;
+            if (string.IsNullOrEmpty(panelPath)) return;
+
+            if (grid.CursorItem is not AFileEntry entry)
+            {
+                _previewViewer.ShowMessage("No selection");
+                return;
+            }
+            if (entry.Typ)
+            {
+                _previewViewer.ShowMessage(entry.Name, "Folder - nothing to preview.");
+                return;
+            }
+
+            string fullPath = JoinChildPath(panelPath, entry.Name);
+
+            // Never auto-read across the network on a cursor move: arrow-keying through a cloud
+            // folder would otherwise download every file it passes over.
+            if (ProviderRegistry.For(fullPath).IsRemote)
+            {
+                _previewViewer.ShowMessage(entry.Name, "Remote file - press F3 to open it in the viewer.");
+                return;
+            }
+
+            _previewViewer.LoadFrom(fullPath, entry.Name);
+        }
+
+        #endregion
 
         /// <summary>
         /// Handles a wildcard-selection request from a panel. Invert applies immediately; Select and
@@ -3055,6 +3207,9 @@ namespace DirOpusReImagined
             // Double-clicking an archive file enters it like a folder.
             if (TryEnterArchive(RPgrid, RPpath, _rpHistory, it)) return;
 
+            // Images go to the integrated viewer when it is enabled, on every platform.
+            if (TryOpenIntegratedImageViewer(RPpath.Text, it)) return;
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 if (it.Typ)
@@ -3127,6 +3282,9 @@ namespace DirOpusReImagined
 
             // Double-clicking an archive file enters it like a folder.
             if (TryEnterArchive(LPgrid, LPpath, _lpHistory, it)) return;
+
+            // Images go to the integrated viewer when it is enabled, on every platform.
+            if (TryOpenIntegratedImageViewer(LPpath.Text, it)) return;
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {

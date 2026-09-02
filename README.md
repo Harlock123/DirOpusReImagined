@@ -85,6 +85,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 | **F6** | Move the selection from the active panel to the other panel |
 | **F7** | Create a new folder in the active panel |
 | **F8** or **Delete** | Delete the selection in the active panel |
+| **F9** | Toggle the live preview window (follows the cursor in the active panel) |
 | **+** | Select items by a wildcard pattern (e.g. `*.jpg`) |
 | **-** | Deselect items by a wildcard pattern |
 | **\*** | Invert the selection |
@@ -122,6 +123,15 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Auto-detects** text vs binary and opens in the right mode; a **Text ⇄ Hex** toggle switches anytime (hex shows offset · bytes · ASCII)
 - Reads through the same provider layer as everything else, so it views **files inside archives** just as easily as normal files
 - Large files are capped (first 256 KB) with a truncation note so the viewer stays responsive
+
+### Live Preview Window
+- Press **F9** for a preview window that **follows the keyboard cursor** — move through a panel and it re-points itself at each file, instead of opening one file at a time
+- It follows whichever panel you are driving, so switching panels retargets it without a second keystroke
+- Shows **images** (scaled to fit, with the source dimensions and format), text, and a hex dump for binary files — the same renderers the F3 viewer uses
+- A window rather than a docked pane, so it costs the file panels no space and can be sized or moved freely
+- It **does not take keyboard focus**, so the arrow keys keep driving the panel underneath while the preview updates
+- **Cloud files are never read automatically** — arrowing through a remote folder would otherwise download every file it passed over; press **F3** to open one deliberately
+- Reads through the provider layer, so images and text inside **archives** preview exactly like local files
 
 ### Browse Into Archives
 - Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
@@ -179,7 +189,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 - **Runtime**: .NET 8.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.26.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.27.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1479,6 +1489,20 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.27.0 (2026-09-02) — Live preview window, image previews & a preview provider layer
+- **Live preview window (F9).** A preview window that **follows the keyboard cursor**: move through a panel and it re-points itself at each file, rather than opening one file at a time. It tracks whichever panel you are driving, so switching panels retargets it without a second keystroke. It is a window rather than a docked pane, so it costs the file panels no space and can be sized and placed freely — including on a second monitor.
+- **It does not steal keyboard focus,** so the arrow keys keep driving the panel while the preview updates. (`ShowActivated = false` alone turned out not to be enough — several window managers focus a newly mapped window regardless — so the main window takes its focus back explicitly.)
+- **Refreshes are debounced** (200 ms) and in-flight reads are cancelled when the cursor moves on, so holding an arrow key scrolls a folder without reading every file it passes over.
+- **Cloud files are never read automatically.** Arrowing through a remote folder would otherwise download each file in turn; the preview says so and leaves it to **F3** to open one deliberately.
+- **Images now preview.** The viewer renders jpg/jpeg/png/gif/bmp/webp/ico/tiff alongside text and hex, reporting the source dimensions, format and file size. This applies to **F3** as well as the preview window.
+- **Large images can no longer exhaust memory.** Dimensions are read from the file header rather than by decoding, so anything wider than 2048px is decoded straight down to that width — a 100-megapixel photo costs a few megabytes instead of the ~400 MB its full-resolution buffer would take.
+- **New preview provider layer.** Preview content now comes from a small registry of providers (`FileSystem/Preview/`), chosen by **magic-number detection rather than file extension**, so a renamed or extension-less file still previews correctly. Adding a format — an archive listing, DOCX text, a PDF info card — means writing one provider class and registering it; the viewer needs no changes. Every file falls back to a text/hex preview, so nothing is ever left blank.
+- **One viewer instead of two.** The unused `ImageViewer` window has been removed and the `<UseIntegratedImageViewer>` setting now opens the standard viewer, which already renders images. That setting was previously parsed but never acted on, so the integrated viewer was unreachable; it is now wired to double-click and remains **off by default**, leaving images going to the system default application unless you turn it on.
+- **Previews read through the provider layer,** so images and text **inside archives** preview exactly like local files. (Archive entry streams are forward-only and the image decoder needs to seek, which previously failed outright; such sources are now buffered up to 64 MB.)
+- **A panel now has keyboard focus at startup.** Previously nothing did, so the arrow keys, type-ahead and every F-key verb silently did nothing until you first clicked a panel.
+- **Windows fixes:** the **File Permissions** dialog no longer surfaces a `PlatformNotSupportedException` on Windows — it now says plainly that Unix permission bits are unavailable and disables Apply — and the same unsupported call could be reached from a double-click during executable detection.
+- **Build is warning-clean.** Fixed all 16 compiler and analyzer warnings (unused variables, nullable returns, obsolete Avalonia APIs, platform-compatibility calls), removed a dead code path in executable detection that made the Unix branch a no-op, and dropped the unused `Microsoft.CodeAnalysis.CSharp` package reference (a 2015-era prerelease) that nothing referenced.
 
 ### 0.1.26.0 (2026-08-17) — Thumbnail (icon) view
 - **Panels can now show a grid of thumbnails instead of a list.** Each panel has its own **List / Thumbnails** toggle in its tab bar (the ▦ / ☰ button), so you can, say, browse a photo folder as tiles on one side while keeping a detail list on the other. Each panel remembers its choice across launches.

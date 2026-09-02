@@ -31,11 +31,18 @@
             </Grid>
         </Border>
 
-        <!-- Content -->
-        <ScrollViewer Name="Scroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <TextBox Name="ContentBox" IsReadOnly="True" AcceptsReturn="True"
-                     BorderThickness="0" FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
-                     TextWrapping="NoWrap" Padding="8" />
-        </ScrollViewer>
+        <!-- Content: exactly one of these is visible, chosen by the preview result's shape. -->
+        <Panel>
+            <ScrollViewer Name="Scroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBox Name="ContentBox" IsReadOnly="True" AcceptsReturn="True"
+                         BorderThickness="0" FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
+                         TextWrapping="NoWrap" Padding="8" />
+            </ScrollViewer>
+
+            <!-- StretchDirection=DownOnly so a small image shows at native size instead of being
+                 blown up to fill the window. -->
+            <Image Name="PreviewImage" IsVisible="False" Margin="8"
+                   Stretch="Uniform" StretchDirection="DownOnly" />
+        </Panel>
     </DockPanel>
 </Window>
