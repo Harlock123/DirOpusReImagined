@@ -20,6 +20,7 @@ public static class PreviewRegistry
     private static readonly List<IPreviewProvider> _providers = new()
     {
         new ImagePreviewProvider(),
+        new PdfPreviewProvider(),
         new BytesPreviewProvider(),   // Priority int.MinValue - always last, always succeeds.
     };
 

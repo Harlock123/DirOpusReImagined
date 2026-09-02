@@ -27,7 +27,8 @@ public abstract record PreviewResult
 
     /// <summary>A labelled field list — the honest fallback for formats that cannot be rendered
     /// but can still be described (page counts, authors, entry totals, codec details).</summary>
-    public sealed record Info(string Title, IReadOnlyList<InfoField> Fields) : PreviewResult;
+    /// <param name="Subtitle">Short summary for the status line; the field count is used when empty.</param>
+    public sealed record Info(string Title, IReadOnlyList<InfoField> Fields, string Subtitle = "") : PreviewResult;
 
     /// <summary>Nothing to show, for a reason worth stating: no selection, a folder, a remote file
     /// deliberately not fetched.</summary>

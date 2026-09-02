@@ -192,7 +192,9 @@ public partial class FileViewer : Window
                 foreach (var f in info.Fields) sb.Append(f.Label.PadRight(width)).Append("  ").Append(f.Value).Append('\n');
                 ContentBox.Text = sb.ToString();
                 InfoText.Text = info.Title;
-                StatusText.Text = $"{info.Fields.Count} field(s)";
+                StatusText.Text = string.IsNullOrEmpty(info.Subtitle)
+                    ? $"{info.Fields.Count} field(s)"
+                    : info.Subtitle;
                 break;
             }
 
