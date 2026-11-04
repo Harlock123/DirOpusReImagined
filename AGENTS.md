@@ -82,4 +82,6 @@ Everything sits at the repository root; there is no `src/` folder.
 - Update `README.md` (features, shortcuts, the overview) to match, and refresh `ScreenShots/` if the look changes.
 - Raise `AssemblyVersion` and `FileVersion` together for a release; `publish-all.sh` names the zips from it.
 
-There is no CI workflow; releases are built locally with `publish-all.sh` or `publish-all.ps1`.
+`.github/workflows/build.yml` builds every push and runs `publish-all.sh` once per platform, so CI ships exactly
+what a local run would. Pushes to `master` refresh the rolling `latest` pre-release; a `v*` tag makes a proper
+release. `publish-all.sh` and `publish-all.ps1` still work locally.
