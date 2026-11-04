@@ -8,7 +8,7 @@ This is **DirOpusReImagined** - a modern cross-platform file manager inspired by
 
 ## What It Does
 
-It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on Windows, macOS, and Linux. Think of it as a professional-grade file browser with two independent panels side-by-side for efficient file management.
+It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on Windows, macOS, and Linux. Think of it as a professional-grade file browser with two independent panels side-by-side for efficient file management.
 
 ## Key Features
 
@@ -194,7 +194,7 @@ It's a **dual-panel file manager** built with .NET 8 and Avalonia that runs on W
 ## Tech Stack
 
 - **Framework**: Avalonia 11.0.0 (cross-platform UI)
-- **Runtime**: .NET 8.0 / C#
+- **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
 The project is currently at version 0.1.27.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
@@ -1393,7 +1393,7 @@ rclone type: `zoho` · docs: https://rclone.org/zoho/
 
 ### Prerequisites
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
 
 Verify your installation:
 
@@ -1414,7 +1414,7 @@ cd DirOpusReImagined
 dotnet build
 ```
 
-The compiled output will be in `bin/Debug/net8.0/`.
+The compiled output will be in `bin/Debug/net10.0/`.
 
 ### Run
 
@@ -1425,13 +1425,13 @@ dotnet run
 Or run the compiled binary directly:
 
 ```bash
-./bin/Debug/net8.0/DirOpusReImagined
+./bin/Debug/net10.0/DirOpusReImagined
 ```
 
 On Windows:
 
 ```cmd
-bin\Debug\net8.0\DirOpusReImagined.exe
+bin\Debug\net10.0\DirOpusReImagined.exe
 ```
 
 ### Publish All Platforms (Single-File Executables)
