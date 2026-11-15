@@ -52,7 +52,8 @@ namespace DirOpusReImagined
         PreviousButtonBank,
         CompareFiles,
         FlatView,
-        FindDuplicates
+        FindDuplicates,
+        SavedFilters
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>

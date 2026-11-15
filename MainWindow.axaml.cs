@@ -111,6 +111,7 @@ namespace DirOpusReImagined
             InitButtonBanks();
             InitFlatView();
             InitLayouts();
+            InitSavedFilters();
             InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
@@ -2327,6 +2328,9 @@ namespace DirOpusReImagined
                 case GridVerb.FindDuplicates:
                     OpenDuplicates(left);
                     break;
+                case GridVerb.SavedFilters:
+                    ShowSavedFilters(left);
+                    break;
             }
         }
 
@@ -4191,12 +4195,13 @@ namespace DirOpusReImagined
                 return;
             }
 
-            // Wildcard match (e.g. *.jpg) when the text contains * or ?, otherwise substring (e.g. jpg).
-            var matcher = FileSearch.MakeNameMatcher(filterText, matchCase: false);
+            // Wildcard match (e.g. *.jpg) when the text contains * or ?, otherwise substring (e.g. jpg);
+            // several patterns separated by ";" match if any does (e.g. *.cs;*.axaml).
+            var matches = SavedFilters.Matcher(filterText);
             var filtered = unfilteredItems.Where(item =>
             {
                 if (item is AFileEntry af)
-                    return matcher.IsMatch(af.Name);
+                    return matches(af.Name);
                 return true;
             }).ToList();
 

@@ -57,6 +57,8 @@ Everything sits at the repository root; there is no `src/` folder.
   a line of text (used for layout names and saved filters).
 - `DuplicateFinder.cs`, `DuplicatesWindow.axaml(.cs)` and `MainWindow.Duplicates.cs`: Find Duplicates (size, then first
   64 KB, then full SHA-256), deleting through `FileOperation.DeleteBatch` so trashed copies can be undone.
+- `SavedFilters.cs` and `MainWindow.Filters.cs`: the filter box's matching (`SavedFilters.Matcher`, `;`-separated
+  patterns) and the saved filters behind its ▾ button, stored under `<SavedFilters>`.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

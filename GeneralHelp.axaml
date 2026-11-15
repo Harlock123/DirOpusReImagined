@@ -83,7 +83,8 @@
                 <TextBlock Text="• All the usual actions work on tiles: click / Ctrl-click / Shift-click to select, drag-and-drop, double-click to open, and right-click for the menu. Arrow keys move in two dimensions (Up/Down a row, Left/Right a tile)." TextWrapping="Wrap" />
 
                 <TextBlock Text="Real-time filter" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• Each panel has a filter box that narrows the listing as you type (case-insensitive, wildcards supported); an X button clears it. Filters reset when you navigate." TextWrapping="Wrap" />
+                <TextBlock Text="• Each panel has a filter box that narrows the listing as you type (case-insensitive, wildcards supported; several patterns separated by ; such as *.cs;*.axaml); an X button clears it. Filters reset when you navigate." TextWrapping="Wrap" />
+                <TextBlock Text="• The ▾ button beside the filter box lists saved filters (shared by both panels) and saves the one typed in under a name." TextWrapping="Wrap" />
 
                 <TextBlock Text="Selection" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Click to select; Ctrl+Click multi-select; Shift+Click range select. Full keyboard selection is available (see below). Select All / Clear buttons per panel." TextWrapping="Wrap" />

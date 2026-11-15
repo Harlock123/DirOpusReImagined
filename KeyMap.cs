@@ -12,7 +12,7 @@ namespace DirOpusReImagined
     {
         Rename, View, Copy, Move, NewFolder, Delete, PreviewToggle,
         Refresh, Undo, FlatView, CompareFiles, FindDuplicates, Checksums, GoToLinkTarget, MakeLink,
-        RecentFolders, NextButtonBank, PreviousButtonBank,
+        RecentFolders, SavedFilters, NextButtonBank, PreviousButtonBank,
         NewTab, CloseTab, NextTab, PreviousTab,
         GoUp, Forward, SwitchPanel,
         SelectAll, SelectByPattern, DeselectByPattern, InvertSelection,
@@ -128,6 +128,7 @@ namespace DirOpusReImagined
             new(ShortcutCommand.GoToLinkTarget, "Go to link target", ""),
             new(ShortcutCommand.MakeLink, "Make link in the other panel", ""),
             new(ShortcutCommand.RecentFolders, "Recent folders", "Alt+Down"),
+            new(ShortcutCommand.SavedFilters, "Saved filters menu", ""),
             new(ShortcutCommand.NextButtonBank, "Next button bank", "Alt+PageDown"),
             new(ShortcutCommand.PreviousButtonBank, "Previous button bank", "Alt+PageUp"),
             new(ShortcutCommand.NewTab, "New tab", "Ctrl+T"),

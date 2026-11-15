@@ -109,7 +109,9 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 
 ### Real-Time Filter
 - Each panel has a filter text box that narrows the displayed files and folders as you type
-- Filters by name using case-insensitive matching
+- Filters by name using case-insensitive matching: a wildcard pattern (`*.jpg`) or text the name contains (`report`)
+- **Several patterns** separated by `;` show anything matching one of them: `*.cs;*.axaml`
+- **Saved filters**: the **▾** button beside the filter box lists filters kept for reuse (shared by both panels) and saves the one typed in under a name ("Images" → `*.jpg;*.png;*.gif`); **Remove ▸** forgets one. They're kept in `Configuration.xml` under `<SavedFilters>`
 - An X button next to each filter clears it instantly
 - Filters reset automatically when navigating to a new directory
 
@@ -210,6 +212,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `GoToLinkTarget` | Go to link target | — |
 | `MakeLink` | Make link in the other panel | — |
 | `RecentFolders` | Recent folders | Alt+Down |
+| `SavedFilters` | Saved filters menu | — |
 | `NextButtonBank` | Next button bank | Alt+PageDown |
 | `PreviousButtonBank` | Previous button bank | Alt+PageUp |
 | `NewTab` | New tab | Ctrl+T |
