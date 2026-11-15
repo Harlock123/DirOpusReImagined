@@ -43,7 +43,8 @@ namespace DirOpusReImagined
         View,
         PreviewToggle,
         Refresh,
-        Undo
+        Undo,
+        Checksums
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -4021,6 +4022,8 @@ namespace DirOpusReImagined
         private void Refresh_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Refresh);
 
         private void Undo_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Undo);
+
+        private void Checksums_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Checksums);
 
         /// <summary>
         /// Sets the right-click Undo item's text ("Undo rename of 3 items"), or disables it when

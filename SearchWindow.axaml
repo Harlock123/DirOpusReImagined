@@ -35,7 +35,7 @@
                 <DataTemplate>
                     <StackPanel Margin="0,1">
                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding MatchSummary}" FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
+                        <TextBlock Text="{Binding MatchSummary}" FontFamily="Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono,Noto Sans Mono,Liberation Mono,monospace"
                                    FontSize="12" TextTrimming="CharacterEllipsis"
                                    IsVisible="{Binding MatchSummary, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                         <TextBlock Text="{Binding Folder}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"

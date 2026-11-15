@@ -2318,6 +2318,9 @@ namespace DirOpusReImagined
                 case GridVerb.Undo:
                     UndoLast();
                     break;
+                case GridVerb.Checksums:
+                    OpenChecksums(left);
+                    break;
             }
         }
 

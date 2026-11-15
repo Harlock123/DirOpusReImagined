@@ -42,6 +42,13 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
 - **Double-click any file to open it with the system default application** — executables run, images open in the image viewer, media plays, documents open in their editor. Windows uses the shell, macOS Launch Services, Linux the desktop's MIME associations
 
+### Checksums
+- Right-click → **Checksums…** hashes the selected files, and every file inside selected folders, with **MD5, SHA-1, SHA-256** (default) or **SHA-512**, with a progress bar and Cancel
+- **Compare with** — paste the hash a download page gave you, in any case, with or without spaces or colons, even with a "SHA256:" label; the matching file is ticked, or you're told nothing matches (or that the hash is from a different algorithm)
+- **Save checksum file** writes `report.pdf.sha256` for one file or `SHA256SUMS` for several, in the standard format, so `sha256sum -c` (or `md5sum -c`, and so on) can check it too; **Copy** puts the same text on the clipboard
+- **Verify** — run Checksums on a checksum file (`.md5`, `.sha1`, `.sha256`, `.sha512`, `SHA256SUMS`, `MD5SUMS`…) and every file it lists is checked: **OK**, **changed** (with the expected and actual hash), **missing** or unreadable. Files written by the coreutils tools, including BSD-style `SHA256 (file) = …` lines, are understood
+- Works for local files and files inside archives; cloud files are downloaded to be hashed
+
 ### Undo Renames & Moves
 - **Ctrl/Cmd+Z** in a panel (or right-click → **Undo …**, which names what it will undo) reverses the last rename or move; press it again to step further back, up to the last 50
 - **Renames** — single or batch — get their old names back straight away, including swaps and chains (`a→b, b→a`)
