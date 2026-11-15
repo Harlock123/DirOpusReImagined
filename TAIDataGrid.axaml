@@ -31,6 +31,7 @@
 						<MenuItem Name="CopyFullPathMenuItem" Header="Copy Full Path" Click="CopyFullPath_Click"/>
 						<Separator/>
 						<MenuItem Name="TerminalHereMenuItem" Header="Terminal Here" Click="TerminalHere_Click"/>
+						<MenuItem Name="RefreshMenuItem" Header="Refresh" InputGesture="Ctrl+R" Click="Refresh_Click"/>
 						<Separator/>
 						<MenuItem Header="Select by Pattern…" Click="SelectByPattern_Click"/>
 						<MenuItem Header="Deselect by Pattern…" Click="DeselectByPattern_Click"/>

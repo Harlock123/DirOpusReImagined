@@ -43,6 +43,15 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Sync is **recursive and file-level**, reuses the transfer progress dialog (current file, speed, ETA, cancel), and works for local, cloud, and cross-provider paths
 - Right-click either **Sync** button (or **⇄**) for a content (hash) variant; long compares run behind a modal dialog with a live "current folder" line and a **Cancel** button
 
+### Refresh & Live Updates
+- **Local folders refresh themselves** — when another program creates, deletes, renames or changes a file in a folder a panel is showing, the panel re-lists within about half a second
+- A refresh **keeps your place**: the cursor row, the selection, the scroll position and the filter all survive it; if the cursor's file was removed, the cursor stays on its neighbour
+- Bursts of changes (a large copy, a growing download) are batched, so the panel updates at most every few seconds rather than on every event
+- **Ctrl/Cmd+R** (or right-click → **Refresh**) re-lists the active panel by hand; for a cloud folder it also skips the 30-second listing cache. The other panel is refreshed too if it shows the same folder
+- If the folder a panel shows is deleted or renamed, the panel steps up to the nearest folder that still exists instead of showing an error
+- Changes that arrive while a **Cmp** comparison is on screen are held back until the comparison is cleared, so the colours aren't wiped mid-review
+- Cloud and archive folders aren't watched (there's nothing to watch locally); use **Ctrl/Cmd+R** for those
+
 ### Real-Time Filter
 - Each panel has a filter text box that narrows the displayed files and folders as you type
 - Filters by name using case-insensitive matching
@@ -94,6 +103,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Ctrl/Cmd + W** | Close the active tab |
 | **Ctrl/Cmd + Tab** | Cycle to the next tab (Shift for previous) |
 | **Ctrl/Cmd + PageUp / PageDown** | Previous / next tab |
+| **Ctrl/Cmd + R** | Refresh the active panel (keeps the cursor, selection and filter) |
 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus

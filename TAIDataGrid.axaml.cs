@@ -41,7 +41,8 @@ namespace DirOpusReImagined
         NewFolder,
         Delete,
         View,
-        PreviewToggle
+        PreviewToggle,
+        Refresh
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -2882,6 +2883,54 @@ namespace DirOpusReImagined
             TheVerticleScrollBar.Value = _gridYShift;
         }
 
+        /// <summary>
+        /// What a refresh must keep: the cursor row and the selected rows (by name and kind, since the
+        /// re-listed items are new objects) and the scroll position.
+        /// </summary>
+        public sealed record ViewState(string? CursorName, bool CursorIsDir,
+                                       HashSet<(string Name, bool IsDir)> Selected, int YShift);
+
+        /// <summary>Records the cursor, selection and scroll position so a re-list can put them back.</summary>
+        public ViewState CaptureViewState()
+        {
+            var selected = new HashSet<(string, bool)>();
+            foreach (var o in _selecteditems)
+                if (o is AFileEntry f) selected.Add((f.Name, f.Typ));
+            var cur = CursorItem as AFileEntry;
+            return new ViewState(cur?.Name, cur?.Typ ?? false, selected, _gridYShift);
+        }
+
+        /// <summary>
+        /// Re-applies a <see cref="ViewState"/> to the current items. Rows that no longer exist are
+        /// dropped from the selection; if the cursor row is gone the cursor stays at its old index
+        /// (clamped), so it lands on the neighbour rather than jumping to the top.
+        /// </summary>
+        public void RestoreViewState(ViewState state, int fallbackCursorIndex = -1)
+        {
+            if (_items.Count == 0) return;
+
+            _selecteditems.Clear();
+            int cursor = -1;
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_items[i] is not AFileEntry f) continue;
+                if (state.Selected.Contains((f.Name, f.Typ))) _selecteditems.Add(f);
+                if (cursor < 0 && state.CursorName != null && f.Typ == state.CursorIsDir &&
+                    string.Equals(f.Name, state.CursorName, StringComparison.Ordinal))
+                    cursor = i;
+            }
+            if (cursor < 0 && fallbackCursorIndex >= 0) cursor = ClampIndex(fallbackCursorIndex);
+
+            _gridYShift = Math.Max(0, Math.Min(state.YShift, _items.Count - 1));
+            if (TheVerticleScrollBar != null)
+                TheVerticleScrollBar.Value = Math.Min(_gridYShift, TheVerticleScrollBar.Maximum);
+
+            _cursorIndex = cursor;
+            _anchorIndex = cursor;
+            if (cursor >= 0) EnsureCursorVisible();
+            ReRender();
+        }
+
         /// <summary>Clamps an index into the valid item range [0, Count-1], or -1 when empty.</summary>
         private int ClampIndex(int i)
         {
@@ -2983,6 +3032,7 @@ namespace DirOpusReImagined
             {
                 if (e.Key == Key.T)        { TabActionRequested?.Invoke(this, TabAction.New);   e.Handled = true; return; }
                 if (e.Key == Key.W)        { TabActionRequested?.Invoke(this, TabAction.Close); e.Handled = true; return; }
+                if (e.Key == Key.R)        { RaiseVerb(GridVerb.Refresh); e.Handled = true; return; }
                 if (e.Key == Key.Tab)      { TabActionRequested?.Invoke(this, shift ? TabAction.Previous : TabAction.Next); e.Handled = true; return; }
                 if (e.Key == Key.PageDown) { TabActionRequested?.Invoke(this, TabAction.Next);     e.Handled = true; return; }
                 if (e.Key == Key.PageUp)   { TabActionRequested?.Invoke(this, TabAction.Previous); e.Handled = true; return; }
@@ -3944,6 +3994,8 @@ namespace DirOpusReImagined
         {
             GridContextTerminalHere?.Invoke(this, EventArgs.Empty);
         }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Refresh);
 
         private void SelectByPattern_Click(object sender, RoutedEventArgs e)
             => RaiseSelectionAction(SelectionAction.SelectByPattern);

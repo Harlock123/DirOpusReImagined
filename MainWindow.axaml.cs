@@ -121,6 +121,7 @@ namespace DirOpusReImagined
             Closing += (_, _) => SaveUseTrashToConfig();
             Closing += (_, _) => { CapturePreviewSize(); SavePreviewSizeToConfig(); };
             Closing += (_, _) => SaveViewModesToConfig();
+            Closing += (_, _) => StopAllWatchers();
 
             // Panel-to-panel (and folder-drop) drag and drop.
             LPgrid.FilesDropped += OnPanelFilesDropped;
@@ -2054,6 +2055,7 @@ namespace DirOpusReImagined
             LPgrid.ClearCompareStates();
             RPgrid.ClearCompareStates();
             _comparing = false;
+            RunDeferredWatchRefreshes();
         }
 
         /// <summary>
@@ -2298,6 +2300,9 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.PreviewToggle:
                     TogglePreviewFollow(left);
+                    break;
+                case GridVerb.Refresh:
+                    RefreshPanel(left, manual: true);
                     break;
             }
         }
@@ -4093,6 +4098,7 @@ namespace DirOpusReImagined
                 ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
                 SyncActiveTabTitle(isLeft: false);
             }
+            AfterPanelPopulated(grid);
             UpdateStatusBar();
         }
 

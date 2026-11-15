@@ -83,6 +83,9 @@
                 <TextBlock Text="Bookmarks" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Bookmarks button opens a dialog that lists your saved folders; send any one to the Left or Right panel, add either panel's current folder, or remove entries. Saved to BOOKMARKS.MD beside the app; a default set (Home, Root, Desktop, Documents, Pictures) is seeded on first run." TextWrapping="Wrap" />
 
+                <TextBlock Text="Refresh" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Local folders refresh by themselves when another program adds, removes, renames or changes files in them; the cursor, selection, scroll position and filter are kept. Press Ctrl/Cmd+R (or right-click → Refresh) to re-list a panel by hand — for a cloud folder this also skips the 30-second listing cache. If the folder shown is deleted, the panel steps up to the nearest folder that still exists." TextWrapping="Wrap" />
+
                 <TextBlock Text="Open terminal here" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Right-click a panel and choose Terminal Here to open a terminal in that panel's current folder. A terminal is auto-detected for your OS, or set your own in the System Wide Settings tab of the button configuration dialog (the &lt;Terminal&gt; entry in Configuration.xml, using %DIR% for the folder)." TextWrapping="Wrap" />
 
@@ -149,6 +152,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="↑ / ↓" FontWeight="Bold" Margin="0,2" />
@@ -228,6 +232,8 @@
 
                     <TextBlock Grid.Row="25" Grid.Column="0" Text="F9" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="25" Grid.Column="1" Text="Toggle the live preview window, which follows the cursor in whichever panel you are driving" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="26" Grid.Column="0" Text="Ctrl/Cmd + R" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="26" Grid.Column="1" Text="Refresh the active panel, keeping the cursor, selection and filter (local folders also refresh by themselves)" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>
