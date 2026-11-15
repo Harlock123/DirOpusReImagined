@@ -2,7 +2,7 @@
   
   <div style="font-size:26px;font-weight:700;letter-spacing:-0.3px;margin:0 0 4px;">
     DirOpus Reimagined
-    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.26.0</span>
+    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.28.0</span>
   </div>
   <div style="color:#5b6472;font-size:14px;margin:4px 0 14px;">A fast, cross-platform dual-panel file manager &mdash; inspired by the classic Amiga Directory Opus.</div>
 
@@ -11,18 +11,30 @@
   <div style="font-size:15px;font-weight:700;margin:16px 0 6px;padding-bottom:4px;border-bottom:2px solid #eef1f5;">What it does</div>
   <ul style="margin:6px 0;padding-left:20px;">
     <li style="margin:3px 0;"><b>Two folders side by side</b> &mdash; copy, move, and compare between them, with folder tabs on each side.</li>
-    <li style="margin:3px 0;"><b>All the file basics</b> &mdash; copy / move / rename / delete, drag-and-drop, and delete-to-Trash (recoverable).</li>
+    <li style="margin:3px 0;"><b>All the file basics</b> &mdash; copy / move / rename / delete, drag-and-drop, delete-to-Trash (recoverable), and <b>undo</b> for renames and moves.</li>
     <li style="margin:3px 0;"><b>Compare &amp; sync</b> two folders with a click.</li>
     <li style="margin:3px 0;"><b>Cloud storage built in</b> &mdash; Google Drive, OneDrive, Dropbox, Amazon S3, and 50+ more, browsed like local folders.</li>
-    <li style="margin:3px 0;"><b>Look inside archives</b> &mdash; open .zip, .7z, .rar, and .tar like folders.</li>
+    <li style="margin:3px 0;"><b>Archives like folders</b> &mdash; open .zip, .7z, .rar, and .tar, and now copy files into, rename and delete inside .zip and .tar archives.</li>
     <li style="margin:3px 0;"><b>Batch rename</b> &mdash; rename a whole selection with a live before&rarr;after preview, find&amp;replace (regex), and numbering.</li>
-    <li style="margin:3px 0;"><b>Make it yours</b> &mdash; 36 custom buttons to launch your own tools, plus bookmarks and a built-in file viewer.</li>
+    <li style="margin:3px 0;"><b>Make it yours</b> &mdash; banks of 36 custom buttons to launch your own tools, plus bookmarks and a built-in file viewer.</li>
     <li style="margin:3px 0;"><b>Themes</b> &mdash; Light/Dark, Dracula, Nord, and Solarized.</li>
-    <li style="margin:3px 0;"><b>Fast to drive</b> &mdash; recursive search, type-ahead jumping, and full keyboard control.</li>
+    <li style="margin:3px 0;"><b>Fast to drive</b> &mdash; search by name or by what&rsquo;s inside files, recent folders, type-ahead jumping, and full keyboard control.</li>
   </ul>
 
   <div style="background:#f3f8ff;border:1px solid #d6e6ff;border-radius:8px;padding:10px 14px;margin:12px 0 8px;">
-    <b>New in this release (0.1.26.0) &mdash; thumbnail view:</b> each panel can now show a grid of image <b>thumbnails</b> instead of a plain list &mdash; toggle it per side with the <b>&#9638; / &#9776;</b> button in the panel's tab bar, so you can browse a photo folder as tiles on one side while keeping a file list on the other (and each panel remembers its choice). Thumbnails for jpg/png/gif/bmp/webp/etc. are generated in the background and filled in as they load, then cached on disk so revisiting a folder is instant. Folders and other file types show large icons; cloud and archive folders show icons rather than downloading every file.
+    <b>New in this release (0.1.28.0):</b>
+    <ul style="margin:6px 0 2px;padding-left:20px;">
+      <li style="margin:3px 0;"><b>Write into archives</b> &mdash; copy or move files into .zip, .tar and .tar.gz archives, and rename, delete and make folders inside them. The original is only replaced once the new one is complete.</li>
+      <li style="margin:3px 0;"><b>Search inside files</b> &mdash; the <b>Find</b> button looks for text inside files as well as names, with live results.</li>
+      <li style="margin:3px 0;"><b>Undo</b> &mdash; Ctrl/Cmd+Z undoes the last rename or move.</li>
+      <li style="margin:3px 0;"><b>Banks of buttons</b> &mdash; as many sets of the 36 custom buttons as you like, switched with tabs, the mouse wheel or Alt+PageUp/PageDown.</li>
+      <li style="margin:3px 0;"><b>Checksums</b> &mdash; compute, compare, save and verify MD5 / SHA-1 / SHA-256 / SHA-512.</li>
+      <li style="margin:3px 0;"><b>Also new:</b> a recent-folders list (Alt+Down), choose which columns to show, symbolic-link support, pause and retry in the operation queue, and panels that refresh by themselves when files change.</li>
+    </ul>
+  </div>
+
+  <div style="background:#fff7f0;border:1px solid #ffd9bd;border-radius:8px;padding:10px 14px;margin:8px 0;">
+    <b>Fixed:</b> since 0.1.19, copying or moving to and from <b>cloud folders</b>, and copying or moving files out of archives, didn&rsquo;t work. That&rsquo;s fixed in this release.
   </div>
 
   <div style="background:#f7f9fb;border:1px solid #e3e8ef;border-radius:8px;padding:12px 16px;margin:10px 0;">
@@ -35,6 +47,6 @@
     <div style="font-size:12px;color:#5b6472;margin-top:3px;">Complete feature list, screenshots, and setup guide in the project README.</div>
   </div>
 
-  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.26.0 &middot; free &amp; open source &middot; built with .NET 8 + Avalonia. Feedback and bug reports welcome!</div>
+  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.28.0 &middot; free &amp; open source &middot; built with .NET 10 + Avalonia. Feedback and bug reports welcome!</div>
 
 </div>
