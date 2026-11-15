@@ -42,6 +42,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
 - **Double-click any file to open it with the system default application** — executables run, images open in the image viewer, media plays, documents open in their editor. Windows uses the shell, macOS Launch Services, Linux the desktop's MIME associations
 
+### Symbolic Links
+- Links are marked **LNK** in the Attributes column, and hovering one shows where it points; **broken links** are listed too, so they can be deleted or fixed
+- Right-click → **Go to Link Target** follows the link under the cursor: a folder link opens that folder, a file link opens the file's folder with the cursor on it
+- Right-click → **Make Link in Other Panel** creates links in the other panel's folder pointing to the selected files and folders (a taken name gets a number). On Windows this needs Developer Mode or administrator rights
+- **Copying** a link between local folders copies the link itself, keeping a relative target relative (like `cp -a`); copying to cloud storage copies what a selected link points to. **Moving** or **deleting** a link moves or deletes just the link, never what it points to
+- **Linked folders are never walked into** by folder sizes, search, checksums, compare and sync, archiving, or copies of a whole folder — so a link back to a parent folder can't make them run forever
+- Moving a folder to a different drive now works on Linux and macOS (it is copied across and then removed, since a rename can't cross drives)
+
 ### Checksums
 - Right-click → **Checksums…** hashes the selected files, and every file inside selected folders, with **MD5, SHA-1, SHA-256** (default) or **SHA-512**, with a progress bar and Cancel
 - **Compare with** — paste the hash a download page gave you, in any case, with or without spaces or colons, even with a "SHA256:" label; the matching file is ticked, or you're told nothing matches (or that the hash is from a different algorithm)

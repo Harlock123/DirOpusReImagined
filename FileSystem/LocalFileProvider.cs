@@ -17,15 +17,16 @@ public sealed class LocalFileProvider : IFileProvider
     public FileEntry? Stat(string path)
     {
         if (Directory.Exists(path))
-        {
-            var di = new DirectoryInfo(path);
-            return BuildEntry(di.FullName, di.Name, true, 0, di.LastWriteTime, di.Attributes);
-        }
+            return BuildEntry(new DirectoryInfo(path), true, 0);
         if (File.Exists(path))
         {
             var fi = new FileInfo(path);
-            return BuildEntry(fi.FullName, fi.Name, false, fi.Length, fi.LastWriteTime, fi.Attributes);
+            return BuildEntry(fi, false, fi.Length);
         }
+        // A broken link: File.Exists and Directory.Exists follow it and find nothing, but the link
+        // itself is there and should be listed (and can be deleted, moved or fixed).
+        var link = new FileInfo(path);
+        if (link.LinkTarget != null) return BuildEntry(link, false, link.Length);
         return null;
     }
 
@@ -36,8 +37,7 @@ public sealed class LocalFileProvider : IFileProvider
             FileEntry? entry = null;
             try
             {
-                var di = new DirectoryInfo(dir);
-                entry = BuildEntry(di.FullName, di.Name, true, 0, di.LastWriteTime, di.Attributes);
+                entry = BuildEntry(new DirectoryInfo(dir), true, 0);
             }
             catch { }
             if (entry is not null) yield return entry;
@@ -52,15 +52,71 @@ public sealed class LocalFileProvider : IFileProvider
             try
             {
                 var fi = new FileInfo(file);
-                entry = BuildEntry(fi.FullName, fi.Name, false, fi.Length, fi.LastWriteTime, fi.Attributes);
+                entry = BuildEntry(fi, false, fi.Length);
             }
             catch { }
             if (entry is not null) yield return entry;
         }
     }
 
-    private static FileEntry BuildEntry(string path, string name, bool isDir, long size, DateTime mtime, FileAttributes attrs)
-        => new(path, name, isDir, size, mtime, ToFlags(attrs), GetAbbreviatedAttributes(attrs));
+    /// <summary>
+    /// The entry for a file or folder. A link's size and date are the link's own (as <c>ls -l</c>
+    /// shows them), and <see cref="FileEntry.LinkTarget"/> holds where it points.
+    /// </summary>
+    private static FileEntry BuildEntry(FileSystemInfo info, bool isDir, long size)
+    {
+        string? target = null;
+        try { target = info.LinkTarget; } catch { /* not readable: treat as a plain entry */ }
+
+        var attrs = info.Attributes;
+        var flags = ToFlags(attrs);
+        if (target != null) flags |= FileEntryFlags.Symlink;
+        string attrText = GetAbbreviatedAttributes(attrs, isLink: target != null);
+        return new FileEntry(info.FullName, info.Name, isDir, size, info.LastWriteTime, flags, attrText, target);
+    }
+
+    /// <summary>True if <paramref name="path"/> is itself a symbolic link (or junction), whether or not its target exists.</summary>
+    public static bool IsLink(string path)
+    {
+        try { return new FileInfo(path).LinkTarget != null; }
+        catch { return false; }
+    }
+
+    /// <summary>
+    /// The full path a link points to (resolving a relative target against the link's folder), or
+    /// null if <paramref name="path"/> isn't a link.
+    /// </summary>
+    public static string? ResolveLink(string path)
+    {
+        try
+        {
+            string? target = new FileInfo(path).LinkTarget;
+            if (target == null) return null;
+            string folder = Path.GetDirectoryName(Path.GetFullPath(path)) ?? "";
+            return Path.GetFullPath(Path.Combine(folder, target));
+        }
+        catch { return null; }
+    }
+
+    /// <summary>
+    /// Makes a symbolic link at <paramref name="linkPath"/> pointing to <paramref name="target"/>
+    /// (written as given, so a relative target stays relative). On Windows this needs Developer
+    /// Mode or administrator rights; the exception says so.
+    /// </summary>
+    public static void CreateLink(string linkPath, string target, bool isDirectory)
+    {
+        try
+        {
+            if (isDirectory) Directory.CreateSymbolicLink(linkPath, target);
+            else File.CreateSymbolicLink(linkPath, target);
+        }
+        catch (Exception ex) when (OperatingSystem.IsWindows() && ex is UnauthorizedAccessException or IOException)
+        {
+            throw new IOException(
+                "Windows only lets programs make symbolic links with Developer Mode turned on " +
+                "(Settings → System → For developers) or when running as administrator. " + ex.Message, ex);
+        }
+    }
 
     public Stream OpenRead(string path) => File.OpenRead(path);
     public Stream OpenWrite(string path) => File.OpenWrite(path);
@@ -89,19 +145,33 @@ public sealed class LocalFileProvider : IFileProvider
         catch { return null; }
     }
 
+    /// <summary>
+    /// Total size of the files in a folder (and below it, if <paramref name="recursive"/>). Linked
+    /// folders inside aren't followed — a link back to a parent would never end, and a link
+    /// elsewhere isn't this folder's content. (<see cref="SearchOption.AllDirectories"/> does follow
+    /// them, which is why this walks the tree itself.)
+    /// </summary>
     public long GetDirectorySize(string path, bool recursive)
     {
         long size = 0;
-        try
+        var pending = new Stack<string>();
+        pending.Push(path);
+        while (pending.Count > 0)
         {
-            var option = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            foreach (var file in Directory.EnumerateFiles(path, "*", option))
+            string dir = pending.Pop();
+            try
             {
-                try { size += new FileInfo(file).Length; }
-                catch { }
+                foreach (var file in Directory.EnumerateFiles(dir))
+                {
+                    try { size += new FileInfo(file).Length; }
+                    catch { }
+                }
+                if (!recursive) break;
+                foreach (var sub in Directory.EnumerateDirectories(dir))
+                    if (!IsLink(sub)) pending.Push(sub);
             }
+            catch { /* unreadable folder: count what we can */ }
         }
-        catch { }
         return size;
     }
 
@@ -115,7 +185,7 @@ public sealed class LocalFileProvider : IFileProvider
         return f;
     }
 
-    private static string GetAbbreviatedAttributes(FileAttributes attributes)
+    private static string GetAbbreviatedAttributes(FileAttributes attributes, bool isLink = false)
     {
         string s = string.Empty;
         s += (attributes & FileAttributes.ReadOnly) != 0 ? "RO-" : "RW-";
@@ -127,7 +197,8 @@ public sealed class LocalFileProvider : IFileProvider
         if ((attributes & FileAttributes.Normal)          != 0) s += "N-";
         if ((attributes & FileAttributes.Temporary)       != 0) s += "T-";
         if ((attributes & FileAttributes.SparseFile)      != 0) s += "SF-";
-        if ((attributes & FileAttributes.ReparsePoint)    != 0) s += "RP-";
+        if (isLink) s += "LNK-";
+        else if ((attributes & FileAttributes.ReparsePoint) != 0) s += "RP-";
         if ((attributes & FileAttributes.Compressed)      != 0) s += "C-";
         if ((attributes & FileAttributes.Offline)         != 0) s += "O-";
         if ((attributes & FileAttributes.NotContentIndexed) != 0) s += "NCI-";

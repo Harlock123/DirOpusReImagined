@@ -101,6 +101,8 @@ namespace DirOpusReImagined
             var dstP = ProviderRegistry.For(targetFile);
             dstP.CreateDirectory(ParentFolderOf(targetFile));
 
+            if (TryCopyLink(sourceFile, targetFile, isDirectory: false, overwrite: true)) return;
+
             await CopyFileAcrossProvidersAsync(sourceFile, targetFile, overwrite: true, progress, ct)
                 .ConfigureAwait(false);
         }
@@ -153,6 +155,9 @@ namespace DirOpusReImagined
         public static async Task CopyDirectoryToFolderAsync(string sourceDirectory, string targetDirectory,
             IProgress<TransferProgress>? progress, CancellationToken ct)
         {
+            // A linked folder copied within the local disk is copied as a link.
+            if (TryCopyLink(sourceDirectory, targetDirectory, isDirectory: true, overwrite: false)) return;
+
             var counter = new ByteCounter();
             await CopyDirectoryInternalAsync(sourceDirectory, targetDirectory, progress, counter, ct)
                 .ConfigureAwait(false);
@@ -169,6 +174,14 @@ namespace DirOpusReImagined
             {
                 ct.ThrowIfCancellationRequested();
                 string targetFile = Path.Combine(targetDirectory, fileEntry.Name);
+
+                // A link: copied as a link within the local disk. Copied elsewhere (the cloud), the
+                // file it points to is copied instead, and a broken one is left out.
+                if (fileEntry.IsLink)
+                {
+                    if (TryCopyLink(fileEntry.Path, targetFile, isDirectory: false, overwrite: true)) continue;
+                    if (LocalFileProvider.ResolveLink(fileEntry.Path) is { } t && !File.Exists(t)) continue;
+                }
 
                 // Offset this file's bytes by what the tree has already transferred.
                 long baseDone = counter.Total;
@@ -188,9 +201,51 @@ namespace DirOpusReImagined
             {
                 ct.ThrowIfCancellationRequested();
                 string targetDir = Path.Combine(targetDirectory, dirEntry.Name);
+
+                // A linked folder inside the tree is never followed: it may lead back to a parent
+                // and copy forever. Within the local disk it's copied as a link; elsewhere it's left out.
+                if (dirEntry.IsLink)
+                {
+                    TryCopyLink(dirEntry.Path, targetDir, isDirectory: true, overwrite: false);
+                    continue;
+                }
+
                 await CopyDirectoryInternalAsync(dirEntry.Path, targetDir, progress, counter, ct)
                     .ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Copies a symbolic link as a link — same target text, so a relative link stays relative,
+        /// as <c>cp -a</c> does — when both ends are on the local disk and the source is a link.
+        /// Returns false (nothing done) otherwise, and the caller copies the contents instead. With
+        /// <paramref name="overwrite"/> an existing file at the destination is replaced; a folder
+        /// link never replaces anything (the caller merges into the existing folder instead).
+        /// </summary>
+        private static bool TryCopyLink(string source, string target, bool isDirectory, bool overwrite)
+        {
+            if (ProviderRegistry.For(source) is not LocalFileProvider || ProviderRegistry.For(target) is not LocalFileProvider)
+                return false;
+
+            string? linkTarget;
+            try { linkTarget = new FileInfo(source).LinkTarget; }
+            catch { return false; }
+            if (linkTarget == null) return false;
+
+            bool exists = File.Exists(target) || Directory.Exists(target) || LocalFileProvider.IsLink(target);
+            if (exists)
+            {
+                // Only an existing file (or link) may be replaced, and only when overwriting. Anything
+                // else — a folder link onto an existing folder, or a real folder in the way — is left
+                // to the caller, which copies contents into it instead.
+                bool replaceable = !isDirectory && overwrite &&
+                                   (!Directory.Exists(target) || LocalFileProvider.IsLink(target));
+                if (!replaceable) return false;
+                File.Delete(target);   // deletes a file, or a link (not what it points to)
+            }
+
+            LocalFileProvider.CreateLink(target, linkTarget, isDirectory);
+            return true;
         }
 
         /// <summary>Moves a single file into a folder; server-side rename when possible, else copy+delete.</summary>
@@ -243,15 +298,27 @@ namespace DirOpusReImagined
             // Directory.Move can't merge into an existing folder. When it does exist (overwrite already
             // confirmed), merge the tree in file-by-file and then remove the source, same as the
             // cross-provider path below.
+            bool moved = false;
             if (ReferenceEquals(srcP, dstP) && !dstP.DirectoryExists(targetDirectory))
             {
-                await Task.Run(() =>
+                moved = await Task.Run(() =>
                 {
                     ct.ThrowIfCancellationRequested();
-                    srcP.MoveDirectory(sourceDirectory, targetDirectory);
+                    try
+                    {
+                        srcP.MoveDirectory(sourceDirectory, targetDirectory);
+                        return true;
+                    }
+                    catch (IOException) when (srcP is LocalFileProvider && Directory.Exists(sourceDirectory) &&
+                                              !Directory.Exists(targetDirectory))
+                    {
+                        // A rename can't cross drives (on Linux and macOS, "Invalid cross-device
+                        // link"). Nothing was moved, so copy the tree across and remove it instead.
+                        return false;
+                    }
                 }, ct).ConfigureAwait(false);
             }
-            else
+            if (!moved)
             {
                 await CopyDirectoryToFolderAsync(sourceDirectory, targetDirectory, progress, ct)
                     .ConfigureAwait(false);
@@ -834,7 +901,7 @@ namespace DirOpusReImagined
                         catch { }
                     }
 
-                    result.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString));
+                    result.Add(new AFileEntry(entry.Name, dirSize, true, ds, fs, entry.AttributeString) { LinkTarget = entry.LinkTarget });
                 }
                 catch
                 {
@@ -849,7 +916,7 @@ namespace DirOpusReImagined
                 {
                     if (!ShowHidden && entry.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
                     string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
-                    result.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft));
+                    result.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft) { LinkTarget = entry.LinkTarget });
                 }
                 catch { }
             }

@@ -322,6 +322,7 @@ public static class Checksums
             return; // unreadable folder: nothing from it
         }
         foreach (var f in fileEntries) files.Add((f.Path, rel + "/" + f.Name, f.Size));
-        foreach (var d in dirEntries) Walk(provider, d.Path, rel + "/" + d.Name, files, ct);
+        // Linked folders aren't followed (they may loop back to a parent).
+        foreach (var d in dirEntries.Where(d => !d.IsLink)) Walk(provider, d.Path, rel + "/" + d.Name, files, ct);
     }
 }

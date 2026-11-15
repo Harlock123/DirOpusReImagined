@@ -45,7 +45,9 @@ namespace DirOpusReImagined
         Refresh,
         Undo,
         Checksums,
-        RecentFolders
+        RecentFolders,
+        GoToLinkTarget,
+        MakeLink
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -4080,6 +4082,10 @@ namespace DirOpusReImagined
 
         private void Checksums_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Checksums);
 
+        private void GoToLinkTarget_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToLinkTarget);
+
+        private void MakeLink_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.MakeLink);
+
         /// <summary>
         /// Sets the right-click Undo item's text ("Undo rename of 3 items"), or disables it when
         /// <paramref name="description"/> is null because there is nothing to undo.
@@ -4959,6 +4965,10 @@ namespace DirOpusReImagined
         // List view. Thumbnail is null until generated (or when generation fails / isn't applicable).
         public Avalonia.Media.Imaging.Bitmap? Thumbnail;
         public ThumbnailState ThumbState = ThumbnailState.None;
+
+        // Where a symbolic link points (as written in the link), or null for anything else. A
+        // FIELD for the same reason as above: a property would become a column.
+        public string? LinkTarget;
 
         //public bool FileSizeCollapsedNumber { get; set; } = false;
         

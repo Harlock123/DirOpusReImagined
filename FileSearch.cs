@@ -170,7 +170,10 @@ namespace DirOpusReImagined
                 if (textMatcher == null && opt.IncludeFolders && nameMatcher != null && nameMatcher.IsMatch(d.Name))
                     onHit(new SearchHit(root, d.Path, d.Name, true, 0, d.LastModified));
 
-                SearchInto(d.Path, nameMatcher, textMatcher, opt, onHit, ct, progress, stats);
+                // A linked folder is listed if its name matches, but not searched inside: it may
+                // lead back to a parent folder, and its contents live somewhere else.
+                if (!d.IsLink)
+                    SearchInto(d.Path, nameMatcher, textMatcher, opt, onHit, ct, progress, stats);
             }
         }
 

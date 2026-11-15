@@ -68,7 +68,7 @@ namespace DirOpusReImagined
                 if (l.IsDir && r.IsDir)
                 {
                     RowCompareState s = RowCompareState.Same;
-                    if (recursive)
+                    if (recursive && l.CanDescend && r.CanDescend)
                     {
                         s = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content, ct) switch
                         {
@@ -141,6 +141,9 @@ namespace DirOpusReImagined
                 }
                 else if (l.IsDir && r.IsDir)
                 {
+                    // A linked folder on either side isn't followed (it may loop, and its contents
+                    // live elsewhere), so there's nothing to plan inside it.
+                    if (!l.CanDescend || !r.CanDescend) continue;
                     // Descend into shared folders; skip any that can't be read rather than aborting.
                     try { PlanInto(sChild, dChild, copies, deletes, content); }
                     catch { /* inaccessible subfolder (permissions) — leave it untouched */ }
@@ -208,7 +211,8 @@ namespace DirOpusReImagined
                 }
                 else if (l.IsDir && r.IsDir)
                 {
-                    PlanTwoWayInto(lChild, rChild, toRight, toLeft, content);
+                    if (l.CanDescend && r.CanDescend)   // linked folders aren't followed
+                        PlanTwoWayInto(lChild, rChild, toRight, toLeft, content);
                 }
                 else if (l.IsDir != r.IsDir)
                 {
@@ -238,7 +242,14 @@ namespace DirOpusReImagined
             }
         }
 
-        private readonly record struct Item(bool IsDir, long Size, DateTime Modified);
+        private readonly record struct Item(bool IsDir, long Size, DateTime Modified, bool IsLink = false)
+        {
+            /// <summary>
+            /// A real folder whose contents can be compared. A linked folder isn't descended into: it
+            /// may lead back to a parent (and never end), and its contents belong somewhere else.
+            /// </summary>
+            public bool CanDescend => IsDir && !IsLink;
+        }
 
         /// <summary>
         /// How entry names are matched across the two sides. Linux file systems (and most cloud
@@ -255,9 +266,9 @@ namespace DirOpusReImagined
 
             var provider = ProviderRegistry.For(path);
             foreach (var d in provider.EnumerateDirectories(path))
-                map[d.Name] = new Item(true, 0, d.LastModified);
+                map[d.Name] = new Item(true, 0, d.LastModified, d.IsLink);
             foreach (var f in provider.EnumerateFiles(path))
-                map[f.Name] = new Item(false, f.Size, f.LastModified);
+                map[f.Name] = new Item(false, f.Size, f.LastModified, f.IsLink);
             return map;
         }
 
@@ -290,6 +301,7 @@ namespace DirOpusReImagined
 
                 if (l.IsDir)
                 {
+                    if (!l.CanDescend || !r.CanDescend) continue;   // a linked folder: not followed
                     var sub = CompareSubtree(Child(leftPath, name), Child(rightPath, name), content, ct);
                     if (sub != SubtreeResult.Equal) return sub; // propagate Different or Inaccessible
                 }

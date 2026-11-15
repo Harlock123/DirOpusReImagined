@@ -90,6 +90,10 @@
                 <TextBlock Text="Search" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Find button on a panel's filter row searches that folder and everything below it, by name (a substring, or a wildcard such as *.cs), by text inside files (fill in Containing; tick the box for a regular expression), or both. Results appear as they are found, with the matching line shown; double-click one to open its folder with the cursor on the file. Binary files and files over 100 MB are skipped, and cloud files are only read if you tick Read cloud files." TextWrapping="Wrap" />
 
+                <TextBlock Text="Symbolic links" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Links show LNK in the Attributes column; hover one to see where it points. Right-click → Go to Link Target follows it, and Make Link in Other Panel creates links to the selection in the other panel's folder (Windows needs Developer Mode for this)." TextWrapping="Wrap" />
+                <TextBlock Text="• Copying a link between local folders copies the link itself; moving or deleting one affects only the link. Linked folders are never walked into by sizes, search, checksums, compare, sync or copies, so a link back to a parent can't make them run forever." TextWrapping="Wrap" />
+
                 <TextBlock Text="Checksums" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Right-click → Checksums… hashes the selection (files, and everything inside selected folders) with MD5, SHA-1, SHA-256 or SHA-512. Paste a hash into Compare with to check a download. Save checksum file writes a standard .sha256 / SHA256SUMS file that sha256sum -c can also check." TextWrapping="Wrap" />
                 <TextBlock Text="• Run Checksums on a checksum file (.sha256, SHA256SUMS, .md5…) to verify the files it lists: each is shown as OK, changed, missing or unreadable." TextWrapping="Wrap" />

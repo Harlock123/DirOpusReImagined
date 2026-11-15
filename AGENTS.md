@@ -87,6 +87,10 @@ Everything sits at the repository root; there is no `src/` folder.
   thread.
 - **Threads.** `OperationQueue` raises its events on a worker thread. Post to `Dispatcher.UIThread` before
   touching any control.
+- **Never walk into a linked folder.** Code that recurses through folders must skip entries with
+  `FileEntry.IsLink` (or `LocalFileProvider.IsLink(path)`): a link back to a parent folder never ends.
+  `SearchOption.AllDirectories` follows links, so don't use it for recursion. `MainWindow.Links.cs` has the link
+  commands.
 - **Trash is local only.** `TrashService` throws on failure and must not be given `archive://` or `cloud://` paths.
 - **New previews register, they don't edit the viewer.** Add an `IPreviewProvider` and list it in
   `PreviewRegistry`.

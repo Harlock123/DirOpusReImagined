@@ -1159,10 +1159,9 @@ namespace DirOpusReImagined
 
                 ToolTip.SetHorizontalOffset(grid, 10.0);
                 ToolTip.SetVerticalOffset(grid, 10.0);
-                if (item.Typ)
-                    ToolTip.SetTip(grid, "Folder: " + item.Name);
-                else
-                    ToolTip.SetTip(grid, "File: " + item.Name);
+                string tip = (item.Typ ? "Folder: " : "File: ") + item.Name;
+                if (item.LinkTarget != null) tip += "\nLink to: " + item.LinkTarget;
+                ToolTip.SetTip(grid, tip);
 
                 ToolTip.SetIsOpen(grid, true);
 
@@ -2332,6 +2331,12 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.RecentFolders:
                     ShowRecentFolders(left);
+                    break;
+                case GridVerb.GoToLinkTarget:
+                    GoToLinkTarget(left);
+                    break;
+                case GridVerb.MakeLink:
+                    MakeLinksInOtherPanel(left);
                     break;
             }
         }
