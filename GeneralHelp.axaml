@@ -32,6 +32,7 @@
                 <TextBlock Text="Dual-panel browsing" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Two independent panels, each with its own path bar, back button, and drive selector." TextWrapping="Wrap" />
                 <TextBlock Text="• Double-click a folder to enter it; use Back / Forward (or Alt+Left / Alt+Right) to move through history, and Backspace to go up a level." TextWrapping="Wrap" />
+                <TextBlock Text="• When the columns don't fit, scroll sideways with the scrollbar under the panel, Shift or Ctrl + mouse wheel, or a sideways touchpad swipe. Alt + mouse wheel changes the font size." TextWrapping="Wrap" />
                 <TextBlock Text="• Type-ahead: with a panel focused, just start typing a name to jump to the matching row (repeat a letter to cycle through matches)." TextWrapping="Wrap" />
                 <TextBlock Text="• Swap panel contents, or clone one panel's path to the other, with the center buttons." TextWrapping="Wrap" />
 

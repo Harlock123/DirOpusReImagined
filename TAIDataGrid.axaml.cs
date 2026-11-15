@@ -951,6 +951,7 @@ namespace DirOpusReImagined
                 _selecteditems.Clear();
                 TheItemUnderTheMouse = new GridHoverItem();
                 _gridXShift = 0;
+                if (TheHorizontalScrollBar != null) TheHorizontalScrollBar.Value = 0;
                 _gridYShift = 0;
                 _cursorIndex = -1;
                 _anchorIndex = -1;
@@ -1536,6 +1537,7 @@ namespace DirOpusReImagined
                             }
                         }
 
+                        UpdateHorizontalScrollRange();
 
                         #endregion
 
@@ -2589,35 +2591,18 @@ namespace DirOpusReImagined
         {
             // Your logic here
 
-            if (e.KeyModifiers == KeyModifiers.Control)
+            // Sideways: Ctrl or Shift + wheel, or a sideways swipe on a touchpad / tilt wheel. Some
+            // platforms already turn Shift+wheel into a sideways delta, so use X when it's there.
+            bool sidewaysModifier = e.KeyModifiers == KeyModifiers.Control || e.KeyModifiers == KeyModifiers.Shift;
+            bool sidewaysGesture = e.KeyModifiers == KeyModifiers.None && e.Delta.X != 0 && Math.Abs(e.Delta.X) >= Math.Abs(e.Delta.Y);
+            if (sidewaysModifier || sidewaysGesture)
             {
-                // We are scrolling Horizontally
-
-                double d = TheHorizontalScrollBar.Value - (e.Delta.Y * _scrollMultiplier);
-                if (d < 0)
+                if (_viewMode == GridViewMode.List && _items.Count > 0)
                 {
-                    d = 0;
+                    double amount = e.Delta.X != 0 ? e.Delta.X : e.Delta.Y;
+                    // Positive deltas scroll towards the start (left), as they do vertically (up).
+                    SetHorizontalShift(_gridXShift - amount * HorizontalWheelStep);
                 }
-                else if (d > TheHorizontalScrollBar.Maximum)
-                {
-                    d = TheHorizontalScrollBar.Maximum;
-                }
-
-                int maxposition = 0;
-
-                for (int i = 0; i < _colWidths.Length; i++)
-                {
-                    maxposition += _colWidths[i];
-                }
-
-                double delta = (maxposition / 100) * d;
-
-                _gridXShift = (int)delta;
-
-                TheHorizontalScrollBar.Value = d;
-
-                ReRender();
-
             }
             else
             {
@@ -3897,30 +3882,66 @@ namespace DirOpusReImagined
         /// <param name="sender">The object that triggered the event.</param>
         /// <param name="e">The scroll event arguments.</param>
         /// <remarks>
-        /// This method calculates the maximum horizontal position of the grid by summing up all the column widths.
-        /// It then calculates the new horizontal position based on the percentage of the maximum position
-        /// specified by the new scroll value.
-        /// The horizontal position is then updated and the grid is re-rendered.
+        /// The scrollbar works in pixels: its value is how far the columns are shifted left, and its
+        /// maximum is how much wider the columns are than the panel (see <see cref="UpdateHorizontalScrollRange"/>).
         /// </remarks>
         private void TheHorizontalScrollBar_scroll(object? sender, ScrollEventArgs e)
         {
-            if (_items.Count > 0)
-            {
-                int maxposition = 0;
+            if (_items.Count > 0) SetHorizontalShift(e.NewValue);
+        }
 
-                for (int i = 0; i < _colWidths.Length; i++)
-                {
-                    maxposition += _colWidths[i];
-                }
+        /// <summary>Pixels moved per mouse-wheel notch when scrolling sideways.</summary>
+        private const int HorizontalWheelStep = 48;
 
-                double delta = (maxposition / 100) * e.NewValue;
+        /// <summary>Total width of all columns, in pixels.</summary>
+        private int ContentWidth()
+        {
+            int total = 0;
+            if (_colWidths != null)
+                foreach (int w in _colWidths) total += w;
+            return total;
+        }
 
-                _gridXShift = (int)delta;
+        private double ViewportWidth() => TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width;
 
-                ReRender();
-            }
+        /// <summary>How far the columns can shift left: the part that doesn't fit, or 0 if they all fit.</summary>
+        private int MaxHorizontalShift()
+        {
+            double viewport = ViewportWidth();
+            if (double.IsNaN(viewport) || viewport <= 0) return 0;
+            return Math.Max(0, ContentWidth() - (int)viewport);
+        }
 
-            //throw new NotImplementedException();
+        /// <summary>
+        /// Sizes the horizontal scrollbar to the columns: the thumb shows how much of their width is
+        /// visible, and it's disabled when everything fits. Also pulls the shift back in range when
+        /// the columns got narrower or the panel wider, so the last column stays at the right edge
+        /// instead of leaving empty space.
+        /// </summary>
+        private void UpdateHorizontalScrollRange()
+        {
+            int max = MaxHorizontalShift();
+            if (_gridXShift > max) _gridXShift = max;
+            if (_gridXShift < 0) _gridXShift = 0;
+
+            double viewport = ViewportWidth();
+            TheHorizontalScrollBar.Minimum = 0;
+            TheHorizontalScrollBar.Maximum = max;
+            TheHorizontalScrollBar.ViewportSize = double.IsNaN(viewport) || viewport <= 0 ? 1 : viewport;
+            TheHorizontalScrollBar.SmallChange = HorizontalWheelStep;
+            TheHorizontalScrollBar.LargeChange = Math.Max(HorizontalWheelStep, viewport * 0.9);
+            TheHorizontalScrollBar.IsEnabled = max > 0;
+            if (TheHorizontalScrollBar.Value != _gridXShift) TheHorizontalScrollBar.Value = _gridXShift;
+        }
+
+        /// <summary>Shifts the columns to <paramref name="pixels"/> (clamped) and redraws if it changed.</summary>
+        private void SetHorizontalShift(double pixels)
+        {
+            int target = (int)Math.Round(Math.Clamp(pixels, 0, MaxHorizontalShift()));
+            if (TheHorizontalScrollBar.Value != target) TheHorizontalScrollBar.Value = target;
+            if (target == _gridXShift) return;
+            _gridXShift = target;
+            ReRender();
         }
 
         /// <summary>

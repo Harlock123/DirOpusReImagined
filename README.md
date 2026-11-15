@@ -204,6 +204,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Configurable font sizes for grid content and headers
 - Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
+- When the columns are wider than the panel, scroll sideways with the scrollbar under the panel, **Shift** or **Ctrl + mouse wheel**, or a sideways touchpad swipe; the scrollbar's thumb shows how much is visible, and it is disabled when everything fits. **Alt + mouse wheel** changes the font size
 
 ### Theming
 - A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, **System** (follow the OS), and the named palettes **Dracula**, **Nord**, **Solarized Light**, and **Solarized Dark**
