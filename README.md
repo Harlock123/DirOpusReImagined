@@ -75,6 +75,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Sync is **recursive and file-level**, reuses the transfer progress dialog (current file, speed, ETA, cancel), and works for local, cloud, and cross-provider paths
 - Right-click either **Sync** button (or **⇄**) for a content (hash) variant; long compares run behind a modal dialog with a live "current folder" line and a **Cancel** button
 
+### Compare Two Files
+- Right-click → **Compare Files…** shows two files **side by side** with the differences coloured: changed lines amber, removed lines red, added lines green
+- It compares **two files selected in one panel**, or else **one file from each panel** (the first selected, or the one under the cursor); the left panel's file stays on the left
+- **Next / Previous change** jump between the differences, **Swap sides** flips them, and **Ignore whitespace** treats lines that differ only in spaces and tabs as the same
+- Lines are matched with the same method as `diff` (Myers), so the fewest possible lines are marked as different, and a 200,000-line file with a few changes compares in well under a second
+- Files that aren't text (or are over 32 MB) are compared byte by byte instead: identical, or the offset of the first difference
+- Works for local files, files inside archives and cloud files
+
 ### Refresh & Live Updates
 - **Local folders refresh themselves** — when another program creates, deletes, renames or changes a file in a folder a panel is showing, the panel re-lists within about half a second
 - A refresh **keeps your place**: the cursor row, the selection, the scroll position and the filter all survive it; if the cursor's file was removed, the cursor stays on its neighbour

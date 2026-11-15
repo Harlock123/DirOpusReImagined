@@ -49,7 +49,8 @@ namespace DirOpusReImagined
         GoToLinkTarget,
         MakeLink,
         NextButtonBank,
-        PreviousButtonBank
+        PreviousButtonBank,
+        CompareFiles
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -4093,6 +4094,7 @@ namespace DirOpusReImagined
         private void Undo_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Undo);
 
         private void Checksums_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Checksums);
+        private void CompareFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CompareFiles);
 
         private void GoToLinkTarget_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToLinkTarget);
 

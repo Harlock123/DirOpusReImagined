@@ -43,6 +43,8 @@ Everything sits at the repository root; there is no `src/` folder.
 - `PanelTab.cs`: one folder tab's saved state (path, history, sort, filter, cursor).
 - `FileSystem/Checksums.cs` and `ChecksumWindow.axaml(.cs)`: computing, saving and verifying checksums in the
   coreutils formats (right-click → Checksums…).
+- `FileCompare.cs` (`TextDiff`), `FileCompareWindow.axaml(.cs)` and `MainWindow.Compare.cs`: side-by-side file
+  comparison (right-click → Compare Files…), a Myers line diff with a byte-level fallback for binary files.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

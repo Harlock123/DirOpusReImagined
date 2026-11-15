@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.FileCompareWindow"
+        Width="1100" Height="700" MinWidth="560" MinHeight="320"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Compare Files">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="TextBlock.code">
+            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono,Noto Sans Mono,Liberation Mono,monospace" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
+        <Style Selector="TextBlock.num">
+            <Setter Property="Opacity" Value="0.55" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="12" RowDefinitions="Auto,Auto,Auto,*,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="*,*" Margin="0,0,0,6">
+            <TextBlock x:Name="LeftHeader" Grid.Column="0" FontWeight="Bold" TextTrimming="PathSegmentEllipsis" Margin="0,0,8,0" />
+            <TextBlock x:Name="RightHeader" Grid.Column="1" FontWeight="Bold" TextTrimming="PathSegmentEllipsis" />
+        </Grid>
+
+        <TextBlock x:Name="SummaryText" Grid.Row="1" Text="Comparing…" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+            <Button x:Name="PrevButton" Content="◀ Previous change" />
+            <Button x:Name="NextButton" Content="Next change ▶" />
+            <Button x:Name="SwapButton" Content="Swap sides" />
+            <CheckBox x:Name="IgnoreWhitespaceBox" Content="Ignore whitespace" Margin="8,0,0,0" />
+        </StackPanel>
+
+        <ListBox x:Name="RowsList" Grid.Row="3" Background="{DynamicResource GridBackgroundBrush}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="56,*,56,*">
+                        <Border Grid.Column="0" Grid.ColumnSpan="2" Background="{Binding LeftBackground}" />
+                        <Border Grid.Column="2" Grid.ColumnSpan="2" Background="{Binding RightBackground}" />
+                        <TextBlock Grid.Column="0" Classes="code num" Text="{Binding LeftNo}" />
+                        <TextBlock Grid.Column="1" Classes="code" Text="{Binding LeftText}" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" />
+                        <TextBlock Grid.Column="2" Classes="code num" Text="{Binding RightNo}" />
+                        <TextBlock Grid.Column="3" Classes="code" Text="{Binding RightText}" TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button x:Name="CloseButton" Content="Close" />
+        </StackPanel>
+    </Grid>
+</Window>

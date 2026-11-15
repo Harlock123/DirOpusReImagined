@@ -2316,6 +2316,9 @@ namespace DirOpusReImagined
                 case GridVerb.PreviousButtonBank:
                     StepButtonBank(-1);
                     break;
+                case GridVerb.CompareFiles:
+                    OpenFileCompare(left);
+                    break;
             }
         }
 
