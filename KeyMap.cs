@@ -11,7 +11,7 @@ namespace DirOpusReImagined
     public enum ShortcutCommand
     {
         Rename, View, Copy, Move, NewFolder, Delete, PreviewToggle,
-        Refresh, Undo, FlatView, CompareFiles, Checksums, GoToLinkTarget, MakeLink,
+        Refresh, Undo, FlatView, CompareFiles, FindDuplicates, Checksums, GoToLinkTarget, MakeLink,
         RecentFolders, NextButtonBank, PreviousButtonBank,
         NewTab, CloseTab, NextTab, PreviousTab,
         GoUp, Forward, SwitchPanel,
@@ -123,6 +123,7 @@ namespace DirOpusReImagined
             new(ShortcutCommand.Undo, "Undo", "Ctrl+Z"),
             new(ShortcutCommand.FlatView, "Flat view on / off", "Ctrl+Shift+F"),
             new(ShortcutCommand.CompareFiles, "Compare files", ""),
+            new(ShortcutCommand.FindDuplicates, "Find duplicate files", ""),
             new(ShortcutCommand.Checksums, "Checksums", ""),
             new(ShortcutCommand.GoToLinkTarget, "Go to link target", ""),
             new(ShortcutCommand.MakeLink, "Make link in the other panel", ""),

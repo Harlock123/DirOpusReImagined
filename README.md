@@ -75,6 +75,13 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Sync is **recursive and file-level**, reuses the transfer progress dialog (current file, speed, ETA, cancel), and works for local, cloud, and cross-provider paths
 - Right-click either **Sync** button (or **⇄**) for a content (hash) variant; long compares run behind a modal dialog with a live "current folder" line and a **Cancel** button
 
+### Find Duplicate Files
+- Right-click → **Find Duplicates…** finds files with **identical contents** in the panel's folder and everything below it, and optionally the other panel's folder too
+- Cheap checks first: only files of the same size can match, then only those whose first 64 KB match, and only those are read in full (SHA-256) — so a large folder is searched quickly. Empty files and linked folders are left out
+- Results are grouped, the most space-wasting first, with a summary of how much deleting the extra copies would free
+- **Mark all but the Oldest / Newest / Shortest path** in each group (or tick copies by hand), then **Delete marked…** — to the trash when it's available, so **Ctrl/Cmd+Z** puts them back; it warns if every copy of something is marked
+- Double-click a file to show it in the panel. Works in local folders and archives (not cloud storage, which would mean downloading every file)
+
 ### Compare Two Files
 - Right-click → **Compare Files…** shows two files **side by side** with the differences coloured: changed lines amber, removed lines red, added lines green
 - It compares **two files selected in one panel**, or else **one file from each panel** (the first selected, or the one under the cursor); the left panel's file stays on the left
@@ -198,6 +205,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `Undo` | Undo | Ctrl+Z |
 | `FlatView` | Flat view on / off | Ctrl+Shift+F |
 | `CompareFiles` | Compare files | — |
+| `FindDuplicates` | Find duplicate files | — |
 | `Checksums` | Checksums | — |
 | `GoToLinkTarget` | Go to link target | — |
 | `MakeLink` | Make link in the other panel | — |

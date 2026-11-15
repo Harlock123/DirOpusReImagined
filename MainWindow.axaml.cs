@@ -2324,6 +2324,9 @@ namespace DirOpusReImagined
                 case GridVerb.FlatView:
                     ToggleFlatView(left);
                     break;
+                case GridVerb.FindDuplicates:
+                    OpenDuplicates(left);
+                    break;
             }
         }
 

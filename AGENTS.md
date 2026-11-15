@@ -55,6 +55,8 @@ Everything sits at the repository root; there is no `src/` folder.
 - `Layouts.cs` and `MainWindow.Layouts.cs`: saved layouts (Layouts ▾), stored under `<Layouts>`. A layout reuses the
   tab restore path (`LoadTab`), `SetHiddenColumns`, `ApplyViewMode` and `ShowButtonBank`. `TextPromptDialog` asks for
   a line of text (used for layout names and saved filters).
+- `DuplicateFinder.cs`, `DuplicatesWindow.axaml(.cs)` and `MainWindow.Duplicates.cs`: Find Duplicates (size, then first
+  64 KB, then full SHA-256), deleting through `FileOperation.DeleteBatch` so trashed copies can be undone.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

@@ -29,6 +29,7 @@
 						<MenuItem Name="ChecksumsMenuItem" Header="Checksums…" Click="Checksums_Click"/>
 						<MenuItem Name="CompareFilesMenuItem" Header="Compare Files…" Click="CompareFiles_Click"/>
 						<MenuItem Name="FlatViewMenuItem" Header="Flat View (all files below)" Click="FlatView_Click"/>
+						<MenuItem Name="FindDuplicatesMenuItem" Header="Find Duplicates…" Click="FindDuplicates_Click"/>
 						<MenuItem Name="GoToLinkTargetMenuItem" Header="Go to Link Target" Click="GoToLinkTarget_Click"/>
 						<MenuItem Name="MakeLinkMenuItem" Header="Make Link in Other Panel" Click="MakeLink_Click"/>
 						<Separator/>

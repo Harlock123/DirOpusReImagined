@@ -67,6 +67,7 @@
 
                 <TextBlock Text="Directory compare &amp; sync" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Cmp color-codes the two panels against each other (only-here, newer, older, same-time/different-size, unreadable); comparison is recursive. Right-click Cmp for a content (hash) compare." TextWrapping="Wrap" />
+                <TextBlock Text="• Right-click → Find Duplicates… finds files with identical contents below the panel's folder (and optionally the other panel's), grouped, largest waste first. Mark all but the oldest, newest or shortest-path copy in each group, then Delete marked — to the trash, so Ctrl/Cmd+Z puts them back." TextWrapping="Wrap" />
                 <TextBlock Text="• Right-click → Compare Files… shows two files side by side with the differences coloured (changed amber, removed red, added green): two files selected in one panel, or one from each panel. Next / Previous change, Swap sides and Ignore whitespace are above the list. Files that aren't text are compared byte by byte." TextWrapping="Wrap" />
                 <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
 

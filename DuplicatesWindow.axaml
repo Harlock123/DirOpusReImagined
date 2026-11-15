@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.DuplicatesWindow"
+        Width="900" Height="620" MinWidth="520" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Find Duplicates">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="ListBox CheckBox">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="12" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <TextBlock x:Name="ScopeText" Grid.Row="0" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
+            <CheckBox x:Name="SubfoldersBox" Content="Include subfolders" IsChecked="True" />
+            <CheckBox x:Name="OtherPanelBox" Content="Also search the other panel's folder" />
+            <Button x:Name="FindButton" Content="Find" />
+            <Button x:Name="StopButton" Content="Stop" IsVisible="False" />
+        </StackPanel>
+
+        <TextBlock x:Name="StatusText" Grid.Row="2" Margin="0,8,0,8" TextWrapping="Wrap"
+                   Text="Files with identical contents are found by size, then by their contents (SHA-256). Empty files are left out." />
+
+        <ListBox x:Name="ResultsList" Grid.Row="3" Background="{DynamicResource GridBackgroundBrush}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,1" ToolTip.Tip="{Binding Tip}">
+                        <CheckBox Grid.Column="0" IsVisible="{Binding IsFile}" IsChecked="{Binding IsMarked, Mode=TwoWay}"
+                                  Margin="16,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding Text}" FontWeight="{Binding Weight}"
+                                   TextTrimming="PathSegmentEllipsis" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{Binding Detail}" Opacity="0.7" Margin="12,0,4,0" VerticalAlignment="Center" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+            <TextBlock Text="Mark all but the" VerticalAlignment="Center" />
+            <Button x:Name="KeepOldestButton" Content="Oldest" />
+            <Button x:Name="KeepNewestButton" Content="Newest" />
+            <Button x:Name="KeepShortestButton" Content="Shortest path" />
+            <TextBlock Text="in each group" VerticalAlignment="Center" />
+            <Button x:Name="ClearMarksButton" Content="Clear marks" Margin="8,0,0,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="5" ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
+            <TextBlock x:Name="MarkedText" Grid.Column="0" VerticalAlignment="Center"
+                       Text="Double-click a file to show it in the panel." />
+            <Button x:Name="DeleteButton" Grid.Column="1" Content="Delete marked…" IsEnabled="False" Margin="0,0,8,0" />
+            <Button x:Name="CloseButton" Grid.Column="2" Content="Close" />
+        </Grid>
+    </Grid>
+</Window>
