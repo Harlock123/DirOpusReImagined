@@ -133,7 +133,7 @@
                 <TextBlock Text="• Manage remotes: the %RCLONEDIAG% button shows the rclone binary location, daemon state, your configured remotes (each with a Delete), a live log, and the Install rclone button." TextWrapping="Wrap" />
 
                 <TextBlock Text="Customization" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution; folder bookmarks; a configurable terminal; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
+                <TextBlock Text="• 36 configurable command buttons that launch external programs with parameter substitution, in as many banks as you like (switch with the tabs above them, the mouse wheel over them, or Alt+PageUp / PageDown; Edit Buttons… adds, renames, reorders and deletes banks); folder bookmarks; a configurable terminal; configurable fonts, start paths, image viewer, and executable extensions via XML." TextWrapping="Wrap" />
 
                 <TextBlock Text="Screenshots" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Press Ctrl+Shift+P (Cmd+Shift+P on macOS) on any screen or dialog to save a PNG image of that window. A save dialog opens with a descriptive default filename (no spaces); pick a name and location. Works everywhere in the app — handy for documentation." TextWrapping="Wrap" />
@@ -145,6 +145,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -259,6 +260,8 @@
                     <TextBlock Grid.Row="27" Grid.Column="1" Text="Undo the last rename or move (press again to go further back)" TextWrapping="Wrap" Margin="0,2" />
                     <TextBlock Grid.Row="28" Grid.Column="0" Text="Alt + ↓" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="28" Grid.Column="1" Text="Recent folders menu (also the ◷ button beside Back / Forward)" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="29" Grid.Column="0" Text="Alt + PgUp / PgDn" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="29" Grid.Column="1" Text="Previous / next bank of command buttons (also the bank tabs, or the mouse wheel over the buttons)" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

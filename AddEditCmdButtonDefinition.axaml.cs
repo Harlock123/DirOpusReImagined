@@ -46,13 +46,22 @@ public partial class AddEditCmdButtonDefinition : Window
         
     }
     
-    public AddEditCmdButtonDefinition(List<ButtonSettings> theButtons)
+    /// <summary>The banks being edited: copies, so nothing changes in the main window until Save.</summary>
+    private readonly List<ButtonBank> _banks = new();
+    private int _bank;
+    private bool _refreshingBanks;
+
+    public AddEditCmdButtonDefinition(IEnumerable<ButtonBank> banks, int showing)
     {
         InitializeComponent();
-        
-        TheButtons = theButtons;
+
+        _banks.AddRange(banks.Select(b => b.Clone()));
+        if (_banks.Count == 0) _banks.Add(new ButtonBank(ButtonBanks.DefaultName(0)));
+        _bank = Math.Clamp(showing, 0, _banks.Count - 1);
+        TheButtons = _banks[_bank].Buttons;
 
         DeployButtonSettings();
+        InitBankControls();
 
         this.Loaded += AddEditCmdButtonDefinition_Loaded;
         
@@ -341,6 +350,110 @@ public partial class AddEditCmdButtonDefinition : Window
 
     }
 
+    private void InitBankControls()
+    {
+        var combo = this.FindControl<ComboBox>("cbBank")!;
+        combo.SelectionChanged += (_, _) =>
+        {
+            if (_refreshingBanks || combo.SelectedIndex < 0 || combo.SelectedIndex == _bank) return;
+            SwitchBank(combo.SelectedIndex);
+        };
+
+        var name = this.FindControl<TextBox>("tbBankName")!;
+        name.LostFocus += (_, _) => CommitBankName();
+        name.KeyUp += (_, e) => { if (e.Key == Key.Enter) CommitBankName(); };
+
+        this.FindControl<Button>("btnNewBank")!.Click += (_, _) =>
+        {
+            LeaveBank();
+            _banks.Add(new ButtonBank(ButtonBanks.NewName(_banks.Select(b => b.Name))));
+            EnterBank(_banks.Count - 1);
+        };
+        this.FindControl<Button>("btnDeleteBank")!.Click += (_, _) =>
+        {
+            if (_banks.Count == 1)
+            {
+                new MessageBox("There has to be at least one bank. Clear its buttons instead.", "Delete Bank").ShowDialog(this);
+                return;
+            }
+            // Nothing is lost until Save: Exit without saving keeps the bank.
+            TheCurrentButton = null;
+            ClearFields();
+            _banks.RemoveAt(_bank);
+            EnterBank(Math.Min(_bank, _banks.Count - 1));
+        };
+        this.FindControl<Button>("btnBankEarlier")!.Click += (_, _) => MoveBank(-1);
+        this.FindControl<Button>("btnBankLater")!.Click += (_, _) => MoveBank(+1);
+
+        RefreshBankList();
+    }
+
+    /// <summary>Stores what's on screen into the current bank before showing another.</summary>
+    private void LeaveBank()
+    {
+        PersistCurrentButtonInterface();
+        CommitBankName();
+        CollectCurrentBank();
+        TheCurrentButton = null;
+        ClearFields();
+    }
+
+    private void EnterBank(int index)
+    {
+        _bank = index;
+        TheButtons = _banks[_bank].Buttons;
+        DeployButtonSettings();
+        RefreshBankList();
+    }
+
+    private void SwitchBank(int index)
+    {
+        LeaveBank();
+        EnterBank(index);
+    }
+
+    private void MoveBank(int delta)
+    {
+        int to = _bank + delta;
+        if (to < 0 || to >= _banks.Count) return;
+        LeaveBank();
+        (_banks[_bank], _banks[to]) = (_banks[to], _banks[_bank]);
+        EnterBank(to);
+    }
+
+    /// <summary>The 36 editor buttons, in order, become the current bank's buttons.</summary>
+    private void CollectCurrentBank()
+    {
+        var list = _banks[_bank].Buttons;
+        list.Clear();
+        for (int i = 1; i <= ButtonBanks.ButtonsPerBank; i++)
+            if (this.FindControl<Button>("LPB" + i)?.Tag is ButtonSettings bs)
+                list.Add(bs);
+    }
+
+    private void CommitBankName()
+    {
+        string text = (this.FindControl<TextBox>("tbBankName")!.Text ?? "").Trim();
+        if (text.Length == 0 || text == _banks[_bank].Name) return;
+        _banks[_bank].Name = text;
+        RefreshBankList();
+    }
+
+    private void RefreshBankList()
+    {
+        _refreshingBanks = true;
+        try
+        {
+            var combo = this.FindControl<ComboBox>("cbBank")!;
+            combo.ItemsSource = _banks.Select((b, i) => $"{i + 1}. {b.Name}").ToList();
+            combo.SelectedIndex = _bank;
+            this.FindControl<TextBox>("tbBankName")!.Text = _banks[_bank].Name;
+            this.FindControl<Button>("btnBankEarlier")!.IsEnabled = _bank > 0;
+            this.FindControl<Button>("btnBankLater")!.IsEnabled = _bank < _banks.Count - 1;
+        }
+        finally { _refreshingBanks = false; }
+    }
+
     private void InitializeComponent()
     { 
         AvaloniaXamlLoader.Load(this);
@@ -357,18 +470,14 @@ public partial class AddEditCmdButtonDefinition : Window
             
             B.Background = new SolidColorBrush(Colors.LightGray);
             B.Foreground = new SolidColorBrush(Colors.Black);
+            B.Tag = null;
         }
         
         foreach (ButtonSettings b in TheButtons)
         {
-            string name = b.Name.Replace("LpButton", "LPB");
-            Button theButton = this.FindControl<Button>(name);
-
-            if (theButton == null)
-            {
-                name = b.Name.Replace("LPButton", "LPB");
-                theButton = this.FindControl<Button>(name);
-            }
+            int slot = ButtonBanks.SlotOf(b.Name);
+            Button? theButton = slot == 0 ? null : this.FindControl<Button>("LPB" + slot);
+            if (theButton == null) continue;
             
             theButton.Content = b.Content;
             
@@ -474,47 +583,6 @@ public partial class AddEditCmdButtonDefinition : Window
     }
 
     /// <summary>
-    /// Method to serialize a list of button settings to XML format. </summary>
-    /// <param name="settings">List of button settings to be serialized.</param>
-    /// <returns>Serialized XML string of the button settings list.</returns>
-    /// /
-    public string SerializeButtonSettingsListToXml(List<ButtonSettings> settings)
-    {
-        
-        
-        // make sure each button has a Margin element
-        foreach (var button in settings)
-        {
-            if (button.Margin == null)
-            {
-                button.Margin = "2,2,2,2";
-            }
-        }
-        
-        var serializer = new XmlSerializer(typeof(List<ButtonSettings>));
-
-        using (var stream = new MemoryStream())
-        {
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                serializer.Serialize(writer, settings);
-                var xml = Encoding.UTF8.GetString(stream.ToArray());
-
-                // Remove the ArrayOfButtonSettings line
-                xml = xml.Substring(xml.IndexOf('>') + 1);
-                xml = xml.Substring(xml.IndexOf('>') + 1);
-                xml = xml.Substring(0, xml.LastIndexOf('<'));
-
-                // Replace ButtonSettings with Button tags
-                xml = xml.Replace("<ButtonSettings>", "<Button>");
-                xml = xml.Replace("</ButtonSettings>", "</Button>");
-
-                return xml;
-            }
-        }
-    }
-
-    /// <summary>
     /// Handles the Click event of the Save button.
     /// </summary>
     /// <param name="sender">The object that raised the event.</param>
@@ -524,22 +592,9 @@ public partial class AddEditCmdButtonDefinition : Window
         // Implement save logic here.
         
         PersistCurrentButtonInterface();
-        
-        List<ButtonSettings> theButtonSettings = new List<ButtonSettings>();
-        
-        for (int i=1;i<=36;i++)
-        {
-            Button b = this.FindControl<Button>("LPB" + i.ToString());
-            ButtonSettings bs = (ButtonSettings)b.Tag;
-            if (bs != null)
-            {
-                theButtonSettings.Add(bs);
-            }
-            //theButtonSettings.Add(bs);
-        }
-        
-        string xml = SerializeButtonSettingsListToXml(theButtonSettings);
-        
+        CommitBankName();
+        CollectCurrentBank();
+
         // Load the same config the app is actually using. Resolving this per-call against the
         // working directory used to mean the dialog could edit a different file than the one loaded.
         string configPath = ConfigPath();
@@ -550,37 +605,22 @@ public partial class AddEditCmdButtonDefinition : Window
         }
 
         var doc = XDocument.Load(configPath);
+        ButtonBanks.Write(doc.Root!, _banks);
+        ButtonBanks.WriteActive(doc.Root!, _bank);
 
-        // Parse the xml string into an XElement
-        var newElement = XElement.Parse("<Buttons>" + xml + "</Buttons>").Elements();
+        // Persist the System Wide Settings (Terminal) alongside the buttons.
+        UpsertTerminalSettings(doc);
 
-        // Find the Buttons element
-        var buttonsElement = doc.Descendants("Buttons").FirstOrDefault();
+        // Save the modifications back to the same file they came from.
+        ConfigFile.EnsureDirectory(configPath);
+        doc.Save(configPath);
 
-        // If the Buttons element exists, add the new element
-        if (buttonsElement != null)
-        {
-            buttonsElement.RemoveAll();
-
-            buttonsElement.Add(newElement);
-
-            // Persist the System Wide Settings (Terminal) alongside the buttons.
-            UpsertTerminalSettings(doc);
-
-            // Save the modifications back to the same file they came from.
-            ConfigFile.EnsureDirectory(configPath);
-            doc.Save(configPath);
-
-            TheMainWindow.DoButtonRefresh();
-        }
-        else
-        {
-            Console.WriteLine("Buttons element not found in the XML file");
-        }
-        
+        TheMainWindow?.SetButtonBanks(_banks, _bank);
     }
 
-    private void Clear_OnClick(object sender, RoutedEventArgs e)
+    private void Clear_OnClick(object sender, RoutedEventArgs e) => ClearFields();
+
+    private void ClearFields()
     {
         this.FindControl<TextBox>("tbContent").Text = "";
         this.FindControl<Button>("SampleButton").Content = "";

@@ -47,7 +47,9 @@ namespace DirOpusReImagined
         Checksums,
         RecentFolders,
         GoToLinkTarget,
-        MakeLink
+        MakeLink,
+        NextButtonBank,
+        PreviousButtonBank
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -3103,6 +3105,8 @@ namespace DirOpusReImagined
                 if (e.Key == Key.Left)  { NavigateUpRequested?.Invoke(this, EventArgs.Empty);      e.Handled = true; return; }
                 if (e.Key == Key.Right) { NavigateForwardRequested?.Invoke(this, EventArgs.Empty); e.Handled = true; return; }
                 if (e.Key == Key.Down)  { RaiseVerb(GridVerb.RecentFolders); e.Handled = true; return; }
+                if (e.Key == Key.PageDown) { RaiseVerb(GridVerb.NextButtonBank);     e.Handled = true; return; }
+                if (e.Key == Key.PageUp)   { RaiseVerb(GridVerb.PreviousButtonBank); e.Handled = true; return; }
             }
 
             // Wildcard selection hotkeys (orthodox "gray-plus/minus/star"). Accept both the numpad

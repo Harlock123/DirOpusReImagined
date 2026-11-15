@@ -529,7 +529,18 @@
 			<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />
 		</StackPanel>
 
-		<Grid Name="ButtonGrid" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Grid.RowSpan="2">
+		<DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Grid.RowSpan="2">
+		<!-- Banks of command buttons: one tab per bank. Alt+PageUp/PageDown or the mouse wheel over the buttons also switch. -->
+		<DockPanel Name="BankBar" DockPanel.Dock="Top" Height="24" Margin="1,2,1,0">
+			<Button Name="EditBanksButton" DockPanel.Dock="Right" Content="Edit Buttons…" FontSize="11"
+			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+			        Background="{DynamicResource PanelChromeBrush}"
+			        ToolTip.Tip="Change the buttons, and add, rename, reorder or delete banks" />
+			<ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+				<StackPanel Name="BankTabs" Orientation="Horizontal" Spacing="2" />
+			</ScrollViewer>
+		</DockPanel>
+		<Grid Name="ButtonGrid">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="*"/>
@@ -664,6 +675,7 @@
 					Content="Button 36" HorizontalAlignment="Stretch" Margin="1,1,1,1"
 					VerticalAlignment="Stretch"/>
 		</Grid>
+		</DockPanel>
 
 		<!-- Status Bar -->
 		<Grid Name="StatusBar" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3"

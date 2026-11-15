@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="DirOpusReImagined.AddEditCmdButtonDefinition"
-        Title="AddEditCmdButtonDefinition" Width="800" Height="600" WindowStartupLocation="CenterOwner">
+        Title="Command Buttons" Width="800" Height="600" WindowStartupLocation="CenterOwner">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save" Click="Save_OnClick" Margin="5"/>
@@ -14,6 +14,20 @@
         <TabControl>
         <TabItem Header="Command Buttons">
         <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,4,0,8">
+            <Label Content="Bank" VerticalAlignment="Center" />
+            <ComboBox Name="cbBank" Width="150" VerticalAlignment="Center"
+                      ToolTip.Tip="Which bank of buttons to edit" />
+            <Label Content="Name" VerticalAlignment="Center" Margin="6,0,0,0" />
+            <TextBox Name="tbBankName" Width="140" VerticalAlignment="Center"
+                     ToolTip.Tip="The bank's name, shown on its tab above the buttons" />
+            <Button Name="btnNewBank" Content="New Bank" VerticalAlignment="Center" />
+            <Button Name="btnDeleteBank" Content="Delete Bank" VerticalAlignment="Center" />
+            <Button Name="btnBankEarlier" Content="◀" VerticalAlignment="Center"
+                    ToolTip.Tip="Move this bank one place earlier" />
+            <Button Name="btnBankLater" Content="▶" VerticalAlignment="Center"
+                    ToolTip.Tip="Move this bank one place later" />
+        </StackPanel>
         <ScrollViewer DockPanel.Dock="Left"
                       VerticalScrollBarVisibility="Visible"
                       >

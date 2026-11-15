@@ -40,9 +40,7 @@ namespace DirOpusReImagined
 
         private List<ButtonEntry> TheButtons = new List<ButtonEntry>();
 
-        private List<Button> TheLowerPanelButtons = new List<Button>();
         
-        private List<ButtonSettings> TheButtonSettings = new List<ButtonSettings>();
         
         private string StartRightPath = "";
         private string StartLeftPath = "";
@@ -110,6 +108,7 @@ namespace DirOpusReImagined
             FileUtility.PanelPopulated += OnPanelPopulated;
             InitUndo();
             InitRecentFolders();
+            InitButtonBanks();
             InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
@@ -170,7 +169,6 @@ namespace DirOpusReImagined
             _configFilePath = configFile;
             if (configFile != null)
             {
-                ClearLowerButtons();
                 ApplyButtonSettingsFromXml(configFile, this);
             }
 
@@ -493,36 +491,6 @@ namespace DirOpusReImagined
 
             if (this.Clipboard != null)
                 await this.Clipboard.SetTextAsync(fullPath);
-        }
-
-        /// <summary>
-        /// Populates the buttons in the lower panel.
-        /// reads from the configuration.xml file and populates the buttons
-        /// </summary>
-        private void PopulateTheButtons()
-        {
-            for (int i = 1; i <= 36; i++)
-            {
-                var buttonName = $"LPButton{i}";
-                var lpButton = this.FindControl<Button>(buttonName);
-    
-                if (lpButton != null)
-                {
-                    TheLowerPanelButtons.Add(lpButton);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Clears the lower buttons by setting their content and tag to null.
-        /// </summary>
-        private void ClearLowerButtons()
-        {
-            foreach (Button b in TheLowerPanelButtons)
-            {
-                b.Content = "";
-                b.Tag = null;
-            }
         }
 
         /// <summary>
@@ -1276,9 +1244,7 @@ namespace DirOpusReImagined
                     if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
                     {
                         // we need to open the button config window
-                        AddEditCmdButtonDefinition BC = new AddEditCmdButtonDefinition(TheButtonSettings);
-                        BC.TheMainWindow = this;
-                        BC.ShowDialog(this);
+                        OpenButtonEditor();
                         break;
                     }
                     if (item.Bcontent.ToUpper().Trim() == "%DRIVEINFO%")
@@ -2346,6 +2312,12 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.MakeLink:
                     MakeLinksInOtherPanel(left);
+                    break;
+                case GridVerb.NextButtonBank:
+                    StepButtonBank(+1);
+                    break;
+                case GridVerb.PreviousButtonBank:
+                    StepButtonBank(-1);
                     break;
             }
         }
@@ -4662,171 +4634,11 @@ namespace DirOpusReImagined
                     RPpath.Text = GetRootDirectoryPath();
                 }
                 
-                // Query XML for button settings
-                var buttonSettingsList = from btn in xmlDoc.Descendants("Button")
-                                         select new ButtonSettings
-                                         {
-                                             Name = (string)btn.Element("Name"),
-                                             Content = (string)btn.Element("Content"),
-                                             Background = (string)btn.Element("Background"),
-                                             Foreground = (string)btn.Element("Foreground"),
-                                             HorizontalAlignment = (string)btn.Element("HorizontalAlignment"),
-                                             VerticalAlignment = (string)btn.Element("VerticalAlignment"),
-                                             Margin = (string)btn.Element("Margin"),
-                                             Action = (string)btn.Element("Action"),
-                                             Args = (string)btn.Element("Args"),
-                                             ShellExecute = (string)btn.Element("ShellExecute"),
-                                             ShowWindow = (string)btn.Element("ShowWindow"),
-                                             ToolTip = (string)btn.Element("ToolTip")
-                                         };
-                
-                //Console.WriteLine(Toml.FromModel(buttonSettingsList));
-
-                TheButtonSettings = buttonSettingsList.ToList();
-                // Find the grid where the buttons exist
-                var grid = (Grid)window.FindControl<Control>("ButtonGrid");
-                
-                // Apply settings to each button
-                foreach (var buttonSettings in buttonSettingsList)
-                {
-                    buttonSettings.Name = buttonSettings.Name.Replace("LP", "Lp");
-                    
-                    // Find the button by its name
-                    Button button = (Button)grid.FindControl<Control>(buttonSettings.Name);
-                    
-                    // Check if the button control exists
-                    if (button != null)
-                    {
-                        // Save the buttonSettings object to the button's Tag property
-                        button.Tag = buttonSettings;
-                        
-                        // Check if the Content property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.Content))
-                        {
-                            // Set the button's Content property
-                            button.Content = buttonSettings.Content;
-                        }
-
-                        // Check if the Background property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.Background))
-                        {
-                            // Parse the color from the string
-                            var color = Color.Parse(buttonSettings.Background);
-                            // Set the button's Background property
-                            button.Background = new SolidColorBrush(color);
-                        }
-
-                        // Check if the Foreground property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.Foreground))
-                        {
-                            // Parse the color from the string
-                            var color = Color.Parse(buttonSettings.Foreground);
-                            // Set the button's Foreground property
-                            button.Foreground = new SolidColorBrush(color);
-                              
-                            //button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
-                        }
-
-                        // Check if the HorizontalAlignment property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.HorizontalAlignment))
-                        {
-                            // Depending on the value of the property, set the button's HorizontalAlignment
-                            switch (buttonSettings.HorizontalAlignment.ToUpper())
-                            {
-                                case "LEFT":
-                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Left;
-                                    break;
-                                case "CENTER":
-                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
-                                    break;
-                                case "RIGHT":
-                                    button.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Right;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        // Check if the VerticalAlignment property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.VerticalAlignment))
-                        {
-                            // Depending on the value of the property, set the button's VerticalAlignment
-                            switch (buttonSettings.VerticalAlignment.ToUpper())
-                            {
-                                case "TOP":
-                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Top;
-                                    break;
-                                case "CENTER":
-                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center;
-                                    break;
-                                case "BOTTOM":
-                                    button.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    
-                        // Check if the Margin property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.Margin))
-                        {
-                            // Parse the margin from the string
-                            var margin = Avalonia.Thickness.Parse(buttonSettings.Margin);
-                            // Set the button's Margin property
-                            button.Margin = margin;
-                        }
-                        
-                        // Check if the Action property is not null or empty
-                        if (!string.IsNullOrEmpty(buttonSettings.Action))
-                        {
-                            // Get the defined action for this button
-                            var action = buttonSettings.Action;
-                            // Get the actual buttons name so it can be sought
-                            // on the handler for the button click
-                            var buttonName = buttonSettings.Name;
-                                                        
-                            var buttonArgs = buttonSettings.Args;
-
-                            // Create a new button entry
-                            var buttonEntry = new ButtonEntry(buttonName, action, buttonArgs);
-
-                            if (!string.IsNullOrEmpty(buttonSettings.ShellExecute))
-                            {
-                                buttonEntry.ShellExecute = bool.Parse(buttonSettings.ShellExecute);
-                            }
-
-                            if (!string.IsNullOrEmpty(buttonSettings.ShowWindow))
-                            {
-                                buttonEntry.ShowWindow = bool.Parse(buttonSettings.ShowWindow);
-                            }
-
-                            buttonEntry.ToolTip = buttonSettings.ToolTip;
-
-                            // Add the button entry to the list of buttons
-                            TheButtons.Add(buttonEntry);
-                            
-                        }
-                    }
-                }
-                
+                LoadButtonBanks(xmlDoc.Root);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Unexpected error: " + ex.Message);
-            }
-        }
-
-        public void DoButtonRefresh()
-        {
-            if (File.Exists(Environment.CurrentDirectory + "/Configuration.xml"))
-            {
-                ClearLowerButtons();
-                ApplyButtonSettingsFromXml(Environment.CurrentDirectory + "/Configuration.xml", this);
-            }
-            else
-            {
-                // Look in the alternate places here based on OS
-
             }
         }
 
@@ -5023,6 +4835,7 @@ namespace DirOpusReImagined
         public string ShowWindow { get; set; }
         public string ToolTip { get; set; }
 
+        public ButtonSettings Clone() => (ButtonSettings)MemberwiseClone();
     }
 
     

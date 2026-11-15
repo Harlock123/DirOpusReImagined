@@ -128,6 +128,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Backspace** | Go up one directory level in the active panel |
 | **Alt + ← / →** | Back / Forward in the panel's history |
 | **Alt + ↓** | Recent folders menu |
+| **Alt + PageUp / PageDown** | Previous / next bank of command buttons |
 | *(type a name)* | Type-ahead: jump to the matching row; repeat a letter to cycle |
 | **Tab** | Switch the active panel |
 | **F2** | Rename the selection in the active panel |
@@ -150,8 +151,10 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus
 
-### 36 Customizable Action Buttons
+### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
+- **Banks:** keep as many sets of 36 as you like, as Directory Opus did. A tab for each bank sits above the buttons; switch with the tabs, the mouse wheel over the buttons, or **Alt+PageUp / Alt+PageDown** in a panel. The bank that was showing comes back next time
+- **Edit Buttons…** (beside the bank tabs, or a `%BUTTONCONFIG%` button) opens the editor, where you can add, rename, reorder and delete banks as well as change the buttons. Nothing changes until you press Save
 - Each button can launch any external program with flexible argument substitution
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
@@ -392,6 +395,11 @@ A Sample of this file is shown below
 </Settings>
 
 ```
+
+Each `<Buttons>` element is one bank of buttons. Give it a name with `<Buttons name="Tools">`, and add more
+`<Buttons name="…">` elements for more banks; they show as tabs in the order they appear. A `<Buttons>`
+without a name (as above, and in files from before banks existed) is called "Bank 1", "Bank 2" and so on.
+`<ActiveButtonBank>` holds which bank was showing, counting from 0.
 
 It is a work in progress.
 
