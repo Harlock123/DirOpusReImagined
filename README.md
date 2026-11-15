@@ -261,7 +261,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.29.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.30.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1566,6 +1566,10 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.30.0 (2026-11-15) — Full command-button labels on hover
+- **A command-button label cut short with "…" now shows in full when you hover over the button,** above the button's own tooltip if it has one. Buttons whose label fits behave as before.
+- Buttons with a label but no command now show their label on hover too; before, they never showed a tooltip.
 
 ### 0.1.29.0 (2026-11-15) — Panel frame and button label fixes
 - **Fixed: the active-panel frame stayed at its old size after the window was resized,** leaving a stray blue line across the panel until something redrew it. The panels drew from their size as last measured on screen, which updates a moment after a resize. They now use the size they were just given. The same fix applies to the thumbnail layout and to scrolling (how far you can scroll sideways, and how far Page Up / Page Down moves).
