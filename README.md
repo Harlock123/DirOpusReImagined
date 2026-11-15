@@ -50,6 +50,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Linked folders are never walked into** by folder sizes, search, checksums, compare and sync, archiving, or copies of a whole folder — so a link back to a parent folder can't make them run forever
 - Moving a folder to a different drive now works on Linux and macOS (it is copied across and then removed, since a rename can't cross drives)
 
+### Set Dates & Permissions
+- Right-click → **Set Dates & Permissions…** changes every selected file and folder at once
+- **Modified date and time** — type one (`2026-11-15 14:30`) or press **Now**
+- **Permissions** (Linux, macOS) in `chmod`'s notation: octal (`644`, `755`) or symbolic (`u+x`, `go-w`, `a=r`, `u=rwX,go=`), where `X` adds execute only to folders and to files someone can already run. A preview shows what it does to the first item (`rw-r--r-- → rwxr--r--`)
+- **Read-only** (Windows): make read-only, make writable, or leave as it is
+- **Also everything inside the selected folders**, never following linked folders
+- Items that can't be changed are listed; the rest are still changed. Local files only
+
 ### Checksums
 - Right-click → **Checksums…** hashes the selected files, and every file inside selected folders, with **MD5, SHA-1, SHA-256** (default) or **SHA-512**, with a progress bar and Cancel
 - **Compare with** — paste the hash a download page gave you, in any case, with or without spaces or colons, even with a "SHA256:" label; the matching file is ticked, or you're told nothing matches (or that the hash is from a different algorithm)
@@ -209,6 +217,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `FlatView` | Flat view on / off | Ctrl+Shift+F |
 | `CompareFiles` | Compare files | — |
 | `FindDuplicates` | Find duplicate files | — |
+| `SetAttributes` | Set dates and permissions | — |
 | `Checksums` | Checksums | — |
 | `GoToLinkTarget` | Go to link target | — |
 | `MakeLink` | Make link in the other panel | — |

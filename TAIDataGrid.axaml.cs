@@ -54,7 +54,8 @@ namespace DirOpusReImagined
         FlatView,
         FindDuplicates,
         SavedFilters,
-        CommandPalette
+        CommandPalette,
+        SetAttributes
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -4073,6 +4074,7 @@ namespace DirOpusReImagined
         private void CompareFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CompareFiles);
         private void FlatView_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FlatView);
         private void FindDuplicates_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FindDuplicates);
+        private void SetAttributes_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SetAttributes);
 
         private void GoToLinkTarget_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToLinkTarget);
 

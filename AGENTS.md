@@ -61,6 +61,8 @@ Everything sits at the repository root; there is no `src/` folder.
   patterns) and the saved filters behind its ▾ button, stored under `<SavedFilters>`.
 - `CommandPalette.cs`, `CommandPaletteWindow.axaml(.cs)` and `MainWindow.Palette.cs`: the command palette
   (Ctrl/Cmd+Shift+A). `MainWindow.RunButtonEntry` runs any button's action, so buttons from banks not showing work too.
+- `BatchAttributes.cs` (`ModeChange` parses chmod notation), `SetAttributesWindow.axaml(.cs)` and
+  `MainWindow.SetAttributes.cs`: Set Dates & Permissions for a whole selection (local files only).
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

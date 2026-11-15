@@ -2331,6 +2331,9 @@ namespace DirOpusReImagined
                 case GridVerb.CommandPalette:
                     OpenCommandPalette();
                     break;
+                case GridVerb.SetAttributes:
+                    OpenSetAttributes(left);
+                    break;
             }
         }
 

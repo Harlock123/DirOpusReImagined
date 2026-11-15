@@ -74,6 +74,9 @@
                 <TextBlock Text="Command palette" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Ctrl/Cmd+Shift+A (or Commands… beside the button bank tabs) lists every panel command with its keys, every button in every bank, saved layouts and saved filters. Type part of a name, ↑ ↓ to choose, Enter to run." TextWrapping="Wrap" />
 
+                <TextBlock Text="Dates &amp; permissions" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Right-click → Set Dates &amp; Permissions… changes the selection at once: the modified date and time, and the permissions in chmod's notation (755, u+x, go-w, u=rwX,go=) on Linux and macOS or read-only on Windows, optionally including everything inside selected folders." TextWrapping="Wrap" />
+
                 <TextBlock Text="Saved layouts" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Layouts ▾ (beside the button bank tabs) saves both panels' tabs, which tab is showing, hidden columns, list or thumbnail view, and the button bank under a name, and switches back to it in one click. Folders that have gone since are left out and listed." TextWrapping="Wrap" />
 
