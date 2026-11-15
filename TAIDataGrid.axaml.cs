@@ -3066,6 +3066,33 @@ namespace DirOpusReImagined
                 _selecteditems.Add(_items[i]);
         }
 
+        /// <summary>Runs a command from the key map (see <see cref="KeyMap"/>).</summary>
+        private void RunShortcut(ShortcutCommand command)
+        {
+            switch (command)
+            {
+                case ShortcutCommand.NewTab: TabActionRequested?.Invoke(this, TabAction.New); break;
+                case ShortcutCommand.CloseTab: TabActionRequested?.Invoke(this, TabAction.Close); break;
+                case ShortcutCommand.NextTab: TabActionRequested?.Invoke(this, TabAction.Next); break;
+                case ShortcutCommand.PreviousTab: TabActionRequested?.Invoke(this, TabAction.Previous); break;
+                case ShortcutCommand.SwitchPanel: SwitchPanelRequested?.Invoke(this, EventArgs.Empty); break;
+                case ShortcutCommand.GoUp: NavigateUpRequested?.Invoke(this, EventArgs.Empty); break;
+                case ShortcutCommand.Forward: NavigateForwardRequested?.Invoke(this, EventArgs.Empty); break;
+                case ShortcutCommand.SelectByPattern: RaiseSelectionAction(SelectionAction.SelectByPattern); break;
+                case ShortcutCommand.DeselectByPattern: RaiseSelectionAction(SelectionAction.DeselectByPattern); break;
+                case ShortcutCommand.InvertSelection: RaiseSelectionAction(SelectionAction.Invert); break;
+                case ShortcutCommand.SelectAll:
+                    if (_items.Count == 0) return;
+                    SelectAllFilesOnly();
+                    RaiseKeyboardSelectionChanged();
+                    break;
+                default:
+                    // The rest share their names with the panel verbs the right-click menu raises.
+                    if (Enum.TryParse(command.ToString(), out GridVerb verb)) RaiseVerb(verb);
+                    break;
+            }
+        }
+
         /// <summary>
         /// Keyboard cursor navigation and selection for the active panel (Explorer-style):
         /// <list type="bullet">
@@ -3082,70 +3109,13 @@ namespace DirOpusReImagined
             // Treat Cmd (Meta) like Ctrl so the shortcuts feel native on macOS.
             bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
-            // Folder-tab shortcuts (Ctrl/Cmd based) — checked before the plain-Tab panel switch.
-            if (ctrl)
+            // Commands (F-keys, tabs, undo, selection by pattern…) come from the key map, which the
+            // user can change in Configuration.xml. Only cursor movement below is fixed.
+            if (KeyMap.Current.TryGet(e.Key, e.KeyModifiers, out var command))
             {
-                if (e.Key == Key.T)        { TabActionRequested?.Invoke(this, TabAction.New);   e.Handled = true; return; }
-                if (e.Key == Key.W)        { TabActionRequested?.Invoke(this, TabAction.Close); e.Handled = true; return; }
-                if (e.Key == Key.R)        { RaiseVerb(GridVerb.Refresh); e.Handled = true; return; }
-                if (e.Key == Key.Z)        { RaiseVerb(GridVerb.Undo); e.Handled = true; return; }
-                if (shift && e.Key == Key.F) { RaiseVerb(GridVerb.FlatView); e.Handled = true; return; }
-                if (e.Key == Key.Tab)      { TabActionRequested?.Invoke(this, shift ? TabAction.Previous : TabAction.Next); e.Handled = true; return; }
-                if (e.Key == Key.PageDown) { TabActionRequested?.Invoke(this, TabAction.Next);     e.Handled = true; return; }
-                if (e.Key == Key.PageUp)   { TabActionRequested?.Invoke(this, TabAction.Previous); e.Handled = true; return; }
-            }
-
-            // Panel-level keys that must work even when the panel is empty.
-            // Tab: hand off focus to the other panel (also suppresses default focus traversal).
-            if (e.Key == Key.Tab)
-            {
-                SwitchPanelRequested?.Invoke(this, EventArgs.Empty);
+                RunShortcut(command);
                 e.Handled = true;
                 return;
-            }
-            // Backspace: navigate this panel up one directory level.
-            if (e.Key == Key.Back)
-            {
-                NavigateUpRequested?.Invoke(this, EventArgs.Empty);
-                e.Handled = true;
-                return;
-            }
-            // Alt+Left / Alt+Right: back / forward in this panel's history.
-            if (e.KeyModifiers.HasFlag(KeyModifiers.Alt))
-            {
-                if (e.Key == Key.Left)  { NavigateUpRequested?.Invoke(this, EventArgs.Empty);      e.Handled = true; return; }
-                if (e.Key == Key.Right) { NavigateForwardRequested?.Invoke(this, EventArgs.Empty); e.Handled = true; return; }
-                if (e.Key == Key.Down)  { RaiseVerb(GridVerb.RecentFolders); e.Handled = true; return; }
-                if (e.Key == Key.PageDown) { RaiseVerb(GridVerb.NextButtonBank);     e.Handled = true; return; }
-                if (e.Key == Key.PageUp)   { RaiseVerb(GridVerb.PreviousButtonBank); e.Handled = true; return; }
-            }
-
-            // Wildcard selection hotkeys (orthodox "gray-plus/minus/star"). Accept both the numpad
-            // keys and the common main-keyboard combos, and ignore them while Ctrl/Cmd is held.
-            // + : Select by pattern   - : Deselect by pattern   * : Invert selection
-            if (!ctrl)
-            {
-                bool plus  = e.Key == Key.Add      || (e.Key == Key.OemPlus  && shift);
-                bool minus = e.Key == Key.Subtract || (e.Key == Key.OemMinus && !shift);
-                bool star  = e.Key == Key.Multiply || (e.Key == Key.D8       && shift);
-
-                if (plus)  { RaiseSelectionAction(SelectionAction.SelectByPattern);   e.Handled = true; return; }
-                if (minus) { RaiseSelectionAction(SelectionAction.DeselectByPattern); e.Handled = true; return; }
-                if (star)  { RaiseSelectionAction(SelectionAction.Invert);            e.Handled = true; return; }
-            }
-
-            // File-operation verbs. Handled before the empty-panel check because "New Folder"
-            // is valid in an empty directory; the other verbs validate their own selection.
-            switch (e.Key)
-            {
-                case Key.F2: RaiseVerb(GridVerb.Rename);    e.Handled = true; return;
-                case Key.F3: RaiseVerb(GridVerb.View);      e.Handled = true; return;
-                case Key.F9: RaiseVerb(GridVerb.PreviewToggle); e.Handled = true; return;
-                case Key.F5: RaiseVerb(GridVerb.Copy);      e.Handled = true; return;
-                case Key.F6: RaiseVerb(GridVerb.Move);      e.Handled = true; return;
-                case Key.F7: RaiseVerb(GridVerb.NewFolder); e.Handled = true; return;
-                case Key.F8:
-                case Key.Delete: RaiseVerb(GridVerb.Delete); e.Handled = true; return;
             }
 
             if (_items.Count == 0)
@@ -3158,15 +3128,6 @@ namespace DirOpusReImagined
             if (e.Key == Key.Enter || e.Key == Key.Return)
             {
                 ActivateCursorItem();
-                e.Handled = true;
-                return;
-            }
-
-            // Select-all: Ctrl/Cmd + A.
-            if (ctrl && e.Key == Key.A)
-            {
-                SelectAllFilesOnly();
-                RaiseKeyboardSelectionChanged();
                 e.Handled = true;
                 return;
             }

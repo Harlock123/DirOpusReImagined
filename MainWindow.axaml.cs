@@ -4642,6 +4642,7 @@ namespace DirOpusReImagined
                 }
                 
                 LoadButtonBanks(xmlDoc.Root);
+                LoadShortcuts(xmlDoc.Root);
             }
             catch (Exception ex)
             {

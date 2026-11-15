@@ -144,7 +144,7 @@
 
                 <!-- ============ Keyboard navigation & shortcuts ============ -->
                 <TextBlock Text="Keyboard Navigation &amp; Shortcuts" FontSize="18" FontWeight="Bold" Margin="0,14,0,2" />
-                <TextBlock Text="The panel with keyboard focus is the active panel (highlighted frame). A keyboard cursor (the outlined row) moves with the arrow keys, independent of the mouse. Shortcuts act only while a file panel has focus, so typing in the path or filter boxes is never intercepted."
+                <TextBlock Text="The panel with keyboard focus is the active panel (highlighted frame). A keyboard cursor (the outlined row) moves with the arrow keys, independent of the mouse. Shortcuts act only while a file panel has focus, so typing in the path or filter boxes is never intercepted. The command shortcuts below can be changed in Configuration.xml (a &lt;Shortcuts&gt; section; the README lists the command names); cursor movement can't."
                            TextWrapping="Wrap" Margin="0,0,0,6" />
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">

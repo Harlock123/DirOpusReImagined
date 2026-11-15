@@ -169,6 +169,53 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus
 
+#### Changing shortcuts
+Any of the commands below can be given different keys, or none, in a `<Shortcuts>` section of `Configuration.xml`:
+
+```xml
+<Shortcuts>
+  <Shortcut command="Copy" keys="F5, Ctrl+Shift+C" />   <!-- replaces Copy's keys -->
+  <Shortcut command="CompareFiles" keys="Ctrl+D" />     <!-- gives Compare Files a key -->
+  <Shortcut command="Delete" keys="" />                 <!-- Delete has no key -->
+</Shortcuts>
+```
+
+- Keys are written like `F5`, `Ctrl+Shift+F`, `Alt+PageDown`, `Backspace`, `NumPlus`; **Ctrl** means Cmd on macOS (`Cmd` works too), and `Option` means Alt
+- A key given to one command is taken away from whichever command had it by default; of two changes claiming the same key, the later wins
+- Anything DORI can't understand is skipped, and a message at start-up lists what was skipped
+- Moving the cursor (arrows, Home/End, Page Up/Down, Space, Insert, Enter) and the screenshot key (**Ctrl/Cmd+Shift+P**) can't be changed
+
+| Command | What it does | Default keys |
+|---|---|---|
+| `Rename` | Rename | F2 |
+| `View` | View file | F3 |
+| `Copy` | Copy to the other panel | F5 |
+| `Move` | Move to the other panel | F6 |
+| `NewFolder` | New folder | F7 |
+| `Delete` | Delete | F8, Delete, Shift+Delete |
+| `PreviewToggle` | Preview window on / off | F9 |
+| `Refresh` | Refresh | Ctrl+R |
+| `Undo` | Undo | Ctrl+Z |
+| `FlatView` | Flat view on / off | Ctrl+Shift+F |
+| `CompareFiles` | Compare files | — |
+| `Checksums` | Checksums | — |
+| `GoToLinkTarget` | Go to link target | — |
+| `MakeLink` | Make link in the other panel | — |
+| `RecentFolders` | Recent folders | Alt+Down |
+| `NextButtonBank` | Next button bank | Alt+PageDown |
+| `PreviousButtonBank` | Previous button bank | Alt+PageUp |
+| `NewTab` | New tab | Ctrl+T |
+| `CloseTab` | Close tab | Ctrl+W |
+| `NextTab` | Next tab | Ctrl+Tab, Ctrl+PageDown |
+| `PreviousTab` | Previous tab | Ctrl+Shift+Tab, Ctrl+PageUp |
+| `GoUp` | Back / up a folder | Backspace, Alt+Left |
+| `Forward` | Forward | Alt+Right |
+| `SwitchPanel` | Switch panel | Tab, Shift+Tab |
+| `SelectAll` | Select all files | Ctrl+A |
+| `SelectByPattern` | Select by pattern | NumPlus, Shift+Plus |
+| `DeselectByPattern` | Deselect by pattern | NumMinus, Minus |
+| `InvertSelection` | Invert selection | NumStar, Shift+8 |
+
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
 - **Banks:** keep as many sets of 36 as you like, as Directory Opus did. A tab for each bank sits above the buttons; switch with the tabs, the mouse wheel over the buttons, or **Alt+PageUp / Alt+PageDown** in a panel. The bank that was showing comes back next time

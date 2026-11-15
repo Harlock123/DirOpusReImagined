@@ -48,6 +48,10 @@ Everything sits at the repository root; there is no `src/` folder.
 - `MainWindow.Flat.cs`: flat view. A panel's `TaiDataGrid.FlatRoot` makes `FileUtility.PopulateFilePanel` list every file
   below that folder (`CollectFlat`, off the UI thread, never into linked folders), each named by its relative path, so
   the usual `JoinPanelPath` operations work; `TransferCoordinator` makes a missing local parent folder for such names.
+- `KeyMap.cs` and `MainWindow.Shortcuts.cs`: panel keyboard shortcuts. Every command key goes through
+  `KeyMap.Current` (defaults in `KeyMap.Commands`, changed by `<Shortcuts>` in `Configuration.xml`);
+  `TaiDataGrid.RunShortcut` runs them, mostly by raising the `GridVerb` of the same name. A new panel command
+  needs a `ShortcutCommand`, an entry in `KeyMap.Commands`, and a matching `GridVerb` (a test checks this).
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.
