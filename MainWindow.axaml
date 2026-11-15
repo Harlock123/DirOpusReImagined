@@ -541,6 +541,13 @@
 			</ScrollViewer>
 		</DockPanel>
 		<Grid Name="ButtonGrid">
+			<Grid.Styles>
+				<!-- No vertical padding: the rows get short in a small window, and Fluent's default
+				     padding then clips the labels top and bottom. -->
+				<Style Selector="Button">
+					<Setter Property="Padding" Value="4,0" />
+				</Style>
+			</Grid.Styles>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="*"/>

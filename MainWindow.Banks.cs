@@ -113,7 +113,10 @@ namespace DirOpusReImagined
         {
             s.Name = $"LpButton{ButtonBanks.SlotOf(s.Name)}";   // the click handler matches on this
             button.Tag = s;
-            if (!string.IsNullOrEmpty(s.Content)) button.Content = s.Content;
+            // A TextBlock rather than a plain string so a label too long for its button ends in "…"
+            // instead of being cut off mid-letter. Foreground is inherited from the button.
+            if (!string.IsNullOrEmpty(s.Content))
+                button.Content = new TextBlock { Text = s.Content, TextTrimming = TextTrimming.CharacterEllipsis };
             if (!string.IsNullOrEmpty(s.Background)) button.Background = new SolidColorBrush(Color.Parse(s.Background));
             if (!string.IsNullOrEmpty(s.Foreground)) button.Foreground = new SolidColorBrush(Color.Parse(s.Foreground));
 
