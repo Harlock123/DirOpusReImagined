@@ -39,6 +39,12 @@ public static class ThumbnailCache
     }
 
     /// <summary>
+    /// Part of every cache key. Raise it when the way thumbnails are made changes, so the old ones on
+    /// disk are no longer used. 2: photos taken sideways are turned upright (EXIF orientation).
+    /// </summary>
+    internal const int CacheVersion = 2;
+
+    /// <summary>
     /// Stable cache key for a (path, size, modified-time, target-width) tuple. Same inputs always
     /// yield the same key; changing any of them (a re-saved file, a different tile size) yields a new
     /// one, so a stale thumbnail is never served. Returns a hex string safe as a filename.
@@ -47,7 +53,7 @@ public static class ThumbnailCache
     {
         // Normalise separators so the same file keys identically regardless of how the path was built.
         string normalized = (path ?? "").Replace('\\', '/');
-        string payload = $"{normalized}|{fileSize}|{mtimeTicks}|{targetWidth}";
+        string payload = $"{normalized}|{fileSize}|{mtimeTicks}|{targetWidth}|{CacheVersion}";
         byte[] hash = SHA1.HashData(Encoding.UTF8.GetBytes(payload));
         var sb = new StringBuilder(hash.Length * 2);
         foreach (byte b in hash) sb.Append(b.ToString("x2"));
@@ -88,11 +94,27 @@ public static class ThumbnailCache
 
                 ct.ThrowIfCancellationRequested();
 
+                // A photo taken with the camera on its side is stored sideways with an EXIF note
+                // to turn it; the note is near the start of the file.
+                int orientation = 1;
+                using (var head = provider.OpenRead(path))
+                {
+                    byte[] probe = Preview.PreviewText.ReadUpTo(head, Preview.ExifReader.ProbeBytes, ct);
+                    orientation = Preview.ExifReader.Read(probe)?.Orientation ?? 1;
+                }
+
                 // Decode the source down to the target width; this bounds memory for huge images.
+                // A sideways photo's stored width is its upright height, so once turned it is no
+                // wider than the tile.
                 Bitmap thumb;
                 using (var src = provider.OpenRead(path))
                 {
                     thumb = Bitmap.DecodeToWidth(src, targetWidth);
+                }
+                if (orientation != 1 && Preview.ImageOrientation.Apply(thumb, orientation) is { } upright)
+                {
+                    thumb.Dispose();
+                    thumb = upright;
                 }
 
                 // Persist to the disk cache (temp + move so a concurrent read never sees a half-written
