@@ -361,7 +361,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.30.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.31.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1666,6 +1666,19 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.31.0 (2026-11-15) — Undo deletes, compare files, flat view, duplicates, palette and more
+- **Undo deletes.** Ctrl/Cmd+Z after a delete to the trash puts the items back where they were. DORI now notes where each item lands in the trash (the trash folders on Linux, including those on other drives; the Recycle Bin on Windows; Finder's Trash on macOS), never restores over something new, and lists anything no longer in the trash.
+- **Compare two files** side by side (right-click → Compare Files…): changed, removed and added lines coloured, next/previous change, swap sides, ignore whitespace. Uses the same line matching as `diff`; files that aren't text are compared byte by byte.
+- **Flat view** (the Flat button, right-click, or Ctrl/Cmd+Shift+F): every file in a folder and all the folders below it in one list, named by path, to sort, filter, select and copy across a whole tree. Copies keep each file's sub-folder.
+- **Changeable keyboard shortcuts.** Any panel command can be given different keys, or none, in a `<Shortcuts>` section of `Configuration.xml`; the README lists every command.
+- **Saved layouts** (Layouts ▾): both panels' tabs, columns, view and the button bank, saved under a name and restored in one click.
+- **Find duplicate files** (right-click → Find Duplicates…): by size, then the first 64 KB, then SHA-256; mark all but the oldest, newest or shortest-path copy, then delete to the trash (undoable).
+- **Saved filters** (the ▾ beside each filter box), and filters with several patterns (`*.cs;*.axaml`).
+- **Command palette** (Ctrl/Cmd+Shift+A, or Commands…): find and run any command, any button in any bank, a saved layout or a saved filter by typing part of its name.
+- **Set dates and permissions** on a whole selection (right-click): modified date and time, permissions in `chmod` notation (`755`, `u+x,go-w`, `u=rwX`) on Linux and macOS, or read-only on Windows, optionally for everything inside selected folders.
+- **Photo details** in the viewer and preview window: camera, lens, date taken, exposure, flash and GPS position from EXIF (JPEG, TIFF, PNG, WebP), and photos taken with the camera on its side are shown upright.
+- New screenshots of the main window in all four themes.
 
 ### 0.1.30.0 (2026-11-15) — Full command-button labels on hover
 - **A command-button label cut short with "…" now shows in full when you hover over the button,** above the button's own tooltip if it has one. Buttons whose label fits behave as before.
