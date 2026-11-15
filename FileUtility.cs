@@ -686,6 +686,14 @@ namespace DirOpusReImagined
         {
             if (string.IsNullOrEmpty(path)) return path;
 
+            // A provider URI's "scheme://" is not a doubled separator: collapsing it turned
+            // "cloud://remote/x" into "cloud:/remote/x" and "archive:///home/a.zip!/" into
+            // "archive:/home/…", which no provider recognises — so copies and moves to and from
+            // cloud folders and archives failed. Keep the prefix and tidy only what follows.
+            int scheme = path.IndexOf("://", StringComparison.Ordinal);
+            if (scheme > 1 && path.Take(scheme).All(char.IsLetter))
+                return path[..(scheme + 3)] + CollapseSeparators(path[(scheme + 3)..]);
+
             int start = IsSeparator(path[0]) && path.Length >= 2 && IsSeparator(path[1]) ? 2 : 0;
 
             var sb = new System.Text.StringBuilder(path.Length);

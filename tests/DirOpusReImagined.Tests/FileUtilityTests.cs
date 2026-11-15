@@ -10,6 +10,9 @@ public class FileUtilityTests
     [InlineData(@"a/\b", "a/b")]                                       // mixed separators collapse to the first
     [InlineData("", "")]
     [InlineData("plain", "plain")]
+    [InlineData("cloud://gdrive/Photos//x", "cloud://gdrive/Photos/x")]                 // scheme kept
+    [InlineData("archive:///home/me/a.zip!/docs//x", "archive:///home/me/a.zip!/docs/x")]
+    [InlineData(@"archive://C:\\data\\a.zip!/x", @"archive://C:\data\a.zip!/x")]
     public void CollapseSeparators(string input, string expected)
         => Assert.Equal(expected, FileUtility.CollapseSeparators(input));
 
