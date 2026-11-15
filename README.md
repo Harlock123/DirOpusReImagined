@@ -30,7 +30,12 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Delete** files and folders with a confirmation dialog — deletes go to the **OS trash / recycle bin** by default (recoverable), with a per-delete toggle for permanent deletion (local files only)
 - **Rename** files and folders with a pattern-based rename interface for batch operations
 - **Create folders** in either panel
-- **Create ZIP archives** from selected files
+- **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz** or **.tar**:
+  - folders go in with everything inside them, including hidden files and empty folders; Unix permissions such as the execute bit are kept
+  - choose the compression (normal, smallest, fastest or none); the name is suggested from the selection
+  - a progress bar shows the current file, and **Cancel** stops it without leaving a half-written archive behind
+  - an existing file is never overwritten — the new archive is numbered instead (`photos_1.zip`)
+  - works from cloud folders and from inside other archives, and can save into a cloud folder; items that can't be read are listed at the end rather than stopping the whole archive
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
 - **Double-click any file to open it with the system default application** — executables run, images open in the image viewer, media plays, documents open in their editor. Windows uses the shell, macOS Launch Services, Linux the desktop's MIME associations
 

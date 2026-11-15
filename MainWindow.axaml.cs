@@ -953,42 +953,39 @@ namespace DirOpusReImagined
 
         private void ArchiveRightButton_Click(object? sender, RoutedEventArgs e)
         {
-            Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (RPgrid.SelectedItems.Count == 0)
-            {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Right panel", "Selection Required");
-                MB.ShowDialog(this);
-                return;
-            }
-            
-            ThePanelSetup PS = new ThePanelSetup(RPgrid, RPpath.Text, LPgrid, LPpath.Text);
-            
-            CreateArchive CA = new CreateArchive(PS, ChkShowHidden.IsChecked.Value);
-
-            CA.ShowDialog(this);
+            if (sender is Button b) ToolTip.SetIsOpen(b, false);
+            CreateArchiveFrom(isLeft: false);
         }
 
         private void ArchiveLeftButton_Click(object? sender, RoutedEventArgs e)
         {
-            Button B = (Button)sender;
-            ToolTip.SetIsOpen(B,false);
-            
-            if (LPgrid.SelectedItems.Count == 0)
-            {
-                MessageBox MB = new MessageBox("You have to have a file selected in the Left panel", "Selection Required");
-                MB.ShowDialog(this);
-                return;
-            }   
-            
-            ThePanelSetup PS = new ThePanelSetup(LPgrid, LPpath.Text, RPgrid, RPpath.Text);
-            
-            CreateArchive CA = new CreateArchive(PS, ChkShowHidden.IsChecked.Value);
+            if (sender is Button b) ToolTip.SetIsOpen(b, false);
+            CreateArchiveFrom(isLeft: true);
+        }
 
-            CA.ShowDialog(this);
-            
-            
+        /// <summary>
+        /// Opens the Create Archive dialog for a panel's selection. The archive is written into that
+        /// panel's folder; the panel (and the other one, if it shows the same folder) is refreshed after.
+        /// </summary>
+        private async void CreateArchiveFrom(bool isLeft)
+        {
+            var grid = isLeft ? LPgrid : RPgrid;
+            string folder = (isLeft ? LPpath.Text : RPpath.Text) ?? "";
+
+            var selected = grid.SelectedItems.OfType<AFileEntry>()
+                               .Where(f => f.Name != ".." && !string.IsNullOrEmpty(f.Name))
+                               .ToList();
+            if (selected.Count == 0 || string.IsNullOrEmpty(folder))
+            {
+                var mb = new MessageBox($"Select the files or folders to archive in the {(isLeft ? "left" : "right")} panel first.",
+                                        "Selection Required");
+                await mb.ShowDialog(this);
+                return;
+            }
+
+            var dlg = new CreateArchive(folder, selected);
+            if (await dlg.ShowDialog<bool>(this))
+                RefreshPanel(isLeft, manual: true);
         }
 
         private void MkDirLeftButton_Click(object? sender, RoutedEventArgs e)

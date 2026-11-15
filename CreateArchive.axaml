@@ -2,23 +2,51 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="140"
-        Width="300" Height="140" WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="300"
         x:Class="DirOpusReImagined.CreateArchive"
-        Title="CreateArchive">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="0.25*"/>
-            <RowDefinition Height="0.25*"/>
-            <RowDefinition Height="0.25*"/>
-            <RowDefinition Height="0.25*"/>
-        </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Margin="4" VerticalAlignment="Bottom">Name of the archive</TextBlock>
-        <TextBox Name="Zipname" Grid.Row="1" Text="Archive.zip" Margin="4" />
-        <StackPanel Grid.Row="3" Orientation="Horizontal" 
-                    HorizontalAlignment="Right" Margin="4">
-            <Button Name="OkButton">OK</Button>
-            <Button Name="CancelButton">Cancel</Button>
+        Width="460" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Create Archive">
+
+    <Window.Styles>
+        <Style Selector="StackPanel > TextBlock, Grid > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <StackPanel Margin="16" Spacing="10">
+        <TextBlock Name="SummaryText" Text="Archive the selected items" TextWrapping="Wrap" FontWeight="Bold" />
+
+        <TextBlock Text="Archive name" />
+        <TextBox Name="NameBox" Text="Archive.zip" />
+
+        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" >
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Format" VerticalAlignment="Center" Margin="0,0,12,6" />
+            <ComboBox Grid.Row="0" Grid.Column="1" Name="FormatBox" HorizontalAlignment="Stretch" Margin="0,0,0,6" SelectedIndex="0">
+                <ComboBoxItem Content="ZIP (.zip) — opens anywhere" />
+                <ComboBoxItem Content="Gzipped tar (.tar.gz) — keeps Unix permissions" />
+                <ComboBoxItem Content="Tar (.tar) — no compression" />
+            </ComboBox>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Compression" VerticalAlignment="Center" Margin="0,0,12,0" />
+            <ComboBox Grid.Row="1" Grid.Column="1" Name="LevelBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                <ComboBoxItem Content="Normal" />
+                <ComboBoxItem Content="Smallest (slower)" />
+                <ComboBoxItem Content="Fastest (larger)" />
+                <ComboBoxItem Content="None (store only)" />
+            </ComboBox>
+        </Grid>
+
+        <StackPanel Name="ProgressPanel" Spacing="4" IsVisible="False">
+            <ProgressBar Name="Bar" Minimum="0" Maximum="1" Height="18" />
+            <TextBlock Name="ProgressText" Text="" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource MutedTextBrush}" />
         </StackPanel>
-    </Grid>
+
+        <TextBlock Name="ErrorText" Text="" TextWrapping="Wrap" Foreground="#E0584B" IsVisible="False" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Name="OkButton" Content="Create" MinWidth="80" FontWeight="Bold" />
+            <Button Name="CancelButton" Content="Cancel" MinWidth="80" />
+        </StackPanel>
+    </StackPanel>
 </Window>

@@ -42,7 +42,7 @@
                 <TextBlock Text="• Copy and Move files/folders between panels, Delete with confirmation, and batch Rename with a live preview." TextWrapping="Wrap" />
                 <TextBlock Text="• Copy, Move and Delete run in the background — see &quot;Background operations&quot; below." TextWrapping="Wrap" />
                 <TextBlock Text="• Delete sends items to the OS Trash/Recycle Bin by default (recoverable) — a checkbox in the delete dialog switches to permanent deletion. Local files only." TextWrapping="Wrap" />
-                <TextBlock Text="• Create folders in either panel and create ZIP archives from a selection." TextWrapping="Wrap" />
+                <TextBlock Text="• Create folders in either panel. The zip buttons archive the selection as .zip, .tar.gz or .tar, with a choice of compression, a progress bar and Cancel; folders go in with everything inside them, and an existing file is never overwritten." TextWrapping="Wrap" />
                 <TextBlock Text="• When items already exist at the destination, a conflict dialog lets you choose per item — Skip, Overwrite, or Keep both (copy under a new name) — showing each side's size and date, with &quot;apply to all&quot; buttons. (Sync uses its own newer-wins rules and isn't affected.)" TextWrapping="Wrap" />
 
                 <TextBlock Text="Batch rename" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
