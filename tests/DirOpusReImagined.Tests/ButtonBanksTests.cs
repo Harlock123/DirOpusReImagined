@@ -154,4 +154,14 @@ public class ButtonBanksTests
             Assert.All(banks.SelectMany(b => b.Buttons), b => Assert.InRange(ButtonBanks.SlotOf(b.Name), 1, 36));
         }
     }
+
+    [Theory]
+    [InlineData(null, "Opens VS Code", "Opens VS Code")]                                    // fits: just the tooltip
+    [InlineData("Windows Terminal on Left", null, "Windows Terminal on Left")]               // trimmed, no tooltip
+    [InlineData("Windows Terminal on Left", "", "Windows Terminal on Left")]
+    [InlineData("Windows Terminal on Left", "Opens a terminal", "Windows Terminal on Left\n\nOpens a terminal")]
+    [InlineData(null, null, null)]                                                         // nothing to show
+    [InlineData(null, "  ", null)]
+    public void Hovering_shows_a_cut_short_label_in_full_then_the_tooltip(string? trimmedLabel, string? toolTip, string? expected)
+        => Assert.Equal(expected, ButtonBanks.HoverText(trimmedLabel, toolTip));
 }

@@ -158,6 +158,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Each button can launch any external program with flexible argument substitution
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
+- A label too long for its button ends in "…"; hovering over the button shows it in full, above the button's own tooltip
 
 ### Bookmarks
 - A **Bookmarks** button in the center panel opens a dialog listing your saved folders

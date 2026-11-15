@@ -92,6 +92,19 @@ namespace DirOpusReImagined
                 if (!taken.Contains(DefaultName(n))) return DefaultName(n);
         }
 
+        /// <summary>
+        /// What hovering over a command button shows: its full label when the label is cut short
+        /// (<paramref name="trimmedLabel"/> is null when it fits), then its own tooltip. Null for nothing.
+        /// </summary>
+        public static string? HoverText(string? trimmedLabel, string? toolTip)
+        {
+            bool hasLabel = !string.IsNullOrWhiteSpace(trimmedLabel);
+            bool hasTip = !string.IsNullOrWhiteSpace(toolTip);
+            if (hasLabel && hasTip) return trimmedLabel + "\n\n" + toolTip;
+            if (hasLabel) return trimmedLabel;
+            return hasTip ? toolTip : null;
+        }
+
         /// <summary>The button position (1 to 36) a saved name such as "LpButton12" or "LPButton12" refers to; 0 if none.</summary>
         public static int SlotOf(string? name)
         {

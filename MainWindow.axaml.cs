@@ -1080,29 +1080,26 @@ namespace DirOpusReImagined
             }
 
             Button B = (Button)sender;
+            if (LastButtonPopupName == B.Name) return;
 
-            string nm = B.Name;
-
-            foreach (ButtonEntry item in TheButtons)
-            {
-                if (item.Bname.ToUpper() == nm.ToUpper() && (item.ToolTip + "") !="" && LastButtonPopupName != B.Name)
-                {
-                    // We have a winner - do the action
-
-                    SetToolTipForItem(B, item);
-
-                    break;
-                }
-            }
+            // A label cut short with "…" shows in full on hover, above the button's own tooltip.
+            var item = TheButtons.FirstOrDefault(i => string.Equals(i.Bname, B.Name, StringComparison.OrdinalIgnoreCase));
+            string? trimmedLabel = B.Content is TextBlock label && IsTrimmed(label) ? label.Text : null;
+            string? tip = ButtonBanks.HoverText(trimmedLabel, item?.ToolTip);
+            if (tip != null) ShowButtonTip(B, tip);
         }
 
-        private void SetToolTipForItem(Button B, ButtonEntry item)
+        /// <summary>True when the TextBlock is showing "…" because its text doesn't fit.</summary>
+        private static bool IsTrimmed(TextBlock tb)
+            => tb.TextLayout.TextLines.Any(line => line.HasCollapsed);
+
+        private void ShowButtonTip(Button B, string tip)
         {
             LastButtonPopupName = B.Name;
             ToolTip.SetPlacement(B, PlacementMode.Top); // this is a hack to get the tooltip to show up in the right place
             ToolTip.SetHorizontalOffset(B,10.0);
             ToolTip.SetVerticalOffset(B,10.0);
-            ToolTip.SetTip(B, item.ToolTip);
+            ToolTip.SetTip(B, tip);
             ToolTip.SetIsOpen(B, true);
         }
         
