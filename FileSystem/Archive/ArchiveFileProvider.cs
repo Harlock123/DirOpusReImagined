@@ -41,7 +41,10 @@ public sealed class ArchiveFileProvider : IFileProvider
             .Select(e => new ArchiveEntry(e.Key, e.IsDir, e.Size, e.Modified))
             .ToList();
 
-    private readonly Dictionary<string, (DateTime Stamp, List<CachedEntry> Entries)> _cache = new();
+    // One provider instance serves every thread (browsing, previews, search, transfers, archive
+    // creation), so the cache must be safe for concurrent use. The cached lists are never changed
+    // after they're stored, so readers can share them.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (DateTime Stamp, List<CachedEntry> Entries)> _cache = new();
 
     /// <summary>
     /// Normalizes an archive entry key to forward slashes with no leading "./" or surrounding
