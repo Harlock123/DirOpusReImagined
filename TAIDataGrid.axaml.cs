@@ -53,7 +53,8 @@ namespace DirOpusReImagined
         CompareFiles,
         FlatView,
         FindDuplicates,
-        SavedFilters
+        SavedFilters,
+        CommandPalette
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -3069,7 +3070,7 @@ namespace DirOpusReImagined
         }
 
         /// <summary>Runs a command from the key map (see <see cref="KeyMap"/>).</summary>
-        private void RunShortcut(ShortcutCommand command)
+        internal void RunShortcut(ShortcutCommand command)
         {
             switch (command)
             {

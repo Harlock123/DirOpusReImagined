@@ -548,6 +548,10 @@
 		<DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Grid.RowSpan="2">
 		<!-- Banks of command buttons: one tab per bank. Alt+PageUp/PageDown or the mouse wheel over the buttons also switch. -->
 		<DockPanel Name="BankBar" DockPanel.Dock="Top" Height="24" Margin="1,2,1,0">
+			<Button Name="PaletteButton" DockPanel.Dock="Right" Content="Commands…" FontSize="11"
+			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+			        Background="{DynamicResource PanelChromeBrush}"
+			        ToolTip.Tip="Find and run any command, button, layout or saved filter by typing part of its name (Ctrl/Cmd+Shift+A)" />
 			<Button Name="LayoutsButton" DockPanel.Dock="Right" Content="Layouts ▾" FontSize="11"
 			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
 			        Background="{DynamicResource PanelChromeBrush}"

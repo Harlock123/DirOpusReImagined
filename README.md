@@ -155,6 +155,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Alt + ← / →** | Back / Forward in the panel's history |
 | **Alt + ↓** | Recent folders menu |
 | **Ctrl/Cmd + Shift + F** | Flat view on / off |
+| **Ctrl/Cmd + Shift + A** | Command palette: find and run any command, button, layout or saved filter |
 | **Alt + PageUp / PageDown** | Previous / next bank of command buttons |
 | *(type a name)* | Type-ahead: jump to the matching row; repeat a letter to cycle |
 | **Tab** | Switch the active panel |
@@ -226,6 +227,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `SelectByPattern` | Select by pattern | NumPlus, Shift+Plus |
 | `DeselectByPattern` | Deselect by pattern | NumMinus, Minus |
 | `InvertSelection` | Invert selection | NumStar, Shift+8 |
+| `CommandPalette` | Command palette (find any command or button) | Ctrl+Shift+A |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -235,6 +237,11 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
 - A label too long for its button ends in "…"; hovering over the button shows it in full, above the button's own tooltip
+
+### Command Palette
+- **Ctrl/Cmd+Shift+A** (or **Commands…** beside the button bank tabs) opens a box listing **everything DORI can run**: every panel command with its current keys, every button in **every** bank (not just the one showing), saved layouts, saved filters, and Find, Bookmarks, Edit Buttons and General Help
+- Type part of a name — every word typed must appear, and names starting with what you type come first — then **↑ ↓** to choose, **Enter** to run, **Esc** to close
+- Commands run on the active panel, so it's also a quick way to reach anything without a key of its own
 
 ### Saved Layouts
 - **Layouts ▾** (beside the button bank tabs) saves how both panels are set up under a name — **every tab in each panel, which one is showing, hidden columns, list or thumbnail view, and the button bank** — and switches back to it in one click (for example "Photo sorting" or "Project X")

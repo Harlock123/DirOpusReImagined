@@ -135,10 +135,7 @@ namespace DirOpusReImagined
             if (!string.IsNullOrEmpty(s.Margin)) button.Margin = Thickness.Parse(s.Margin);
 
             if (string.IsNullOrEmpty(s.Action)) return;
-            var entry = new ButtonEntry(s.Name, s.Action, s.Args) { ToolTip = s.ToolTip };
-            if (!string.IsNullOrEmpty(s.ShellExecute)) entry.ShellExecute = bool.Parse(s.ShellExecute);
-            if (!string.IsNullOrEmpty(s.ShowWindow)) entry.ShowWindow = bool.Parse(s.ShowWindow);
-            TheButtons.Add(entry);
+            TheButtons.Add(ToEntry(s));
         }
 
         /// <summary>One tab per bank above the buttons, the showing one pressed in.</summary>

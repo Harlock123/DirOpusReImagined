@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.CommandPaletteWindow"
+        Width="640" Height="460" MinWidth="400" MinHeight="240"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Commands">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="8,4" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel Margin="10">
+        <TextBox x:Name="QueryBox" DockPanel.Dock="Top" Margin="0,0,0,8"
+                 Watermark="Type to find a command, button, layout or filter — Enter runs it, Esc closes" />
+        <TextBlock x:Name="HintText" DockPanel.Dock="Bottom" Margin="0,6,0,0" FontSize="11" Opacity="0.7"
+                   Text="↑ ↓ choose · Enter run · Esc close" />
+        <ListBox x:Name="ResultsList" Background="{DynamicResource GridBackgroundBrush}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Grid.Column="0" Text="{Binding Group}" Opacity="0.6" Margin="0,0,8,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2" Text="{Binding Keys}" Opacity="0.6" Margin="12,0,0,0" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

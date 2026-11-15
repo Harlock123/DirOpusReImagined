@@ -16,6 +16,7 @@ namespace DirOpusReImagined
         NewTab, CloseTab, NextTab, PreviousTab,
         GoUp, Forward, SwitchPanel,
         SelectAll, SelectByPattern, DeselectByPattern, InvertSelection,
+        CommandPalette,
     }
 
     /// <summary>
@@ -142,6 +143,7 @@ namespace DirOpusReImagined
             new(ShortcutCommand.SelectByPattern, "Select by pattern", "NumPlus, Shift+Plus"),
             new(ShortcutCommand.DeselectByPattern, "Deselect by pattern", "NumMinus, Minus"),
             new(ShortcutCommand.InvertSelection, "Invert selection", "NumStar, Shift+8"),
+            new(ShortcutCommand.CommandPalette, "Command palette (find any command or button)", "Ctrl+Shift+A"),
         };
 
         public const string ElementName = "Shortcuts";

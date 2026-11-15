@@ -71,6 +71,9 @@
                 <TextBlock Text="• Right-click → Compare Files… shows two files side by side with the differences coloured (changed amber, removed red, added green): two files selected in one panel, or one from each panel. Next / Previous change, Swap sides and Ignore whitespace are above the list. Files that aren't text are compared byte by byte." TextWrapping="Wrap" />
                 <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
 
+                <TextBlock Text="Command palette" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Ctrl/Cmd+Shift+A (or Commands… beside the button bank tabs) lists every panel command with its keys, every button in every bank, saved layouts and saved filters. Type part of a name, ↑ ↓ to choose, Enter to run." TextWrapping="Wrap" />
+
                 <TextBlock Text="Saved layouts" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Layouts ▾ (beside the button bank tabs) saves both panels' tabs, which tab is showing, hidden columns, list or thumbnail view, and the button bank under a name, and switches back to it in one click. Folders that have gone since are left out and listed." TextWrapping="Wrap" />
 
@@ -154,6 +157,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -274,6 +278,8 @@
                     <TextBlock Grid.Row="29" Grid.Column="1" Text="Previous / next bank of command buttons (also the bank tabs, or the mouse wheel over the buttons)" TextWrapping="Wrap" Margin="0,2" />
                     <TextBlock Grid.Row="30" Grid.Column="0" Text="Ctrl/Cmd + Shift + F" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="30" Grid.Column="1" Text="Flat view on / off: every file in the folder and all the folders below, in one list" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="31" Grid.Column="0" Text="Ctrl/Cmd + Shift + A" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="31" Grid.Column="1" Text="Command palette: find and run any command, button, layout or saved filter by typing part of its name" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

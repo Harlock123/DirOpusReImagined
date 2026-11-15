@@ -112,6 +112,7 @@ namespace DirOpusReImagined
             InitFlatView();
             InitLayouts();
             InitSavedFilters();
+            PaletteButton.Click += (_, _) => OpenCommandPalette();
             InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
@@ -1235,70 +1236,66 @@ namespace DirOpusReImagined
 
             string nm = B.Name;
 
-            foreach (ButtonEntry item in TheButtons)
+            var item = TheButtons.FirstOrDefault(i => string.Equals(i.Bname, nm, StringComparison.OrdinalIgnoreCase));
+            if (item != null) RunButtonEntry(item);
+        }
+
+        /// <summary>Runs a command button's action: one of the built-in %…% actions, or a program with its arguments.</summary>
+        internal void RunButtonEntry(ButtonEntry item)
+        {
+            if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
             {
-                if (item.Bname.ToUpper() == nm.ToUpper())
+                // we need to open the button config window
+                OpenButtonEditor();
+                return;
+            }
+            if (item.Bcontent.ToUpper().Trim() == "%DRIVEINFO%")
+            {
+                DriveInfoDialog DI = new DriveInfoDialog();
+                DI.ShowDialog(this);
+                return;
+            }
+            if (item.Bcontent.ToUpper().Trim() == "%RCLONEDIAG%")
+            {
+                ShowRcloneDiagnostics();
+                return;
+            }
+            if (item.Bcontent.ToUpper().Trim() == "%RCLONECONFIG%")
+            {
+                ShowRcloneConfig();
+                return;
+            }
+            string newaction = ParseTheArgs(item.Bargs);
+
+            if (newaction != "%ERROR%")
+            {
+                try
                 {
-                    // We have a winner - do the action
-                    
-                    if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
+                    if (newaction.Contains(","))
                     {
-                        // we need to open the button config window
-                        OpenButtonEditor();
-                        break;
-                    }
-                    if (item.Bcontent.ToUpper().Trim() == "%DRIVEINFO%")
-                    {
-                        DriveInfoDialog DI = new DriveInfoDialog();
-                        DI.ShowDialog(this);
-                        break;
-                    }
-                    if (item.Bcontent.ToUpper().Trim() == "%RCLONEDIAG%")
-                    {
-                        ShowRcloneDiagnostics();
-                        break;
-                    }
-                    if (item.Bcontent.ToUpper().Trim() == "%RCLONECONFIG%")
-                    {
-                        ShowRcloneConfig();
-                        break;
-                    }
-                    string newaction = ParseTheArgs(item.Bargs);
+                        // we have comma seperated arguments so
+                        // we need to split them up and pass them
+                        // to the process start info one at a time
 
-                    if (newaction != "%ERROR%")
-                    {
-                        try
+                        string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (string arg in args)
                         {
-                            if (newaction.Contains(","))
-                            {
-                                // we have comma seperated arguments so
-                                // we need to split them up and pass them
-                                // to the process start info one at a time
-
-                                string[] args = newaction.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-                                foreach (string arg in args)
-                                {
-                                    StartDetachedProcess(item.Bcontent, arg, item.ShellExecute, item.ShowWindow);
-                                }
-                            }
-                            else
-                            {
-                                StartDetachedProcess(item.Bcontent.Trim(), newaction, item.ShellExecute, item.ShowWindow);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ProgressWindow PW = new ProgressWindow();
-
-                            PW.MessageText.Text = "Error: " + ex.Message;
-
-                            PW.ShowDialog(this);
+                            StartDetachedProcess(item.Bcontent, arg, item.ShellExecute, item.ShowWindow);
                         }
                     }
+                    else
+                    {
+                        StartDetachedProcess(item.Bcontent.Trim(), newaction, item.ShellExecute, item.ShowWindow);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ProgressWindow PW = new ProgressWindow();
 
-                    break;
+                    PW.MessageText.Text = "Error: " + ex.Message;
 
+                    PW.ShowDialog(this);
                 }
             }
         }
@@ -2330,6 +2327,9 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.SavedFilters:
                     ShowSavedFilters(left);
+                    break;
+                case GridVerb.CommandPalette:
+                    OpenCommandPalette();
                     break;
             }
         }
