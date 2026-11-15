@@ -1922,8 +1922,8 @@ namespace DirOpusReImagined
                        // can see at a glance which panel the keyboard is driving.
                        if (_isActivePanel)
                        {
-                           double frameW = TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width;
-                           double frameH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+                           double frameW = CanvasWidth();
+                           double frameH = CanvasHeight();
                            Rectangle frame = new Rectangle();
                            frame.Width = frameW - 2;
                            frame.Height = frameH - 2;
@@ -1971,8 +1971,8 @@ namespace DirOpusReImagined
                 Height = TheCanvas.Height
             };
 
-            double canvasW = TheCanvas.Bounds.Width  > 0 ? TheCanvas.Bounds.Width  : TheCanvas.Width;
-            double canvasH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+            double canvasW = CanvasWidth();
+            double canvasH = CanvasHeight();
 
             // --- Title strip (no column header in thumbnails view) ---
             _gridHeaderAndTitleHeight = 0;
@@ -2132,8 +2132,8 @@ namespace DirOpusReImagined
             // Active-panel frame.
             if (_isActivePanel)
             {
-                double frameW = TheCanvas.Bounds.Width  > 0 ? TheCanvas.Bounds.Width  : TheCanvas.Width;
-                double frameH = TheCanvas.Bounds.Height > 0 ? TheCanvas.Bounds.Height : TheCanvas.Height;
+                double frameW = CanvasWidth();
+                double frameH = CanvasHeight();
                 var frame = new Rectangle
                 {
                     Width = frameW - 2, Height = frameH - 2,
@@ -2335,7 +2335,7 @@ namespace DirOpusReImagined
             if (_curMouseY != -1 && y >= 0 && x >= 0 && _thumbTileW > 0 && _thumbTileH > 0 && _thumbCols > 0)
             {
                 int gridW = _thumbCols * _thumbTileW;
-                int usableW = (int)(TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width);
+                int usableW = (int)(CanvasWidth());
                 int xOffset = Math.Max(0, (usableW - gridW) / 2);
 
                 int col = (x - xOffset) / _thumbTileW;
@@ -2861,8 +2861,7 @@ namespace DirOpusReImagined
         /// </summary>
         private int VisibleRowCount()
         {
-            double viewport = TheCanvas.Bounds.Height;
-            if (viewport <= 0) viewport = TheCanvas.Height;
+            double viewport = CanvasHeight();
             viewport -= _gridHeaderAndTitleHeight;
 
             // Use the cursor row's height (or the first row's) as a representative row height.
@@ -2901,8 +2900,7 @@ namespace DirOpusReImagined
 
             if (_cursorIndex < 0 || _rowHeights == null || _rowHeights.Length == 0) return;
 
-            double viewport = TheCanvas.Bounds.Height;
-            if (viewport <= 0) viewport = TheCanvas.Height;
+            double viewport = CanvasHeight();
             viewport -= _gridHeaderAndTitleHeight;
             if (viewport <= 0) return;
 
@@ -3964,7 +3962,17 @@ namespace DirOpusReImagined
             return total;
         }
 
-        private double ViewportWidth() => TheCanvas.Bounds.Width > 0 ? TheCanvas.Bounds.Width : TheCanvas.Width;
+        private double ViewportWidth() => CanvasWidth();
+
+        // The canvas's size as SetGridSize last set it. Bounds lags behind until the next layout
+        // pass, so drawing straight after a resize from Bounds drew the active-panel frame (and laid
+        // out thumbnails and scrolling) for the old size. Bounds is only the fallback for when no
+        // size has been set.
+        private double CanvasWidth()
+            => !double.IsNaN(TheCanvas.Width) && TheCanvas.Width > 0 ? TheCanvas.Width : TheCanvas.Bounds.Width;
+
+        private double CanvasHeight()
+            => !double.IsNaN(TheCanvas.Height) && TheCanvas.Height > 0 ? TheCanvas.Height : TheCanvas.Bounds.Height;
 
         /// <summary>How far the columns can shift left: the part that doesn't fit, or 0 if they all fit.</summary>
         private int MaxHorizontalShift()
