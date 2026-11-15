@@ -32,6 +32,7 @@
 						<Separator/>
 						<MenuItem Name="TerminalHereMenuItem" Header="Terminal Here" Click="TerminalHere_Click"/>
 						<MenuItem Name="RefreshMenuItem" Header="Refresh" InputGesture="Ctrl+R" Click="Refresh_Click"/>
+						<MenuItem Name="UndoMenuItem" Header="Undo" InputGesture="Ctrl+Z" IsEnabled="False" Click="Undo_Click"/>
 						<Separator/>
 						<MenuItem Header="Select by Pattern…" Click="SelectByPattern_Click"/>
 						<MenuItem Header="Deselect by Pattern…" Click="DeselectByPattern_Click"/>

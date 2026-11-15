@@ -41,6 +41,8 @@ Everything sits at the repository root; there is no `src/` folder.
   action buttons, menus and most commands, and registers the rclone and archive providers.
 - `TAIDataGrid.axaml(.cs)`: the custom file grid used by each panel, including drag and drop between panels.
 - `PanelTab.cs`: one folder tab's saved state (path, history, sort, filter, cursor).
+- `UndoHistory.cs` and `MainWindow.Undo.cs`: Ctrl/Cmd+Z undo for renames and moves. `UndoPlanner` records what
+  really happened after an operation and checks the disk before reversing it; it never overwrites.
 - `MainWindow.Refresh.cs`: Ctrl/Cmd+R refresh and the per-panel `FileSystemWatcher` that re-lists local folders
   changed by other programs, keeping the cursor, selection and scroll (`TaiDataGrid.CaptureViewState`).
 - `FileSystem/`: the storage layer.

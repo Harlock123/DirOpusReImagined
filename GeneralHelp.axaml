@@ -86,6 +86,9 @@
                 <TextBlock Text="Search" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Find button on a panel's filter row searches that folder and everything below it, by name (a substring, or a wildcard such as *.cs), by text inside files (fill in Containing; tick the box for a regular expression), or both. Results appear as they are found, with the matching line shown; double-click one to open its folder with the cursor on the file. Binary files and files over 100 MB are skipped, and cloud files are only read if you tick Read cloud files." TextWrapping="Wrap" />
 
+                <TextBlock Text="Undo" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Ctrl/Cmd+Z (or right-click → Undo) reverses the last rename or move, and again for the one before. Renames are reversed straight away; moves ask first, then move the items back with a progress window. Nothing is ever overwritten: items that have changed since, or whose old place is now taken, are left alone and listed. Copies and deletes can't be undone (deletes go to the trash)." TextWrapping="Wrap" />
+
                 <TextBlock Text="Refresh" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Local folders refresh by themselves when another program adds, removes, renames or changes files in them; the cursor, selection, scroll position and filter are kept. Press Ctrl/Cmd+R (or right-click → Refresh) to re-list a panel by hand — for a cloud folder this also skips the 30-second listing cache. If the folder shown is deleted, the panel steps up to the nearest folder that still exists." TextWrapping="Wrap" />
 
@@ -155,6 +158,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
@@ -237,6 +241,8 @@
                     <TextBlock Grid.Row="25" Grid.Column="1" Text="Toggle the live preview window, which follows the cursor in whichever panel you are driving" TextWrapping="Wrap" Margin="0,2" />
                     <TextBlock Grid.Row="26" Grid.Column="0" Text="Ctrl/Cmd + R" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="26" Grid.Column="1" Text="Refresh the active panel, keeping the cursor, selection and filter (local folders also refresh by themselves)" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="27" Grid.Column="0" Text="Ctrl/Cmd + Z" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="27" Grid.Column="1" Text="Undo the last rename or move (press again to go further back)" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

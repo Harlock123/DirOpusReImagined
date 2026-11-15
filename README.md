@@ -39,6 +39,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
 - **Double-click any file to open it with the system default application** — executables run, images open in the image viewer, media plays, documents open in their editor. Windows uses the shell, macOS Launch Services, Linux the desktop's MIME associations
 
+### Undo Renames & Moves
+- **Ctrl/Cmd+Z** in a panel (or right-click → **Undo …**, which names what it will undo) reverses the last rename or move; press it again to step further back, up to the last 50
+- **Renames** — single or batch — get their old names back straight away, including swaps and chains (`a→b, b→a`)
+- **Moves** (buttons, F6 or drag with Shift) ask first, then move the items back to their original folder as a normal queued transfer with progress; a move that failed or was cancelled partway can still be undone for the items that did move
+- Undo checks the disk first and **never overwrites**: an item that has since been moved or deleted, or whose old name or place is now taken by something new, is left alone and listed
+- Items that replaced (or merged into) something at the destination aren't undoable, since what they replaced can't be brought back
+- Copies and deletes aren't covered — deletes go to the trash by default, so restore them from there
+
 ### Directory Compare & Sync
 - **Compare panels** — a **Cmp** button color-codes the two panels against each other: green = only on this side, blue = newer, gray = older, khaki = same time but different size, coral = couldn't be read (permissions)
 - Comparison is **recursive** — a folder that looks identical at the top level but differs deep inside is still flagged; click **Cmp** again (or navigate) to clear
@@ -118,6 +126,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Ctrl/Cmd + Tab** | Cycle to the next tab (Shift for previous) |
 | **Ctrl/Cmd + PageUp / PageDown** | Previous / next tab |
 | **Ctrl/Cmd + R** | Refresh the active panel (keeps the cursor, selection and filter) |
+| **Ctrl/Cmd + Z** | Undo the last rename or move |
 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus

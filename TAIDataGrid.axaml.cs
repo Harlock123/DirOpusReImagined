@@ -42,7 +42,8 @@ namespace DirOpusReImagined
         Delete,
         View,
         PreviewToggle,
-        Refresh
+        Refresh,
+        Undo
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -3033,6 +3034,7 @@ namespace DirOpusReImagined
                 if (e.Key == Key.T)        { TabActionRequested?.Invoke(this, TabAction.New);   e.Handled = true; return; }
                 if (e.Key == Key.W)        { TabActionRequested?.Invoke(this, TabAction.Close); e.Handled = true; return; }
                 if (e.Key == Key.R)        { RaiseVerb(GridVerb.Refresh); e.Handled = true; return; }
+                if (e.Key == Key.Z)        { RaiseVerb(GridVerb.Undo); e.Handled = true; return; }
                 if (e.Key == Key.Tab)      { TabActionRequested?.Invoke(this, shift ? TabAction.Previous : TabAction.Next); e.Handled = true; return; }
                 if (e.Key == Key.PageDown) { TabActionRequested?.Invoke(this, TabAction.Next);     e.Handled = true; return; }
                 if (e.Key == Key.PageUp)   { TabActionRequested?.Invoke(this, TabAction.Previous); e.Handled = true; return; }
@@ -3996,6 +3998,19 @@ namespace DirOpusReImagined
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Refresh);
+
+        private void Undo_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Undo);
+
+        /// <summary>
+        /// Sets the right-click Undo item's text ("Undo rename of 3 items"), or disables it when
+        /// <paramref name="description"/> is null because there is nothing to undo.
+        /// </summary>
+        public void SetUndoDescription(string? description)
+        {
+            if (UndoMenuItem == null) return;
+            UndoMenuItem.Header = description == null ? "Undo" : "Undo " + description;
+            UndoMenuItem.IsEnabled = description != null;
+        }
 
         private void SelectByPattern_Click(object sender, RoutedEventArgs e)
             => RaiseSelectionAction(SelectionAction.SelectByPattern);

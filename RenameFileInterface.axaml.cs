@@ -35,6 +35,9 @@ public partial class RenameFileInterface : Window
 
     public bool Canceled => FrmCanceled;
 
+    /// <summary>Called on the UI thread after items were renamed, with the record to undo them.</summary>
+    public Action<RenameUndo>? Renamed { get; set; }
+
     public RenameFileInterface()
     {
         InitializeComponent();
@@ -219,11 +222,14 @@ public partial class RenameFileInterface : Window
         OKButton.IsEnabled = false;
         CANCELButton.IsEnabled = false;
 
-        var errors = await FileUtility.ApplyRenamePlanAsync(thePath, plan);
+        var (errors, renamed) = await FileUtility.ApplyRenamePlanDetailedAsync(thePath, plan);
 
         FileUtility.PopulateFilePanel(theGrid, thePath, _ShowHidden);
         if (theOtherPath == thePath)
             FileUtility.PopulateFilePanel(theOtherGrid, theOtherPath, _ShowHidden);
+
+        if (UndoPlanner.RecordRename(thePath, renamed, DateTime.Now) is { } undo)
+            Renamed?.Invoke(undo);
 
         if (errors.Count > 0)
         {

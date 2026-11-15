@@ -555,7 +555,15 @@ namespace DirOpusReImagined
         /// duplicates and on-disk clashes), phase B cannot collide. A phase-B failure leaves that
         /// item at its temp name and reports it, rather than losing the file.
         /// </remarks>
-        public static Task<List<string>> ApplyRenamePlanAsync(
+        public static async Task<List<string>> ApplyRenamePlanAsync(
+            string folderPath, IReadOnlyList<RenamePlanRow> plan, CancellationToken ct = default)
+            => (await ApplyRenamePlanDetailedAsync(folderPath, plan, ct)).Errors;
+
+        /// <summary>
+        /// <see cref="ApplyRenamePlanAsync"/>, also returning which items were renamed (old and new
+        /// name), so the rename can be recorded for undo.
+        /// </summary>
+        public static Task<(List<string> Errors, List<RenameUndo.Item> Renamed)> ApplyRenamePlanDetailedAsync(
             string folderPath, IReadOnlyList<RenamePlanRow> plan, CancellationToken ct = default)
         {
             var changes = plan.Where(r => r.WillRename).ToList();
@@ -563,10 +571,11 @@ namespace DirOpusReImagined
             return Task.Run(() =>
             {
                 var errors = new List<string>();
-                if (changes.Count == 0) return errors;
+                var renamed = new List<RenameUndo.Item>();
+                if (changes.Count == 0) return (errors, renamed);
 
                 // Phase A: originals -> unique temp names.
-                var staged = new List<(string TmpPath, string FinalName, bool IsDir)>();
+                var staged = new List<(string TmpPath, string OldName, string FinalName, bool IsDir)>();
                 foreach (var r in changes)
                 {
                     ct.ThrowIfCancellationRequested();
@@ -576,7 +585,7 @@ namespace DirOpusReImagined
 
                     string? err = r.IsDirectory ? TryRenameDirectory(oldPath, tmpPath) : TryRenameFile(oldPath, tmpPath);
                     if (err != null) { errors.Add($"{r.OldName}: {err}"); continue; }
-                    staged.Add((tmpPath, r.NewName, r.IsDirectory));
+                    staged.Add((tmpPath, r.OldName, r.NewName, r.IsDirectory));
                 }
 
                 // Phase B: temps -> final names.
@@ -587,9 +596,11 @@ namespace DirOpusReImagined
                     string? err = s.IsDir ? TryRenameDirectory(s.TmpPath, finalPath) : TryRenameFile(s.TmpPath, finalPath);
                     if (err != null)
                         errors.Add($"{s.FinalName}: {err} (left as \"{Path.GetFileName(s.TmpPath)}\")");
+                    else
+                        renamed.Add(new RenameUndo.Item(s.OldName, s.FinalName, s.IsDir));
                 }
 
-                return errors;
+                return (errors, renamed);
             }, ct);
         }
 

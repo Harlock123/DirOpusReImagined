@@ -108,6 +108,7 @@ namespace DirOpusReImagined
             ProviderRegistry.Register(new RcloneFileProvider());
             ProviderRegistry.Register(new ArchiveFileProvider());
             FileUtility.PanelPopulated += OnPanelPopulated;
+            InitUndo();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
             // until the user clicks a panel. Focus() needs the control attached to the visual tree,
@@ -596,6 +597,7 @@ namespace DirOpusReImagined
             RenameFileInterface fi =
                 new RenameFileInterface(LPgrid, LPpath.Text+"",
                     RPgrid,RPpath.Text+"", ChkShowHidden.IsChecked.Value);
+            fi.Renamed = _undo.Push;
             fi.Show(this);
             
         }
@@ -635,6 +637,7 @@ namespace DirOpusReImagined
             RenameFileInterface fi =
                 new RenameFileInterface(RPgrid, RPpath.Text+ "",
                     LPgrid,LPpath.Text + "", ChkShowHidden.IsChecked.Value);
+            fi.Renamed = _undo.Push;
             fi.Show(this);
             
         }
@@ -1978,12 +1981,19 @@ namespace DirOpusReImagined
             // off the UI thread. With no conflicts the transfer proceeds straight to the queue.
             var conflicts = await Task.Run(() => ConflictScanner.Scan(items));
             var finalItems = (IReadOnlyList<TransferItem>)items;
+            var overwritten = new HashSet<string>(StringComparer.Ordinal);
             if (conflicts.Count > 0)
             {
                 var dlg = new ConflictResolutionDialog(conflicts);
                 if (!await dlg.ShowDialog<bool>(this)) return;   // cancelled — nothing happens
                 finalItems = ConflictResolver.ApplyResolutions(items, dlg.Decisions);
                 if (finalItems.Count == 0) return;               // everything was skipped
+
+                // Items still aimed at a path that already existed are overwrites (or folder merges);
+                // undo leaves those alone. "Keep both" items were renamed, so they aren't in this set.
+                var conflictTargets = new HashSet<string>(conflicts.Select(c => c.Item.TargetPath), StringComparer.Ordinal);
+                foreach (var fi in finalItems)
+                    if (conflictTargets.Contains(fi.TargetPath)) overwritten.Add(fi.TargetPath);
 
                 // A user-typed "Keep both" name could collide with another item in the batch, which
                 // would make two items resolve to the same destination (silent data loss). Refuse
@@ -2016,6 +2026,8 @@ namespace DirOpusReImagined
                     RefreshRPGrid();
                     if (op.Status == OperationStatus.Failed)
                         OperationsWindow.ShowSingleton(this);
+                    // Record what actually moved, even if the move failed or was cancelled partway.
+                    if (move) RecordMoveForUndo(spath, finalItems, overwritten);
                 }), TaskScheduler.Default);
         }
 
@@ -2300,6 +2312,9 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.Refresh:
                     RefreshPanel(left, manual: true);
+                    break;
+                case GridVerb.Undo:
+                    UndoLast();
                     break;
             }
         }
