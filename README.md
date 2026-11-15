@@ -260,7 +260,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.27.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.28.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1565,6 +1565,22 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.28.0 (2026-11-15) — Archive writing, search, undo, checksums, button banks and more
+- **Write into archives.** Copy or move files and folders into .zip, .tar, .tar.gz and .tgz archives, and delete, rename and make folders inside them. Each operation rewrites the archive once, into a temporary file that replaces the original only when complete, so a failure or cancel leaves it untouched. 7z and RAR stay read-only.
+- **Fixed: copying and moving to or from cloud folders and archives** had failed since 0.1.19, because a path tidy-up turned `cloud://` into `cloud:/`.
+- **Banks of command buttons.** Keep as many sets of the 36 buttons as you like, switched with tabs above them, the mouse wheel, or Alt+PageUp/PageDown. The button editor adds, renames, reorders and deletes banks. Existing config files read as one bank.
+- **Search inside files** from the **Find** button: a name pattern, optional text to look for, live results, and a jump to any file found.
+- **Undo** renames and moves with Ctrl/Cmd+Z. It checks the disk first and never overwrites.
+- **Checksums** (right-click → Checksums…): compute MD5/SHA-1/SHA-256/SHA-512, compare, save and verify in the coreutils formats.
+- **Recent folders** — the ◷ button (or Alt+↓) lists the folders either panel has shown, kept between sessions.
+- **Choose which columns each panel shows** by right-clicking the header.
+- **Symbolic links** show as links, can be followed or made from the right-click menu, and are copied as links. Folder walks no longer follow linked folders, so a link back to a parent can't loop forever.
+- **Pause, resume and retry** queued operations; a retry runs only what didn't finish.
+- **Refresh** with Ctrl/Cmd+R, and local folders now refresh by themselves when other programs change them.
+- **Create Archive rebuilt**: .zip, .tar.gz or .tar, with a choice of compression, progress and Cancel.
+- **Fixed** horizontal scrolling in the file panels, and a race in the archive entry cache.
+- Moved to **.NET 10**; added an **xUnit test suite** (480+ tests), a GitHub Actions build that publishes every platform, and an MIT licence.
 
 ### 0.1.27.0 (2026-09-02) — Live preview window, image previews & a preview provider layer
 - **Live preview window (F9).** A preview window that **follows the keyboard cursor**: move through a panel and it re-points itself at each file, rather than opening one file at a time. It tracks whichever panel you are driving, so switching panels retargets it without a second keystroke. It is a window rather than a docked pane, so it costs the file panels no space and can be sized and placed freely — including on a second monitor.

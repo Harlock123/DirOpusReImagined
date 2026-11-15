@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.27.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.28.0).
 
 ## Commands
 
