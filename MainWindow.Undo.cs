@@ -118,17 +118,15 @@ namespace DirOpusReImagined
             {
                 string title = $"Undo: moving {(moves.Count == 1 ? "1 item" : $"{moves.Count} items")} back → {folder}";
                 var op = FileOperation.Transfer(true, moves, title, move.SourceFolder);
+                op.AfterFinish = done => Dispatcher.UIThread.Post(() =>
+                {
+                    RefreshPanel(isLeft: true, manual: true);
+                    RefreshPanel(isLeft: false, manual: true);
+                    if (done.Status == OperationStatus.Failed)
+                        OperationsWindow.ShowSingleton(this);
+                });
                 OperationQueue.Instance.Enqueue(op);
                 OperationsWindow.ShowSingleton(this);
-
-                _ = op.Completion.ContinueWith(_ =>
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        RefreshPanel(isLeft: true, manual: true);
-                        RefreshPanel(isLeft: false, manual: true);
-                        if (op.Status == OperationStatus.Failed)
-                            OperationsWindow.ShowSingleton(this);
-                    }), TaskScheduler.Default);
             }
 
             await ReportUndoProblems("moved back", problems);

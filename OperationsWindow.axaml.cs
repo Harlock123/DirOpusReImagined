@@ -37,6 +37,7 @@ namespace DirOpusReImagined
             public ProgressBar Bar = null!;
             public TextBlock Stats = null!;
             public Button Cancel = null!;
+            public Button Pause = null!;
             public Button Retry = null!;
         }
 
@@ -116,13 +117,27 @@ namespace DirOpusReImagined
             };
             cancel.Click += (_, _) => _queue.Cancel(op);
 
+            ToolTip.SetTip(cancel, "Cancel");
+
+            var pause = new Button
+            {
+                Content = "⏸",
+                Padding = new Thickness(8, 2),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            pause.Click += (_, _) =>
+            {
+                if (op.IsPaused) _queue.Resume(op); else _queue.Pause(op);
+            };
+
             var retry = new Button
             {
                 Content = "↻ Retry",
                 Padding = new Thickness(8, 2),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                IsVisible = false   // only shown for failed operations
+                IsVisible = false   // only shown for failed or cancelled operations
             };
+            ToolTip.SetTip(retry, "Run the items that didn't finish");
             retry.Click += (_, _) => RetryOp(op);
 
             var actions = new StackPanel
@@ -131,6 +146,7 @@ namespace DirOpusReImagined
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(8, 0, 0, 0)
             };
+            actions.Children.Add(pause);
             actions.Children.Add(cancel);
             actions.Children.Add(retry);
             Grid.SetColumn(actions, 1);
@@ -154,7 +170,7 @@ namespace DirOpusReImagined
             var row = new Row
             {
                 Op = op, Card = card, Title = title, File = file,
-                Bar = bar, Stats = stats, Cancel = cancel, Retry = retry
+                Bar = bar, Stats = stats, Cancel = cancel, Pause = pause, Retry = retry
             };
             _rows[op] = row;
             OpsPanel.Children.Add(card);
@@ -168,17 +184,31 @@ namespace DirOpusReImagined
 
             row.File.Text = string.IsNullOrEmpty(p.CurrentFile) ? "" : p.CurrentFile;
 
-            // Retry is offered only for failed operations; hidden in every other state.
-            row.Retry.IsVisible = op.Status == OperationStatus.Failed;
+            // Retry is offered for failed and cancelled operations; pause while not finished.
+            row.Retry.IsVisible = op.CanRetry;
+            row.Pause.IsVisible = !op.IsTerminal;
+            row.Pause.Content = op.IsPaused ? "▶" : "⏸";
+            ToolTip.SetTip(row.Pause, op.IsPaused ? "Resume" : "Pause");
 
             switch (op.Status)
             {
                 case OperationStatus.Queued:
                     row.Bar.IsIndeterminate = false;
                     row.Bar.Value = 0;
-                    row.Stats.Text = "Waiting…";
+                    row.Stats.Text = op.IsPaused ? "Paused — waiting operations behind it will go first" : "Waiting…";
                     // leave Foreground at the muted default (Gray) set at creation
                     row.Stats.Foreground = Brushes.Gray;
+                    row.Cancel.IsEnabled = true;
+                    row.Cancel.IsVisible = true;
+                    break;
+
+                case OperationStatus.Running when op.IsPaused:
+                    // Hold the bar where it is; no speed or time left while nothing moves.
+                    row.Bar.IsIndeterminate = false;
+                    if (p.HasTotal) row.Bar.Value = p.Fraction;
+                    string at = ProgressFormat.Stats(p with { BytesPerSecond = 0 });
+                    row.Stats.Text = at.Length > 0 ? $"Paused · {at}" : "Paused";
+                    row.Stats.Foreground = Brushes.DarkGoldenrod;
                     row.Cancel.IsEnabled = true;
                     row.Cancel.IsVisible = true;
                     break;
@@ -222,8 +252,9 @@ namespace DirOpusReImagined
         private void UpdateSummary()
         {
             var ops = _queue.Operations;
-            int running = ops.Count(o => o.Status == OperationStatus.Running);
-            int queued = ops.Count(o => o.Status == OperationStatus.Queued);
+            int paused = ops.Count(o => o.IsPaused && !o.IsTerminal);
+            int running = ops.Count(o => o.Status == OperationStatus.Running && !o.IsPaused);
+            int queued = ops.Count(o => o.Status == OperationStatus.Queued && !o.IsPaused);
             int done = ops.Count(o => o.Status == OperationStatus.Completed);
             int failed = ops.Count(o => o.Status == OperationStatus.Failed);
             int canceled = ops.Count(o => o.Status == OperationStatus.Canceled);
@@ -238,6 +269,7 @@ namespace DirOpusReImagined
             {
                 var parts = new List<string>();
                 if (running > 0) parts.Add($"{running} running");
+                if (paused > 0) parts.Add($"{paused} paused");
                 if (queued > 0) parts.Add($"{queued} queued");
                 if (done > 0) parts.Add($"{done} done");
                 if (failed > 0) parts.Add($"{failed} failed");
@@ -245,33 +277,65 @@ namespace DirOpusReImagined
                 SummaryText.Text = string.Join("  ·  ", parts);
             }
 
-            bool anyActive = running > 0 || queued > 0;
+            bool anyActive = running > 0 || queued > 0 || paused > 0;
             bool anyFinished = done > 0 || failed > 0 || canceled > 0;
             CancelAllBtn.IsEnabled = anyActive;
             ClearBtn.IsEnabled = anyFinished;
-            RetryAllBtn.IsEnabled = failed > 0;
+            RetryAllBtn.IsEnabled = failed > 0 || canceled > 0;
+
+            // One button: pause while anything is going, resume once everything left is paused.
+            bool allPaused = anyActive && running == 0 && queued == 0;
+            PauseAllBtn.Content = allPaused ? "Resume all" : "Pause all";
+            PauseAllBtn.IsEnabled = anyActive;
         }
 
         // ---- Retry ----
 
-        /// <summary>Re-enqueues a finished operation as a fresh copy of the same work.</summary>
+        /// <summary>
+        /// Queues a new operation for what a failed or cancelled one left undone, and clears the old
+        /// card so the list doesn't fill up with superseded attempts.
+        /// </summary>
         private void RetryOp(FileOperation op)
         {
             var again = FileOperation.Retry(op);
+            if (again == null)
+            {
+                // Everything did finish after all (e.g. the failure was in follow-up work).
+                if (_rows.TryGetValue(op, out var r)) r.Stats.Text = "Nothing left to retry";
+                return;
+            }
             _queue.Enqueue(again);   // OperationAdded -> OnAdded builds a fresh card automatically
+            RemoveFinished(new[] { op });
+        }
+
+        private void RemoveFinished(IEnumerable<FileOperation> ops)
+        {
+            foreach (var removed in _queue.Remove(ops))
+            {
+                if (_rows.TryGetValue(removed, out var row))
+                {
+                    OpsPanel.Children.Remove(row.Card);
+                    _rows.Remove(removed);
+                }
+            }
+            UpdateSummary();
         }
 
         // ---- Toolbar buttons ----
 
         private void CancelAllBtn_Click(object? sender, RoutedEventArgs e) => _queue.CancelAll();
 
+        private void PauseAllBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            if (PauseAllBtn.Content as string == "Resume all") _queue.ResumeAll();
+            else _queue.PauseAll();
+        }
+
         private void RetryAllBtn_Click(object? sender, RoutedEventArgs e)
         {
             // Snapshot first: enqueuing mutates the queue's operation list as we go.
-            var failed = _queue.Operations
-                .Where(o => o.Status == OperationStatus.Failed)
-                .ToList();
-            foreach (var op in failed)
+            var retryable = _queue.Operations.Where(o => o.CanRetry).ToList();
+            foreach (var op in retryable)
                 RetryOp(op);
         }
 

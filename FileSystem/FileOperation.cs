@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,6 +83,90 @@ public sealed class FileOperation
     /// <summary>Completes (never faults) when the operation reaches a terminal status.</summary>
     public Task Completion => _completion.Task;
 
+    // ---- pause ----
+
+    private readonly ManualResetEventSlim _running = new(initialState: true);   // reset = paused
+    private readonly Stopwatch _activeClock = new();                             // running and not paused
+    private bool _started;
+
+    /// <summary>
+    /// True while paused. A queued operation that is paused is passed over until it's resumed; a
+    /// running one stops at its next progress report (within a file for streamed copies, before
+    /// the next file otherwise) and holds its place.
+    /// </summary>
+    public bool IsPaused => !_running.IsSet;
+
+    /// <summary>How long the operation has actually been working: running time minus paused time.</summary>
+    public TimeSpan ActiveTime => _activeClock.Elapsed;
+
+    /// <summary>Pauses the operation. Returns false if it has already finished.</summary>
+    internal bool Pause()
+    {
+        if (IsTerminal) return false;
+        _running.Reset();
+        _activeClock.Stop();
+        return true;
+    }
+
+    /// <summary>Resumes a paused operation. Returns false if it wasn't paused.</summary>
+    internal bool Resume()
+    {
+        if (!IsPaused) return false;
+        if (_started && !IsTerminal) _activeClock.Start();
+        _running.Set();
+        return true;
+    }
+
+    /// <summary>Blocks the calling worker thread while paused. Throws if cancelled meanwhile.</summary>
+    internal void WaitWhilePaused(CancellationToken ct) => _running.Wait(ct);
+
+    internal void MarkStarted()
+    {
+        _started = true;
+        if (!IsPaused) _activeClock.Start();
+    }
+
+    /// <summary>Stops the clock when the operation finishes; a finished operation is never "paused".</summary>
+    internal void MarkStopped()
+    {
+        _activeClock.Stop();
+        _running.Set();
+    }
+
+    // ---- per-item progress, for retrying only what didn't finish ----
+
+    private readonly HashSet<int> _doneItems = new();
+
+    /// <summary>Records that work item <paramref name="index"/> (in the factory's item list) finished.</summary>
+    internal void MarkItemDone(int index)
+    {
+        lock (_doneItems) _doneItems.Add(index);
+    }
+
+    internal bool IsItemDone(int index)
+    {
+        lock (_doneItems) return _doneItems.Contains(index);
+    }
+
+    /// <summary>
+    /// Builds the operation that does what this one left undone, or null if nothing is left. Set by
+    /// the factories that track their items; when null, a retry repeats the whole operation.
+    /// </summary>
+    private Func<FileOperation, FileOperation?>? _remainingWork;
+
+    /// <summary>The operation this one retries, if it is a retry.</summary>
+    public FileOperation? RetryOf { get; private set; }
+
+    /// <summary>
+    /// Called on the worker thread once the operation finishes, whatever the outcome. A retry
+    /// carries it over, so follow-up work (refreshing the panels, recording a move for undo) also
+    /// happens when a retried operation finishes. UI work must be posted to the UI thread.
+    /// </summary>
+    public Action<FileOperation>? AfterFinish { get; set; }
+
+    /// <summary>True when a retry would do something: the operation failed or was cancelled.</summary>
+    public bool CanRetry => Status is OperationStatus.Failed or OperationStatus.Canceled;
+
     /// <summary>True once the operation has finished, one way or another.</summary>
     public bool IsTerminal =>
         Status is OperationStatus.Completed or OperationStatus.Canceled or OperationStatus.Failed;
@@ -109,12 +194,32 @@ public sealed class FileOperation
         IReadOnlyList<TransferItem> items,
         string title,
         string? destinationFolder = null)
-        => new(
+    {
+        FileOperation op = null!;
+        op = new FileOperation(
             move ? OperationKind.Move : OperationKind.Copy,
             items,
             title,
-            (progress, ct) => TransferCoordinator.RunAsync(items, move, progress, ct),
+            (progress, ct) => TransferCoordinator.RunAsync(items, move, progress, ct, i => op.MarkItemDone(i)),
             destinationFolder);
+        op._remainingWork = src =>
+        {
+            var left = Remaining(src, items);
+            return left.Count == 0 ? null : Transfer(move, left, RetryTitle(src.Title, left.Count, items.Count), destinationFolder);
+        };
+        return op;
+    }
+
+    private static List<T> Remaining<T>(FileOperation op, IReadOnlyList<T> items)
+        => items.Where((_, i) => !op.IsItemDone(i)).ToList();
+
+    private static string RetryTitle(string title, int left, int total)
+    {
+        // Strip an earlier retry note so retrying a retry doesn't stack them up.
+        int note = title.IndexOf(" (retrying ", StringComparison.Ordinal);
+        if (note >= 0) title = title[..note];
+        return left == total ? title : $"{title} (retrying {left} of {total})";
+    }
 
     /// <summary>
     /// Builds a delete operation over a set of (path, isDirectory) targets. Each item is deleted off
@@ -128,7 +233,8 @@ public sealed class FileOperation
         string title)
     {
         var list = targets ?? Array.Empty<(string, bool)>();
-        return new FileOperation(
+        FileOperation op = null!;
+        op = new FileOperation(
             OperationKind.Delete,
             Array.Empty<TransferItem>(),
             title,
@@ -148,6 +254,7 @@ public sealed class FileOperation
                         ? FileUtility.TryDeleteFolder(path, useTrash)
                         : FileUtility.TryDeleteFile(path, useTrash);
                     if (err != null) failures.Add($"{name}: {err}");
+                    else op.MarkItemDone(i);
                 }
 
                 if (failures.Count > 0)
@@ -159,23 +266,33 @@ public sealed class FileOperation
                         $"{failures.Count} of {list.Count} item(s) could not be deleted: {detail}");
                 }
             }, ct));
+        op._remainingWork = src =>
+        {
+            var left = Remaining(src, list);
+            return left.Count == 0 ? null : DeleteBatch(left, useTrash, RetryTitle(src.Title, left.Count, list.Count));
+        };
+        return op;
     }
 
     /// <summary>
-    /// Builds a fresh operation that repeats the work of a finished one. The original's spent
-    /// <see cref="Cts"/> and completion source can't be reused, so retry reuses only its captured
-    /// <see cref="ExecuteAsync"/> delegate (which covers copy/move <em>and</em> delete, whose targets
-    /// live inside the closure) in a brand-new <see cref="FileOperation"/>.
+    /// Builds a fresh operation that finishes the work of a failed or cancelled one: only the items
+    /// that didn't complete, so a partly done move doesn't fail on items that already moved and a
+    /// copy doesn't copy everything again. (The original's spent <see cref="Cts"/> and completion
+    /// can't be reused.) Operations that don't track their items are repeated in full. Returns null
+    /// when nothing is left to do. <see cref="AfterFinish"/> is carried over.
     /// </summary>
-    public static FileOperation Retry(FileOperation source)
+    public static FileOperation? Retry(FileOperation source)
     {
         if (source is null) throw new ArgumentNullException(nameof(source));
-        return new FileOperation(
-            source.Kind,
-            source.Items,
-            source.Title,
-            source.ExecuteAsync,
-            source.DestinationFolder);
+
+        var again = source._remainingWork != null
+            ? source._remainingWork(source)
+            : new FileOperation(source.Kind, source.Items, source.Title, source.ExecuteAsync, source.DestinationFolder);
+        if (again == null) return null;
+
+        again.RetryOf = source;
+        again.AfterFinish = source.AfterFinish;
+        return again;
     }
 
     /// <summary>Marks the operation terminal and releases anyone awaiting <see cref="Completion"/>.</summary>

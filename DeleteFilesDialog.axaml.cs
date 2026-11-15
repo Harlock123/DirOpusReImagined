@@ -130,22 +130,22 @@ public partial class DeleteFilesDialog : Window
         var op = FileOperation.DeleteBatch(targets, useTrash, title);
 
         var owner = this.Owner as Window;
-        OperationQueue.Instance.Enqueue(op);
-        if (owner != null) OperationsWindow.ShowSingleton(owner);
 
-        // Refresh the affected panel(s) when the delete finishes. Captured locals survive this
-        // dialog closing; the grids belong to the main window and persist.
+        // Refresh the affected panel(s) when the delete (or a retry of it) finishes. Captured
+        // locals survive this dialog closing; the grids belong to the main window and persist.
         var panel = ThePanel; var root = RootPath;
         var otherPanel = OtherPanel; var otherRoot = OtherRootPath; var showHidden = _ShowHidden;
-        _ = op.Completion.ContinueWith(_ =>
-            Dispatcher.UIThread.Post(() =>
-            {
-                FileUtility.PopulateFilePanel(panel, root, showHidden);
-                if (otherRoot == root)
-                    FileUtility.PopulateFilePanel(otherPanel, otherRoot, showHidden);
-                if (op.Status == OperationStatus.Failed && owner != null)
-                    OperationsWindow.ShowSingleton(owner);
-            }), TaskScheduler.Default);
+        op.AfterFinish = done => Dispatcher.UIThread.Post(() =>
+        {
+            FileUtility.PopulateFilePanel(panel, root, showHidden);
+            if (otherRoot == root)
+                FileUtility.PopulateFilePanel(otherPanel, otherRoot, showHidden);
+            if (done.Status == OperationStatus.Failed && owner != null)
+                OperationsWindow.ShowSingleton(owner);
+        });
+
+        OperationQueue.Instance.Enqueue(op);
+        if (owner != null) OperationsWindow.ShowSingleton(owner);
 
         this.Close();
     }

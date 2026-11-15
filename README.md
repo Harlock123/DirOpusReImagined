@@ -29,6 +29,9 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Move** files and folders between panels
 - **Delete** files and folders with a confirmation dialog — deletes go to the **OS trash / recycle bin** by default (recoverable), with a per-delete toggle for permanent deletion (local files only)
 - **Rename** files and folders with a pattern-based rename interface for batch operations
+- Copies, moves and deletes run **in the background**, one at a time, in a **File Operations** window with progress, speed and time remaining:
+  - **Pause** (⏸) and **resume** (▶) any operation, or **Pause all / Resume all**. A running copy stops within a second, partway through a file, and holds its place; cloud transfers stop after the current file. A paused operation that hasn't started yet lets the ones behind it go first. Speed and time remaining ignore paused time
+  - **Retry** (↻) a failed or cancelled operation, or **Retry all**: it runs **only the items that didn't finish**, so a move that failed halfway completes instead of failing on the items it already moved, and a copy doesn't start again from scratch. The panels refresh afterwards, and a retried move can still be undone
 - **Create folders** in either panel
 - **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz** or **.tar**:
   - folders go in with everything inside them, including hidden files and empty folders; Unix permissions such as the execute bit are kept

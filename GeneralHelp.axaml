@@ -56,7 +56,8 @@
                 <TextBlock Text="• Copy, Move and Delete run in the background and appear in a floating File Operations window, so the app stays responsive and you can keep working while a transfer runs." TextWrapping="Wrap" />
                 <TextBlock Text="• Each operation shows a live progress bar, the current file, and transfer speed / estimated time remaining. A ✕ cancels just that operation; Cancel all stops everything, and Clear finished tidies completed rows." TextWrapping="Wrap" />
                 <TextBlock Text="• Operations run one at a time in the order started, so you can queue several transfers up and let them work through. Failures are shown inline in red — the rest of the queue still runs." TextWrapping="Wrap" />
-                <TextBlock Text="• A failed operation gets a ↻ Retry button to run it again as a fresh operation; Retry all failed (window header) re-queues every failed one at once." TextWrapping="Wrap" />
+                <TextBlock Text="• ⏸ pauses an operation and ▶ resumes it; Pause all / Resume all does every one. A running copy stops partway through a file and holds its place (cloud transfers stop after the current file); a paused operation that hasn't started lets the ones behind it go first." TextWrapping="Wrap" />
+                <TextBlock Text="• A failed or cancelled operation gets a ↻ Retry button, and Retry all does every one. A retry runs only the items that didn't finish, so a half-done move completes rather than failing on what already moved." TextWrapping="Wrap" />
                 <TextBlock Text="• Optional &quot;Verify copies&quot; (System Wide Settings) re-reads each copied file and compares checksums, failing the copy if they differ. Applies to local disk and Windows/UNC shares; off by default as it roughly doubles reading." TextWrapping="Wrap" />
 
                 <TextBlock Text="Drag and drop" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />

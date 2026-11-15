@@ -2013,22 +2013,23 @@ namespace DirOpusReImagined
             // Enqueue the (possibly rewritten) batch and show the (non-modal) operations window. The
             // transfer runs in the background so the UI stays live and transfers can be stacked.
             var op = FileOperation.Transfer(move, finalItems, BuildTransferTitle(move, finalItems.Count, targetPathRaw), tpath);
+
+            // Refresh both panels when the operation (or a retry of it) finishes: the source shrinks
+            // on a move, the destination grows. A failure is shown inline in the operations window;
+            // re-raise it so the red status is visible even if the user had closed the window.
+            // A move is recorded for undo — what actually moved, even if it stopped partway.
+            op.AfterFinish = done => Dispatcher.UIThread.Post(() =>
+            {
+                RefreshLPGrid();
+                RefreshRPGrid();
+                if (done.Status == OperationStatus.Failed)
+                    OperationsWindow.ShowSingleton(this);
+                if (move) RecordMoveForUndo(spath, done.Items, overwritten);
+            });
+
             OperationQueue.Instance.Enqueue(op);
             OperationsWindow.ShowSingleton(this);
 
-            // Refresh both panels when this specific operation finishes (source shrinks on a move,
-            // destination grows). A failure is already shown inline in the operations window; re-raise
-            // it so the red status is visible even if the user had closed the window.
-            _ = op.Completion.ContinueWith(_ =>
-                Dispatcher.UIThread.Post(() =>
-                {
-                    RefreshLPGrid();
-                    RefreshRPGrid();
-                    if (op.Status == OperationStatus.Failed)
-                        OperationsWindow.ShowSingleton(this);
-                    // Record what actually moved, even if the move failed or was cancelled partway.
-                    if (move) RecordMoveForUndo(spath, finalItems, overwritten);
-                }), TaskScheduler.Default);
         }
 
         private static string BuildTransferTitle(bool move, int count, string targetDisplay)
@@ -2186,25 +2187,26 @@ namespace DirOpusReImagined
         }
 
         /// <summary>
-        /// Enqueues one or more operations (in order), shows the operations window, and refreshes both
-        /// panels once the last operation finishes — re-raising the window if any of them failed.
+        /// Enqueues one or more operations (in order) and shows the operations window. Both panels
+        /// are refreshed as each operation (or a retry of it) finishes, and the window is raised
+        /// again if one fails.
         /// </summary>
         private void EnqueueSequenceAndRefresh(IReadOnlyList<FileOperation> ops)
         {
             if (ops.Count == 0) return;
 
-            foreach (var o in ops) OperationQueue.Instance.Enqueue(o);
-            OperationsWindow.ShowSingleton(this);
-
-            var last = ops[ops.Count - 1];
-            _ = last.Completion.ContinueWith(_ =>
-                Dispatcher.UIThread.Post(() =>
+            foreach (var o in ops)
+            {
+                o.AfterFinish = done => Dispatcher.UIThread.Post(() =>
                 {
                     RefreshLPGrid();
                     RefreshRPGrid();
-                    if (ops.Any(o => o.Status == OperationStatus.Failed))
+                    if (done.Status == OperationStatus.Failed)
                         OperationsWindow.ShowSingleton(this);
-                }), TaskScheduler.Default);
+                });
+                OperationQueue.Instance.Enqueue(o);
+            }
+            OperationsWindow.ShowSingleton(this);
         }
 
         private string MakePathEnvSafe(string path)

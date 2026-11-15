@@ -16,7 +16,8 @@ public static class TransferCoordinator
         IReadOnlyList<TransferItem> items,
         bool move,
         IProgress<TransferProgress>? progress,
-        CancellationToken ct)
+        CancellationToken ct,
+        Action<int>? itemDone = null)
     {
         // Pre-scan sizes so the overall bar is meaningful (folders priced via recursive size).
         // Run off the UI thread — for cloud items this makes blocking network calls.
@@ -73,6 +74,8 @@ public static class TransferCoordinator
                 else
                     await FileUtility.CopyFileToPathAsync(item.Source, item.TargetPath, itemProgress, ct).ConfigureAwait(false);
             }
+
+            itemDone?.Invoke(i);
 
             // Advance by the pre-scanned size so the bar is monotonic and lands exactly at 100%.
             completedBytes += sizes[i];

@@ -10,15 +10,17 @@
     <Grid Margin="12" RowDefinitions="Auto,*,Auto">
 
         <!-- Header: summary + bulk actions -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
-            <TextBlock Grid.Column="0" x:Name="SummaryText" VerticalAlignment="Center"
-                       FontSize="15" FontWeight="SemiBold" Text="No operations"/>
-            <Button Grid.Column="1" x:Name="RetryAllBtn" Content="Retry all failed"
-                    Margin="0,0,8,0" Click="RetryAllBtn_Click"/>
-            <Button Grid.Column="2" x:Name="ClearBtn" Content="Clear finished"
-                    Margin="0,0,8,0" Click="ClearBtn_Click"/>
-            <Button Grid.Column="3" x:Name="CancelAllBtn" Content="Cancel all"
-                    Click="CancelAllBtn_Click"/>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Margin="0,0,0,10">
+            <TextBlock Grid.Column="0" Grid.Row="0" x:Name="SummaryText" VerticalAlignment="Center"
+                       FontSize="15" FontWeight="SemiBold" Text="No operations" TextWrapping="Wrap"/>
+            <WrapPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                <Button x:Name="PauseAllBtn" Content="Pause all" Margin="0,0,8,4" Click="PauseAllBtn_Click"
+                        ToolTip.Tip="Pause everything that hasn't finished; press again to resume"/>
+                <Button x:Name="RetryAllBtn" Content="Retry all" Margin="0,0,8,4" Click="RetryAllBtn_Click"
+                        ToolTip.Tip="Retry every failed or cancelled operation — only the items that didn't finish"/>
+                <Button x:Name="ClearBtn" Content="Clear finished" Margin="0,0,8,4" Click="ClearBtn_Click"/>
+                <Button x:Name="CancelAllBtn" Content="Cancel all" Margin="0,0,0,4" Click="CancelAllBtn_Click"/>
+            </WrapPanel>
         </Grid>
 
         <!-- Per-operation cards -->
