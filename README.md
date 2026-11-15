@@ -63,6 +63,15 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - An X button next to each filter clears it instantly
 - Filters reset automatically when navigating to a new directory
 
+### Search
+- The **Find** button on each panel's filter row opens a search window for that panel's folder and everything below it
+- **By name** — a substring, or a wildcard (`*.cs`, `report?`) when it contains `*` or `?`; optionally include folders
+- **By text inside files** — fill in **Containing** to list only files that contain it, with the line number and the matching line shown under each result; tick **Text is a regular expression** for a regex. Leave the name empty to look in every file, or combine both (`*.cs` containing `TODO`)
+- Results appear **as they're found**, with a live status line and **Cancel** (or Esc)
+- Double-click a result (or press Enter) to show it in the panel: the panel opens its folder with the **cursor on the file**
+- Binary files and files over 100 MB are skipped, and the status line says how many were read and skipped. Text in UTF-8, UTF-16 and other BOM-marked encodings is read correctly
+- Works in local folders and **inside archives**. In a cloud folder, file contents are only read if you tick **Read cloud files**, since that downloads each file
+
 ### Status Bar
 - A status bar at the bottom of the window shows live information for each panel:
   - Total folder and file counts

@@ -93,6 +93,17 @@ namespace DirOpusReImagined
             WatchPanel(isLeft, path);
         }
 
+        /// <summary>
+        /// Puts the cursor on (and selects) <paramref name="name"/> once <paramref name="folder"/>
+        /// is next listed in this panel, including a cloud listing that arrives later.
+        /// </summary>
+        private void PutCursorOnNextListing(bool isLeft, string folder, string name, bool isDir)
+        {
+            var state = new TaiDataGrid.ViewState(name, isDir,
+                new System.Collections.Generic.HashSet<(string Name, bool IsDir)> { (name, isDir) }, 0);
+            if (isLeft) _lpPendingView = (folder, state, -1); else _rpPendingView = (folder, state, -1);
+        }
+
         /// <summary>Starts (or moves) the watcher for a panel. Only plain local folders are watched.</summary>
         private void WatchPanel(bool isLeft, string path)
         {

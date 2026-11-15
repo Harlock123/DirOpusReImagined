@@ -83,6 +83,9 @@
                 <TextBlock Text="Bookmarks" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Bookmarks button opens a dialog that lists your saved folders; send any one to the Left or Right panel, add either panel's current folder, or remove entries. Saved to BOOKMARKS.MD beside the app; a default set (Home, Root, Desktop, Documents, Pictures) is seeded on first run." TextWrapping="Wrap" />
 
+                <TextBlock Text="Search" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• The Find button on a panel's filter row searches that folder and everything below it, by name (a substring, or a wildcard such as *.cs), by text inside files (fill in Containing; tick the box for a regular expression), or both. Results appear as they are found, with the matching line shown; double-click one to open its folder with the cursor on the file. Binary files and files over 100 MB are skipped, and cloud files are only read if you tick Read cloud files." TextWrapping="Wrap" />
+
                 <TextBlock Text="Refresh" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Local folders refresh by themselves when another program adds, removes, renames or changes files in them; the cursor, selection, scroll position and filter are kept. Press Ctrl/Cmd+R (or right-click → Refresh) to re-list a panel by hand — for a cloud folder this also skips the 30-second listing cache. If the folder shown is deleted, the panel steps up to the nearest folder that still exists." TextWrapping="Wrap" />
 

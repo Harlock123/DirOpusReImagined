@@ -3830,10 +3830,19 @@ namespace DirOpusReImagined
             win.Show(this);
         }
 
-        /// <summary>Navigates the originating panel to a search hit — into a folder hit, or to a file's folder.</summary>
+        /// <summary>
+        /// Shows a search hit in the originating panel: opens a folder hit, or opens a file's folder
+        /// with the cursor on (and selecting) the file.
+        /// </summary>
         private void NavigateToHit(string side, SearchHit hit)
         {
-            NavigatePanelTo(side, hit.IsDir ? hit.FullPath : hit.Folder);
+            if (hit.IsDir)
+            {
+                NavigatePanelTo(side, hit.FullPath);
+                return;
+            }
+            PutCursorOnNextListing(side == "LP", hit.Folder, hit.Name, isDir: false);
+            NavigatePanelTo(side, hit.Folder);
         }
 
         /// <summary>Navigates a panel to the root of a cloud remote, mirroring a typed-path Enter.</summary>
@@ -3854,7 +3863,7 @@ namespace DirOpusReImagined
                 if (!string.IsNullOrEmpty(LPpath.Text)) PushHistory(true, LPpath.Text);
                 LPpath.Text = path;
                 LPfilter.Text = "";
-                FileUtility.PopulateFilePanel(LPgrid, path, showHidden);
+                FileUtility.PopulateFilePanel(LPgrid, path, showHidden, _lpSort);
                 RefreshLPGridPostActions();
                 ExitPathEditMode("LP");
             }
@@ -3863,7 +3872,7 @@ namespace DirOpusReImagined
                 if (!string.IsNullOrEmpty(RPpath.Text)) PushHistory(false, RPpath.Text);
                 RPpath.Text = path;
                 RPfilter.Text = "";
-                FileUtility.PopulateFilePanel(RPgrid, path, showHidden);
+                FileUtility.PopulateFilePanel(RPgrid, path, showHidden, _rpSort);
                 RefreshRPGridPostActions();
                 ExitPathEditMode("RP");
             }

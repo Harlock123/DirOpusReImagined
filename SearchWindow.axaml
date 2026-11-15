@@ -1,30 +1,43 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="DirOpusReImagined.SearchWindow"
-        Width="640" Height="470" Title="Search"
+        Width="720" Height="540" Title="Search"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="12" RowDefinitions="auto,auto,auto,*,auto">
+    <Grid Margin="12" RowDefinitions="auto,auto,auto,auto,*,auto">
         <TextBlock x:Name="rootText" Grid.Row="0" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
                    TextTrimming="CharacterEllipsis" Text=""/>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto" Margin="0,8,0,0">
-            <TextBox x:Name="patternBox" Grid.Column="0"
-                     Watermark="Name pattern — substring, or *.txt / report?"/>
-            <Button x:Name="findButton" Grid.Column="1" Content="Find" Width="80" Margin="6,0,0,0"/>
-            <Button x:Name="cancelButton" Grid.Column="2" Content="Cancel" Width="80" Margin="6,0,0,0" IsEnabled="False"/>
+        <Grid Grid.Row="1" ColumnDefinitions="auto,*,auto,auto" RowDefinitions="auto,auto" Margin="0,8,0,0">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBox x:Name="patternBox" Grid.Row="0" Grid.Column="1"
+                     Watermark="Substring, or *.txt / report? — leave empty to look in every file"/>
+            <Button x:Name="findButton" Grid.Row="0" Grid.Column="2" Content="Find" Width="80" Margin="6,0,0,0"/>
+            <Button x:Name="cancelButton" Grid.Row="0" Grid.Column="3" Content="Cancel" Width="80" Margin="6,0,0,0" IsEnabled="False"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Containing" VerticalAlignment="Center" Margin="0,6,8,0"/>
+            <TextBox x:Name="textBox" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0"
+                     Watermark="Text inside the file (optional)"/>
         </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
-            <CheckBox x:Name="matchCaseCheck" Content="Match case"/>
-            <CheckBox x:Name="includeFoldersCheck" Content="Include folders"/>
-            <TextBlock x:Name="statusText" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" Text=""/>
-        </StackPanel>
+        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+            <CheckBox x:Name="matchCaseCheck" Content="Match case" Margin="0,0,16,0"/>
+            <CheckBox x:Name="regexCheck" Content="Text is a regular expression" Margin="0,0,16,0"/>
+            <CheckBox x:Name="includeFoldersCheck" Content="Include folders" Margin="0,0,16,0"/>
+            <CheckBox x:Name="cloudContentsCheck" Content="Read cloud files" IsVisible="False"
+                      ToolTip.Tip="Downloads every cloud file whose name matches, so it can be slow and use data."/>
+        </WrapPanel>
 
-        <ListBox x:Name="resultsList" Grid.Row="3" Margin="0,8,0,0">
+        <TextBlock x:Name="statusText" Grid.Row="3" Margin="0,8,0,0" Foreground="{DynamicResource MutedTextBrush}"
+                   TextTrimming="CharacterEllipsis" Text=""/>
+
+        <ListBox x:Name="resultsList" Grid.Row="4" Margin="0,6,0,0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="0,1">
                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding MatchSummary}" FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
+                                   FontSize="12" TextTrimming="CharacterEllipsis"
+                                   IsVisible="{Binding MatchSummary, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                         <TextBlock Text="{Binding Folder}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
@@ -32,7 +45,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <TextBlock Grid.Row="4" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,6,0,0"
-                   Text="Double-click a result to open its folder in the panel."/>
+        <TextBlock Grid.Row="5" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,6,0,0"
+                   Text="Double-click a result (or press Enter) to show it in the panel."/>
     </Grid>
 </Window>
