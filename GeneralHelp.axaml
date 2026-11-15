@@ -32,6 +32,7 @@
                 <TextBlock Text="Dual-panel browsing" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Two independent panels, each with its own path bar, back button, and drive selector." TextWrapping="Wrap" />
                 <TextBlock Text="• Double-click a folder to enter it; use Back / Forward (or Alt+Left / Alt+Right) to move through history, and Backspace to go up a level." TextWrapping="Wrap" />
+                <TextBlock Text="• The ◷ button beside Back / Forward (or Alt+Down) lists the folders either panel has shown recently, newest first; pick one to go there. The list is kept between sessions." TextWrapping="Wrap" />
                 <TextBlock Text="• When the columns don't fit, scroll sideways with the scrollbar under the panel, Shift or Ctrl + mouse wheel, or a sideways touchpad swipe. Alt + mouse wheel changes the font size." TextWrapping="Wrap" />
                 <TextBlock Text="• Type-ahead: with a panel focused, just start typing a name to jump to the matching row (repeat a letter to cycle through matches)." TextWrapping="Wrap" />
                 <TextBlock Text="• Swap panel contents, or clone one panel's path to the other, with the center buttons." TextWrapping="Wrap" />
@@ -166,6 +167,7 @@
                                             <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="↑ / ↓" FontWeight="Bold" Margin="0,2" />
@@ -249,6 +251,8 @@
                     <TextBlock Grid.Row="26" Grid.Column="1" Text="Refresh the active panel, keeping the cursor, selection and filter (local folders also refresh by themselves)" TextWrapping="Wrap" Margin="0,2" />
                     <TextBlock Grid.Row="27" Grid.Column="0" Text="Ctrl/Cmd + Z" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="27" Grid.Column="1" Text="Undo the last rename or move (press again to go further back)" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="28" Grid.Column="0" Text="Alt + ↓" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="28" Grid.Column="1" Text="Recent folders menu (also the ◷ button beside Back / Forward)" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

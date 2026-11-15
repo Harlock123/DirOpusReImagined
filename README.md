@@ -119,6 +119,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Enter** | Open the cursor row — folders navigate in, files open/execute |
 | **Backspace** | Go up one directory level in the active panel |
 | **Alt + ← / →** | Back / Forward in the panel's history |
+| **Alt + ↓** | Recent folders menu |
 | *(type a name)* | Type-ahead: jump to the matching row; repeat a letter to cycle |
 | **Tab** | Switch the active panel |
 | **F2** | Rename the selection in the active panel |
@@ -202,6 +203,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 ### Navigation
 - Path text box with Enter key navigation
 - **Back and Forward** buttons per panel (per-tab history) — Back also goes up a level; **Alt+← / Alt+→** on the keyboard
+- **Recent folders** — the **◷** button beside Back/Forward (or **Alt+↓**) lists the folders either panel has shown lately, newest first, including cloud and archive folders; pick one to go there. The list holds 25, is shared by both panels, survives restarts (saved in `Configuration.xml`), skips folders that no longer exist, and can be cleared from the menu
 - Full keyboard navigation — arrow-key cursor, Enter to open, Backspace to go up, Tab to switch panels (see **Keyboard Navigation & Shortcuts**)
 - **Type-ahead** — start typing a name in a panel to jump to the matching file/folder; repeat a letter to cycle
 - Drive button for drive/volume selection

@@ -91,6 +91,7 @@ namespace DirOpusReImagined
                 grid.RestoreViewState(p.State, p.CursorIndex);
 
             WatchPanel(isLeft, path);
+            RememberRecentFolder(path);
         }
 
         /// <summary>

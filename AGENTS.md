@@ -43,6 +43,8 @@ Everything sits at the repository root; there is no `src/` folder.
 - `PanelTab.cs`: one folder tab's saved state (path, history, sort, filter, cursor).
 - `FileSystem/Checksums.cs` and `ChecksumWindow.axaml(.cs)`: computing, saving and verifying checksums in the
   coreutils formats (right-click → Checksums…).
+- `RecentFolders.cs` and `MainWindow.Recent.cs`: the recent-folders menu (◷ / Alt+Down), saved in `Configuration.xml`
+  under `<RecentFolders>`.
 - `UndoHistory.cs` and `MainWindow.Undo.cs`: Ctrl/Cmd+Z undo for renames and moves. `UndoPlanner` records what
   really happened after an operation and checks the disk before reversing it; it never overwrites.
 - `MainWindow.Refresh.cs`: Ctrl/Cmd+R refresh and the per-panel `FileSystemWatcher` that re-lists local folders

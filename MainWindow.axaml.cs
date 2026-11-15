@@ -109,6 +109,7 @@ namespace DirOpusReImagined
             ProviderRegistry.Register(new ArchiveFileProvider());
             FileUtility.PanelPopulated += OnPanelPopulated;
             InitUndo();
+            InitRecentFolders();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
             // until the user clicks a panel. Focus() needs the control attached to the visual tree,
@@ -346,6 +347,7 @@ namespace DirOpusReImagined
             _rpActiveTab = 0;
             // Restore any tabs saved from a previous session (replaces the seeded single tab).
             LoadTabsFromConfig();
+            LoadRecentFoldersFromConfig();
             RenderTabBar(isLeft: true);
             RenderTabBar(isLeft: false);
 
@@ -2320,6 +2322,9 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.Checksums:
                     OpenChecksums(left);
+                    break;
+                case GridVerb.RecentFolders:
+                    ShowRecentFolders(left);
                     break;
             }
         }
