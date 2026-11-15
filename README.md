@@ -361,7 +361,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.31.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.32.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1666,6 +1666,9 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.32.0 (2026-11-15) — Upright thumbnails
+- **Thumbnails of photos taken with the camera on its side now show upright**, as the viewer and preview window already did. Thumbnails cached sideways by earlier versions are made again the first time each folder is shown.
 
 ### 0.1.31.0 (2026-11-15) — Undo deletes, compare files, flat view, duplicates, palette and more
 - **Undo deletes.** Ctrl/Cmd+Z after a delete to the trash puts the items back where they were. DORI now notes where each item lands in the trash (the trash folders on Linux, including those on other drives; the Recycle Bin on Windows; Finder's Trash on macOS), never restores over something new, and lists anything no longer in the trash.
