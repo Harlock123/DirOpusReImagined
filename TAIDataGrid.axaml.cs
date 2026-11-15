@@ -50,7 +50,8 @@ namespace DirOpusReImagined
         MakeLink,
         NextButtonBank,
         PreviousButtonBank,
-        CompareFiles
+        CompareFiles,
+        FlatView
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -371,6 +372,16 @@ namespace DirOpusReImagined
 
         /// <summary>Outline brush drawn around the row that currently holds the keyboard cursor.</summary>
         private IBrush _gridCursorBrush = Brushes.DodgerBlue;
+
+        /// <summary>
+        /// The folder this panel shows in flat view (every file below it in one list, named by its
+        /// path relative to the folder), or null for the normal view. Listing any other folder turns
+        /// flat view off.
+        /// </summary>
+        public string? FlatRoot { get; set; }
+
+        /// <summary>True when the last flat listing stopped at <see cref="FileUtility.FlatViewLimit"/> files.</summary>
+        public bool FlatTruncated { get; set; }
 
         /// <summary>True when this grid is the active panel (has keyboard focus); drives the frame.</summary>
         private bool _isActivePanel;
@@ -3078,6 +3089,7 @@ namespace DirOpusReImagined
                 if (e.Key == Key.W)        { TabActionRequested?.Invoke(this, TabAction.Close); e.Handled = true; return; }
                 if (e.Key == Key.R)        { RaiseVerb(GridVerb.Refresh); e.Handled = true; return; }
                 if (e.Key == Key.Z)        { RaiseVerb(GridVerb.Undo); e.Handled = true; return; }
+                if (shift && e.Key == Key.F) { RaiseVerb(GridVerb.FlatView); e.Handled = true; return; }
                 if (e.Key == Key.Tab)      { TabActionRequested?.Invoke(this, shift ? TabAction.Previous : TabAction.Next); e.Handled = true; return; }
                 if (e.Key == Key.PageDown) { TabActionRequested?.Invoke(this, TabAction.Next);     e.Handled = true; return; }
                 if (e.Key == Key.PageUp)   { TabActionRequested?.Invoke(this, TabAction.Previous); e.Handled = true; return; }
@@ -4095,6 +4107,7 @@ namespace DirOpusReImagined
 
         private void Checksums_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Checksums);
         private void CompareFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CompareFiles);
+        private void FlatView_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FlatView);
 
         private void GoToLinkTarget_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToLinkTarget);
 

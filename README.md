@@ -92,6 +92,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Changes that arrive while a **Cmp** comparison is on screen are held back until the comparison is cleared, so the colours aren't wiped mid-review
 - Cloud and archive folders aren't watched (there's nothing to watch locally); use **Ctrl/Cmd+R** for those
 
+### Flat View
+- The **Flat** button in a panel's tab bar (or right-click → **Flat View**, or **Ctrl/Cmd+Shift+F**) lists **every file in the folder and all the folders below it** in one list, each named by its path from the folder (`src/app/main.cs`)
+- Sort, filter and select across the whole tree at once — for example every `.log` file anywhere below — then copy, move, delete, view or compare as usual
+- **Copies and moves keep each file's sub-folder**: copying `src/app/main.cs` into another folder creates `src/app` there
+- Linked folders are never walked into, hidden folders only when **Show Hidden** is on; the list stops at 100,000 files (the status bar says so), and is built in the background so a large tree doesn't freeze the window
+- The status bar shows **Flat view:**, local folders still refresh by themselves when anything below changes, and going to another folder turns flat view off
+- Works for local folders, archives and cloud folders (a cloud tree can take a while to list)
+
 ### Real-Time Filter
 - Each panel has a filter text box that narrows the displayed files and folders as you type
 - Filters by name using case-insensitive matching
@@ -137,6 +145,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Backspace** | Go up one directory level in the active panel |
 | **Alt + ← / →** | Back / Forward in the panel's history |
 | **Alt + ↓** | Recent folders menu |
+| **Ctrl/Cmd + Shift + F** | Flat view on / off |
 | **Alt + PageUp / PageDown** | Previous / next bank of command buttons |
 | *(type a name)* | Type-ahead: jump to the matching row; repeat a letter to cycle |
 | **Tab** | Switch the active panel |

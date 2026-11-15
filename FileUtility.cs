@@ -807,7 +807,8 @@ namespace DirOpusReImagined
 
             var provider = ProviderRegistry.For(PATHNAME);
 
-            if (provider.IsRemote)
+            // A flat listing can be large, so it is built off the UI thread like a cloud one.
+            if (provider.IsRemote || IsFlat(ThePanel, PATHNAME))
             {
                 PopulateFilePanelAsync(ThePanel, PATHNAME, ShowHidden, Sort, provider);
                 return;
@@ -834,9 +835,10 @@ namespace DirOpusReImagined
         {
             // A cloud remote's first listing after launch can take ~20s while rclone spins up the
             // backend and refreshes its OAuth token; say so, so the panel doesn't look frozen.
+            bool flat = IsFlat(ThePanel, PATHNAME);
             var loadingText = provider.IsRemote
                 ? "Loading… (first cloud access can take ~20s)"
-                : "Loading…";
+                : flat ? "Listing every file below this folder…" : "Loading…";
             ThePanel.SuspendRendering = true;
             ThePanel.Items = new List<object>
             {
@@ -848,7 +850,12 @@ namespace DirOpusReImagined
             {
                 List<AFileEntry>? list = null;
                 Exception? error = null;
-                try { list = BuildFileList(provider, PATHNAME, ShowHidden, Sort); }
+                bool truncated = false;
+                try
+                {
+                    if (flat) (list, truncated) = BuildFlatList(provider, PATHNAME, ShowHidden, Sort, FlatViewLimit);
+                    else list = BuildFileList(provider, PATHNAME, ShowHidden, Sort);
+                }
                 catch (Exception ex) { error = ex; }
 
                 Dispatcher.UIThread.Post(() =>
@@ -863,10 +870,81 @@ namespace DirOpusReImagined
                     {
                         ThePanel.Items = list!.OfType<object>().ToList();
                     }
+                    ThePanel.FlatTruncated = truncated;
                     ThePanel.SuspendRendering = false;
                     PanelPopulated?.Invoke(ThePanel);
                 });
             });
+        }
+
+        /// <summary>A flat listing stops after this many files, to keep a mistaken flat view of a whole drive usable.</summary>
+        public const int FlatViewLimit = 100_000;
+
+        /// <summary>
+        /// True when <paramref name="panel"/> should show <paramref name="path"/> flat. Listing any
+        /// other folder turns flat view off, so it never follows the panel somewhere unexpected.
+        /// </summary>
+        private static bool IsFlat(TaiDataGrid panel, string path)
+        {
+            if (panel.FlatRoot == null) return false;
+            if (string.Equals(panel.FlatRoot.TrimEnd('/', '\\'), path.TrimEnd('/', '\\'),
+                              OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
+                return true;
+            panel.FlatRoot = null;
+            panel.FlatTruncated = false;
+            return false;
+        }
+
+        /// <summary>
+        /// Every file below <paramref name="root"/>, each named by its path relative to it. Linked
+        /// folders are never walked into (a link back to a parent would never end), nor hidden ones
+        /// unless hidden files are shown. Folders that can't be read are skipped. Stops at
+        /// <paramref name="limit"/> files.
+        /// </summary>
+        internal static (List<FileEntry> Files, bool Truncated) CollectFlat(IFileProvider provider, string root, bool showHidden, int limit)
+        {
+            char sep = provider is LocalFileProvider ? Path.DirectorySeparatorChar : '/';
+            var files = new List<FileEntry>();
+            var pending = new Stack<(string Dir, string Prefix)>();
+            pending.Push((root, ""));
+            while (pending.Count > 0)
+            {
+                var (dir, prefix) = pending.Pop();
+                List<FileEntry> subdirs, here;
+                try
+                {
+                    here = provider.EnumerateFiles(dir).ToList();
+                    subdirs = provider.EnumerateDirectories(dir).ToList();
+                }
+                catch { continue; }
+
+                foreach (var f in here)
+                {
+                    if (!showHidden && f.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
+                    if (files.Count >= limit) return (files, true);
+                    files.Add(f with { Name = prefix + f.Name });
+                }
+                // Pushed in reverse so folders are walked in name order.
+                foreach (var d in subdirs.OrderByDescending(d => d.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (d.IsLink || d.Flags.HasFlag(FileEntryFlags.System)) continue;
+                    if (!showHidden && d.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
+                    pending.Push((d.Path, prefix + d.Name + sep));
+                }
+            }
+            return (files, false);
+        }
+
+        private static (List<AFileEntry>, bool) BuildFlatList(IFileProvider provider, string root, bool showHidden, SortSpec sort, int limit)
+        {
+            var (files, truncated) = CollectFlat(provider, root, showHidden, limit);
+            var result = new List<AFileEntry>(files.Count);
+            foreach (var entry in SortFiles(files, sort))
+            {
+                string ft = entry.LastModified.ToShortDateString() + " " + entry.LastModified.ToShortTimeString();
+                result.Add(new AFileEntry(entry.Name, entry.Size, false, entry.AttributeString, ft) { LinkTarget = entry.LinkTarget });
+            }
+            return (result, truncated);
         }
 
         private static List<AFileEntry> BuildFileList(IFileProvider provider, string PATHNAME, bool ShowHidden, SortSpec Sort)
@@ -971,6 +1049,12 @@ namespace DirOpusReImagined
             
             
             var provider = ProviderRegistry.For(PATHNAME);
+
+            if (IsFlat(ThePanel, PATHNAME))
+            {
+                PopulateFilePanel(ThePanel, PATHNAME, ShowHidden, SortSpec.Default);
+                return;
+            }
 
             if (provider.IsRemote)
             {

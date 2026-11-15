@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,6 +61,10 @@ public static class TransferCoordinator
             // Use TargetPath (the exact destination) for both files and directories so a
             // collision resolved by renaming lands under its new name. TargetPath normally equals
             // TargetFolder + source name, so ordinary transfers are unaffected.
+            // A file from a flat view keeps its sub-folder ("sub/a.txt"), which may not exist at the
+            // destination yet. Archives and cloud storage make parent folders themselves.
+            EnsureLocalParent(item.TargetPath);
+
             if (move)
             {
                 if (item.IsDirectory)
@@ -93,6 +98,13 @@ public static class TransferCoordinator
                 : p.Stat(item.Source)?.Size ?? 0;
         }
         catch { return 0; }
+    }
+
+    private static void EnsureLocalParent(string target)
+    {
+        if (ProviderRegistry.For(target) is not LocalFileProvider) return;
+        string? parent = Path.GetDirectoryName(target);
+        if (!string.IsNullOrEmpty(parent) && !Directory.Exists(parent)) Directory.CreateDirectory(parent);
     }
 
     private static string NameOf(string path)

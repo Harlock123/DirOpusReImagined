@@ -22,6 +22,7 @@ namespace DirOpusReImagined
         {
             public FileSystemWatcher? Watcher;
             public string Path = "";
+            public bool Recursive;   // flat view: changes in any folder below count
             public DispatcherTimer? Timer;
             public DateTime FirstPendingUtc = DateTime.MinValue;
             // A change arrived while the panels were showing a compare; refresh once it's cleared.
@@ -109,10 +110,12 @@ namespace DirOpusReImagined
         private void WatchPanel(bool isLeft, string path)
         {
             var w = isLeft ? _lpWatch : _rpWatch;
-            if (w.Watcher != null && PathsEqual(w.Path, path)) return;
+            bool recursive = (isLeft ? LPgrid : RPgrid).FlatRoot != null;
+            if (w.Watcher != null && PathsEqual(w.Path, path) && w.Recursive == recursive) return;
 
             StopWatching(w);
             w.Path = path;
+            w.Recursive = recursive;
 
             if (string.IsNullOrEmpty(path) || ProviderRegistry.For(path) is not LocalFileProvider) return;
             if (!Directory.Exists(path)) return;
@@ -121,7 +124,7 @@ namespace DirOpusReImagined
             {
                 var fsw = new FileSystemWatcher(path)
                 {
-                    IncludeSubdirectories = false,
+                    IncludeSubdirectories = recursive,
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName |
                                    NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.Attributes,
                 };

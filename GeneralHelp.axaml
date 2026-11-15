@@ -70,6 +70,9 @@
                 <TextBlock Text="• Right-click → Compare Files… shows two files side by side with the differences coloured (changed amber, removed red, added green): two files selected in one panel, or one from each panel. Next / Previous change, Swap sides and Ignore whitespace are above the list. Files that aren't text are compared byte by byte." TextWrapping="Wrap" />
                 <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
 
+                <TextBlock Text="Flat view" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• The Flat button in a panel's tab bar (or right-click → Flat View, or Ctrl/Cmd+Shift+F) lists every file in the folder and all the folders below it, each named by its path from the folder. Sort, filter and select across the whole tree, then copy, move or delete as usual; copies and moves keep each file's sub-folder. Linked folders are skipped, and the list stops at 100,000 files. Going to another folder turns it off." TextWrapping="Wrap" />
+
                 <TextBlock Text="Thumbnail (icon) view" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• Each panel has a List / Thumbnails toggle in its tab bar (the ▦ / ☰ button). Thumbnails view shows a wrapped grid of tiles instead of the detail list; the two panels are independent and each remembers its choice across launches." TextWrapping="Wrap" />
                 <TextBlock Text="• Image files (jpg, png, gif, bmp, webp, ico, tiff) get real thumbnails, generated in the background and filled in as they load; folders and other files show large icons. Thumbnails are cached on disk, so revisiting a folder is instant. Cloud and archive folders switch to tiles but show icons only (no per-file downloads)." TextWrapping="Wrap" />
@@ -146,6 +149,7 @@
 
                 <Grid ColumnDefinitions="220,*" Margin="0,2,0,0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -263,6 +267,8 @@
                     <TextBlock Grid.Row="28" Grid.Column="1" Text="Recent folders menu (also the ◷ button beside Back / Forward)" TextWrapping="Wrap" Margin="0,2" />
                     <TextBlock Grid.Row="29" Grid.Column="0" Text="Alt + PgUp / PgDn" FontWeight="Bold" Margin="0,2" />
                     <TextBlock Grid.Row="29" Grid.Column="1" Text="Previous / next bank of command buttons (also the bank tabs, or the mouse wheel over the buttons)" TextWrapping="Wrap" Margin="0,2" />
+                    <TextBlock Grid.Row="30" Grid.Column="0" Text="Ctrl/Cmd + Shift + F" FontWeight="Bold" Margin="0,2" />
+                    <TextBlock Grid.Row="30" Grid.Column="1" Text="Flat view on / off: every file in the folder and all the folders below, in one list" TextWrapping="Wrap" Margin="0,2" />
                 </Grid>
 
             </StackPanel>

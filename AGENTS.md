@@ -45,6 +45,9 @@ Everything sits at the repository root; there is no `src/` folder.
   coreutils formats (right-click → Checksums…).
 - `FileCompare.cs` (`TextDiff`), `FileCompareWindow.axaml(.cs)` and `MainWindow.Compare.cs`: side-by-side file
   comparison (right-click → Compare Files…), a Myers line diff with a byte-level fallback for binary files.
+- `MainWindow.Flat.cs`: flat view. A panel's `TaiDataGrid.FlatRoot` makes `FileUtility.PopulateFilePanel` list every file
+  below that folder (`CollectFlat`, off the UI thread, never into linked folders), each named by its relative path, so
+  the usual `JoinPanelPath` operations work; `TransferCoordinator` makes a missing local parent folder for such names.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

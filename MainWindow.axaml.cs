@@ -109,6 +109,7 @@ namespace DirOpusReImagined
             InitUndo();
             InitRecentFolders();
             InitButtonBanks();
+            InitFlatView();
             InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
@@ -2319,6 +2320,9 @@ namespace DirOpusReImagined
                 case GridVerb.CompareFiles:
                     OpenFileCompare(left);
                     break;
+                case GridVerb.FlatView:
+                    ToggleFlatView(left);
+                    break;
             }
         }
 
@@ -4123,6 +4127,7 @@ namespace DirOpusReImagined
                 SyncActiveTabTitle(isLeft: false);
             }
             AfterPanelPopulated(grid);
+            UpdateFlatToggle(grid);
             UpdateStatusBar();
         }
 
@@ -4274,7 +4279,9 @@ namespace DirOpusReImagined
                 ? $" | Sel: {selectedCount} ({FormatBytes(selectedBytes)})"
                 : "";
 
-            return $"{folders} folders, {files} files{selInfo}" +
+            string flat = grid.FlatRoot == null ? ""
+                : grid.FlatTruncated ? $"Flat view (first {FileUtility.FlatViewLimit:N0}): " : "Flat view: ";
+            return $"{flat}{folders} folders, {files} files{selInfo}" +
                    (freeSpace != "" ? $" | {freeSpace}" : "");
         }
 

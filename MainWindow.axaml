@@ -507,6 +507,9 @@
 					        ToolTip.Tip="New tab (clone current folder)" Click="LPnewTab_Click" />
 						<Button Name="LPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
 						        ToolTip.Tip="Switch between list and thumbnail view" Click="LPviewToggle_Click" />
+						<ToggleButton Name="LPflatToggle" Content="Flat" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
+						              VerticalContentAlignment="Center"
+						              ToolTip.Tip="Flat view: every file in this folder and all the folders below it, in one list (Ctrl/Cmd+Shift+F)" />
 				</StackPanel>
 			</Border>
 			<cons:TaiDataGrid Name="LPgrid" VerticalAlignment="Top" />
@@ -524,6 +527,9 @@
 					        ToolTip.Tip="New tab (clone current folder)" Click="RPnewTab_Click" />
 						<Button Name="RPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
 						        ToolTip.Tip="Switch between list and thumbnail view" Click="RPviewToggle_Click" />
+						<ToggleButton Name="RPflatToggle" Content="Flat" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
+						              VerticalContentAlignment="Center"
+						              ToolTip.Tip="Flat view: every file in this folder and all the folders below it, in one list (Ctrl/Cmd+Shift+F)" />
 				</StackPanel>
 			</Border>
 			<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />
