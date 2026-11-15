@@ -272,6 +272,8 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 ### Integrated Image Viewer
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
 - Configurable via the `<UseIntegratedImageViewer>` setting
+- **Photo details**: when a photo carries EXIF data (JPEG, TIFF, PNG and WebP), a strip under the picture in the viewer and the preview window shows the **camera and lens, when it was taken, shutter speed, aperture, ISO, focal length, flash, and where it was taken** (GPS position and altitude)
+- **Photos taken with the camera on its side show upright**: the EXIF orientation is applied, as photo apps do, and the size shown is the size as displayed
 
 ### File Viewer (Text / Hex)
 - Press **F3** (or right-click → **View**) to open a read-only viewer for the selected file

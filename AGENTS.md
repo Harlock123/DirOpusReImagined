@@ -63,6 +63,8 @@ Everything sits at the repository root; there is no `src/` folder.
   (Ctrl/Cmd+Shift+A). `MainWindow.RunButtonEntry` runs any button's action, so buttons from banks not showing work too.
 - `BatchAttributes.cs` (`ModeChange` parses chmod notation), `SetAttributesWindow.axaml(.cs)` and
   `MainWindow.SetAttributes.cs`: Set Dates & Permissions for a whole selection (local files only).
+- `FileSystem/Preview/ExifReader.cs` and `ImageOrientation.cs`: photo details for image previews (EXIF from JPEG,
+  TIFF, PNG and WebP, every offset bounds-checked) and turning the decoded bitmap upright for EXIF orientations 2–8.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

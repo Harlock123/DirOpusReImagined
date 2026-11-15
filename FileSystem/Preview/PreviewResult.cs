@@ -21,9 +21,11 @@ public abstract record PreviewResult
     /// <summary>A decoded image, already bounded in size by the provider.</summary>
     /// <param name="Scaled">True when <paramref name="Bitmap"/> was decoded smaller than the
     /// source, so the viewer can say so rather than implying it is showing full resolution.</param>
+    /// <param name="Photo">The photo's EXIF details (camera, exposure, date taken, place) and
+    /// orientation, or null when the file has none.</param>
     public sealed record Image(
         Bitmap Bitmap, int SourceWidth, int SourceHeight,
-        string Format, long TotalBytes, bool Scaled) : PreviewResult;
+        string Format, long TotalBytes, bool Scaled, PhotoDetails? Photo = null) : PreviewResult;
 
     /// <summary>
     /// Text extracted from a document, as opposed to the file's own bytes. Distinct from

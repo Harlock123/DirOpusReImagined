@@ -63,9 +63,11 @@ public sealed class ImagePreviewProvider : IPreviewProvider
                     return new PreviewResult.Error(
                         $"Image is too large to preview from this source (over {MaxBufferedBytes / (1024 * 1024)} MB).");
 
-                // Read the true dimensions from the header before committing to a decode.
-                byte[] probe = PreviewText.ReadUpTo(content, ImageDimensions.ProbeBytes, ct);
+                // Read the true dimensions from the header before committing to a decode, and the
+                // photo details (EXIF), which sit near the start of the file.
+                byte[] probe = PreviewText.ReadUpTo(content, Math.Max(ImageDimensions.ProbeBytes, ExifReader.ProbeBytes), ct);
                 bool known = ImageDimensions.TryParse(probe, r.Signature, out int srcW, out int srcH);
+                PhotoDetails? photo = ExifReader.Read(probe);
                 content.Position = 0;
 
                 ct.ThrowIfCancellationRequested();
@@ -99,11 +101,20 @@ public sealed class ImagePreviewProvider : IPreviewProvider
                     srcH = bitmap.PixelSize.Height;
                 }
 
+                // A photo taken with the camera on its side is stored sideways with an EXIF note to
+                // turn it; turn the pixels here so every view shows it upright.
+                if (photo != null && photo.Orientation != 1 && ImageOrientation.Apply(bitmap, photo.Orientation) is { } upright)
+                {
+                    bitmap.Dispose();
+                    bitmap = upright;
+                    if (ImageOrientation.SwapsSides(photo.Orientation)) (srcW, srcH) = (srcH, srcW);
+                }
+
                 string format = FileSignature.IsImage(r.Signature)
                     ? FileSignature.Describe(r.Signature)
                     : "Image";
 
-                return new PreviewResult.Image(bitmap, srcW, srcH, format, size, scaled);
+                return new PreviewResult.Image(bitmap, srcW, srcH, format, size, scaled, photo);
             }
             catch (OperationCanceledException)
             {

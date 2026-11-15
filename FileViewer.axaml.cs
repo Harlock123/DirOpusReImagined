@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -180,6 +181,7 @@ public partial class FileViewer : Window
                 string dims = $"{img.SourceWidth} × {img.SourceHeight}";
                 string scaled = img.Scaled ? " · scaled to fit" : "";
                 StatusText.Text = $"{img.Format} · {dims} · {PreviewText.FormatSize(img.TotalBytes)}{scaled}";
+                ShowPhotoDetails(img.Photo);
                 break;
             }
 
@@ -237,6 +239,14 @@ public partial class FileViewer : Window
         }
     }
 
+    /// <summary>The camera, exposure, date and place under a photo, or nothing for an image without EXIF.</summary>
+    private void ShowPhotoDetails(PhotoDetails? photo)
+    {
+        var fields = photo?.Fields.Where(f => f.Label != "Orientation").ToList();
+        PhotoBar.IsVisible = fields is { Count: > 0 };
+        PhotoText.Text = fields is { Count: > 0 } ? string.Join("   ·   ", fields.Select(f => $"{f.Label}: {f.Value}")) : "";
+    }
+
     /// <summary>The three mutually exclusive content surfaces the window can show.</summary>
     private enum Surface { PlainText, Highlighted, Image }
 
@@ -252,7 +262,11 @@ public partial class FileViewer : Window
         PreviewImage.IsVisible = surface == Surface.Image;
 
         if (surface != Surface.Highlighted) SyntaxBox.Text = "";
-        if (surface != Surface.Image) PreviewImage.Source = null;
+        if (surface != Surface.Image)
+        {
+            PreviewImage.Source = null;
+            PhotoBar.IsVisible = false;
+        }
 
         // Wrap applies to the plain text box only; hex and highlighted code are laid out by column.
         // Extracted document text manages its own wrapping in Render().
