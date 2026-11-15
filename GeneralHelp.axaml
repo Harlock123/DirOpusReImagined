@@ -120,7 +120,8 @@
                 <TextBlock Text="• Archives list what is inside them — entry counts, uncompressed size, compression saved, and the first 200 entries. A file whose contents identify it (a .docx, an EPUB, a JAR) is named as that rather than as a plain ZIP." TextWrapping="Wrap" />
 
                 <TextBlock Text="Browse into archives" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
-                <TextBlock Text="• Double-click a .zip, .7z, .rar, .tar, or .tar.gz to open it like a folder and browse its contents. Copy or drag files out to a normal folder to extract them (with the usual progress and overwrite prompts). Archives are read-only — extract first, then modify." TextWrapping="Wrap" />
+                <TextBlock Text="• Double-click a .zip, .7z, .rar, .tar, or .tar.gz to open it like a folder and browse its contents. Copy or drag files out to a normal folder to extract them (with the usual progress and overwrite prompts)." />
+                <TextBlock Text="• .zip, .tar, .tar.gz and .tgz archives can be changed like folders: copy or move files in, delete, rename and make folders. Each operation rewrites the archive once, and the original is only replaced when the new one is complete, so a failure or cancel leaves it untouched. 7z and RAR archives are read-only." TextWrapping="Wrap" />
                 <TextBlock Text="• Custom command buttons (e.g. open in an editor) also work on files inside archives: the file is extracted to a temporary copy and that path is passed to the tool. Edits to the temp copy are not written back into the archive." TextWrapping="Wrap" />
 
                 <TextBlock Text="Cloud storage (rclone)" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />

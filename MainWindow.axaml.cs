@@ -1943,13 +1943,18 @@ namespace DirOpusReImagined
         {
             if (selected == null || selected.Count == 0) return;
 
-            // Archives are read-only: block writing INTO one up front with a clear message rather than
-            // letting the transfer fail partway. Extracting OUT of an archive is fine and continues below.
-            if (ArchivePath.IsArchiveUri(targetPathRaw))
+            // Only some archive formats can be written: say so up front rather than failing partway.
+            // (Copying into a .zip/.tar/.tar.gz, and extracting out of any archive, continue below.)
+            if (ArchivePath.IsArchiveUri(targetPathRaw) &&
+                ArchiveEditor.WhyReadOnly(ArchivePath.Parse(targetPathRaw).ArchiveFsPath) is { } readOnly)
             {
-                await new MessageBox(
-                    "This location is inside an archive, which is read-only.\n\nExtract the files to a normal folder first, then modify them there.",
-                    "Archive is read-only").ShowDialog(this);
+                await new MessageBox(readOnly, "Archive is read-only").ShowDialog(this);
+                return;
+            }
+            if (move && ArchivePath.IsArchiveUri(sourcePathRaw) &&
+                ArchiveEditor.WhyReadOnly(ArchivePath.Parse(sourcePathRaw).ArchiveFsPath) is { } cantRemove)
+            {
+                await new MessageBox(cantRemove + "\n\nCopy the files out instead of moving them.", "Archive is read-only").ShowDialog(this);
                 return;
             }
 
@@ -2020,7 +2025,11 @@ namespace DirOpusReImagined
 
             // Enqueue the (possibly rewritten) batch and show the (non-modal) operations window. The
             // transfer runs in the background so the UI stays live and transfers can be stacked.
-            var op = FileOperation.Transfer(move, finalItems, BuildTransferTitle(move, finalItems.Count, targetPathRaw), tpath);
+            string title = BuildTransferTitle(move, finalItems.Count, targetPathRaw);
+            // Into an archive, or moving out of one: change each archive in one rewrite.
+            var op = FileOperation.NeedsArchiveTransfer(move, finalItems)
+                ? FileOperation.ArchiveTransfer(move, finalItems, title, tpath)
+                : FileOperation.Transfer(move, finalItems, title, tpath);
 
             // Refresh both panels when the operation (or a retry of it) finishes: the source shrinks
             // on a move, the destination grows. A failure is shown inline in the operations window;

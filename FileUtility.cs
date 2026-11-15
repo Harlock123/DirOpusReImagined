@@ -641,6 +641,24 @@ namespace DirOpusReImagined
                 var renamed = new List<RenameUndo.Item>();
                 if (changes.Count == 0) return (errors, renamed);
 
+                // Inside an archive: one rewrite does every rename at once (so swaps need no
+                // temporary names), and either all of them happen or none do.
+                if (DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(folderPath))
+                {
+                    var folder = DirOpusReImagined.FileSystem.Archive.ArchivePath.Parse(folderPath);
+                    var edit = new DirOpusReImagined.FileSystem.Archive.ArchiveEdit();
+                    foreach (var r in changes)
+                        edit.Renames[folder.Join(r.OldName).EntryPath] = folder.Join(r.NewName).EntryPath;
+                    try
+                    {
+                        DirOpusReImagined.FileSystem.Archive.ArchiveEditor.Apply(folder.ArchiveFsPath, edit, null, ct);
+                        renamed.AddRange(changes.Select(r => new RenameUndo.Item(r.OldName, r.NewName, r.IsDirectory)));
+                    }
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex) { errors.Add(ex.Message); }
+                    return (errors, renamed);
+                }
+
                 // Phase A: originals -> unique temp names.
                 var staged = new List<(string TmpPath, string OldName, string FinalName, bool IsDir)>();
                 foreach (var r in changes)

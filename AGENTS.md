@@ -55,8 +55,10 @@ Everything sits at the repository root; there is no `src/` folder.
 - `FileSystem/`: the storage layer.
   - `IFileProvider.cs` and `ProviderRegistry.cs` pick a provider by path.
     - `LocalFileProvider` is the default.
-    - `Archive/ArchiveFileProvider` handles `archive://` paths (read-only). `Archive/ArchiveCreator` writes new
-      .zip, .tar.gz and .tar files for the Create Archive dialog, reading sources through the providers.
+    - `Archive/ArchiveFileProvider` handles `archive://` paths. `Archive/ArchiveEditor` changes .zip/.tar/.tar.gz
+      archives (adds, removes, renames) in one rewrite via a temp file; each provider write method is a full
+      rewrite, so bulk work goes through `ArchiveEdit` batches (`FileOperation.ArchiveTransfer`, `DeleteBatch`,
+      archive renames in `ApplyRenamePlanDetailedAsync`). `Archive/ArchiveCreator` writes new archives.
     - `Rclone/RcloneFileProvider` handles `cloud://` paths.
   - `OperationQueue`, `TransferCoordinator`, `TransferItem`, `ConflictScanner` and `ConflictResolution` run copies
     and moves off the UI thread with progress and conflict handling.

@@ -198,7 +198,12 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
 - **Extract** by copying or dragging files/folders out to a normal folder — reuses the standard transfer progress and overwrite prompts
 - **View** files inside archives with F3, and **open them in external tools** (custom command buttons) — the file is extracted to a temporary copy that the tool receives
-- Archives are **read-only**: writing into one is blocked with a clear message (extract first, then modify); edits made in an external tool stay in the temp copy and are not written back
+- **Change .zip, .tar, .tar.gz and .tgz archives** as if they were folders:
+  - **copy or move files and folders in** (buttons, F5/F6 or drag), with the usual skip / overwrite / keep-both choices for names already there
+  - **delete**, **rename** (including batch renames and swaps), **make folders**, and **move** items within the archive or out of it
+  - each operation rewrites the archive **once**, however many items it touches, and the new archive only replaces the old one when it is complete — a failure or **Cancel** leaves the original untouched. Moves into archives can be undone (Ctrl/Cmd+Z), and failed operations retried
+  - large archives take a moment: every change rewrites the whole file, and zip entries are recompressed
+- **7z and RAR archives are read-only** (nothing available can write them); writing to one says so. Edits made in an external tool stay in the temp copy and are not written back
 - Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
 
 ### Cloud Storage Access

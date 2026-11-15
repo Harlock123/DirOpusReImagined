@@ -136,16 +136,22 @@ public class ArchiveFileProviderTests : IDisposable
     }
 
     [Fact]
-    public void All_writes_are_refused()
+    public void Writes_to_formats_that_cannot_be_written_are_refused()
     {
-        Assert.Throws<NotSupportedException>(() => _p.OpenWrite(U("new.txt")));
-        Assert.Throws<NotSupportedException>(() => _p.CreateDirectory(U("newdir")));
-        Assert.Throws<NotSupportedException>(() => _p.DeleteFile(U("readme.txt")));
-        Assert.Throws<NotSupportedException>(() => _p.DeleteDirectory(U("docs"), true));
-        Assert.Throws<NotSupportedException>(() => _p.CopyFile(U("readme.txt"), U("copy.txt"), true));
-        Assert.Throws<NotSupportedException>(() => _p.MoveFile(U("readme.txt"), U("moved.txt")));
-        Assert.Throws<NotSupportedException>(() => _p.MoveDirectory(U("docs"), U("docs2")));
+        // .zip/.tar/.tar.gz can be changed (see ArchiveEditorTests); 7z and RAR can't.
+        string S(string entry) => new ArchivePath(_t.Combine("sample.7z"), entry).FullUri;
+        Assert.Throws<NotSupportedException>(() => _p.OpenWrite(S("new.txt")));
+        Assert.Throws<NotSupportedException>(() => _p.CreateDirectory(S("newdir")));
+        Assert.Throws<NotSupportedException>(() => _p.DeleteFile(S("readme.txt")));
+        Assert.Throws<NotSupportedException>(() => _p.DeleteDirectory(S("docs"), true));
+        Assert.Throws<NotSupportedException>(() => _p.CopyFile(U("readme.txt"), S("copy.txt"), true));
+        Assert.Throws<NotSupportedException>(() => _p.MoveFile(S("readme.txt"), S("moved.txt")));
+        Assert.Throws<NotSupportedException>(() => _p.MoveDirectory(S("docs"), S("docs2")));
+    }
 
+    [Fact]
+    public void An_entry_opened_for_reading_cannot_be_written()
+    {
         using var s = _p.OpenRead(U("readme.txt"));
         Assert.False(s.CanWrite);
         Assert.Throws<NotSupportedException>(() => s.Write(new byte[1], 0, 1));

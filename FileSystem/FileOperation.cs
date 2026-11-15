@@ -222,6 +222,116 @@ public sealed class FileOperation
     }
 
     /// <summary>
+    /// True when a copy or move should use <see cref="ArchiveTransfer"/>: it goes into an archive,
+    /// or it moves items out of one (so their removal can be one rewrite rather than one per item).
+    /// </summary>
+    public static bool NeedsArchiveTransfer(bool move, IReadOnlyList<TransferItem> items)
+        => items.Any(i => Archive.ArchivePath.IsArchiveUri(i.TargetPath)) ||
+           (move && items.Any(i => Archive.ArchivePath.IsArchiveUri(i.Source)));
+
+    /// <summary>
+    /// A copy or move that writes into an archive and/or moves out of one, changing each archive
+    /// in one rewrite: copying in adds everything in a single pass, a move within one archive is a
+    /// rename, and items moved out of an archive are removed from it together at the end.
+    /// </summary>
+    public static FileOperation ArchiveTransfer(
+        bool move,
+        IReadOnlyList<TransferItem> items,
+        string title,
+        string? destinationFolder = null)
+    {
+        FileOperation op = null!;
+        op = new FileOperation(
+            move ? OperationKind.Move : OperationKind.Copy,
+            items,
+            title,
+            (progress, ct) => Task.Run(async () =>
+            {
+                static string EntryOf(string uri) => Archive.ArchivePath.Parse(uri).EntryPath;
+                static string ArchiveOf(string uri) => Path.GetFullPath(Archive.ArchivePath.Parse(uri).ArchiveFsPath);
+
+                // 1. Get everything to its destination.
+                var toArchive = items.Select((it, i) => (it, i)).Where(x => Archive.ArchivePath.IsArchiveUri(x.it.TargetPath)).ToList();
+                var elsewhere = items.Select((it, i) => (it, i)).Where(x => !Archive.ArchivePath.IsArchiveUri(x.it.TargetPath)).ToList();
+                var arrived = new HashSet<int>();
+
+                foreach (var group in toArchive.GroupBy(x => ArchiveOf(x.it.TargetPath)))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var edit = new Archive.ArchiveEdit();
+                    var renamed = new HashSet<int>();
+                    foreach (var (it, i) in group)
+                    {
+                        // A move within the same archive is just a rename.
+                        if (move && Archive.ArchivePath.IsArchiveUri(it.Source) && ArchiveOf(it.Source) == group.Key)
+                        {
+                            edit.Renames[EntryOf(it.Source)] = EntryOf(it.TargetPath);
+                            renamed.Add(i);
+                        }
+                    }
+                    edit.Adds.AddRange(Archive.ArchiveEditor.PlanAdds(
+                        group.Where(x => !renamed.Contains(x.i)).Select(x => (x.it.Source, EntryOf(x.it.TargetPath), x.it.IsDirectory)), ct));
+                    Archive.ArchiveEditor.Apply(group.Key, edit, progress, ct);
+
+                    foreach (var (_, i) in group)
+                    {
+                        arrived.Add(i);
+                        // A rename is a finished move; a copy is finished once it's in.
+                        if (!move || renamed.Contains(i)) op.MarkItemDone(i);
+                    }
+                }
+
+                if (elsewhere.Count > 0)
+                {
+                    var plain = elsewhere.Select(x => x.it).ToList();
+                    await TransferCoordinator.RunAsync(plain, move: false, progress, ct, k =>
+                    {
+                        int i = elsewhere[k].i;
+                        arrived.Add(i);
+                        if (!move) op.MarkItemDone(i);
+                    }).ConfigureAwait(false);
+                }
+                if (!move) return;
+
+                // 2. A move: remove the originals that arrived (not the ones renamed in place).
+                var failures = new List<string>();
+                var toRemove = items.Select((it, i) => (it, i)).Where(x => arrived.Contains(x.i) && !op.IsItemDone(x.i)).ToList();
+
+                foreach (var group in toRemove.Where(x => Archive.ArchivePath.IsArchiveUri(x.it.Source)).GroupBy(x => ArchiveOf(x.it.Source)))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var edit = new Archive.ArchiveEdit();
+                    foreach (var (it, _) in group) edit.Removes.Add(EntryOf(it.Source));
+                    try
+                    {
+                        Archive.ArchiveEditor.Apply(group.Key, edit, null, ct);
+                        foreach (var (_, i) in group) op.MarkItemDone(i);
+                    }
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex) { failures.Add($"{Path.GetFileName(group.Key)}: {ex.Message}"); }
+                }
+                foreach (var (it, i) in toRemove.Where(x => !Archive.ArchivePath.IsArchiveUri(x.it.Source)))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    string? err = it.IsDirectory ? FileUtility.TryDeleteFolder(it.Source, useTrash: false)
+                                                 : FileUtility.TryDeleteFile(it.Source, useTrash: false);
+                    if (err == null) op.MarkItemDone(i);
+                    else failures.Add($"{Path.GetFileName(it.Source.TrimEnd('/', '\\'))}: {err}");
+                }
+
+                if (failures.Count > 0)
+                    throw new IOException("Copied, but the originals couldn't all be removed: " + string.Join("; ", failures.Take(4)));
+            }, ct),
+            destinationFolder);
+        op._remainingWork = src =>
+        {
+            var left = Remaining(src, items);
+            return left.Count == 0 ? null : ArchiveTransfer(move, left, RetryTitle(src.Title, left.Count, items.Count), destinationFolder);
+        };
+        return op;
+    }
+
+    /// <summary>
     /// Builds a delete operation over a set of (path, isDirectory) targets. Each item is deleted off
     /// the UI thread via <see cref="FileUtility"/> (to the OS trash when <paramref name="useTrash"/>
     /// is set and supported, otherwise permanently). Progress is reported per item; if any items fail,
@@ -241,10 +351,32 @@ public sealed class FileOperation
             (progress, ct) => Task.Run(() =>
             {
                 var failures = new List<string>();
+
+                // Items inside an archive: one rewrite per archive, not one per item.
+                var inArchives = Enumerable.Range(0, list.Count)
+                    .Where(i => Archive.ArchivePath.IsArchiveUri(list[i].Path))
+                    .GroupBy(i => Archive.ArchivePath.Parse(list[i].Path).ArchiveFsPath);
+                foreach (var group in inArchives)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    progress.Report(new TransferProgress(
+                        $"Removing {group.Count()} item(s) from {Path.GetFileName(group.Key)}", 1, list.Count, 0, 0, 0));
+                    var edit = new Archive.ArchiveEdit();
+                    foreach (int i in group) edit.Removes.Add(Archive.ArchivePath.Parse(list[i].Path).EntryPath);
+                    try
+                    {
+                        Archive.ArchiveEditor.Apply(group.Key, edit, null, ct);
+                        foreach (int i in group) op.MarkItemDone(i);
+                    }
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex) { failures.Add($"{Path.GetFileName(group.Key)}: {ex.Message}"); }
+                }
+
                 for (int i = 0; i < list.Count; i++)
                 {
                     ct.ThrowIfCancellationRequested();
                     var (path, isDir) = list[i];
+                    if (Archive.ArchivePath.IsArchiveUri(path)) continue;   // handled above
                     string name = Path.GetFileName(path.TrimEnd('/', '\\'));
 
                     progress.Report(new TransferProgress(

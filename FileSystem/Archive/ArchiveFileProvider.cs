@@ -8,11 +8,13 @@ using SharpCompress.Readers;
 namespace DirOpusReImagined.FileSystem.Archive;
 
 /// <summary>
-/// Read-only <see cref="IFileProvider"/> that lets the app browse into archive files
+/// <see cref="IFileProvider"/> that lets the app browse into archive files
 /// (<c>archive://&lt;file&gt;!/&lt;entry&gt;</c>) and extract their contents through the normal
 /// transfer pipeline. Reading is delegated to SharpCompress, so ZIP, 7z, RAR, TAR and the common
-/// gzip/bzip2 tarballs are all listable. Mutating operations are unsupported for now — archives are
-/// treated as read-only, and any write attempt throws a clear error.
+/// gzip/bzip2 tarballs are all listable. .zip, .tar, .tar.gz and .tgz archives can also be changed
+/// (see <see cref="ArchiveEditor"/>); the others are read-only and a write throws a clear error.
+/// <para>Each write method here is one full rewrite of the archive. Bulk operations (copying many
+/// files in, deleting, renaming) batch their changes into one <see cref="ArchiveEdit"/> instead.</para>
 /// </summary>
 public sealed class ArchiveFileProvider : IFileProvider
 {
@@ -45,6 +47,9 @@ public sealed class ArchiveFileProvider : IFileProvider
     // creation), so the cache must be safe for concurrent use. The cached lists are never changed
     // after they're stored, so readers can share them.
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (DateTime Stamp, List<CachedEntry> Entries)> _cache = new();
+
+    /// <summary>Drops the cached listing of an archive, after it has been rewritten.</summary>
+    internal void Forget(string archiveFsPath) => _cache.TryRemove(archiveFsPath, out _);
 
     /// <summary>
     /// Normalizes an archive entry key to forward slashes with no leading "./" or surrounding
@@ -254,18 +259,118 @@ public sealed class ArchiveFileProvider : IFileProvider
             .Sum(e => e.Size);
     }
 
-    // ---- read-only: mutating operations are intentionally unsupported for now ----
+    // ---- writing (zip / tar / tar.gz only; each call is one rewrite of the archive) ----
 
     private static NotSupportedException ReadOnly()
         => new("Archives are read-only. Extract the files first, then modify them.");
 
-    public Stream OpenWrite(string path) => throw ReadOnly();
-    public void CreateDirectory(string path) => throw ReadOnly();
-    public void DeleteFile(string path) => throw ReadOnly();
-    public void DeleteDirectory(string path, bool recursive) => throw ReadOnly();
-    public void CopyFile(string src, string dst, bool overwrite) => throw ReadOnly();
-    public void MoveFile(string src, string dst) => throw ReadOnly();
-    public void MoveDirectory(string src, string dst) => throw ReadOnly();
+    private static ArchivePath Writable(string path)
+    {
+        var ap = ArchivePath.Parse(path);
+        if (ArchiveEditor.WhyReadOnly(ap.ArchiveFsPath) is { } why) throw new NotSupportedException(why);
+        return ap;
+    }
+
+    /// <summary>
+    /// A stream that becomes the entry at <paramref name="path"/> when it is closed. The bytes are
+    /// held in a temporary file meanwhile, then added to the archive in one rewrite.
+    /// </summary>
+    public Stream OpenWrite(string path)
+    {
+        var ap = Writable(path);
+        if (ap.IsRoot) throw new IOException("Can't write over the archive itself.");
+        return new CommitOnClose(ap);
+    }
+
+    public void CreateDirectory(string path)
+    {
+        var ap = Writable(path);
+        if (ap.IsRoot || DirectoryExists(path)) return;   // nothing to do (callers create parents freely)
+        var edit = new ArchiveEdit();
+        edit.Adds.Add(new ArchiveAdd(ap.EntryPath, null, true, DateTime.Now));
+        ArchiveEditor.Apply(ap.ArchiveFsPath, edit);
+    }
+
+    public void DeleteFile(string path) => Remove(path);
+    public void DeleteDirectory(string path, bool recursive) => Remove(path);
+
+    private void Remove(string path)
+    {
+        var ap = Writable(path);
+        if (ap.IsRoot) throw new IOException("Delete the archive file itself from its folder instead.");
+        var edit = new ArchiveEdit();
+        edit.Removes.Add(ap.EntryPath);
+        ArchiveEditor.Apply(ap.ArchiveFsPath, edit);
+    }
+
+    public void CopyFile(string src, string dst, bool overwrite)
+    {
+        var to = Writable(dst);
+        if (!overwrite && FileExists(dst)) throw new IOException($"\"{to.EntryPath}\" is already in the archive.");
+        var edit = new ArchiveEdit();
+        edit.Adds.Add(new ArchiveAdd(to.EntryPath, src, false, Stat(src)?.LastModified ?? DateTime.Now));
+        ArchiveEditor.Apply(to.ArchiveFsPath, edit);
+    }
+
+    public void MoveFile(string src, string dst) => Move(src, dst);
+    public void MoveDirectory(string src, string dst) => Move(src, dst);
+
+    /// <summary>Within one archive, a rename. Between two archives, copy across, then remove.</summary>
+    private void Move(string src, string dst)
+    {
+        var from = Writable(src);
+        var to = Writable(dst);
+        if (from.IsRoot || to.IsRoot) throw new IOException("Can't move the archive's root.");
+
+        if (string.Equals(Path.GetFullPath(from.ArchiveFsPath), Path.GetFullPath(to.ArchiveFsPath), StringComparison.Ordinal))
+        {
+            var rename = new ArchiveEdit();
+            rename.Renames[from.EntryPath] = to.EntryPath;
+            ArchiveEditor.Apply(from.ArchiveFsPath, rename);
+            return;
+        }
+
+        var add = new ArchiveEdit();
+        bool isDir = DirectoryExists(src) && !FileExists(src);
+        add.Adds.AddRange(ArchiveEditor.PlanAdds(new[] { (src, to.EntryPath, isDir) }));
+        ArchiveEditor.Apply(to.ArchiveFsPath, add);
+        Remove(src);
+    }
+
+    /// <summary>Buffers written bytes in a temp file and adds them to the archive on close.</summary>
+    private sealed class CommitOnClose : FileStream
+    {
+        private readonly ArchivePath _target;
+        private bool _committed;
+
+        public CommitOnClose(ArchivePath target)
+            : base(Path.Combine(Path.GetTempPath(), $"dori-entry-{Guid.NewGuid():N}"), FileMode.CreateNew,
+                   FileAccess.Write, FileShare.None, 81920)
+            => _target = target;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposing || _committed)
+            {
+                base.Dispose(disposing);
+                return;
+            }
+
+            _committed = true;
+            string temp = Name;
+            base.Dispose(true);   // close it first: Windows won't let it be read while open for writing
+            try
+            {
+                var edit = new ArchiveEdit();
+                edit.Adds.Add(new ArchiveAdd(_target.EntryPath, temp, false, DateTime.Now));
+                ArchiveEditor.Apply(_target.ArchiveFsPath, edit);
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { /* temp folder; best effort */ }
+            }
+        }
+    }
 
     /// <summary>Wraps an entry stream and disposes the owning archive when the stream is closed.</summary>
     private sealed class OwningStream : Stream

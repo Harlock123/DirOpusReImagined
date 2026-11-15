@@ -117,7 +117,9 @@ namespace DirOpusReImagined
             if (moves.Count > 0)
             {
                 string title = $"Undo: moving {(moves.Count == 1 ? "1 item" : $"{moves.Count} items")} back → {folder}";
-                var op = FileOperation.Transfer(true, moves, title, move.SourceFolder);
+                var op = FileOperation.NeedsArchiveTransfer(true, moves)
+                    ? FileOperation.ArchiveTransfer(true, moves, title, move.SourceFolder)
+                    : FileOperation.Transfer(true, moves, title, move.SourceFolder);
                 op.AfterFinish = done => Dispatcher.UIThread.Post(() =>
                 {
                     RefreshPanel(isLeft: true, manual: true);
