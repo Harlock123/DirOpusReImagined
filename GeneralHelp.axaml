@@ -70,6 +70,9 @@
                 <TextBlock Text="• Right-click → Compare Files… shows two files side by side with the differences coloured (changed amber, removed red, added green): two files selected in one panel, or one from each panel. Next / Previous change, Swap sides and Ignore whitespace are above the list. Files that aren't text are compared byte by byte." TextWrapping="Wrap" />
                 <TextBlock Text="• Sync→ / Sync← bring the destination up to date (copying only new/newer/changed items), with an opt-in mirror mode; ⇄ is a two-way &quot;newer wins&quot; merge. Works for local, cloud, and cross-provider paths." TextWrapping="Wrap" />
 
+                <TextBlock Text="Saved layouts" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
+                <TextBlock Text="• Layouts ▾ (beside the button bank tabs) saves both panels' tabs, which tab is showing, hidden columns, list or thumbnail view, and the button bank under a name, and switches back to it in one click. Folders that have gone since are left out and listed." TextWrapping="Wrap" />
+
                 <TextBlock Text="Flat view" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" />
                 <TextBlock Text="• The Flat button in a panel's tab bar (or right-click → Flat View, or Ctrl/Cmd+Shift+F) lists every file in the folder and all the folders below it, each named by its path from the folder. Sort, filter and select across the whole tree, then copy, move or delete as usual; copies and moves keep each file's sub-folder. Linked folders are skipped, and the list stops at 100,000 files. Going to another folder turns it off." TextWrapping="Wrap" />
 

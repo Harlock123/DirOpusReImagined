@@ -110,6 +110,7 @@ namespace DirOpusReImagined
             InitRecentFolders();
             InitButtonBanks();
             InitFlatView();
+            InitLayouts();
             InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing

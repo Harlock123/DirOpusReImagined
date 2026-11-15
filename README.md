@@ -225,6 +225,12 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
 - A label too long for its button ends in "…"; hovering over the button shows it in full, above the button's own tooltip
 
+### Saved Layouts
+- **Layouts ▾** (beside the button bank tabs) saves how both panels are set up under a name — **every tab in each panel, which one is showing, hidden columns, list or thumbnail view, and the button bank** — and switches back to it in one click (for example "Photo sorting" or "Project X")
+- Saving under an existing name asks before replacing it; **Delete ▸** removes one
+- Folders that no longer exist are left out when a layout is applied, and listed; cloud and archive tabs are kept as saved
+- Layouts are kept in `Configuration.xml` under `<Layouts>`
+
 ### Bookmarks
 - A **Bookmarks** button in the center panel opens a dialog listing your saved folders
 - Send any bookmark to the **Left** or **Right** panel, add the current folder of either panel, or remove entries — all following the active Light/Dark theme
