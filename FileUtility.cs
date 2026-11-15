@@ -1044,15 +1044,19 @@ namespace DirOpusReImagined
         /// per failed item on top of an already-modal dialog — which froze the app and then took the
         /// process down with no visible error. Callers batch the failures into one message.
         /// </remarks>
-        public static string? TryDeleteFolder(string rootPath, bool useTrash)
+        public static string? TryDeleteFolder(string rootPath, bool useTrash) => TryDeleteFolder(rootPath, useTrash, out _);
+
+        /// <summary>As above; <paramref name="trashed"/> says where the folder went when it went to the trash.</summary>
+        public static string? TryDeleteFolder(string rootPath, bool useTrash, out TrashedItem? trashed)
         {
+            trashed = null;
             try
             {
                 var p = ProviderRegistry.For(rootPath);
                 if (p.DirectoryExists(rootPath))
                 {
                     if (CanTrash(p, rootPath, useTrash))
-                        TrashService.Trash(rootPath);
+                        trashed = TrashService.Trash(rootPath);
                     else
                         p.DeleteDirectory(rootPath, recursive: true);
                 }
@@ -1074,15 +1078,19 @@ namespace DirOpusReImagined
         /// Deletes a file, returning the error message on failure and <c>null</c> on success.
         /// See <see cref="TryDeleteFolder"/> for why this reports rather than shows.
         /// </summary>
-        public static string? TryDeleteFile(string rootPath, bool useTrash)
+        public static string? TryDeleteFile(string rootPath, bool useTrash) => TryDeleteFile(rootPath, useTrash, out _);
+
+        /// <summary>As above; <paramref name="trashed"/> says where the file went when it went to the trash.</summary>
+        public static string? TryDeleteFile(string rootPath, bool useTrash, out TrashedItem? trashed)
         {
+            trashed = null;
             try
             {
                 var p = ProviderRegistry.For(rootPath);
                 if (p.FileExists(rootPath))
                 {
                     if (CanTrash(p, rootPath, useTrash))
-                        TrashService.Trash(rootPath);
+                        trashed = TrashService.Trash(rootPath);
                     else
                         p.DeleteFile(rootPath);
                 }

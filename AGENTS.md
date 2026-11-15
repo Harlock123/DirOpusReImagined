@@ -52,7 +52,8 @@ Everything sits at the repository root; there is no `src/` folder.
   them back with `SetButtonBanks` on Save.
 - `RecentFolders.cs` and `MainWindow.Recent.cs`: the recent-folders menu (◷ / Alt+Down), saved in `Configuration.xml`
   under `<RecentFolders>`.
-- `UndoHistory.cs` and `MainWindow.Undo.cs`: Ctrl/Cmd+Z undo for renames and moves. `UndoPlanner` records what
+- `UndoHistory.cs` and `MainWindow.Undo.cs`: Ctrl/Cmd+Z undo for renames, moves and deletes to the trash
+  (`TrashService.Trash` returns a `TrashedItem` saying where each item went; `TrashService.Restore` puts it back). `UndoPlanner` records what
   really happened after an operation and checks the disk before reversing it; it never overwrites.
 - `MainWindow.Refresh.cs`: Ctrl/Cmd+R refresh and the per-panel `FileSystemWatcher` that re-lists local folders
   changed by other programs, keeping the cursor, selection and scroll (`TaiDataGrid.CaptureViewState`).

@@ -57,13 +57,14 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Verify** — run Checksums on a checksum file (`.md5`, `.sha1`, `.sha256`, `.sha512`, `SHA256SUMS`, `MD5SUMS`…) and every file it lists is checked: **OK**, **changed** (with the expected and actual hash), **missing** or unreadable. Files written by the coreutils tools, including BSD-style `SHA256 (file) = …` lines, are understood
 - Works for local files and files inside archives; cloud files are downloaded to be hashed
 
-### Undo Renames & Moves
-- **Ctrl/Cmd+Z** in a panel (or right-click → **Undo …**, which names what it will undo) reverses the last rename or move; press it again to step further back, up to the last 50
+### Undo Renames, Moves & Deletes
+- **Ctrl/Cmd+Z** in a panel (or right-click → **Undo …**, which names what it will undo) reverses the last rename, move or delete; press it again to step further back, up to the last 50
 - **Renames** — single or batch — get their old names back straight away, including swaps and chains (`a→b, b→a`)
 - **Moves** (buttons, F6 or drag with Shift) ask first, then move the items back to their original folder as a normal queued transfer with progress; a move that failed or was cancelled partway can still be undone for the items that did move
 - Undo checks the disk first and **never overwrites**: an item that has since been moved or deleted, or whose old name or place is now taken by something new, is left alone and listed
 - Items that replaced (or merged into) something at the destination aren't undoable, since what they replaced can't be brought back
-- Copies and deletes aren't covered — deletes go to the trash by default, so restore them from there
+- **Deletes to the trash** come back out of it, to where they were. DORI notes where each item went in the trash (the trash folders on Linux, including those on other drives; the Recycle Bin on Windows; Finder's Trash on macOS), so Undo works even with several deleted items of the same name. A permanent delete can't be undone, and an item no longer in the trash (the trash was emptied) is listed
+- Copies aren't covered
 
 ### Directory Compare & Sync
 - **Compare panels** — a **Cmp** button color-codes the two panels against each other: green = only on this side, blue = newer, gray = older, khaki = same time but different size, coral = couldn't be read (permissions)
@@ -146,7 +147,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 | **Ctrl/Cmd + Tab** | Cycle to the next tab (Shift for previous) |
 | **Ctrl/Cmd + PageUp / PageDown** | Previous / next tab |
 | **Ctrl/Cmd + R** | Refresh the active panel (keeps the cursor, selection and filter) |
-| **Ctrl/Cmd + Z** | Undo the last rename or move |
+| **Ctrl/Cmd + Z** | Undo the last rename, move or delete to the trash |
 
 - Copy/Move always flow **out of** the active (framed) panel into the other one, so Tab-then-F5 reverses the direction
 - Typing in the path or filter boxes is never intercepted — the shortcuts only act while a file panel has focus

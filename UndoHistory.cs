@@ -25,8 +25,13 @@ namespace DirOpusReImagined
     public sealed record MoveUndo(string SourceFolder, IReadOnlyList<TransferItem> Items, DateTime When)
         : UndoEntry(RenameUndo.Describe("move", Items.Count, Items.Count == 1 ? ConflictResolver.LeafOf(Items[0].TargetPath) : null), When);
 
+    /// <summary>A delete to the trash: each item's original path and where it is in the trash.</summary>
+    public sealed record TrashUndo(string Folder, IReadOnlyList<TrashedItem> Items, DateTime When)
+        : UndoEntry(RenameUndo.Describe("delete", Items.Count,
+                                        Items.Count == 1 ? ConflictResolver.LeafOf(Items[0].OriginalPath) : null), When);
+
     /// <summary>
-    /// The most recent renames and moves, newest last. Only the newest can be undone, so undoing
+    /// The most recent renames, moves and deletes to the trash, newest last. Only the newest can be undone, so undoing
     /// several steps replays them in reverse order.
     /// </summary>
     public sealed class UndoHistory
@@ -164,6 +169,28 @@ namespace DirOpusReImagined
                 plan.Add(new RenamePlanRow(i.NewName, i.OldName, i.IsDirectory) { Status = RenameStatus.Change });
             }
             return (plan, problems);
+        }
+
+        /// <summary>The undo record for a delete, or null if nothing went to the trash (a permanent delete can't be undone).</summary>
+        public static TrashUndo? RecordTrash(string folder, IReadOnlyList<TrashedItem> trashed, DateTime now)
+            => trashed.Count == 0 ? null : new TrashUndo(folder, trashed, now);
+
+        /// <summary>
+        /// The trashed items that can be put back, and a note for each that can't: it's no longer
+        /// in the trash, or something new now sits at its old path.
+        /// </summary>
+        public static (List<TrashedItem> Restores, List<string> Problems) ReverseTrash(TrashUndo undo, Func<string, bool> exists)
+        {
+            var restores = new List<TrashedItem>();
+            var problems = new List<string>();
+            foreach (var i in undo.Items)
+            {
+                string name = ConflictResolver.LeafOf(i.OriginalPath);
+                if (!exists(i.TrashedPath)) problems.Add($"{name}: no longer in the trash");
+                else if (exists(i.OriginalPath)) problems.Add($"{name}: something new is already at {i.OriginalPath}");
+                else restores.Add(i);
+            }
+            return (restores, problems);
         }
 
         private static bool PathEquals(string a, string b)

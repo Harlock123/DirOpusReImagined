@@ -8,9 +8,10 @@ using DirOpusReImagined.FileSystem;
 namespace DirOpusReImagined
 {
     /// <summary>
-    /// Undo for renames and moves (Ctrl/Cmd+Z, or right-click → Undo). Finished renames and moves
-    /// are recorded in <see cref="_undo"/>; undoing the newest one checks the disk first and then
-    /// renames or moves the items back through the normal rename and transfer code.
+    /// Undo for renames, moves and deletes to the trash (Ctrl/Cmd+Z, or right-click → Undo). Each
+    /// finished one is recorded in <see cref="_undo"/>; undoing the newest checks the disk first and
+    /// then renames or moves the items back through the normal rename and transfer code, or takes
+    /// them back out of the trash.
     /// </summary>
     public partial class MainWindow
     {
@@ -49,7 +50,7 @@ namespace DirOpusReImagined
             }
         }
 
-        /// <summary>Undoes the newest rename or move.</summary>
+        /// <summary>Undoes the newest rename, move or delete to the trash.</summary>
         private async void UndoLast()
         {
             if (_undoRunning) return;
@@ -70,6 +71,9 @@ namespace DirOpusReImagined
                         break;
                     case MoveUndo move:
                         await UndoMoveAsync(move);
+                        break;
+                    case TrashUndo trash:
+                        await UndoTrashAsync(trash);
                         break;
                 }
             }
@@ -132,6 +136,36 @@ namespace DirOpusReImagined
             }
 
             await ReportUndoProblems("moved back", problems);
+        }
+
+        /// <summary>After a delete finishes, records what went to the trash so it can be put back.</summary>
+        internal void RecordDeleteForUndo(string folder, IReadOnlyList<TrashedItem> trashed)
+        {
+            var record = UndoPlanner.RecordTrash(folder, trashed, DateTime.Now);
+            if (record != null) _undo.Push(record);
+        }
+
+        /// <summary>Puts items deleted to the trash back where they were.</summary>
+        private async Task UndoTrashAsync(TrashUndo trash)
+        {
+            var (restores, problems) = await Task.Run(() => UndoPlanner.ReverseTrash(trash, UndoPlanner.Exists));
+            _undo.Pop();
+
+            var failed = await Task.Run(() =>
+            {
+                var errors = new List<string>();
+                foreach (var item in restores)
+                {
+                    try { TrashService.Restore(item); }
+                    catch (Exception ex) { errors.Add($"{ConflictResolver.LeafOf(item.OriginalPath)}: {ex.Message}"); }
+                }
+                return errors;
+            });
+            problems.AddRange(failed);
+
+            RefreshPanel(isLeft: true, manual: true);
+            RefreshPanel(isLeft: false, manual: true);
+            await ReportUndoProblems("put back", problems);
         }
 
         private async Task ReportUndoProblems(string verb, List<string> problems)

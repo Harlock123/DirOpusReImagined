@@ -331,6 +331,11 @@ public sealed class FileOperation
         return op;
     }
 
+    private readonly List<TrashedItem> _trashed = new();
+
+    /// <summary>What a delete put in the trash, and where, so it can be undone. Empty for other operations.</summary>
+    public IReadOnlyList<TrashedItem> Trashed { get { lock (_trashed) return _trashed.ToList(); } }
+
     /// <summary>
     /// Builds a delete operation over a set of (path, isDirectory) targets. Each item is deleted off
     /// the UI thread via <see cref="FileUtility"/> (to the OS trash when <paramref name="useTrash"/>
@@ -382,11 +387,13 @@ public sealed class FileOperation
                     progress.Report(new TransferProgress(
                         $"Deleting {name}  ({i + 1} of {list.Count})", i + 1, list.Count, 0, 0, 0));
 
+                    TrashedItem? trashed;
                     string? err = isDir
-                        ? FileUtility.TryDeleteFolder(path, useTrash)
-                        : FileUtility.TryDeleteFile(path, useTrash);
+                        ? FileUtility.TryDeleteFolder(path, useTrash, out trashed)
+                        : FileUtility.TryDeleteFile(path, useTrash, out trashed);
                     if (err != null) failures.Add($"{name}: {err}");
                     else op.MarkItemDone(i);
+                    if (trashed != null) lock (op._trashed) op._trashed.Add(trashed);
                 }
 
                 if (failures.Count > 0)

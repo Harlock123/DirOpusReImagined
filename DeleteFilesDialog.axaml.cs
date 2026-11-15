@@ -142,6 +142,8 @@ public partial class DeleteFilesDialog : Window
                 FileUtility.PopulateFilePanel(otherPanel, otherRoot, showHidden);
             if (done.Status == OperationStatus.Failed && owner != null)
                 OperationsWindow.ShowSingleton(owner);
+            // Whatever went to the trash (all of it, or what got done before a failure) can be undone.
+            (owner as MainWindow)?.RecordDeleteForUndo(root, done.Trashed);
         });
 
         OperationQueue.Instance.Enqueue(op);
