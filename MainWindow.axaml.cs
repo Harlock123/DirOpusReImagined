@@ -110,6 +110,7 @@ namespace DirOpusReImagined
             FileUtility.PanelPopulated += OnPanelPopulated;
             InitUndo();
             InitRecentFolders();
+            InitColumns();
             // Give the left panel keyboard focus once the window is up. Without this nothing holds
             // focus at startup, so the arrow keys, type-ahead and the F-key verbs all do nothing
             // until the user clicks a panel. Focus() needs the control attached to the visual tree,
@@ -256,8 +257,8 @@ namespace DirOpusReImagined
             RPgrid.TruncateColumnLength = 30;
             LPgrid.TruncateColumnLength = 30;
 
-            RPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
-            LPgrid.TruncateColumns.Add(1); // truncate the NAME column if its more than 30 characters
+            RPgrid.TruncateColumns.Add("Name"); // truncate the NAME column if its more than 30 characters
+            LPgrid.TruncateColumns.Add("Name"); // truncate the NAME column if its more than 30 characters
 
             LPgrid.GridItemDoubleClick += LPgrid_GridItemDoubleClick;
             RPgrid.GridItemDoubleClick += RPgrid_GridItemDoubleClick;
@@ -299,12 +300,11 @@ namespace DirOpusReImagined
             LPgrid.GridContextTerminalHere += Handle_TerminalHere;
             RPgrid.GridContextTerminalHere += Handle_TerminalHere;
 
-            LPgrid.JustifyColumns.Add(2);
-            LPgrid.JustifyColumns.Add(3);
-            LPgrid.JustifyColumns.Add(4);
-            RPgrid.JustifyColumns.Add(2);
-            RPgrid.JustifyColumns.Add(3);
-            RPgrid.JustifyColumns.Add(4);
+            foreach (var right in new[] { "FileSize", "FileDate", "Dirs" })
+            {
+                LPgrid.JustifyColumns.Add(right);
+                RPgrid.JustifyColumns.Add(right);
+            }
             
             LPpath.KeyUp += LPpath_KeyUp;
             RPpath.KeyUp += RPpath_KeyUp;
@@ -348,6 +348,7 @@ namespace DirOpusReImagined
             // Restore any tabs saved from a previous session (replaces the seeded single tab).
             LoadTabsFromConfig();
             LoadRecentFoldersFromConfig();
+            LoadColumnsFromConfig();
             RenderTabBar(isLeft: true);
             RenderTabBar(isLeft: false);
 
@@ -880,7 +881,7 @@ namespace DirOpusReImagined
             var spec = ReferenceEquals(grid, LPgrid) ? _lpSort : _rpSort;
 
             // Set the header ▲/▼ indicator before repopulating (the render reads these).
-            grid.SortColumnIndex = ColumnForSortKey(spec.Key);
+            grid.SortColumnName = ColumnForSortKey(spec.Key);
             grid.SortAscending = spec.Ascending;
 
             if (ReferenceEquals(grid, LPgrid))
@@ -895,28 +896,28 @@ namespace DirOpusReImagined
             }
         }
 
-        // AFileEntry column order: 0=Typ, 1=Name, 2=Size, 3=Date, 4=Dirs, 5=Files, 6=Flags.
-        private static int ColumnForSortKey(SortKey key) => key switch
+        // Columns are referred to by their property name, so hiding one doesn't shift the others.
+        private static string? ColumnForSortKey(SortKey key) => key switch
         {
-            SortKey.Name => 1,
-            SortKey.Size => 2,
-            SortKey.Date => 3,
-            _            => -1,   // Type has no column → no header indicator
+            SortKey.Name => "Name",
+            SortKey.Size => "FileSize",
+            SortKey.Date => "FileDate",
+            _            => null,   // Type has no column → no header indicator
         };
 
-        private static SortKey? SortKeyForColumn(int col) => col switch
+        private static SortKey? SortKeyForColumn(string? column) => column switch
         {
-            1 => SortKey.Name,
-            2 => SortKey.Size,
-            3 => SortKey.Date,
-            _ => (SortKey?)null,  // Typ/Dirs/Files/Flags aren't sortable via click
+            "Name"     => SortKey.Name,
+            "FileSize" => SortKey.Size,
+            "FileDate" => SortKey.Date,
+            _          => (SortKey?)null,  // Typ/Dirs/Files/Flags aren't sortable via click
         };
 
         /// <summary>Left-click on a column header: sort that panel by the column (toggle if repeated).</summary>
         private void OnGridHeaderClicked(object? sender, int col)
         {
             if (sender is not TaiDataGrid grid) return;
-            var key = SortKeyForColumn(col);
+            var key = SortKeyForColumn(grid.ColumnNameAt(col));
             if (key == null) return;
             SetPanelSort(grid, key.Value);
         }
@@ -952,6 +953,12 @@ namespace DirOpusReImagined
             flyout.Items.Add(new Separator());
             flyout.Items.Add(DirItem("Ascending", true));
             flyout.Items.Add(DirItem("Descending", false));
+
+            // Which columns this panel shows; ticking or unticking one applies straight away.
+            flyout.Items.Add(new Separator());
+            flyout.Items.Add(new MenuItem { Header = "Columns", IsEnabled = false });
+            foreach (var item in ColumnMenuItems(grid))
+                flyout.Items.Add(item);
 
             flyout.ShowAt(grid, showAtPointer: true);
         }
@@ -3186,7 +3193,7 @@ namespace DirOpusReImagined
                 _lpSort = t.Sort;
                 LPfilter.Text = t.FilterText;
                 LPpath.Text = t.Path;
-                LPgrid.SortColumnIndex = ColumnForSortKey(t.Sort.Key);
+                LPgrid.SortColumnName = ColumnForSortKey(t.Sort.Key);
                 LPgrid.SortAscending = t.Sort.Ascending;
                 FileUtility.PopulateFilePanel(LPgrid, t.Path, showHidden, _lpSort);
                 RefreshLPGridPostActions();
@@ -3198,7 +3205,7 @@ namespace DirOpusReImagined
                 _rpSort = t.Sort;
                 RPfilter.Text = t.FilterText;
                 RPpath.Text = t.Path;
-                RPgrid.SortColumnIndex = ColumnForSortKey(t.Sort.Key);
+                RPgrid.SortColumnName = ColumnForSortKey(t.Sort.Key);
                 RPgrid.SortAscending = t.Sort.Ascending;
                 FileUtility.PopulateFilePanel(RPgrid, t.Path, showHidden, _rpSort);
                 RefreshRPGridPostActions();

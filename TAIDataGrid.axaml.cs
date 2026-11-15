@@ -370,8 +370,59 @@ namespace DirOpusReImagined
         /// <summary>True when this grid is the active panel (has keyboard focus); drives the frame.</summary>
         private bool _isActivePanel;
 
-        /// <summary>Column index the list is currently sorted by (for the header ▲/▼ indicator), or -1.</summary>
-        public int SortColumnIndex { get; set; } = -1;
+        /// <summary>
+        /// Name of the column the list is sorted by (a property name such as "FileSize"), for the
+        /// header ▲/▼ indicator, or null. A name rather than a position, so it stays right when
+        /// columns are hidden.
+        /// </summary>
+        public string? SortColumnName { get; set; }
+
+        // ---- column visibility ----
+
+        /// <summary>The column that can't be hidden: without it the rows can't be told apart.</summary>
+        public const string AlwaysShownColumn = "Name";
+
+        private readonly HashSet<string> _hiddenColumns = new(StringComparer.Ordinal);
+        private Type? _visibleFor;
+        private PropertyInfo[] _visibleProperties = Array.Empty<PropertyInfo>();
+
+        /// <summary>Names (property names) of the columns currently hidden.</summary>
+        public IReadOnlyCollection<string> HiddenColumns => _hiddenColumns;
+
+        /// <summary>Hides exactly these columns (by property name) and redraws. "Name" is never hidden.</summary>
+        public void SetHiddenColumns(IEnumerable<string> names)
+        {
+            _hiddenColumns.Clear();
+            foreach (var n in names)
+                if (!string.IsNullOrWhiteSpace(n) && n.Trim() != AlwaysShownColumn) _hiddenColumns.Add(n.Trim());
+            _visibleFor = null;
+            ReRender();
+        }
+
+        public bool IsColumnVisible(string name) => !_hiddenColumns.Contains(name);
+
+        /// <summary>
+        /// The properties shown as columns for items of <paramref name="t"/>, in order. Every column
+        /// loop (measuring, drawing, hit-testing) goes through this, so a column index always means
+        /// the same column everywhere.
+        /// </summary>
+        private PropertyInfo[] VisibleProperties(Type t)
+        {
+            if (_visibleFor != t)
+            {
+                _visibleProperties = t.GetProperties().Where(p => !_hiddenColumns.Contains(p.Name)).ToArray();
+                _visibleFor = t;
+            }
+            return _visibleProperties;
+        }
+
+        /// <summary>The property name of the column at <paramref name="index"/> as currently shown, or null.</summary>
+        public string? ColumnNameAt(int index)
+        {
+            if (_items.Count == 0 || index < 0) return null;
+            var props = VisibleProperties(_items[0].GetType());
+            return index < props.Length ? props[index].Name : null;
+        }
 
         /// <summary>Direction of the current sort, for the header indicator glyph.</summary>
         public bool SortAscending { get; set; } = true;
@@ -506,12 +557,14 @@ namespace DirOpusReImagined
         /// <summary>
         /// The private list of integers used to store the columns to justify in a table.
         /// </summary>
-        private List<int> _justifyColumns = new List<int>();
+        // Names of the columns (property names) whose text is right-aligned.
+        private HashSet<string> _justifyColumns = new(StringComparer.Ordinal);
 
         /// <summary>
         /// This private variable is a list of integers that stores the column indices to be truncated.
         /// </summary>
-        private List<int> _truncateColumns = new List<int>();
+        // Names of the columns (property names) whose text is cut at _truncateColumnLength.
+        private HashSet<string> _truncateColumns = new(StringComparer.Ordinal);
 
         /// <summary>
         /// The maximum number of characters for truncating a column in a data table.
@@ -1178,7 +1231,7 @@ namespace DirOpusReImagined
         /// When setting the value of this property, it triggers the ReRender method to update the rendering of the control. </remarks> <seealso cref="ReRender"/> <seealso cref="DefaultValueAttribute"/>
         /// /
         [DefaultValue(null)]
-        public List<int> JustifyColumns
+        public HashSet<string> JustifyColumns
         {
             get { return _justifyColumns; }
             set
@@ -1202,7 +1255,7 @@ namespace DirOpusReImagined
         /// The default value is null.
         /// </remarks>
         [DefaultValue(null)]
-        public List<int> TruncateColumns
+        public HashSet<string> TruncateColumns
         {
             get { return _truncateColumns; }
             set
@@ -1497,13 +1550,13 @@ namespace DirOpusReImagined
                                     int tempval = 0;
 
 
-                                    foreach (PropertyInfo property in item.GetType().GetProperties())
+                                    foreach (PropertyInfo property in VisibleProperties(item.GetType()))
                                     {
                                         //property.GetValue(item)
 
                                         string thestringtomeasure = property.GetValue(item)?.ToString() + "";
 
-                                        if (_truncateColumns.Contains(idx))
+                                        if (_truncateColumns.Contains(property.Name))
                                         {
                                             if (thestringtomeasure.Length > _truncateColumnLength)
                                             {
@@ -1613,7 +1666,7 @@ namespace DirOpusReImagined
                                 BackingCanvas.Children.Add(ttb);
 
                                 // Sort indicator (▲/▼) in the active sort column's header, right-aligned.
-                                if (idx == SortColumnIndex)
+                                if (property.Name == SortColumnName)
                                 {
                                     TextBlock ind = new TextBlock();
                                     ind.Text = SortAscending ? "▲" : "▼";
@@ -1688,7 +1741,7 @@ namespace DirOpusReImagined
                                 else
                                 {
                                     string lastCellItemText = "";
-                                    foreach (PropertyInfo property in item.GetType().GetProperties())
+                                    foreach (PropertyInfo property in VisibleProperties(item.GetType()))
                                     {
                                         //property.GetValue(item)
 
@@ -1788,7 +1841,7 @@ namespace DirOpusReImagined
 
                                                 string thestringtoprint = property.GetValue(item)?.ToString() + "";
 
-                                                if (_truncateColumns.Contains(idx))
+                                                if (_truncateColumns.Contains(property.Name))
                                                 {
                                                     // here we need to truncate the string being rendered
                                                     if (thestringtoprint.Length > _truncateColumnLength)
@@ -1802,7 +1855,7 @@ namespace DirOpusReImagined
 
                                                 ttb.Text = thestringtoprint;
 
-                                                if (JustifyColumns.Contains(idx))
+                                                if (JustifyColumns.Contains(property.Name))
                                                 {
                                                     var theTextFormatted =
                                                         new FormattedText(thestringtoprint,
@@ -2193,7 +2246,7 @@ namespace DirOpusReImagined
                 {
                     object theitem = TheItemUnderTheMouse.ItemUnderMouse; //this.items[this.TheItemUnderTheMouse.rowID];
                     int idx = 0;
-                    foreach (PropertyInfo property in Items[0].GetType().GetProperties())
+                    foreach (PropertyInfo property in VisibleProperties(Items[0].GetType()))
                     {
                         if (idx == TheItemUnderTheMouse.colID)
                         {
@@ -2250,7 +2303,7 @@ namespace DirOpusReImagined
             {
                 object theitem = TheItemUnderTheMouse.ItemUnderMouse; //this.items[this.TheItemUnderTheMouse.rowID];
                 int idx = 0;
-                foreach (PropertyInfo property in Items[0].GetType().GetProperties())
+                foreach (PropertyInfo property in VisibleProperties(Items[0].GetType()))
                 {
                     if (idx == TheItemUnderTheMouse.colID)
                     {
@@ -2516,7 +2569,7 @@ namespace DirOpusReImagined
         {
             List<PropertyInfoModel> schema = new List<PropertyInfoModel>();
             Type type = obj.GetType();
-            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo[] properties = VisibleProperties(type);
 
             foreach (PropertyInfo property in properties)
             {

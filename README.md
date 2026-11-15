@@ -213,6 +213,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 ### Display Options
 - Toggle hidden file visibility with the "Show Hidden" checkbox
 - **Sort by clicking a column header** — Name, Size, or Date; click again to reverse (an ▲/▼ shows the active column). **Right-click a header** for a menu with **Type (extension)** sorting and explicit Ascending/Descending. Sorting is per-panel and persists as you navigate; folders stay grouped first
+- **Choose the columns** each panel shows — right-click a column header and tick or untick Icon, Size, Date, Folders inside, Files inside and Attributes (Name is always shown), or pick **Show all columns**. Each panel keeps its own choice, and it's remembered between sessions (in `Configuration.xml`). Hiding the folder/file count columns also leaves more room for long names
 - Configurable font sizes for grid content and headers
 - Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
