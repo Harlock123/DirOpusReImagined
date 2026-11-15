@@ -18,9 +18,16 @@ dotnet build DirOpusReImagined.sln                # global.json: SDK 8.0.0 with 
 dotnet run --project DirOpusReImagined.csproj     # --scale <factor> sets the UI scale
 ./publish-all.sh                                  # self-contained single-file zips for every platform, into dist/
 ./publish-all.sh linux-x64 osx-arm64              # only the listed runtime identifiers
+dotnet test tests/DirOpusReImagined.Tests         # xUnit suite; also run by CI before publishing
 ```
 
-`publish-all.ps1` is the PowerShell version of the same script. There are no tests yet.
+`publish-all.ps1` is the PowerShell version of the same script.
+
+- **Tests:** `tests/DirOpusReImagined.Tests` covers the logic that runs without a window: `RenameEngine`,
+  `DirectoryComparer`, `FileSearch`, conflict handling, the local, archive and cloud-path providers, and
+  `FileUtility` helpers. Each disk test uses its own temp folder (`TempDir`). The main csproj sits at the root and
+  globs `**/*.cs`, so it removes `tests/**`; keep that if you add test projects. Tests skipped with a `BUG:`
+  reason pin known defects; fix the code, then remove the `Skip`.
 
 - **Scaling:** `DisplayScaling.Bootstrap` reads `--scale` first, then the `AVALONIA_GLOBAL_SCALE_FACTOR` and
   `AVALONIA_SCREEN_SCALE_FACTORS` environment variables.
@@ -34,6 +41,8 @@ Everything sits at the repository root; there is no `src/` folder.
   action buttons, menus and most commands, and registers the rclone and archive providers.
 - `TAIDataGrid.axaml(.cs)`: the custom file grid used by each panel, including drag and drop between panels.
 - `PanelTab.cs`: one folder tab's saved state (path, history, sort, filter, cursor).
+- `MainWindow.Refresh.cs`: Ctrl/Cmd+R refresh and the per-panel `FileSystemWatcher` that re-lists local folders
+  changed by other programs, keeping the cursor, selection and scroll (`TaiDataGrid.CaptureViewState`).
 - `FileSystem/`: the storage layer.
   - `IFileProvider.cs` and `ProviderRegistry.cs` pick a provider by path.
     - `LocalFileProvider` is the default.
@@ -78,7 +87,8 @@ Everything sits at the repository root; there is no `src/` folder.
 
 ## Making a change
 
-- Check changes by running the app on each platform you can, since there are no tests.
+- Run `dotnet test`, and add tests for new logic that doesn't need a window. UI behaviour still has to be checked by
+  running the app on each platform you can.
 - Update `README.md` (features, shortcuts, the overview) to match, and refresh `ScreenShots/` if the look changes.
 - Raise `AssemblyVersion` and `FileVersion` together for a release; `publish-all.sh` names the zips from it.
 

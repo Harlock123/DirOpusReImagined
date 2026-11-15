@@ -51,8 +51,8 @@ namespace DirOpusReImagined
             var left = Snapshot(leftPath);
             var right = Snapshot(rightPath);
 
-            var leftStates = new Dictionary<string, RowCompareState>(StringComparer.OrdinalIgnoreCase);
-            var rightStates = new Dictionary<string, RowCompareState>(StringComparer.OrdinalIgnoreCase);
+            var leftStates = new Dictionary<string, RowCompareState>(NameComparer);
+            var rightStates = new Dictionary<string, RowCompareState>(NameComparer);
 
             foreach (var (name, l) in left)
             {
@@ -240,9 +240,17 @@ namespace DirOpusReImagined
 
         private readonly record struct Item(bool IsDir, long Size, DateTime Modified);
 
+        /// <summary>
+        /// How entry names are matched across the two sides. Linux file systems (and most cloud
+        /// remotes) are case-sensitive, so a.txt and A.txt are different files there and must not
+        /// collapse into one; Windows and macOS file systems are case-insensitive by default.
+        /// </summary>
+        private static readonly StringComparer NameComparer =
+            OperatingSystem.IsLinux() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
         private static Dictionary<string, Item> Snapshot(string path)
         {
-            var map = new Dictionary<string, Item>(StringComparer.OrdinalIgnoreCase);
+            var map = new Dictionary<string, Item>(NameComparer);
             if (string.IsNullOrEmpty(path)) return map;
 
             var provider = ProviderRegistry.For(path);

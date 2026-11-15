@@ -1,4 +1,4 @@
-# Every push: build, then publish DirOpusReImagined for Windows, macOS and Linux on Intel/AMD and ARM with
+# Every push: build and run the tests, then publish DirOpusReImagined for Windows, macOS and Linux on Intel/AMD and ARM with
 # publish-all.sh, the same script used by hand: a self-contained single-file program per platform, zipped with
 # that platform's Configuration.xml and the Assets folder beside it. The zips are attached to the workflow run;
 # pushes to the default branch also refresh the "latest" pre-release, and a v* tag (e.g. v0.1.28) makes a
@@ -35,6 +35,8 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Build
         run: dotnet build DirOpusReImagined.csproj -c Release
+      - name: Test
+        run: dotnet test tests/DirOpusReImagined.Tests/DirOpusReImagined.Tests.csproj -c Release
 
   publish:
     needs: build

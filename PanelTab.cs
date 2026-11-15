@@ -25,12 +25,22 @@ public sealed class PanelTab
     {
         get
         {
-            var p = Path?.TrimEnd('/', '\\') ?? "";
-            if (p.Length == 0) return "/";
+            var raw = Path ?? "";
 
-            // Strip an archive:// entry marker so the tab shows the inner leaf, not the URI.
-            int marker = p.IndexOf("!/", System.StringComparison.Ordinal);
-            if (marker >= 0) p = p.Substring(marker + 2).TrimEnd('/', '\\');
+            // An archive:// path: show the inner leaf, or the archive's own name at its root. The
+            // "!/" marker is found before trimming, since at the root the trailing '/' is part of it.
+            string p;
+            int marker = raw.IndexOf("!/", System.StringComparison.Ordinal);
+            if (marker >= 0)
+            {
+                p = raw.Substring(marker + 2).TrimEnd('/', '\\');
+                if (p.Length == 0) p = raw.Substring(0, marker);
+            }
+            else
+            {
+                p = raw.TrimEnd('/', '\\');
+            }
+            if (p.Length == 0) return "/";
 
             int slash = p.LastIndexOfAny(new[] { '/', '\\' });
             string name = slash >= 0 ? p.Substring(slash + 1) : p;
