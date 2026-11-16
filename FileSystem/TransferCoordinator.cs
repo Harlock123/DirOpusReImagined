@@ -53,7 +53,7 @@ public static class TransferCoordinator
                     items.Count,
                     baseBytes + tp.BytesDone,
                     totalBytes,
-                    tp.BytesPerSecond)));
+                    tp.BytesPerSecond) { Resumed = tp.Resumed }));
 
             // Show the item immediately, before any bytes move.
             itemProgress.Report(new TransferProgress(itemName, index, items.Count, 0, 0, 0));

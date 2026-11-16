@@ -96,8 +96,10 @@ namespace DirOpusReImagined
 
             if (plan.Count > 0)
             {
-                var (errors, _) = await FileUtility.ApplyRenamePlanDetailedAsync(rename.Folder, plan);
+                var (errors, renamed) = await FileUtility.ApplyRenamePlanDetailedAsync(rename.Folder, plan);
                 problems.AddRange(errors);
+                MoveLabelsBack(renamed.Select(r => (FileUtility.JoinPanelPath(rename.Folder, r.OldName),
+                                                    FileUtility.JoinPanelPath(rename.Folder, r.NewName))));
             }
 
             RefreshPanelsShowing(rename.Folder);
@@ -126,6 +128,10 @@ namespace DirOpusReImagined
                     : FileOperation.Transfer(true, moves, title, move.SourceFolder);
                 op.AfterFinish = done => Dispatcher.UIThread.Post(() =>
                 {
+                    // Labels follow the items that really went back (all of them, or some if cancelled).
+                    MoveLabelsBack(moves.Where(m => ProviderRegistry.For(m.TargetPath) is LocalFileProvider
+                                                    && UndoPlanner.Exists(m.TargetPath) && !UndoPlanner.Exists(m.Source))
+                                        .Select(m => (m.Source, m.TargetPath)));
                     RefreshPanel(isLeft: true, manual: true);
                     RefreshPanel(isLeft: false, manual: true);
                     if (done.Status == OperationStatus.Failed)
@@ -166,6 +172,18 @@ namespace DirOpusReImagined
             RefreshPanel(isLeft: true, manual: true);
             RefreshPanel(isLeft: false, manual: true);
             await ReportUndoProblems("put back", problems);
+        }
+
+        /// <summary>Moves labels from where undo found items to where it put them.</summary>
+        private static void MoveLabelsBack(IEnumerable<(string From, string To)> moves)
+        {
+            try
+            {
+                var store = LabelStore.Current;
+                if (store.Count == 0) return;
+                foreach (var (from, to) in moves) store.Move(from, to);
+            }
+            catch (Exception ex) { CrashLog.Write("Moving labels back", ex); }
         }
 
         private async Task ReportUndoProblems(string verb, List<string> problems)

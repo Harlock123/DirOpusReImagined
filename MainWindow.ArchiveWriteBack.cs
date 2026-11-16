@@ -88,7 +88,7 @@ namespace DirOpusReImagined
                     return;
                 }
 
-                bool put = await new MessageBox($"{changed.Name} was changed in another program.\n\n" +
+                bool put = await new MessageBox($"{changed.Name} was changed since it was taken out of {changed.ArchiveName}.\n\n" +
                                                 $"Put the changed file back into {changed.ArchiveName}?",
                                                 true, "Update the Archive", "Not Now", "Changed file from an archive").ShowDialog<bool>(this);
                 if (!put)

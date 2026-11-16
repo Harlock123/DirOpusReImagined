@@ -10,7 +10,7 @@
     <Grid Margin="12" RowDefinitions="Auto,*,Auto">
 
         <!-- Header: summary + bulk actions -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,10">
             <TextBlock Grid.Column="0" Grid.Row="0" x:Name="SummaryText" VerticalAlignment="Center"
                        FontSize="15" FontWeight="SemiBold" Text="No operations" TextWrapping="Wrap"/>
             <WrapPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
@@ -20,6 +20,17 @@
                         ToolTip.Tip="Retry every failed or cancelled operation — only the items that didn't finish"/>
                 <Button x:Name="ClearBtn" Content="Clear finished" Margin="0,0,8,4" Click="ClearBtn_Click"/>
                 <Button x:Name="CancelAllBtn" Content="Cancel all" Margin="0,0,0,4" Click="CancelAllBtn_Click"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                <TextBlock Text="Speed limit" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                <TextBox x:Name="SpeedLimitBox" Width="96" Watermark="No limit" Margin="0,0,6,4"
+                         ToolTip.Tip="The most copies may use, such as 10 MB or 512 KB (per second). Leave it empty for no limit. Applies to copies on this computer and to cloud transfers."/>
+                <TextBlock Text="a second" VerticalAlignment="Center" Margin="0,0,16,4"/>
+                <Button x:Name="StartLaterBtn" Content="Start later…" Margin="0,0,8,4" Click="StartLaterBtn_Click"
+                        ToolTip.Tip="Hold the operations that haven't started until a time, such as 02:00. One already running carries on."/>
+                <Button x:Name="StartNowBtn" Content="Start now" Margin="0,0,8,4" Click="StartNowBtn_Click" IsVisible="False"/>
+                <TextBlock x:Name="HoldText" VerticalAlignment="Center" Margin="0,0,0,4"
+                           Foreground="{DynamicResource MutedTextBrush}"/>
             </WrapPanel>
         </Grid>
 

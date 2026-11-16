@@ -30,6 +30,30 @@ public sealed class OperationQueue
     private readonly List<FileOperation> _operations = new();   // everything, for the UI (newest kept until cleared)
     private readonly List<FileOperation> _pending = new();      // not-yet-started, FIFO
     private bool _workerRunning;
+    private DateTime? _holdUntil;
+
+    /// <summary>
+    /// When set, operations that haven't started wait until this time (Operations window → Start
+    /// Later); one already running carries on. Null when the queue isn't held.
+    /// </summary>
+    public DateTime? HoldUntil
+    {
+        get { lock (_gate) return _holdUntil; }
+    }
+
+    /// <summary>Holds the queue until <paramref name="when"/>, or releases it when null.</summary>
+    public void SetHold(DateTime? when)
+    {
+        lock (_gate)
+        {
+            _holdUntil = when;
+            Monitor.PulseAll(_gate);
+        }
+        HoldChanged?.Invoke();
+    }
+
+    /// <summary>Raised when the hold is set, released, or runs out (on any thread).</summary>
+    public event Action? HoldChanged;
 
     /// <summary>Raised when an operation is enqueued.</summary>
     public event Action<FileOperation>? OperationAdded;
@@ -165,6 +189,7 @@ public sealed class OperationQueue
         while (true)
         {
             FileOperation? op;
+            bool holdEnded = false;
             lock (_gate)
             {
                 while (true)
@@ -174,18 +199,30 @@ public sealed class OperationQueue
                         _workerRunning = false;
                         return;
                     }
+                    // Held until a time (Start Later): only cancelled operations are taken (to be
+                    // marked finished) until it comes.
+                    TimeSpan heldFor = TimeSpan.Zero;
+                    if (_holdUntil is { } until)
+                    {
+                        heldFor = until - DateTime.Now;
+                        if (heldFor <= TimeSpan.Zero) { _holdUntil = null; holdEnded = true; }
+                    }
+                    bool held = heldFor > TimeSpan.Zero;
+
                     // The oldest operation that may start: not paused, or cancelled (so it can be
                     // marked finished). If every waiting one is paused, sleep until something changes.
-                    op = _pending.FirstOrDefault(o => !o.IsPaused || o.Cts.IsCancellationRequested);
+                    op = _pending.FirstOrDefault(o => o.Cts.IsCancellationRequested || (!held && !o.IsPaused));
                     if (op != null)
                     {
                         _pending.Remove(op);
                         break;
                     }
-                    Monitor.Wait(_gate);
+                    if (held) Monitor.Wait(_gate, heldFor < TimeSpan.FromMinutes(1) ? heldFor : TimeSpan.FromMinutes(1));
+                    else Monitor.Wait(_gate);
                 }
             }
 
+            if (holdEnded) HoldChanged?.Invoke();
             await RunOneAsync(op).ConfigureAwait(false);
         }
     }
@@ -210,6 +247,7 @@ public sealed class OperationQueue
         var progress = new SyncProgress<TransferProgress>(tp =>
         {
             op.WaitWhilePaused(op.Cts.Token);
+            if (tp.Resumed) meter.Restart();   // bytes kept from an earlier try weren't copied just now
             meter.Add(op.ActiveTime.TotalSeconds, tp.BytesDone);
             op.Progress = tp with { BytesPerSecond = meter.BytesPerSecond ?? tp.BytesPerSecond };
             OperationUpdated?.Invoke(op);

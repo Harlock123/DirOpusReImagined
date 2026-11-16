@@ -181,6 +181,10 @@ public sealed class RcloneFileProvider : IFileProvider
     {
         var client = await RcloneService.GetClientAsync().ConfigureAwait(false);
 
+        // Keep to the speed limit (Operations window); a failure to set it doesn't stop the copy.
+        try { await client.ApplySpeedLimitAsync(AppOptions.SpeedLimit, ct).ConfigureAwait(false); }
+        catch (OperationCanceledException) { throw; }
+        catch { }
         var group = "diropus/" + Guid.NewGuid().ToString("N");
         var jobid = await client.StartAsyncJobAsync("operations/copyfile", body, group, ct)
             .ConfigureAwait(false);

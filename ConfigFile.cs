@@ -86,4 +86,39 @@ namespace DirOpusReImagined
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
         }
     }
+
+    /// <summary>Reads and writes single top-level settings (&lt;Name&gt;value&lt;/Name&gt;) in the config file.</summary>
+    public static class ConfigSettings
+    {
+        /// <summary>The setting's text, or null when it isn't there (or the file can't be read).</summary>
+        public static string? Load(string name, string? path = null)
+        {
+            try
+            {
+                path ??= ConfigFile.Resolve();
+                if (!System.IO.File.Exists(path)) return null;
+                return System.Xml.Linq.XDocument.Load(path).Root?.Element(name)?.Value;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Sets the setting, keeping everything else in the file. Best effort: a failure is logged, not thrown.</summary>
+        public static void Save(string name, string value, string? path = null)
+        {
+            try
+            {
+                path ??= ConfigFile.Resolve();
+                var doc = System.IO.File.Exists(path)
+                    ? System.Xml.Linq.XDocument.Load(path)
+                    : new System.Xml.Linq.XDocument(new System.Xml.Linq.XElement("Settings"));
+                var root = doc.Root!;
+                var el = root.Element(name);
+                if (el == null) { el = new System.Xml.Linq.XElement(name); root.Add(el); }
+                el.Value = value;
+                ConfigFile.EnsureDirectory(path);
+                doc.Save(path);
+            }
+            catch (Exception ex) { CrashLog.Write("Saving setting " + name, ex); }
+        }
+    }
 }

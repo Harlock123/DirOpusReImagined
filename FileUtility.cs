@@ -188,7 +188,7 @@ namespace DirOpusReImagined
                 var fileProgress = new SyncProgress<TransferProgress>(tp =>
                     progress?.Report(new TransferProgress(
                         string.IsNullOrEmpty(tp.CurrentFile) ? fileEntry.Name : tp.CurrentFile,
-                        0, 0, baseDone + tp.BytesDone, 0, tp.BytesPerSecond)));
+                        0, 0, baseDone + tp.BytesDone, 0, tp.BytesPerSecond) { Resumed = tp.Resumed }));
 
                 await CopyFileAcrossProvidersAsync(fileEntry.Path, targetFile, overwrite: true, fileProgress, ct)
                     .ConfigureAwait(false);
@@ -968,7 +968,7 @@ namespace DirOpusReImagined
                     files.Add(f with { Name = prefix + f.Name });
                 }
                 // Pushed in reverse so folders are walked in name order.
-                foreach (var d in subdirs.OrderByDescending(d => d.Name, StringComparer.OrdinalIgnoreCase))
+                foreach (var d in subdirs.OrderByDescending(d => d.Name, NameComparer))
                 {
                     if (d.IsLink || d.Flags.HasFlag(FileEntryFlags.System)) continue;
                     if (!showHidden && d.Flags.HasFlag(FileEntryFlags.Hidden)) continue;
@@ -996,7 +996,9 @@ namespace DirOpusReImagined
         private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden)
             => BuildFileListCore(provider, PATHNAME, ShowHidden, SortSpec.Default);
 
-        private static readonly StringComparer NameComparer = StringComparer.OrdinalIgnoreCase;
+        /// <summary>How names are ordered in listings: naturally ("file2" before "file10") unless that option is off.</summary>
+        internal static IComparer<string> NameComparer
+            => AppOptions.NaturalSort ? NaturalComparer.Instance : StringComparer.OrdinalIgnoreCase;
 
         private static string Extension(string name)
         {
@@ -1021,7 +1023,7 @@ namespace DirOpusReImagined
         private static List<AFileEntry> BuildFileListCore(IFileProvider provider, string PATHNAME, bool ShowHidden, SortSpec sort)
         {
             var directoryEntries = provider.EnumerateDirectories(PATHNAME)
-                .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(e => e.Name, NameComparer)
                 .ToList();
 
             var fileEntries = SortFiles(provider.EnumerateFiles(PATHNAME), sort).ToList();

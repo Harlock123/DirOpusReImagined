@@ -19,6 +19,14 @@ public static class AppOptions
     /// hashes itself. Roughly doubles read I/O, so it is off by default.</summary>
     public static bool VerifyCopies = false;
 
+    /// <summary>When true, names sort the way people count ("file2" before "file10"); when false,
+    /// character by character as before. Default: on.</summary>
+    public static bool NaturalSort = true;
+
+    /// <summary>The most bytes per second copies may use (local copies, and cloud transfers through
+    /// rclone), or 0 for no limit. Default: no limit.</summary>
+    public static long SpeedLimit = 0;
+
     /// <summary>UI scale factor applied to every window. 0 means "auto" — let <see cref="DisplayScaling"/>
     /// work it out from the desktop. Only read at startup (Avalonia fixes the scale when the windowing
     /// platform initialises), so a change here needs a restart to take effect.</summary>

@@ -20,6 +20,13 @@ public readonly record struct TransferProgress(
     long BytesTotal,
     double BytesPerSecond)
 {
+    /// <summary>
+    /// True on the report a resumed copy makes before it starts: <see cref="BytesDone"/> jumped
+    /// forward by bytes kept from an earlier attempt, not copied now, so speed measurement starts
+    /// again from here instead of counting them as copied in no time.
+    /// </summary>
+    public bool Resumed { get; init; }
+
     /// <summary>True when a meaningful total is known, so a determinate bar can be shown.</summary>
     public bool HasTotal => BytesTotal > 0;
 

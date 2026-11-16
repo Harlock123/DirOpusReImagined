@@ -18,6 +18,7 @@ namespace DirOpusReImagined
         SelectAll, SelectByPattern, DeselectByPattern, InvertSelection,
         CommandPalette,
         DiskUsage, EditLabels, ImageTools, SplitFile, JoinFiles, SyncBrowse,
+        CopyToClipboard, CutToClipboard, PasteFromClipboard, FolderSizes, ExportListing, FolderRules, Catalogues, SecureDelete,
     }
 
     /// <summary>
@@ -152,6 +153,14 @@ namespace DirOpusReImagined
             new(ShortcutCommand.SplitFile, "Split a file into pieces", ""),
             new(ShortcutCommand.JoinFiles, "Join pieces (.001, .002…)", ""),
             new(ShortcutCommand.SyncBrowse, "Synced browsing on / off", ""),
+            new(ShortcutCommand.CopyToClipboard, "Copy files to the clipboard", "Ctrl+C"),
+            new(ShortcutCommand.CutToClipboard, "Cut files to the clipboard", "Ctrl+X"),
+            new(ShortcutCommand.PasteFromClipboard, "Paste files from the clipboard", "Ctrl+V"),
+            new(ShortcutCommand.FolderSizes, "Calculate folder sizes", "Ctrl+Shift+S"),
+            new(ShortcutCommand.ExportListing, "Export the listing (CSV, text, HTML)", ""),
+            new(ShortcutCommand.FolderRules, "Folder rules", ""),
+            new(ShortcutCommand.Catalogues, "Disk catalogues", ""),
+            new(ShortcutCommand.SecureDelete, "Securely delete (overwrite first)", ""),
         };
 
         public const string ElementName = "Shortcuts";

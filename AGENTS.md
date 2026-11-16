@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.33.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.34.0).
 
 ## Commands
 
@@ -85,6 +85,29 @@ Everything sits at the repository root; there is no `src/` folder.
   more is kept on cancel or failure and resumed by the next copy of the same file to the same place (`ResumablePrefix`).
   Verify Copies (`FileUtility.VerifyCopyIfEnabledAsync`, `VerifyArchiveAdds`) hashes through the providers, so archive legs
   are checked too.
+- `ClipboardFiles.cs` and `MainWindow.Clipboard.cs`: copy/cut/paste of files through the system clipboard. Writing uses
+  Avalonia's `DataTransfer` (a file item per path, plus `x-special/gnome-copied-files` on Linux and `Preferred DropEffect`
+  on Windows); reading takes the GNOME list, native file lists, `text/uri-list` or plain paths. Pastes go through
+  `RunPanelTransferAsync`. Avalonia 11.3's X11 clipboard advertises `text/uri-list` for our files but sends it empty, so
+  KDE apps don't see DORI's copies yet; GNOME-style file managers do.
+- `NaturalComparer.cs`: name order for listings (`FileUtility.NameComparer`), switched by `AppOptions.NaturalSort`.
+- `MainWindow.FolderSizes.cs`: measured folder sizes per panel (kept while the panel stays in that folder, put back on
+  rows in `OnPanelPopulated`; `FolderSizeOrder` sorts folders by them). `AFileEntry.FolderBytes` is a field (−1 = unmeasured).
+- `ListingExport.cs` and `MainWindow.Export.cs`: Export Listing (CSV, TSV, text, HTML) from `TaiDataGrid.ShownColumns()`.
+- `FolderRules.cs` (`FolderRule`, `RuleStore` in `Rules.xml`, `FolderRuleEngine`), `FolderRuleRunner.cs` (watchers, the
+  hourly look, one run at a time; label changes go to the UI thread) and `FolderRulesWindow.axaml(.cs)`.
+- `Catalogue.cs` (scan, gzip'd `.dcat` files in `Catalogues/` beside the config, search, `CatalogueChanges`) and
+  `CataloguesWindow.axaml(.cs)`: disk catalogues, browsed in their own window rather than as a provider.
+- `FileSystem/SpeedLimiter.cs`: the speed limit for `StreamCopy` (rclone gets it through `RcloneClient.ApplySpeedLimitAsync`).
+  `OperationQueue.SetHold` holds operations that haven't started until a time (Start Later in `OperationsWindow`).
+  A resumed copy reports once with `TransferProgress.Resumed`, which restarts the `SpeedMeter`.
+- `FileSystem/Archive/NestedArchives.cs` and `MainWindow.NestedArchives.cs`: an archive inside an archive is copied to the
+  tool temp folder and browsed from there; `ArchivePath.ParentUri` goes back to the outer archive, and the copy is
+  tracked by `ArchiveWriteBack`, so changes are offered back into the outer archive.
+- `FileSystem/VideoFrames.cs`: frames from ffmpeg (when installed) for video thumbnails (`ThumbnailCache.CanThumbnail`)
+  and the media preview.
+- `SecureEraser.cs` and `MainWindow.SecureDelete.cs`: overwrite-then-delete, run as a `FileOperation`; never follows links.
+- `ConfigFile.cs` also has `ConfigSettings` (`Load`/`Save` of one top-level setting).
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

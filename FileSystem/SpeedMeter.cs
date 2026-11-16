@@ -30,6 +30,9 @@ public sealed class SpeedMeter
         if (drop > 0) _samples.RemoveRange(0, drop);
     }
 
+    /// <summary>Forgets every sample, so the next one starts a fresh window (after a resumed copy's jump).</summary>
+    public void Restart() => _samples.Clear();
+
     /// <summary>Bytes per second over the window, or null until there is half a second of data.</summary>
     public double? BytesPerSecond
     {

@@ -47,6 +47,11 @@ public readonly record struct ArchivePath(string ArchiveFsPath, string EntryPath
             return new ArchivePath(ArchiveFsPath, parentEntry).FullUri;
         }
 
+        // At the root of an archive opened from inside another: back to the folder (in the outer
+        // archive) that holds it.
+        if (NestedArchives.OuterOf(ArchiveFsPath) is { } outer)
+            return Parse(outer).ParentUri();
+
         // At the archive root: step out to the real directory containing the archive file.
         return System.IO.Path.GetDirectoryName(ArchiveFsPath) ?? ArchiveFsPath;
     }

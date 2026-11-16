@@ -1,6 +1,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -110,6 +112,17 @@ public sealed class MediaPreviewProvider : IPreviewProvider
                 }
 
                 string subtitle = BuildSubtitle(formatName, tags, seconds);
+
+                // A video on this computer, with ffmpeg installed: show a frame, with the details
+                // in the bar under it.
+                if (VideoFrames.Available && r.Provider is LocalFileProvider && VideoFrames.IsVideoFile(r.DisplayName)
+                    && VideoFrames.GrabPngAsync(r.Path, 0, ct).GetAwaiter().GetResult() is { } png)
+                {
+                    var frame = new Avalonia.Media.Imaging.Bitmap(new MemoryStream(png));
+                    return new PreviewResult.Image(frame, frame.PixelSize.Width, frame.PixelSize.Height,
+                        subtitle.Length > 0 ? subtitle : formatName, r.Size, false,
+                        new PhotoDetails(fields.Where(f => f.Label is not ("Size" or "Details")).ToList(), 1));
+                }
                 return new PreviewResult.Info(r.DisplayName, fields, subtitle);
             }
             catch (OperationCanceledException)

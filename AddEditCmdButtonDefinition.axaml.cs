@@ -108,6 +108,9 @@ public partial class AddEditCmdButtonDefinition : Window
         var vc = this.FindControl<CheckBox>("cbVerifyCopies");
         if (vc != null) vc.IsChecked = AppOptions.VerifyCopies;
 
+        var ns = this.FindControl<CheckBox>("cbNaturalSort");
+        if (ns != null) ns.IsChecked = AppOptions.NaturalSort;
+
         LoadUiScaleFields();
     }
 
@@ -212,6 +215,17 @@ public partial class AddEditCmdButtonDefinition : Window
         var verifyEl = doc.Root!.Element("VerifyCopies");
         if (verifyEl == null) { verifyEl = new XElement("VerifyCopies"); doc.Root!.Add(verifyEl); }
         verifyEl.Value = verify ? "true" : "false";
+
+        // Natural sort: saved, and the panels re-sorted straight away.
+        bool natural = this.FindControl<CheckBox>("cbNaturalSort")?.IsChecked ?? true;
+        var naturalEl = doc.Root!.Element("NaturalSort");
+        if (naturalEl == null) { naturalEl = new XElement("NaturalSort"); doc.Root!.Add(naturalEl); }
+        naturalEl.Value = natural ? "true" : "false";
+        if (natural != AppOptions.NaturalSort)
+        {
+            AppOptions.NaturalSort = natural;
+            TheMainWindow?.ResortPanels();
+        }
 
         // Persist the UI scale override. Unlike the options above this one cannot be applied live.
         UpsertUiScaleSetting(doc);

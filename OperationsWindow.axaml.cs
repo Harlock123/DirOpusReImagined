@@ -53,6 +53,68 @@ namespace DirOpusReImagined
             _queue.OperationAdded += OnAdded;
             _queue.OperationUpdated += OnUpdated;
             _queue.OperationCompleted += OnUpdated;
+
+            InitLimitAndHold();
+        }
+
+        // ---- Speed limit and Start Later ----
+
+        private void InitLimitAndHold()
+        {
+            SpeedLimitBox.Text = SpeedLimiter.Describe(AppOptions.SpeedLimit);
+            SpeedLimitBox.LostFocus += (_, _) => CommitSpeedLimit();
+            SpeedLimitBox.KeyDown += (_, e) => { if (e.Key == Avalonia.Input.Key.Enter) CommitSpeedLimit(); };
+
+            Action onHold = () => Dispatcher.UIThread.Post(UpdateHold);
+            _queue.HoldChanged += onHold;
+            Closed += (_, _) =>
+            {
+                _queue.HoldChanged -= onHold;
+                _queue.OperationAdded -= OnAdded;
+                _queue.OperationUpdated -= OnUpdated;
+                _queue.OperationCompleted -= OnUpdated;
+            };
+            UpdateHold();
+        }
+
+        private void CommitSpeedLimit()
+        {
+            if (!SpeedLimiter.TryParse(SpeedLimitBox.Text, out long limit))
+            {
+                SpeedLimitBox.Text = SpeedLimiter.Describe(AppOptions.SpeedLimit);
+                _ = new MessageBox("Type a speed such as 10 MB or 512 KB (per second), or leave it empty for no limit.", "Speed limit").ShowDialog(this);
+                return;
+            }
+            SpeedLimitBox.Text = SpeedLimiter.Describe(limit);
+            if (limit == AppOptions.SpeedLimit) return;
+            AppOptions.SpeedLimit = limit;
+            ConfigSettings.Save("SpeedLimit", limit.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        private async void StartLaterBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new TextPromptDialog("Start later",
+                "Start the operations that haven't started at what time? For example 02:00 or 23:30. " +
+                "A time already gone today means tomorrow. Anything added meanwhile waits too.",
+                _queue.HoldUntil?.ToString("HH:mm") ?? "02:00");
+            string? text = await dialog.ShowDialog<string?>(this);
+            if (text == null) return;
+            if (!QueueSchedule.TryNextTime(text, DateTime.Now, out var when))
+            {
+                await new MessageBox($"\"{text}\" isn't a time. Try 02:00, 2am or 23:30.", "Start later").ShowDialog(this);
+                return;
+            }
+            _queue.SetHold(when);
+        }
+
+        private void StartNowBtn_Click(object? sender, RoutedEventArgs e) => _queue.SetHold(null);
+
+        private void UpdateHold()
+        {
+            var until = _queue.HoldUntil;
+            bool held = until is { } u && u > DateTime.Now;
+            StartNowBtn.IsVisible = held;
+            HoldText.Text = held ? $"Waiting until {QueueSchedule.Describe(until!.Value, DateTime.Now)}" : "";
         }
 
         /// <summary>Opens the shared window (or brings the existing one to the front).</summary>

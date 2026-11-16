@@ -61,7 +61,15 @@ namespace DirOpusReImagined
         ImageTools,
         SplitFile,
         JoinFiles,
-        SyncBrowse
+        SyncBrowse,
+        CopyToClipboard,
+        CutToClipboard,
+        PasteFromClipboard,
+        FolderSizes,
+        ExportListing,
+        FolderRules,
+        Catalogues,
+        SecureDelete
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -464,6 +472,10 @@ namespace DirOpusReImagined
             }
             return _visibleProperties;
         }
+
+        /// <summary>The property names of the columns as currently shown, in order.</summary>
+        public IReadOnlyList<string> ShownColumns()
+            => VisibleProperties(typeof(AFileEntry)).Select(p => p.Name).ToList();
 
         /// <summary>The property name of the column at <paramref name="index"/> as currently shown, or null.</summary>
         public string? ColumnNameAt(int index)
@@ -3446,9 +3458,6 @@ namespace DirOpusReImagined
             {
                 // Right mouse button was pressed
                 // Enable/disable context-specific menu items before context menu opens
-                bool isFolder = TheItemUnderTheMouse.ItemUnderMouse is AFileEntry entry && entry.Typ;
-                CalcFolderSizeMenuItem.IsEnabled = isFolder;
-
                 bool isUnix = Environment.OSVersion.Platform == PlatformID.Unix ||
                               Environment.OSVersion.Platform == PlatformID.MacOSX;
                 PermissionsMenuItem.IsEnabled = isUnix && TheItemUnderTheMouse.ItemUnderMouse is AFileEntry;
@@ -4072,14 +4081,6 @@ namespace DirOpusReImagined
         /// </summary>
         /// <param name="sender">The object that raised the event.</param>
         /// <param name="e">Event arguments for the event.</param>
-        private void CalculateFolderSize_Click(object sender, RoutedEventArgs e)
-        {
-            if (TheItemUnderTheMouse.ItemUnderMouse is AFileEntry entry && entry.Typ)
-            {
-                GridContextCalculateSize?.Invoke(this, TheItemUnderTheMouse);
-            }
-        }
-
         // Panel-wide: sizes every folder in this panel, regardless of what the mouse is over.
         private void CalculateAllSizes_Click(object sender, RoutedEventArgs e)
         {
@@ -4141,6 +4142,14 @@ namespace DirOpusReImagined
         private void SplitFile_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SplitFile);
         private void JoinFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.JoinFiles);
         private void SyncBrowse_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SyncBrowse);
+        private void CopyToClipboard_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CopyToClipboard);
+        private void CutToClipboard_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CutToClipboard);
+        private void PasteFromClipboard_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.PasteFromClipboard);
+        private void FolderSizes_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderSizes);
+        private void ExportListing_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.ExportListing);
+        private void FolderRules_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderRules);
+        private void Catalogues_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Catalogues);
+        private void SecureDelete_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SecureDelete);
 
         /// <summary>Raised when a colour is picked under right-click → Label (None clears the colour).</summary>
         public event EventHandler<LabelColour>? LabelColourRequested;
@@ -4242,7 +4251,6 @@ namespace DirOpusReImagined
         /// <param name="e">A GridHoverItem object that contains event data.</param>
         public event EventHandler<GridHoverItem> GridItemClick;
 
-        public event EventHandler<GridHoverItem> GridContextCalculateSize;
 
         /// <summary>Raised when "Calculate All Folder Sizes" is chosen. The host computes the recursive
         /// size of every folder in this panel, so no item under the mouse is required.</summary>
@@ -5056,6 +5064,10 @@ namespace DirOpusReImagined
         // Where a symbolic link points (as written in the link), or null for anything else. A
         // FIELD for the same reason as above: a property would become a column.
         public string? LinkTarget;
+
+        // A folder's calculated size in bytes (Calculate Folder Sizes), or −1 when not measured. A
+        // FIELD for the same reason as above.
+        public long FolderBytes = -1;
 
         //public bool FileSizeCollapsedNumber { get; set; } = false;
         

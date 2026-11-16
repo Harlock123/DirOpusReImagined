@@ -39,10 +39,18 @@ public static class ThumbnailCache
     }
 
     /// <summary>
+    /// True if the panel can show a thumbnail for the name: a picture, or a video on this computer
+    /// when ffmpeg is installed (see <see cref="VideoFrames"/>).
+    /// </summary>
+    public static bool CanThumbnail(string name, IFileProvider provider)
+        => IsImageFile(name) || (provider is LocalFileProvider && VideoFrames.IsVideoFile(name) && VideoFrames.Available);
+
+    /// <summary>
     /// Part of every cache key. Raise it when the way thumbnails are made changes, so the old ones on
     /// disk are no longer used. 2: photos taken sideways are turned upright (EXIF orientation).
+    /// 3: videos get a frame (ffmpeg).
     /// </summary>
-    internal const int CacheVersion = 2;
+    internal const int CacheVersion = 3;
 
     /// <summary>
     /// Stable cache key for a (path, size, modified-time, target-width) tuple. Same inputs always
@@ -72,7 +80,8 @@ public static class ThumbnailCache
         {
             try
             {
-                if (!IsImageFile(name)) return null;
+                bool video = !IsImageFile(name);
+                if (video && !CanThumbnail(name, provider)) return null;
                 ct.ThrowIfCancellationRequested();
 
                 string key = KeyFor(path, fileSize, mtimeTicks, targetWidth);
@@ -93,6 +102,15 @@ public static class ThumbnailCache
                 }
 
                 ct.ThrowIfCancellationRequested();
+
+                if (video)
+                {
+                    byte[]? png = VideoFrames.GrabPngAsync(path, targetWidth, ct).GetAwaiter().GetResult();
+                    if (png == null) return null;
+                    var frame = new Bitmap(new MemoryStream(png));
+                    try { File.WriteAllBytes(cacheFile, png); } catch { /* best effort */ }
+                    return frame;
+                }
 
                 // A photo taken with the camera on its side is stored sideways with an EXIF note
                 // to turn it; the note is near the start of the file.

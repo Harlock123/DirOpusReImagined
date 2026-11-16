@@ -129,12 +129,16 @@ internal static class StreamCopy
         long copied = alreadyDone;
         var sw = Stopwatch.StartNew();
         long lastReportMs = 0;
+        // A resumed copy says where it starts from, marked so the speed isn't measured across the jump.
+        if (alreadyDone > 0)
+            progress?.Report(new TransferProgress(name, 0, 0, alreadyDone, total, 0) { Resumed = true });
 
         int n;
         while ((n = await inStream.ReadAsync(buffer.AsMemory(0, BufferSize), ct).ConfigureAwait(false)) > 0)
         {
             await outStream.WriteAsync(buffer.AsMemory(0, n), ct).ConfigureAwait(false);
             copied += n;
+            await SpeedLimiter.ThrottleAsync(n, ct).ConfigureAwait(false);
 
             long nowMs = sw.ElapsedMilliseconds;
             if (nowMs - lastReportMs >= ReportEveryMs)

@@ -33,6 +33,8 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
   - **Pause** (⏸) and **resume** (▶) any operation, or **Pause all / Resume all**. A running copy stops within a second, partway through a file, and holds its place; cloud transfers stop after the current file. A paused operation that hasn't started yet lets the ones behind it go first. Speed and time remaining ignore paused time
   - **Retry** (↻) a failed or cancelled operation, or **Retry all**: it runs **only the items that didn't finish**, so a move that failed halfway completes instead of failing on the items it already moved, and a copy doesn't start again from scratch. The panels refresh afterwards, and a retried move can still be undone
   - **Large copies carry on where they stopped.** A file being copied on this computer is written as `name.dori-part` and only gets its real name once complete, so a half-copied file never sits under the real name (and an overwritten file keeps its old contents until the new copy is whole). If a copy is cancelled or fails after 4 MB, the part is kept, and **Retry** — or copying the same file to the same place again, even after a crash — continues from where it stopped, once it has checked the part still matches the start of the source
+- **Copy, cut and paste with other file managers.** **Ctrl/Cmd+C** (or right-click → **Copy**) puts the selected files on the system clipboard, **Ctrl/Cmd+X** cuts them, and **Ctrl/Cmd+V** pastes into the panel's folder, through the usual queue with its skip / overwrite / keep-both questions and undo. Files copied in Explorer, Finder or Files (Nautilus) paste into DORI, and files copied in DORI paste there; cut files are moved, and paste once. Full paths copied as text paste too. Files inside archives or in the cloud can't go on the clipboard (other programs can't open them); copy them to the other panel instead
+- **Speed limit and Start Later** (in the File Operations window): type a limit such as `10 MB` (a second) and copies keep under it — copies on this computer, and cloud transfers through rclone. **Start later…** holds the operations that haven't started until a time such as `02:00` (one already running carries on); **Start now** lets them go. The limit is remembered
 - **Verify copies** (under File operations in **Edit Buttons…**, off by default) reads each copied file back and compares it with the original (SHA-256), failing the copy if they differ. It covers copies on this computer and copies into and out of archives; cloud copies are checked by rclone itself, which compares hashes where the storage offers them
 - **Create folders** in either panel
 - **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz** or **.tar**:
@@ -110,7 +112,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Label → Tags…** gives them **tags** ("work", "invoices 2026"), separated by commas; the box shows the tags already in use
 - A **Tags** column shows the colour and tags (`Green · work`). Like the Git column, it only appears while something in the folder has a label, and can be hidden from the header's right-click menu
 - **Filter by label**: type `tag:work` (or `tag:red`) in a panel's filter box, alone or with other patterns (`tag:work;*.pdf`), and save it as a saved filter like any other
-- Labels follow their files when DORI renames or moves them. They're kept in `Labels.xml` beside `Configuration.xml`, for files and folders on this computer
+- Labels follow their files when DORI renames or moves them, and back again when that is undone. They're kept in `Labels.xml` beside `Configuration.xml`, for files and folders on this computer
 
 ### Git Status Column
 - Inside a **git work tree**, a **Git** column shows each file's state: **Modified**, **Staged**, **Added**, **Renamed**, **Untracked**, **Ignored** or **Conflict**. A folder shows the most important state of anything inside it, so a folder holding a change says Modified
@@ -127,6 +129,28 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Right-click → **File Tools → Split File…** cuts one file into pieces of the size you give (`100 MB`, `4 GB`, `650M`), named `name.001`, `name.002`… (as 7-Zip and HJSplit name them), plus `name.sha256` holding the whole file's checksum
 - **File Tools → Join Pieces** on any piece puts them back together, and checks the result against the `.sha256` file when it's there — a damaged or missing piece is reported
 - The pieces (or the joined file) go into the other panel's folder, or beside the original when the other panel isn't on this computer. Both run in the File Operations window with progress, pause and cancel, and never overwrite
+
+### Folder Sizes
+- **Ctrl/Cmd+Shift+S** (or right-click → **Calculate Folder Sizes**) measures the selected folders, or the one under the cursor, with everything inside them; with no folder picked it measures them all. **Calculate All Folder Sizes** always measures every folder
+- The sizes stay while the panel shows that folder, refreshes included, so **sorting by Size orders the folders too** (largest first, unmeasured ones last), and the status bar's selection total counts selected folders. Linked folders are never walked into
+
+### Export Listing
+- Right-click → **File Tools → Export Listing…** saves the panel's rows as **CSV** (for spreadsheets), **tab-separated values**, **plain text** in lined-up columns, or a **web page**, chosen by the file type in the save dialog
+- It has the columns the panel shows, plus the exact size in bytes and the full path. With several rows selected only those are written; otherwise everything the panel shows — so a filtered panel, or a flat view of a whole tree, exports just as you see it
+
+### Folder Rules
+- Right-click → **File Tools → Folder Rules…** sets up rules that tidy a folder: for files whose names match (`*.pdf;*.docx`, some text, or `tag:work`) and, if you like, that are **older than** a number of days, **move** them to a folder, **copy** them there, move them to the **trash**, give them a **colour label** or **add a tag**
+- A **watching** rule runs by itself while DORI is open: a few seconds after files arrive in its folder, and once an hour for its age test. Files still downloading or being written (`.part`, `.crdownload`, files changed in the last few seconds) are left until they're finished
+- **Run Now…** shows which files a rule takes before doing it. A move never replaces a file (the newcomer is numbered: `report (2).pdf`), a copy whose same-size twin is already there is skipped, and labels move with the files. What the rules did is listed at the bottom of the window. Rules look only at the folder itself, not its subfolders, and are kept in `Rules.xml` beside `Configuration.xml`. Rule moves can't be undone with Ctrl/Cmd+Z
+
+### Disk Catalogues
+- Right-click → **File Tools → Disk Catalogues…** keeps a record of everything under a folder — an external drive, a network share, a cloud remote — so you can **browse and search it while the drive isn't connected**
+- **New from Panel…** catalogues the folder the panel shows (files, folders, sizes and dates; linked folders aren't walked into). Browse it like a folder, with sizes and dates; **Search All** finds names (`*.mp4;holiday`) in every catalogue at once, and double-clicking a result shows it in its catalogue
+- **Update** looks at the drive again and lists what is **new, gone or changed** since last time; **Show in Panel** goes to an item when its drive is there. Catalogues are small gzip'd files in a `Catalogues` folder beside `Configuration.xml`
+
+### Securely Delete
+- Right-click → **File Tools → Securely Delete…** overwrites the selected files with random data, written through to the disk, then renames, empties and deletes them, so a recovery tool can't bring them back. Folders are emptied the same way and removed; links are removed without touching what they point to. It runs in the File Operations window, and can't be undone
+- **It can't be relied on everywhere**: SSDs and flash drives move writes to fresh cells, copy-on-write file systems (Btrfs, ZFS, APFS) write new blocks, and snapshots, backups and cloud sync keep their own copies. On those, whole-disk encryption is the dependable answer
 
 ### Synced Browsing
 - **⇄ Follow** (beside the button bank tabs, or right-click → **Synced Browsing**) links the two panels: going into a folder in one panel takes the other panel into the folder of the **same name**, and going up takes it **up the same number of levels**
@@ -170,7 +194,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 ### Status Bar
 - A status bar at the bottom of the window shows live information for each panel:
   - Total folder and file counts
-  - Number of selected files and their combined size
+  - Number of selected files and their combined size (selected folders count once their size has been calculated)
   - Free disk space on the current drive
 
 ### Selection Management
@@ -278,6 +302,14 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `SplitFile` | Split a file into pieces | — |
 | `JoinFiles` | Join pieces (.001, .002…) | — |
 | `SyncBrowse` | Synced browsing on / off | — |
+| `CopyToClipboard` | Copy files to the clipboard | Ctrl+C |
+| `CutToClipboard` | Cut files to the clipboard | Ctrl+X |
+| `PasteFromClipboard` | Paste files from the clipboard | Ctrl+V |
+| `FolderSizes` | Calculate folder sizes | Ctrl+Shift+S |
+| `ExportListing` | Export the listing (CSV, text, HTML) | — |
+| `FolderRules` | Folder rules | — |
+| `Catalogues` | Disk catalogues | — |
+| `SecureDelete` | Securely delete (overwrite first) | — |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -315,6 +347,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Built-in image viewer for common formats (BMP, JPG, PNG, TIFF, GIF, ICO, etc.)
 - Configurable via the `<UseIntegratedImageViewer>` setting
 - **Photo details**: when a photo carries EXIF data (JPEG, TIFF, PNG and WebP), a strip under the picture in the viewer and the preview window shows the **camera and lens, when it was taken, shutter speed, aperture, ISO, focal length, flash, and where it was taken** (GPS position and altitude)
+- **Videos show a frame** in the preview window and the Thumbnails view when [ffmpeg](https://ffmpeg.org/) is installed (on the PATH, or Homebrew's folder on macOS), with the duration and stream details under it. Without ffmpeg they show their details as before; nothing extra is bundled
 - **Photos taken with the camera on its side show upright** in the viewer, the preview window and the Thumbnails view: the EXIF orientation is applied, as photo apps do, and the size shown is the size as displayed
 
 ### File Viewer (Text / Hex)
@@ -350,6 +383,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
   - **delete**, **rename** (including batch renames and swaps), **make folders**, and **move** items within the archive or out of it
   - each operation rewrites the archive **once**, however many items it touches, and the new archive only replaces the old one when it is complete — a failure or **Cancel** leaves the original untouched. Moves into archives can be undone (Ctrl/Cmd+Z), and failed operations retried
   - large archives take a moment: every change rewrites the whole file, and zip entries are recompressed
+- **Archives inside archives** open too: double-click a .zip (or .tar.gz, .7z…) shown inside another archive and DORI takes it out to a temporary copy and opens that. The path bar shows where it really is (`outer.zip › inner.zip`), going up from its top returns to the outer archive, and changes made inside it (copying files in, deleting, renaming) are offered back into the outer archive like any edited file
 - **7z and RAR archives are read-only** (nothing available can write them); writing to one says so, and a file edited from one is left in its temporary copy, whose path DORI shows
 - Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
 
@@ -373,9 +407,10 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 ### Display Options
 - Toggle hidden file visibility with the "Show Hidden" checkbox
 - **Sort by clicking a column header** — Name, Size, or Date; click again to reverse (an ▲/▼ shows the active column). **Right-click a header** for a menu with **Type (extension)** sorting and explicit Ascending/Descending. Sorting is per-panel and persists as you navigate; folders stay grouped first
+- **Names sort the way people count**: `file2` before `file10`, `Track 9` before `Track 10`. Turn it off under **Display** in **Edit Buttons…** to sort character by character
 - **Choose the columns** each panel shows — right-click a column header and tick or untick Icon, Size, Date, Folders inside, Files inside and Attributes (Name is always shown); the **Tags** and **Git** columns appear by themselves when there's something to show, or pick **Show all columns**. Each panel keeps its own choice, and it's remembered between sessions (in `Configuration.xml`). Hiding the folder/file count columns also leaves more room for long names
 - Configurable font sizes for grid content and headers
-- Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
+- Right-click context menu on panels — Copy / Cut / Paste, Calculate Folder Sizes, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
 - When the columns are wider than the panel, scroll sideways with the scrollbar under the panel, **Shift** or **Ctrl + mouse wheel**, or a sideways touchpad swipe; the scrollbar's thumb shows how much is visible, and it is disabled when everything fits. **Alt + mouse wheel** changes the font size
 
@@ -404,7 +439,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.33.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.34.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1713,6 +1748,20 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.34.0 (2026-11-16) — Clipboard, folder rules, catalogues, nested archives and more
+- **Copy, cut and paste files with other file managers** (Ctrl/Cmd+C, X, V, or right-click): files copied here paste in Explorer, Finder and Files, and the other way round, through the copy queue.
+- **Natural sort**: `file2` before `file10`. On by default; can be turned off under Display in Edit Buttons….
+- **Folder sizes that stay** (Ctrl/Cmd+Shift+S): measured sizes survive refreshes, sort by Size orders the folders, and the status bar counts selected folders.
+- **Export Listing** (right-click → File Tools): the panel's rows as CSV, tab-separated, text or HTML, with exact bytes and full paths.
+- **Folder rules** (right-click → File Tools): move, copy, trash, label or tag files in a folder by name and age, by hand or watching the folder.
+- **Disk catalogues** (right-click → File Tools): browse and search a drive's contents while it's unplugged, and see what changed when it's back.
+- **Speed limit and Start Later** in the File Operations window, for local copies and cloud transfers.
+- **Archives inside archives** open, and changes to them are offered back into the outer archive.
+- **Video frames** in the preview and Thumbnails view when ffmpeg is installed.
+- **Securely Delete** (right-click → File Tools): overwrite, then delete — with a clear note on where that can't be relied on.
+- Undo now moves colour labels and tags back when it reverses a rename or move.
+- The speed shown when a copy resumes from a kept part no longer jumps up at the start.
 
 ### 0.1.33.0 (2026-11-16) — Disk usage, labels, git status, image tools, split & join and more
 - **Disk usage** (right-click → Disk Usage…): what takes the space under a folder, largest first with bars; open folders to dig in, and go to any item in the panel.

@@ -112,6 +112,7 @@ namespace DirOpusReImagined
             InitFlatView();
             InitLabels();
             InitSyncBrowse();
+            InitFolderRules();
             InitArchiveWriteBack();
             InitLayouts();
             InitSavedFilters();
@@ -184,6 +185,7 @@ namespace DirOpusReImagined
             LoadUseTrashFromConfig();
             LoadKeepRcloneWarmFromConfig();
             LoadVerifyCopiesFromConfig();
+            LoadTransferAndSortOptions();
             LoadPreviewSizeFromConfig();
             LoadUiScaleFromConfig();
             LoadViewModesFromConfig();
@@ -274,8 +276,6 @@ namespace DirOpusReImagined
             LPgrid.GridHover += Handle_GridHover;
             RPgrid.GridHover += Handle_GridHover;
 
-            LPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
-            RPgrid.GridContextCalculateSize += Handle_CalculateFolderSize;
 
             LPgrid.GridContextCalculateAllSizes += Handle_CalculateAllFolderSizes;
             RPgrid.GridContextCalculateAllSizes += Handle_CalculateAllFolderSizes;
@@ -403,64 +403,6 @@ namespace DirOpusReImagined
                 SetToolTipForGridItem((TaiDataGrid)sender, af);
             }
     
-        }
-
-        private async void Handle_CalculateFolderSize(object? sender, GridHoverItem e)
-        {
-            if (e.ItemUnderMouse is not AFileEntry entry || !entry.Typ) return;
-
-            var grid = sender as TaiDataGrid;
-            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
-            var separator = Path.DirectorySeparatorChar;
-            var folderPath = currentPath.TrimEnd(separator) + separator + entry.Name;
-
-            // Show a calculating indicator
-            entry.FileSize = "...";
-            grid?.ReRender();
-
-            // Run the recursive calculation on a background thread
-            long size = await Task.Run(() => FileUtility.GetDirectorySizeRecursive(folderPath));
-
-            // Update the entry with the calculated size
-            entry.FileSize = entry.ConvertNumberToReadableString(size);
-            grid?.ReRender();
-        }
-
-        // Computes recursive sizes for every folder in the panel, filling each row's size cell as it
-        // lands. Sizing runs one folder at a time on a background thread so the UI stays responsive and
-        // the disk isn't hammered by parallel recursive walks. Skipped for remote panels, where a
-        // recursive walk is prohibitively expensive.
-        private async void Handle_CalculateAllFolderSizes(object? sender, EventArgs e)
-        {
-            var grid = sender as TaiDataGrid;
-            if (grid is null) return;
-
-            var currentPath = grid == LPgrid ? LPpath.Text : RPpath.Text;
-            if (string.IsNullOrEmpty(currentPath)) return;
-
-            if (ProviderRegistry.For(currentPath).IsRemote) return;
-
-            var separator = Path.DirectorySeparatorChar;
-            var basePath = currentPath.TrimEnd(separator) + separator;
-
-            // Snapshot the folder rows up front; the panel could be navigated away while we run.
-            var folders = grid.Items
-                .OfType<AFileEntry>()
-                .Where(x => x.Typ && x.Name != "." && x.Name != "..")
-                .ToList();
-            if (folders.Count == 0) return;
-
-            // Mark them all as pending, then fill in progressively.
-            foreach (var f in folders) f.FileSize = "...";
-            grid.ReRender();
-
-            foreach (var entry in folders)
-            {
-                var folderPath = basePath + entry.Name;
-                long size = await Task.Run(() => FileUtility.GetDirectorySizeRecursive(folderPath));
-                entry.FileSize = entry.ConvertNumberToReadableString(size);
-                grid.ReRender();
-            }
         }
 
         private async void Handle_Permissions(object? sender, GridHoverItem e)
@@ -2362,6 +2304,30 @@ namespace DirOpusReImagined
                 case GridVerb.SyncBrowse:
                     ToggleSyncBrowse();
                     break;
+                case GridVerb.CopyToClipboard:
+                    CopyFilesToClipboard(left, cut: false);
+                    break;
+                case GridVerb.CutToClipboard:
+                    CopyFilesToClipboard(left, cut: true);
+                    break;
+                case GridVerb.PasteFromClipboard:
+                    PasteFilesFromClipboard(left);
+                    break;
+                case GridVerb.FolderSizes:
+                    CalculatePickedFolderSizes(left);
+                    break;
+                case GridVerb.ExportListing:
+                    ExportListing(left);
+                    break;
+                case GridVerb.FolderRules:
+                    OpenFolderRules(left);
+                    break;
+                case GridVerb.Catalogues:
+                    OpenCatalogues(left);
+                    break;
+                case GridVerb.SecureDelete:
+                    SecureDeletePicked(left);
+                    break;
             }
         }
 
@@ -2788,6 +2754,17 @@ namespace DirOpusReImagined
         /// Reads the persisted &lt;Theme&gt; setting (Light/Dark/System, default Light), applies it,
         /// and syncs the picker without triggering a save.
         /// </summary>
+        /// <summary>Reads &lt;NaturalSort&gt; (default true) and &lt;SpeedLimit&gt; (bytes a second, default 0 = none).</summary>
+        private void LoadTransferAndSortOptions()
+        {
+            string? path = _configFilePath != null && File.Exists(_configFilePath) ? _configFilePath : null;
+            if (path == null) return;
+            if (bool.TryParse(ConfigSettings.Load("NaturalSort", path)?.Trim(), out var natural))
+                AppOptions.NaturalSort = natural;
+            if (long.TryParse(ConfigSettings.Load("SpeedLimit", path)?.Trim(), out var limit) && limit >= 0)
+                AppOptions.SpeedLimit = limit;
+        }
+
         /// <summary>Reads the persisted &lt;UseTrash&gt; setting (default true) into <see cref="AppOptions"/>.</summary>
         private void LoadUseTrashFromConfig()
         {
@@ -3660,6 +3637,12 @@ namespace DirOpusReImagined
                 return;
             }
 
+            if (ArchivePath.IsArchiveUri(path) && NestedArchives.OuterOf(ArchivePath.Parse(path).ArchiveFsPath) != null)
+            {
+                UpdateNestedArchiveBreadcrumbs(path, breadcrumbs, side);
+                return;
+            }
+
             var items = new List<Control>();
 
             var separator = Path.DirectorySeparatorChar;
@@ -3709,6 +3692,39 @@ namespace DirOpusReImagined
                 items.Add(segButton);
             }
 
+            breadcrumbs.ItemsSource = items;
+        }
+
+        /// <summary>
+        /// Inside an archive opened from another archive: the first crumb is the outer archive's
+        /// folder (where Up goes from the root), named by the chain of archives, then the inner
+        /// archive's folders. The temporary copy's own location is never shown.
+        /// </summary>
+        private void UpdateNestedArchiveBreadcrumbs(string path, ItemsControl breadcrumbs, string side)
+        {
+            var ap = ArchivePath.Parse(path);
+            string outerEntry = NestedArchives.OuterOf(ap.ArchiveFsPath)!;
+            var items = new List<Control>();
+            string chain = NestedArchives.Describe(ArchivePath.RootUriFor(ap.ArchiveFsPath));
+            // "archive:///home/me/a.zip!/sub/inner.zip!/" → "a.zip › sub › inner.zip"
+            string label = string.Join(" \u203a ", chain.Substring(ArchivePath.Scheme.Length)
+                .Split(new[] { ArchivePath.Marker }, StringSplitOptions.RemoveEmptyEntries)
+                .Select((part, i) => i == 0 ? Path.GetFileName(part) : part.Replace("/", " \u203a ")));
+            items.Add(CreateBreadcrumbButton("\U0001F4E6 " + label, ArchivePath.Parse(outerEntry).ParentUri(), side));
+            var cumulative = new ArchivePath(ap.ArchiveFsPath, "");
+            items.Add(CreateBreadcrumbButton("/", cumulative.FullUri, side));
+            foreach (var seg in ap.EntryPath.Split('/', StringSplitOptions.RemoveEmptyEntries))
+            {
+                items.Add(new TextBlock
+                {
+                    Text = " \u203a ",
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Foreground = new SolidColorBrush(Colors.Gray),
+                    FontSize = 13,
+                });
+                cumulative = cumulative.Join(seg);
+                items.Add(CreateBreadcrumbButton(seg, cumulative.FullUri, side));
+            }
             breadcrumbs.ItemsSource = items;
         }
 
@@ -4059,7 +4075,7 @@ namespace DirOpusReImagined
             // CTS above) can leave items stuck in Pending with no thumbnail, so this pass must retry them.
             // Loaded/Failed are terminal and skipped.
             var targets = grid.Items.OfType<AFileEntry>()
-                .Where(e => !e.Typ && ThumbnailCache.IsImageFile(e.Name) &&
+                .Where(e => !e.Typ && ThumbnailCache.CanThumbnail(e.Name, provider) &&
                             (e.ThumbState == ThumbnailState.None || e.ThumbState == ThumbnailState.Pending))
                 .ToList();
             if (targets.Count == 0) return;
@@ -4156,6 +4172,7 @@ namespace DirOpusReImagined
             // Labels first, so the filter can match tag:name.
             string? shown = ReferenceEquals(grid, LPgrid) ? LPpath.Text : RPpath.Text;
             ApplyLabels(grid, shown);
+            ApplyFolderSizes(grid, shown);
             RequestGitStatus(grid, shown);
 
             if (ReferenceEquals(grid, LPgrid))
@@ -4305,6 +4322,12 @@ namespace DirOpusReImagined
                 {
                     selectedCount++;
                     selectedBytes += ParseFileSize(af.FileSize);
+                }
+                else if (item is AFileEntry { Typ: true, FolderBytes: >= 0 } measured)
+                {
+                    // A folder counts once its size has been calculated (Ctrl/Cmd+Shift+S).
+                    selectedCount++;
+                    selectedBytes += measured.FolderBytes;
                 }
             }
 
@@ -4743,9 +4766,9 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// If <paramref name="it"/> is an archive file being double-clicked from a real (local) folder,
-        /// navigates the panel into the archive (<c>archive://…!/</c>) and returns true. Nesting into an
-        /// archive that already lives inside a cloud or archive path isn't supported (v1), so those return
-        /// false and fall through to the normal open/execute behaviour.
+        /// navigates the panel into the archive (<c>archive://…!/</c>) and returns true. An archive inside
+        /// another archive is opened from a temporary copy (<see cref="EnterNestedArchive"/>). One in cloud
+        /// storage isn't, so that returns false and falls through to the normal open behaviour.
         /// </summary>
         private bool TryEnterArchive(TaiDataGrid grid, TextBox pathBox, Stack<string> history, AFileEntry it)
         {
@@ -4753,7 +4776,13 @@ namespace DirOpusReImagined
             if (!ArchivePath.IsArchiveFile(it.Name)) return false;
 
             string current = pathBox.Text ?? "";
-            if (CloudPath.IsCloudUri(current) || ArchivePath.IsArchiveUri(current)) return false;
+            if (CloudPath.IsCloudUri(current)) return false;
+            if (ArchivePath.IsArchiveUri(current))
+            {
+                // An archive inside an archive: take it out to a temporary copy and go into that.
+                EnterNestedArchive(grid, pathBox, current, it.Name);
+                return true;
+            }
 
             string fsPath = JoinChildPath(current, it.Name);
             PushHistory(ReferenceEquals(grid, LPgrid), current);   // new nav → clears forward

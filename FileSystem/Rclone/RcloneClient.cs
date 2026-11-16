@@ -103,6 +103,20 @@ public sealed class RcloneClient : IDisposable
             : throw new InvalidOperationException($"rclone {endpoint} did not return a jobid");
     }
 
+    private long _appliedSpeedLimit = -1;
+
+    /// <summary>
+    /// Tells rclone the speed limit (bytes per second, 0 for none) if it has changed since last
+    /// time, so cloud transfers keep to the same limit as local copies.
+    /// </summary>
+    public async Task ApplySpeedLimitAsync(long bytesPerSecond, CancellationToken ct = default)
+    {
+        if (bytesPerSecond == _appliedSpeedLimit) return;
+        string rate = bytesPerSecond <= 0 ? "off" : Math.Max(1, bytesPerSecond / 1024) + "K";
+        using var _ = await PostAsync("core/bwlimit", new Dictionary<string, object> { ["rate"] = rate }, ct).ConfigureAwait(false);
+        _appliedSpeedLimit = bytesPerSecond;
+    }
+
     public async Task<RcloneJobStatus> GetJobStatusAsync(long jobid, CancellationToken ct = default)
     {
         using var doc = await PostAsync("job/status", new Dictionary<string, object> { ["jobid"] = jobid }, ct)
