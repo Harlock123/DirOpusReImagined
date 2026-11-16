@@ -17,6 +17,7 @@ namespace DirOpusReImagined
         GoUp, Forward, SwitchPanel,
         SelectAll, SelectByPattern, DeselectByPattern, InvertSelection,
         CommandPalette,
+        DiskUsage, EditLabels, ImageTools, SplitFile, JoinFiles, SyncBrowse,
     }
 
     /// <summary>
@@ -145,6 +146,12 @@ namespace DirOpusReImagined
             new(ShortcutCommand.DeselectByPattern, "Deselect by pattern", "NumMinus, Minus"),
             new(ShortcutCommand.InvertSelection, "Invert selection", "NumStar, Shift+8"),
             new(ShortcutCommand.CommandPalette, "Command palette (find any command or button)", "Ctrl+Shift+A"),
+            new(ShortcutCommand.DiskUsage, "Disk usage (what takes the space)", ""),
+            new(ShortcutCommand.EditLabels, "Labels and tags", ""),
+            new(ShortcutCommand.ImageTools, "Image tools (resize, convert, turn)", ""),
+            new(ShortcutCommand.SplitFile, "Split a file into pieces", ""),
+            new(ShortcutCommand.JoinFiles, "Join pieces (.001, .002…)", ""),
+            new(ShortcutCommand.SyncBrowse, "Synced browsing on / off", ""),
         };
 
         public const string ElementName = "Shortcuts";

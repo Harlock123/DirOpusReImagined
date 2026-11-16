@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="320" d:DesignHeight="150"
-        Width="320" Height="150" 
+        Width="360" MinHeight="150" SizeToContent="Height" CanResize="False"
         WindowStartupLocation="CenterOwner"
         x:Class="DirOpusReImagined.MessageBox"
         Title="MessageBox">
@@ -12,9 +12,9 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="messageTextBlock" TextWrapping="Wrap" Text="TextBlock" Grid.Row="0"
+        <TextBlock x:Name="messageTextBlock" TextWrapping="Wrap" Text="TextBlock" Grid.Row="0" Margin="16,16,16,8"
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,0,0,12">
             <Button x:Name="okButton" Content="OK" />
             <Button x:Name="cancelButton" Content="Cancel" IsVisible="False" />
         </StackPanel>

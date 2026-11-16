@@ -32,6 +32,8 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Copies, moves and deletes run **in the background**, one at a time, in a **File Operations** window with progress, speed and time remaining:
   - **Pause** (⏸) and **resume** (▶) any operation, or **Pause all / Resume all**. A running copy stops within a second, partway through a file, and holds its place; cloud transfers stop after the current file. A paused operation that hasn't started yet lets the ones behind it go first. Speed and time remaining ignore paused time
   - **Retry** (↻) a failed or cancelled operation, or **Retry all**: it runs **only the items that didn't finish**, so a move that failed halfway completes instead of failing on the items it already moved, and a copy doesn't start again from scratch. The panels refresh afterwards, and a retried move can still be undone
+  - **Large copies carry on where they stopped.** A file being copied on this computer is written as `name.dori-part` and only gets its real name once complete, so a half-copied file never sits under the real name (and an overwritten file keeps its old contents until the new copy is whole). If a copy is cancelled or fails after 4 MB, the part is kept, and **Retry** — or copying the same file to the same place again, even after a crash — continues from where it stopped, once it has checked the part still matches the start of the source
+- **Verify copies** (under File operations in **Edit Buttons…**, off by default) reads each copied file back and compares it with the original (SHA-256), failing the copy if they differ. It covers copies on this computer and copies into and out of archives; cloud copies are checked by rclone itself, which compares hashes where the storage offers them
 - **Create folders** in either panel
 - **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz** or **.tar**:
   - folders go in with everything inside them, including hidden files and empty folders; Unix permissions such as the execute bit are kept
@@ -98,6 +100,38 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Files that aren't text (or are over 32 MB) are compared byte by byte instead: identical, or the offset of the first difference
 - Works for local files, files inside archives and cloud files
 
+### Disk Usage
+- Right-click → **Disk Usage…** measures everything under the panel's folder (or the one folder selected) and lists what is inside it **largest first**, each with a bar, its size, its share and how many files it holds
+- **Double-click** a folder (or **Enter**, or **Open Folder**) to see what takes its space; **↑ Up** or **Backspace** goes back. **Show in Panel** goes to the item in the panel, ready to delete, move or compress
+- Measured in the background with a running file count and **Stop**; **Measure Again** after a clean-up. Linked folders count as nothing and are never walked into; folders that couldn't be read are noted. Local folders only
+
+### Labels & Tags
+- Right-click → **Label** gives the selected files and folders a **colour** (red, orange, yellow, green, blue, purple or grey), which tints their rows in the list and thumbnail views; **No Colour** removes it
+- **Label → Tags…** gives them **tags** ("work", "invoices 2026"), separated by commas; the box shows the tags already in use
+- A **Tags** column shows the colour and tags (`Green · work`). Like the Git column, it only appears while something in the folder has a label, and can be hidden from the header's right-click menu
+- **Filter by label**: type `tag:work` (or `tag:red`) in a panel's filter box, alone or with other patterns (`tag:work;*.pdf`), and save it as a saved filter like any other
+- Labels follow their files when DORI renames or moves them. They're kept in `Labels.xml` beside `Configuration.xml`, for files and folders on this computer
+
+### Git Status Column
+- Inside a **git work tree**, a **Git** column shows each file's state: **Modified**, **Staged**, **Added**, **Renamed**, **Untracked**, **Ignored** or **Conflict**. A folder shows the most important state of anything inside it, so a folder holding a change says Modified
+- Asked of `git` in the background each time the folder is listed (and when it refreshes), so the panel never waits for it. Outside a repository, or when git isn't installed, the column simply isn't there. Works in flat view too
+
+### Image Tools
+- Right-click → **File Tools → Image Tools…** works on the selected pictures (JPEG, PNG, WebP, GIF, BMP, ICO):
+  - **shrink to fit** a width and/or height (never enlarged, shape kept)
+  - **save as** JPEG, PNG or WebP (or the same format), with a quality setting
+  - **turn** 90° right, 180° or 90° left, and **stand sideways photos upright** for good, from their EXIF orientation
+- New files are written — beside the originals with something added to the name (`photo_edited.jpg`), or into the other panel's folder — and an existing file is never replaced. The originals are never changed. Photo details (EXIF) aren't copied into the new files
+
+### Split & Join Files
+- Right-click → **File Tools → Split File…** cuts one file into pieces of the size you give (`100 MB`, `4 GB`, `650M`), named `name.001`, `name.002`… (as 7-Zip and HJSplit name them), plus `name.sha256` holding the whole file's checksum
+- **File Tools → Join Pieces** on any piece puts them back together, and checks the result against the `.sha256` file when it's there — a damaged or missing piece is reported
+- The pieces (or the joined file) go into the other panel's folder, or beside the original when the other panel isn't on this computer. Both run in the File Operations window with progress, pause and cancel, and never overwrite
+
+### Synced Browsing
+- **⇄ Follow** (beside the button bank tabs, or right-click → **Synced Browsing**) links the two panels: going into a folder in one panel takes the other panel into the folder of the **same name**, and going up takes it **up the same number of levels**
+- When the other panel has no folder of that name it stays where it is, so the two can drift apart and line up again. Handy for comparing two copies of a project, or a folder and its backup
+
 ### Refresh & Live Updates
 - **Local folders refresh themselves** — when another program creates, deletes, renames or changes a file in a folder a panel is showing, the panel re-lists within about half a second
 - A refresh **keeps your place**: the cursor row, the selection, the scroll position and the filter all survive it; if the cursor's file was removed, the cursor stays on its neighbour
@@ -119,6 +153,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Each panel has a filter text box that narrows the displayed files and folders as you type
 - Filters by name using case-insensitive matching: a wildcard pattern (`*.jpg`) or text the name contains (`report`)
 - **Several patterns** separated by `;` show anything matching one of them: `*.cs;*.axaml`
+- **Labels**: `tag:work` or `tag:red` shows items with that tag or colour label (see Labels & Tags)
 - **Saved filters**: the **▾** button beside the filter box lists filters kept for reuse (shared by both panels) and saves the one typed in under a name ("Images" → `*.jpg;*.png;*.gif`); **Remove ▸** forgets one. They're kept in `Configuration.xml` under `<SavedFilters>`
 - An X button next to each filter clears it instantly
 - Filters reset automatically when navigating to a new directory
@@ -237,6 +272,12 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `DeselectByPattern` | Deselect by pattern | NumMinus, Minus |
 | `InvertSelection` | Invert selection | NumStar, Shift+8 |
 | `CommandPalette` | Command palette (find any command or button) | Ctrl+Shift+A |
+| `DiskUsage` | Disk usage (what takes the space) | — |
+| `EditLabels` | Labels and tags | — |
+| `ImageTools` | Image tools (resize, convert, turn) | — |
+| `SplitFile` | Split a file into pieces | — |
+| `JoinFiles` | Join pieces (.001, .002…) | — |
+| `SyncBrowse` | Synced browsing on / off | — |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -244,6 +285,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Edit Buttons…** (beside the bank tabs, or a `%BUTTONCONFIG%` button) opens the editor, where you can add, rename, reorder and delete banks as well as change the buttons. Nothing changes until you press Save
 - Each button can launch any external program with flexible argument substitution
 - Supports parameter placeholders like `%FD%`, `%LPATH%`, `%AF%`, and more
+- **`%ASK%`** or **`%ASK:Question%`** in a button's arguments asks for a value each time the button is pressed (for example `commit -m "%ASK:Commit message%"`); the same question used twice is asked once, and **Cancel** runs nothing
 - Button appearance (color, text, alignment, tooltip) is fully configurable via XML
 - A label too long for its button ends in "…"; hovering over the button shows it in full, above the button's own tooltip
 
@@ -301,13 +343,14 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 ### Browse Into Archives
 - Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
 - **Extract** by copying or dragging files/folders out to a normal folder — reuses the standard transfer progress and overwrite prompts
-- **View** files inside archives with F3, and **open them in external tools** (custom command buttons) — the file is extracted to a temporary copy that the tool receives
+- **View** files inside archives with F3, and **open them in external tools** (double-click, or custom command buttons) — the file is extracted to a temporary copy that the tool receives
+- **Edits are saved back into the archive.** When the other program saves that copy, DORI asks whether to **put the changed file back into the archive** (a .zip, .tar, .tar.gz or .tgz), replacing the entry in one rewrite. **Not Now** asks again after the next save
 - **Change .zip, .tar, .tar.gz and .tgz archives** as if they were folders:
   - **copy or move files and folders in** (buttons, F5/F6 or drag), with the usual skip / overwrite / keep-both choices for names already there
   - **delete**, **rename** (including batch renames and swaps), **make folders**, and **move** items within the archive or out of it
   - each operation rewrites the archive **once**, however many items it touches, and the new archive only replaces the old one when it is complete — a failure or **Cancel** leaves the original untouched. Moves into archives can be undone (Ctrl/Cmd+Z), and failed operations retried
   - large archives take a moment: every change rewrites the whole file, and zip entries are recompressed
-- **7z and RAR archives are read-only** (nothing available can write them); writing to one says so. Edits made in an external tool stay in the temp copy and are not written back
+- **7z and RAR archives are read-only** (nothing available can write them); writing to one says so, and a file edited from one is left in its temporary copy, whose path DORI shows
 - Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
 
 ### Cloud Storage Access
@@ -330,7 +373,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 ### Display Options
 - Toggle hidden file visibility with the "Show Hidden" checkbox
 - **Sort by clicking a column header** — Name, Size, or Date; click again to reverse (an ▲/▼ shows the active column). **Right-click a header** for a menu with **Type (extension)** sorting and explicit Ascending/Descending. Sorting is per-panel and persists as you navigate; folders stay grouped first
-- **Choose the columns** each panel shows — right-click a column header and tick or untick Icon, Size, Date, Folders inside, Files inside and Attributes (Name is always shown), or pick **Show all columns**. Each panel keeps its own choice, and it's remembered between sessions (in `Configuration.xml`). Hiding the folder/file count columns also leaves more room for long names
+- **Choose the columns** each panel shows — right-click a column header and tick or untick Icon, Size, Date, Folders inside, Files inside and Attributes (Name is always shown); the **Tags** and **Git** columns appear by themselves when there's something to show, or pick **Show all columns**. Each panel keeps its own choice, and it's remembered between sessions (in `Configuration.xml`). Hiding the folder/file count columns also leaves more room for long names
 - Configurable font sizes for grid content and headers
 - Right-click context menu on panels — Calculate Folder Size, File Permissions, Copy Path / Full Path, **Terminal Here**, and font size adjustment
 - Tooltips on hover showing file/folder details
@@ -361,7 +404,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.32.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.33.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -611,6 +654,10 @@ The `<Args> </Args>` parameter can contain the following entries
 * `%LPATH%` - Full Path of what is currently being shown in the LEFT Panel
 
 * `%RPATH%` - Full Path of what is currently being shown in the RIGHT Panel
+
+* `%ASK%` or `%ASK:Question%` - Asks for a value when the button is pressed and puts it here, for example
+  `<Args>commit -m "%ASK:Commit message%"</Args>`. Put quotes around it when the answer may contain spaces.
+  The same question used twice is asked once; Cancel runs nothing. It can be used together with the tokens above
 
 
 
@@ -1666,6 +1713,19 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.33.0 (2026-11-16) — Disk usage, labels, git status, image tools, split & join and more
+- **Disk usage** (right-click → Disk Usage…): what takes the space under a folder, largest first with bars; open folders to dig in, and go to any item in the panel.
+- **Edits saved back into archives.** A file opened from inside a .zip or .tar in another program is watched, and when it is saved DORI offers to put it back into the archive.
+- **Verify copies** now also checks copies into and out of archives.
+- **Large copies carry on where they stopped.** Files are copied as `name.dori-part` and renamed when complete; a cancelled or failed copy keeps its part, and Retry (or copying again) continues from there after checking it.
+- **Synced browsing** (⇄ Follow): the other panel follows into folders of the same name and back up.
+- **Colour labels and tags** (right-click → Label): tinted rows, a Tags column, and `tag:name` in the filter box. Kept in `Labels.xml`, and moved with files DORI renames or moves.
+- **Git status column**: Modified, Staged, Untracked, Ignored and so on for each file inside a git work tree, and the strongest state for folders.
+- **Image tools** (right-click → File Tools): shrink, convert to JPEG/PNG/WebP and turn a batch of pictures, standing sideways photos upright, into new files.
+- **`%ASK%` button token**: a button can ask for a value (`%ASK:Commit message%`) before it runs.
+- **Split and join files** (right-click → File Tools): numbered pieces of any size with a `.sha256` file, and joining that checks the result.
+- Message boxes grow to fit longer messages instead of cutting them off.
 
 ### 0.1.32.0 (2026-11-15) — Upright thumbnails
 - **Thumbnails of photos taken with the camera on its side now show upright**, as the viewer and preview window already did. Thumbnails cached sideways by earlier versions are made again the first time each folder is shown.

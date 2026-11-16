@@ -78,6 +78,12 @@
                     <TextBlock Text="%RPATH%" FontWeight="Bold" FontSize="16"></TextBlock>
                     <TextBlock Text="  Will inject the PATH currently selected in the Right panel" FontWeight="16"></TextBlock>
                 </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="    -"></TextBlock>
+                    <TextBlock Text="%ASK:Question%" FontWeight="Bold" FontSize="16"></TextBlock>
+                    <TextBlock Text="  Asks the question when the button is pressed and injects the answer (%ASK% alone asks for a Value)" FontWeight="16"></TextBlock>
+                </StackPanel>
                 
             </StackPanel>
         </ScrollViewer>

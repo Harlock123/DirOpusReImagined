@@ -9,6 +9,9 @@ namespace DirOpusReImagined
     /// </summary>
     public partial class TextPromptDialog : Window
     {
+        /// <summary>When true, OK with an empty box gives "" (rather than null, which means cancelled).</summary>
+        public bool AllowEmpty { get; set; }
+
         public TextPromptDialog()
         {
             AvaloniaXamlLoader.Load(this);
@@ -23,7 +26,7 @@ namespace DirOpusReImagined
             this.FindControl<Button>("OkButton")!.Click += (_, _) =>
             {
                 string text = (box.Text ?? "").Trim();
-                Close(text.Length == 0 ? null : text);
+                Close(text.Length == 0 && !AllowEmpty ? null : text);
             };
             this.FindControl<Button>("CancelButton")!.Click += (_, _) => Close(null);
             Opened += (_, _) => { box.Focus(); box.SelectAll(); };

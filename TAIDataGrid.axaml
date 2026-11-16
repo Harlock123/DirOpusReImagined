@@ -31,6 +31,25 @@
 						<MenuItem Name="CompareFilesMenuItem" Header="Compare Files…" Click="CompareFiles_Click"/>
 						<MenuItem Name="FlatViewMenuItem" Header="Flat View (all files below)" Click="FlatView_Click"/>
 						<MenuItem Name="FindDuplicatesMenuItem" Header="Find Duplicates…" Click="FindDuplicates_Click"/>
+						<MenuItem Name="DiskUsageMenuItem" Header="Disk Usage…" Click="DiskUsage_Click"/>
+						<MenuItem Name="LabelMenuItem" Header="Label">
+							<MenuItem Header="Red" Tag="Red" Click="LabelColour_Click"/>
+							<MenuItem Header="Orange" Tag="Orange" Click="LabelColour_Click"/>
+							<MenuItem Header="Yellow" Tag="Yellow" Click="LabelColour_Click"/>
+							<MenuItem Header="Green" Tag="Green" Click="LabelColour_Click"/>
+							<MenuItem Header="Blue" Tag="Blue" Click="LabelColour_Click"/>
+							<MenuItem Header="Purple" Tag="Purple" Click="LabelColour_Click"/>
+							<MenuItem Header="Grey" Tag="Grey" Click="LabelColour_Click"/>
+							<MenuItem Header="No Colour" Tag="None" Click="LabelColour_Click"/>
+							<Separator/>
+							<MenuItem Header="Tags…" Click="EditLabels_Click"/>
+						</MenuItem>
+						<MenuItem Name="FileToolsMenuItem" Header="File Tools">
+							<MenuItem Name="ImageToolsMenuItem" Header="Image Tools (resize, convert, turn)…" Click="ImageTools_Click"/>
+							<MenuItem Name="SplitFileMenuItem" Header="Split File…" Click="SplitFile_Click"/>
+							<MenuItem Name="JoinFilesMenuItem" Header="Join Pieces (.001)" Click="JoinFiles_Click"/>
+						</MenuItem>
+						<MenuItem Name="SyncBrowseMenuItem" Header="Synced Browsing" Click="SyncBrowse_Click"/>
 						<MenuItem Name="GoToLinkTargetMenuItem" Header="Go to Link Target" Click="GoToLinkTarget_Click"/>
 						<MenuItem Name="MakeLinkMenuItem" Header="Make Link in Other Panel" Click="MakeLink_Click"/>
 						<Separator/>

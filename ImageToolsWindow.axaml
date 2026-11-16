@@ -1,0 +1,78 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.ImageToolsWindow"
+        Width="560" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Image Tools">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="CheckBox, RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <StackPanel Margin="16" Spacing="10">
+        <TextBlock x:Name="ScopeText" FontWeight="Bold" TextWrapping="Wrap" />
+
+        <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Shrink to fit" />
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                <TextBox x:Name="MaxWidthBox" Width="80" Watermark="width" />
+                <TextBlock Text="×" />
+                <TextBox x:Name="MaxHeightBox" Width="80" Watermark="height" />
+                <TextBlock Text="pixels (empty: keep the size)" Opacity="0.75" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Save as" />
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <ComboBox x:Name="FormatBox" Width="150" SelectedIndex="0">
+                    <ComboBoxItem Content="Same format" />
+                    <ComboBoxItem Content="JPEG" />
+                    <ComboBoxItem Content="PNG" />
+                    <ComboBoxItem Content="WebP" />
+                </ComboBox>
+                <TextBlock Text="Quality" />
+                <TextBox x:Name="QualityBox" Width="56" Text="90" ToolTip.Tip="For JPEG and WebP: 1 to 100" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Turn" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                <ComboBox x:Name="TurnBox" Width="150" SelectedIndex="0">
+                    <ComboBoxItem Content="No extra turn" />
+                    <ComboBoxItem Content="90° right" />
+                    <ComboBoxItem Content="180°" />
+                    <ComboBoxItem Content="90° left" />
+                </ComboBox>
+                <CheckBox x:Name="UprightBox" IsChecked="True" Content="Stand sideways photos upright"
+                          ToolTip.Tip="Turns photos the way their EXIF orientation says, so they're upright in every program" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Save into" />
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                <RadioButton x:Name="SameFolderRadio" GroupName="Where" Content="The same folder" IsChecked="True" />
+                <RadioButton x:Name="OtherPanelRadio" GroupName="Where" Content="The other panel's folder" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Add to names" />
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <TextBox x:Name="SuffixBox" Width="120" Text="_edited" />
+                <TextBlock x:Name="ExampleText" Opacity="0.75" TextTrimming="CharacterEllipsis" MaxWidth="250" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Text="New files are written; the originals are never changed. Photo details (EXIF) aren't copied into them."
+                   TextWrapping="Wrap" Opacity="0.75" />
+        <TextBlock x:Name="StatusText" TextWrapping="Wrap" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="StartButton" Content="Make Them" IsDefault="True" />
+            <Button x:Name="StopButton" Content="Stop" IsVisible="False" />
+            <Button x:Name="CloseButton" Content="Close" IsCancel="True" />
+        </StackPanel>
+    </StackPanel>
+</Window>

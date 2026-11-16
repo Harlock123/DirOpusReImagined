@@ -110,6 +110,9 @@ namespace DirOpusReImagined
             InitRecentFolders();
             InitButtonBanks();
             InitFlatView();
+            InitLabels();
+            InitSyncBrowse();
+            InitArchiveWriteBack();
             InitLayouts();
             InitSavedFilters();
             PaletteButton.Click += (_, _) => OpenCommandPalette();
@@ -572,7 +575,7 @@ namespace DirOpusReImagined
             RenameFileInterface fi =
                 new RenameFileInterface(LPgrid, LPpath.Text+"",
                     RPgrid,RPpath.Text+"", ChkShowHidden.IsChecked.Value);
-            fi.Renamed = _undo.Push;
+            fi.Renamed = PushUndo;
             fi.Show(this);
             
         }
@@ -612,7 +615,7 @@ namespace DirOpusReImagined
             RenameFileInterface fi =
                 new RenameFileInterface(RPgrid, RPpath.Text+ "",
                     LPgrid,LPpath.Text + "", ChkShowHidden.IsChecked.Value);
-            fi.Renamed = _undo.Push;
+            fi.Renamed = PushUndo;
             fi.Show(this);
             
         }
@@ -1241,7 +1244,7 @@ namespace DirOpusReImagined
         }
 
         /// <summary>Runs a command button's action: one of the built-in %…% actions, or a program with its arguments.</summary>
-        internal void RunButtonEntry(ButtonEntry item)
+        internal async void RunButtonEntry(ButtonEntry item)
         {
             if (item.Bcontent.ToUpper().Trim() == "%BUTTONCONFIG%")
             {
@@ -1265,7 +1268,22 @@ namespace DirOpusReImagined
                 ShowRcloneConfig();
                 return;
             }
-            string newaction = ParseTheArgs(item.Bargs);
+            // %ASK% and %ASK:Question% are asked for first; cancelling one runs nothing.
+            string bargs = item.Bargs ?? "";
+            var questions = ButtonPrompts.Questions(bargs);
+            if (questions.Count > 0)
+            {
+                var answers = new Dictionary<string, string>();
+                foreach (var q in questions)
+                {
+                    string? answer = await new TextPromptDialog("Run " + Path.GetFileName((item.Bcontent ?? "").Trim()), q) { AllowEmpty = true }
+                        .ShowDialog<string?>(this);
+                    if (answer == null) return;
+                    answers[q] = answer;
+                }
+                bargs = ButtonPrompts.Fill(bargs, answers);
+            }
+            string newaction = ParseTheArgs(bargs);
 
             if (newaction != "%ERROR%")
             {
@@ -1403,7 +1421,6 @@ namespace DirOpusReImagined
 
         // Session temp dir for archive entries handed to external tools; cleaned up on exit.
         private string _toolTempDir;
-        private bool _archiveToolNoteShown;
 
         /// <summary>Removes the session temp folder holding archive entries extracted for external tools.</summary>
         private void CleanupToolTemp()
@@ -1435,8 +1452,8 @@ namespace DirOpusReImagined
 
         /// <summary>
         /// Extracts a single archive entry to a session temp folder and returns its real path (or null
-        /// on failure). Shows a one-time note that edits to the extracted copy won't be written back
-        /// into the read-only archive.
+        /// on failure). The copy is watched, and when another program saves it DORI offers to put it back
+        /// into the archive.
         /// </summary>
         private string? ExtractArchiveEntryToTemp(string panelPath, string name)
         {
@@ -1451,19 +1468,12 @@ namespace DirOpusReImagined
 
                 string dest = Path.Combine(_toolTempDir, name);
                 Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                // Taken out again while the program may still have the old copy open: replace it in
+                // place, so a save to the old copy is still seen.
                 using (var inS = provider.OpenRead(entryUri))
-                using (var outS = File.Create(dest))
+                using (var outS = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
                     inS.CopyTo(outS);
-
-                if (!_archiveToolNoteShown)
-                {
-                    _archiveToolNoteShown = true;
-                    new MessageBox(
-                        "Files inside an archive are opened from a temporary extracted copy.\n\n" +
-                        "Any changes you save in the external program stay in that temporary copy and are " +
-                        "NOT written back into the archive.",
-                        "Opened from archive").ShowDialog(this);
-                }
+                TrackArchiveCopy(entryUri, dest);
 
                 return dest;
             }
@@ -2333,6 +2343,24 @@ namespace DirOpusReImagined
                     break;
                 case GridVerb.SetAttributes:
                     OpenSetAttributes(left);
+                    break;
+                case GridVerb.DiskUsage:
+                    OpenDiskUsage(left);
+                    break;
+                case GridVerb.EditLabels:
+                    EditLabels(left);
+                    break;
+                case GridVerb.ImageTools:
+                    OpenImageTools(left);
+                    break;
+                case GridVerb.SplitFile:
+                    SplitPickedFile(left);
+                    break;
+                case GridVerb.JoinFiles:
+                    JoinPickedPieces(left);
+                    break;
+                case GridVerb.SyncBrowse:
+                    ToggleSyncBrowse();
                     break;
             }
         }
@@ -3985,6 +4013,7 @@ namespace DirOpusReImagined
             ApplyFilter(LPgrid, LPfilter.Text, _lpUnfilteredItems);
             UpdateStatusBar();
             UpdateBreadcrumbs(LPpath.Text, LPbreadcrumbs, "LP");
+            AfterPanelNavigated(isLeft: true);
         }
 
         private void RefreshRPGridPostActions()
@@ -3993,6 +4022,7 @@ namespace DirOpusReImagined
             ApplyFilter(RPgrid, RPfilter.Text, _rpUnfilteredItems);
             UpdateStatusBar();
             UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
+            AfterPanelNavigated(isLeft: false);
         }
 
         // In-flight thumbnail generation per panel; cancelled when the panel re-lists or navigates away.
@@ -4123,6 +4153,11 @@ namespace DirOpusReImagined
             // A fresh listing invalidates any active comparison (rows are rebuilt unmarked).
             _comparing = false;
 
+            // Labels first, so the filter can match tag:name.
+            string? shown = ReferenceEquals(grid, LPgrid) ? LPpath.Text : RPpath.Text;
+            ApplyLabels(grid, shown);
+            RequestGitStatus(grid, shown);
+
             if (ReferenceEquals(grid, LPgrid))
             {
                 LPgrid.SourcePath = LPpath.Text ?? "";
@@ -4200,11 +4235,12 @@ namespace DirOpusReImagined
 
             // Wildcard match (e.g. *.jpg) when the text contains * or ?, otherwise substring (e.g. jpg);
             // several patterns separated by ";" match if any does (e.g. *.cs;*.axaml).
-            var matches = SavedFilters.Matcher(filterText);
+            // tag:name matches a colour label or tag.
+            var matches = SavedFilters.EntryMatcher(filterText);
             var filtered = unfilteredItems.Where(item =>
             {
                 if (item is AFileEntry af)
-                    return matches(af.Name);
+                    return matches(af.Name, af.Label.Has);
                 return true;
             }).ToList();
 

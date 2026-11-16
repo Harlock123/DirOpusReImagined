@@ -27,6 +27,8 @@ namespace DirOpusReImagined
             "Dirs" => "Folders inside",
             "Files" => "Files inside",
             "Flags" => "Attributes",
+            "Tags" => "Labels and tags (shown when any)",
+            "Git" => "Git status (shown in a git work tree)",
             _ => name,
         };
 

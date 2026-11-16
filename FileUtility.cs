@@ -382,18 +382,61 @@ namespace DirOpusReImagined
             string src, string dst, CancellationToken ct)
         {
             if (!AppOptions.VerifyCopies) return;
-            if (!ReferenceEquals(srcP, dstP) || srcP.IsRemote) return;
+            // Cloud copies are left to rclone, which checks each transfer's hash itself where the
+            // storage offers one; reading the file back from the cloud would double the download.
+            if (srcP.IsRemote || dstP.IsRemote) return;
 
             await Task.Run(() =>
             {
                 ct.ThrowIfCancellationRequested();
-                string? a = srcP.ComputeHash(src);
-                string? b = dstP.ComputeHash(dst);
+                string? a = HashOf(srcP, src, ct);
+                string? b = HashOf(dstP, dst, ct);
                 if (a == null || b == null) return;   // can't verify -> don't fail the copy
                 if (!string.Equals(a, b, StringComparison.OrdinalIgnoreCase))
                     throw new IOException(
                         $"Verification failed: {Path.GetFileName(dst.TrimEnd('/', '\\'))} does not match the source after copying.");
             }, ct).ConfigureAwait(false);
+        }
+
+        /// <summary>SHA-256 of a file through its provider (so an archive entry is read from the archive), or null if it can't be read.</summary>
+        internal static string? HashOf(IFileProvider provider, string path, CancellationToken ct = default)
+        {
+            try
+            {
+                using var stream = provider.OpenRead(path);
+                using var sha = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
+                var buffer = new byte[1 << 16];
+                int n;
+                while ((n = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    sha.AppendData(buffer, 0, n);
+                }
+                return Convert.ToHexString(sha.GetHashAndReset());
+            }
+            catch (OperationCanceledException) { throw; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// With Verify Copies on, reads back each file just written into <paramref name="archiveFsPath"/>
+        /// and compares it with the file it came from. Throws on the first one that differs.
+        /// </summary>
+        internal static void VerifyArchiveAdds(string archiveFsPath, IEnumerable<FileSystem.Archive.ArchiveAdd> adds, CancellationToken ct)
+        {
+            if (!AppOptions.VerifyCopies) return;
+            var local = ProviderRegistry.For(archiveFsPath);
+            foreach (var add in adds)
+            {
+                if (add.IsDirectory || string.IsNullOrEmpty(add.Source)) continue;
+                ct.ThrowIfCancellationRequested();
+                string uri = new FileSystem.Archive.ArchivePath(archiveFsPath, add.Entry.Trim('/')).FullUri;
+                string? a = HashOf(local, add.Source, ct);
+                string? b = HashOf(ProviderRegistry.For(uri), uri, ct);
+                if (a == null || b == null) continue;
+                if (!string.Equals(a, b, StringComparison.OrdinalIgnoreCase))
+                    throw new IOException($"Verification failed: {Path.GetFileName(add.Source)} does not match its copy in {Path.GetFileName(archiveFsPath)}.");
+            }
         }
 
         private sealed class ByteCounter { public long Total; }

@@ -272,6 +272,7 @@ public sealed class FileOperation
                     edit.Adds.AddRange(Archive.ArchiveEditor.PlanAdds(
                         group.Where(x => !renamed.Contains(x.i)).Select(x => (x.it.Source, EntryOf(x.it.TargetPath), x.it.IsDirectory)), ct));
                     Archive.ArchiveEditor.Apply(group.Key, edit, progress, ct);
+                    FileUtility.VerifyArchiveAdds(group.Key, edit.Adds, ct);
 
                     foreach (var (_, i) in group)
                     {

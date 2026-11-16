@@ -55,7 +55,13 @@ namespace DirOpusReImagined
         FindDuplicates,
         SavedFilters,
         CommandPalette,
-        SetAttributes
+        SetAttributes,
+        DiskUsage,
+        EditLabels,
+        ImageTools,
+        SplitFile,
+        JoinFiles,
+        SyncBrowse
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -422,6 +428,26 @@ namespace DirOpusReImagined
         public bool IsColumnVisible(string name) => !_hiddenColumns.Contains(name);
 
         /// <summary>
+        /// Columns that only appear when some row has something in them (Tags, Git), so folders
+        /// without labels or outside a git work tree look as they always did.
+        /// </summary>
+        public static readonly string[] OptionalColumns = { nameof(AFileEntry.Tags), nameof(AFileEntry.Git) };
+
+        private bool AnyValueIn(PropertyInfo p)
+        {
+            foreach (var item in _items)
+                if (item is AFileEntry && p.GetValue(item) is string { Length: > 0 }) return true;
+            return false;
+        }
+
+        /// <summary>Call after changing rows' Tags or Git text, so those columns appear or go and the rows redraw.</summary>
+        public void RefreshOptionalColumns()
+        {
+            _visibleFor = null;
+            ReRender();
+        }
+
+        /// <summary>
         /// The properties shown as columns for items of <paramref name="t"/>, in order. Every column
         /// loop (measuring, drawing, hit-testing) goes through this, so a column index always means
         /// the same column everywhere.
@@ -430,7 +456,10 @@ namespace DirOpusReImagined
         {
             if (_visibleFor != t)
             {
-                _visibleProperties = t.GetProperties().Where(p => !_hiddenColumns.Contains(p.Name)).ToArray();
+                _visibleProperties = t.GetProperties()
+                    .Where(p => !_hiddenColumns.Contains(p.Name))
+                    .Where(p => !OptionalColumns.Contains(p.Name) || AnyValueIn(p))
+                    .ToArray();
                 _visibleFor = t;
             }
             return _visibleProperties;
@@ -1023,6 +1052,7 @@ namespace DirOpusReImagined
                 SuspendRendering = true;
 
                 _items = value;
+                _visibleFor = null;   // the optional columns depend on the rows
                 _selecteditems.Clear();
                 TheItemUnderTheMouse = new GridHoverItem();
                 _gridXShift = 0;
@@ -1391,6 +1421,30 @@ namespace DirOpusReImagined
         /// background (normal, selection, hover, drop target, and every compare color) in both themes,
         /// without hand-tuning a text color per background.
         /// </summary>
+        // Label tints, mixed into the grid's background so they stay soft in light and dark themes alike.
+        private readonly Dictionary<(LabelColour, Color), IBrush> _labelBrushes = new();
+
+        private IBrush LabelBrush(LabelColour colour)
+        {
+            Color bg = _gridCellBrush is ISolidColorBrush s ? s.Color : Colors.White;
+            if (_labelBrushes.TryGetValue((colour, bg), out var brush)) return brush;
+            Color c = colour switch
+            {
+                LabelColour.Red => Color.FromRgb(0xE5, 0x48, 0x4D),
+                LabelColour.Orange => Color.FromRgb(0xF0, 0x8C, 0x2E),
+                LabelColour.Yellow => Color.FromRgb(0xE8, 0xC5, 0x2A),
+                LabelColour.Green => Color.FromRgb(0x46, 0xA7, 0x58),
+                LabelColour.Blue => Color.FromRgb(0x3E, 0x7B, 0xE0),
+                LabelColour.Purple => Color.FromRgb(0x9A, 0x5C, 0xD0),
+                _ => Color.FromRgb(0x8E, 0x8E, 0x8E),
+            };
+            const double mix = 0.38;
+            byte M(byte a, byte b) => (byte)Math.Round(a + (b - a) * mix);
+            brush = new SolidColorBrush(Color.FromRgb(M(bg.R, c.R), M(bg.G, c.G), M(bg.B, c.B)));
+            _labelBrushes[(colour, bg)] = brush;
+            return brush;
+        }
+
         private static IBrush ReadableTextFor(IBrush bg)
         {
             if (bg is ISolidColorBrush scb)
@@ -1729,6 +1783,10 @@ namespace DirOpusReImagined
                                 if (item is AFileEntry cmpEntry && cmpEntry.CompareState != RowCompareState.None)
                                 {
                                     tbb = CompareBrush(cmpEntry.CompareState);
+                                }
+                                else if (item is AFileEntry labelled && labelled.LabelColour != LabelColour.None)
+                                {
+                                    tbb = LabelBrush(labelled.LabelColour);
                                 }
 
                                 if (_selecteditems.Contains(item))
@@ -2088,6 +2146,8 @@ namespace DirOpusReImagined
                     IBrush? bg = null;
                     if (entry != null && entry.CompareState != RowCompareState.None)
                         bg = CompareBrush(entry.CompareState);
+                    else if (entry != null && entry.LabelColour != LabelColour.None)
+                        bg = LabelBrush(entry.LabelColour);
                     if (_selecteditems.Contains(item))
                         bg = _gridSelectedItemBrush;
                     if (idx == TheItemUnderTheMouse.rowID && _mouseInControl)
@@ -4075,6 +4135,28 @@ namespace DirOpusReImagined
         private void FlatView_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FlatView);
         private void FindDuplicates_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FindDuplicates);
         private void SetAttributes_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SetAttributes);
+        private void DiskUsage_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.DiskUsage);
+        private void EditLabels_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.EditLabels);
+        private void ImageTools_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.ImageTools);
+        private void SplitFile_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SplitFile);
+        private void JoinFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.JoinFiles);
+        private void SyncBrowse_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SyncBrowse);
+
+        /// <summary>Raised when a colour is picked under right-click → Label (None clears the colour).</summary>
+        public event EventHandler<LabelColour>? LabelColourRequested;
+
+        private void LabelColour_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem { Tag: string name } && Enum.TryParse(name, out LabelColour colour))
+                LabelColourRequested?.Invoke(this, colour);
+        }
+
+        /// <summary>Shows whether synced browsing is on, as a tick on its menu item.</summary>
+        public void SetSyncBrowseChecked(bool on)
+        {
+            var item = this.FindControl<MenuItem>("SyncBrowseMenuItem");
+            if (item != null) item.Header = (on ? "✓ " : "") + "Synced Browsing";
+        }
 
         private void GoToLinkTarget_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToLinkTarget);
 
@@ -4949,6 +5031,17 @@ namespace DirOpusReImagined
         public string Dirs { get; set; }
         public string Files { get; set; }
         public string Flags { get; set; }
+
+        /// <summary>The colour label and tags ("Red · work"); a column only while some row has one.</summary>
+        public string Tags { get; set; } = "";
+
+        /// <summary>The git status word (Modified, Untracked…); a column only inside a git work tree.</summary>
+        public string Git { get; set; } = "";
+
+        // The colour label, tinting the row, and the whole label for tag: filters. FIELDS, for the
+        // same reason as CompareState below.
+        public LabelColour LabelColour;
+        public FileLabel Label = FileLabel.Empty;
 
         // Directory-compare color state. Deliberately a FIELD, not a property: the grid renders one
         // column per public property (reflection), so a property here would show as a stray column.

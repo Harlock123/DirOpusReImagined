@@ -35,6 +35,21 @@ namespace DirOpusReImagined
             return name => matchers.Any(m => m.IsMatch(name));
         }
 
+        /// <summary>
+        /// Like <see cref="Matcher"/>, but a pattern written <c>tag:name</c> matches items whose
+        /// colour label or one of whose tags is <c>name</c> (<paramref name="hasLabel"/> answers that).
+        /// </summary>
+        public static Func<string, Func<string, bool>, bool> EntryMatcher(string filterText)
+        {
+            var parts = filterText.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var tags = parts.Where(IsTagPattern).Select(p => p.Substring(4).Trim()).Where(t => t.Length > 0).ToList();
+            var names = parts.Where(p => !IsTagPattern(p)).Select(p => FileSearch.MakeNameMatcher(p, matchCase: false)).ToList();
+            if (tags.Count == 0 && names.Count == 0) return (_, _) => true;
+            return (name, hasLabel) => names.Any(m => m.IsMatch(name)) || tags.Any(hasLabel);
+        }
+
+        private static bool IsTagPattern(string p) => p.StartsWith("tag:", StringComparison.OrdinalIgnoreCase);
+
         public static List<SavedFilter> Read(XElement? root)
             => (root?.Element(ElementName)?.Elements("Filter") ?? Enumerable.Empty<XElement>())
                .Select(e => new SavedFilter((((string?)e.Attribute("name")) ?? "").Trim(), e.Value.Trim()))

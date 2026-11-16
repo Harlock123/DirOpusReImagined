@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.32.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.33.0).
 
 ## Commands
 
@@ -66,6 +66,25 @@ Everything sits at the repository root; there is no `src/` folder.
 - `FileSystem/Preview/ExifReader.cs` and `ImageOrientation.cs`: photo details for image previews (EXIF from JPEG,
   TIFF, PNG and WebP, every offset bounds-checked) and turning the decoded bitmap upright for EXIF orientations 2–8 (also used by `ThumbnailCache`; raise its
   `CacheVersion` whenever thumbnails are made differently, so old ones on disk aren't reused).
+- `DiskUsage.cs` and `DiskUsageWindow.axaml(.cs)`: Disk Usage (sizes of everything under a local folder, largest first;
+  linked folders count as nothing and are never walked into).
+- `Labels.cs` (`LabelStore`, `Labels.xml` beside the config) and `MainWindow.Labels.cs`: colour labels and tags. Each listing
+  copies them onto its rows (`AFileEntry.Label`/`LabelColour` fields for the tint and `tag:` filters, the `Tags` property
+  for the column); `MainWindow.PushUndo` records renames and moves for undo and moves their labels too.
+- `GitStatus.cs` and `MainWindow.Git.cs`: the Git column, from `git status --porcelain -z` run off the UI thread after each
+  listing. `Tags` and `Git` are `TaiDataGrid.OptionalColumns`: shown only while some row has text in them.
+- `ImageTools.cs` and `ImageToolsWindow.axaml(.cs)`: resize, convert and turn pictures with SkiaSharp (which Avalonia ships),
+  always into new files. `FileSplitter.cs`: split into `name.001…` with `name.sha256`, and join with a check.
+  `MainWindow.Tools.cs` opens these and Disk Usage, and runs split/join as `FileOperation`s in the queue.
+- `SyncBrowse.cs` and `MainWindow.SyncBrowse.cs`: synced browsing (⇄ Follow). `AfterPanelNavigated`, called from
+  `RefreshLPGridPostActions`/`RefreshRPGridPostActions`, compares the panel's old and new path.
+- `ArchiveWriteBack.cs` and `MainWindow.ArchiveWriteBack.cs`: files extracted from archives for other programs
+  (`ExtractArchiveEntryToTemp`) are watched, and a changed copy is offered back into the archive (`ArchiveEditor.Apply`).
+- `ButtonPrompts.cs`: the `%ASK%` / `%ASK:Question%` button token, asked for in `RunButtonEntry` before the other tokens.
+- `FileSystem/StreamCopy.cs`: local copies go through `name.dori-part` and are renamed when complete; a part of 4 MB or
+  more is kept on cancel or failure and resumed by the next copy of the same file to the same place (`ResumablePrefix`).
+  Verify Copies (`FileUtility.VerifyCopyIfEnabledAsync`, `VerifyArchiveAdds`) hashes through the providers, so archive legs
+  are checked too.
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,
   `JustifyColumns`, `TruncateColumns`, `ColumnNameAt`), never by position, because hidden columns shift positions.

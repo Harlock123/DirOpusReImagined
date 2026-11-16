@@ -167,7 +167,7 @@
                     <CheckBox Name="cbVerifyCopies" Padding="4"
                               Content="Verify copies (compare checksums after copying)" />
                     <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,0,0"
-                               Text="After each file is copied, re-read both copies and compare their checksums; if they differ the operation fails instead of silently reporting success. Applies to local disk and Windows/UNC network-share copies (where the checksums are comparable) — cloud copies are not verified. Trade-off: this roughly doubles the amount of reading, so large or network copies take longer. Off by default." />
+                               Text="After each file is copied, re-read both copies and compare their checksums; if they differ the operation fails instead of silently reporting success. Applies to copies on this computer (including Windows/UNC network shares) and copies into and out of archives; cloud copies are left to rclone, which checks hashes itself where the storage offers them. Trade-off: this roughly doubles the amount of reading, so large or network copies take longer. Off by default." />
 
                     <TextBlock Text="Display" FontSize="16" FontWeight="Bold" Margin="0,16,0,0" />
                     <StackPanel Orientation="Horizontal" Spacing="8">

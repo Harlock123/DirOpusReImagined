@@ -5,7 +5,7 @@ public class ColumnsTests
     [Fact]
     public void Every_file_entry_property_is_a_choosable_column_in_display_order()
     {
-        Assert.Equal(new[] { "Typ", "Name", "FileSize", "FileDate", "Dirs", "Files", "Flags" },
+        Assert.Equal(new[] { "Typ", "Name", "FileSize", "FileDate", "Dirs", "Files", "Flags", "Tags", "Git" },
                      MainWindow.AllColumns.Select(c => c.Name));
     }
 
@@ -48,4 +48,11 @@ public class ColumnsTests
         var hidden = new[] { "Typ", "FileDate", "Flags" };
         Assert.Equal(hidden, MainWindow.ParseHiddenColumns(MainWindow.FormatHiddenColumns(hidden)));
     }
+}
+
+public class OptionalColumnsTests
+{
+    [Fact]
+    public void Tags_and_git_are_the_columns_that_only_show_with_something_in_them()
+        => Assert.Equal(new[] { "Tags", "Git" }, TaiDataGrid.OptionalColumns);
 }

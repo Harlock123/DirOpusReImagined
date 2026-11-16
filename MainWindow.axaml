@@ -552,6 +552,10 @@
 			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
 			        Background="{DynamicResource PanelChromeBrush}"
 			        ToolTip.Tip="Find and run any command, button, layout or saved filter by typing part of its name (Ctrl/Cmd+Shift+A)" />
+			<ToggleButton Name="SyncBrowseToggle" DockPanel.Dock="Right" Content="⇄ Follow" FontSize="11"
+			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+			        Background="{DynamicResource PanelChromeBrush}"
+			        ToolTip.Tip="Synced browsing: going into a folder in one panel takes the other panel into the folder of the same name, and going up takes it up too" />
 			<Button Name="LayoutsButton" DockPanel.Dock="Right" Content="Layouts ▾" FontSize="11"
 			        Padding="8,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
 			        Background="{DynamicResource PanelChromeBrush}"

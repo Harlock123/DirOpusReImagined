@@ -42,7 +42,7 @@ namespace DirOpusReImagined
             {
                 var record = await Task.Run(() =>
                     UndoPlanner.RecordMove(sourceFolder, items, overwrittenTargets, UndoPlanner.Exists, DateTime.Now));
-                if (record != null) _undo.Push(record);
+                if (record != null) PushUndo(record);
             }
             catch (Exception ex)
             {
