@@ -40,6 +40,12 @@ namespace DirOpusReImagined
                     items.Add(new PaletteItem("Button", s.Content.Trim() + where, "", () => RunButtonEntry(entry)));
                 }
 
+            foreach (var job in _syncJobs)
+            {
+                var j = job;
+                items.Add(new PaletteItem("Sync job", j.Name, "", () => _ = RunSyncJobAsync(j, byItself: false)));
+            }
+
             foreach (var layout in ReadLayouts())
             {
                 var chosen = layout;

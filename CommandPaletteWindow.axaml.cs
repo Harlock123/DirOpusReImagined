@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -13,6 +14,19 @@ namespace DirOpusReImagined
     public partial class CommandPaletteWindow : Window
     {
         private readonly IReadOnlyList<PaletteItem> _items = new List<PaletteItem>();
+        private Func<string, IEnumerable<PaletteItem>>? _extra;
+
+        /// <summary>
+        /// A palette over other things than commands (Go to Folder uses it for folders), with
+        /// <paramref name="extra"/> adding items made from what is typed (a path typed in full).
+        /// </summary>
+        public CommandPaletteWindow(IReadOnlyList<PaletteItem> items, string title, string watermark,
+                                    Func<string, IEnumerable<PaletteItem>>? extra = null) : this(items)
+        {
+            Title = title;
+            this.FindControl<TextBox>("QueryBox")!.Watermark = watermark;
+            _extra = extra;
+        }
 
         public CommandPaletteWindow()
         {
@@ -47,6 +61,7 @@ namespace DirOpusReImagined
         {
             var list = this.FindControl<ListBox>("ResultsList")!;
             var ranked = CommandPalette.Rank(_items, text);
+            if (_extra != null) ranked.InsertRange(0, _extra(text));
             list.ItemsSource = ranked;
             list.SelectedIndex = ranked.Count > 0 ? 0 : -1;
             this.FindControl<TextBlock>("HintText")!.Text = ranked.Count == 0

@@ -57,6 +57,9 @@ public static class ArchiveEditor
     /// <summary>Why an archive can't be changed, for messages; null if it can.</summary>
     public static string? WhyReadOnly(string archiveFsPath)
     {
+        if (ArchivePasswords.IsEncrypted(archiveFsPath))
+            return "This archive is password-protected. DORI can open it and copy files out, but not change it. " +
+                   "Extract the files to a normal folder, change them there, and make a new password-protected zip.";
         if (CanWrite(archiveFsPath)) return null;
         string ext = Path.GetExtension(archiveFsPath);
         return $"DORI can read {ext} archives but not change them — only .zip, .tar, .tar.gz and .tgz archives " +

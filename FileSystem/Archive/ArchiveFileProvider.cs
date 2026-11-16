@@ -75,10 +75,17 @@ public sealed class ArchiveFileProvider : IFileProvider
             return hit.Entries;
 
         var list = new List<CachedEntry>();
+        if (DiscImage.IsDiscImage(archiveFsPath))
+        {
+            foreach (var (key, isDir, size, modified) in DiscImage.List(archiveFsPath))
+                if (key.Length > 0) list.Add(new CachedEntry(key, isDir, size, modified));
+            _cache[archiveFsPath] = (stamp, list);
+            return list;
+        }
         try
         {
             // Random-access path: ZIP, 7z, RAR, plain TAR, and single-member gzip/bzip2.
-            using var archive = ArchiveFactory.OpenArchive(archiveFsPath);
+            using var archive = ArchiveFactory.OpenArchive(archiveFsPath, ArchivePasswords.OptionsFor(archiveFsPath));
             foreach (var e in archive.Entries)
             {
                 if (e.Key == null) continue;
@@ -93,7 +100,7 @@ public sealed class ArchiveFileProvider : IFileProvider
             // Streaming fallback: compression-wrapped tarballs (.tar.gz/.tgz/.tar.bz2) that the
             // random-access factory can't open. Read forward once to collect entry metadata.
             list.Clear();
-            using var reader = ReaderFactory.OpenReader(archiveFsPath);
+            using var reader = ReaderFactory.OpenReader(archiveFsPath, ArchivePasswords.OptionsFor(archiveFsPath));
             while (reader.MoveToNextEntry())
             {
                 var e = reader.Entry;
@@ -215,11 +222,12 @@ public sealed class ArchiveFileProvider : IFileProvider
     public Stream OpenRead(string path)
     {
         var ap = ArchivePath.Parse(path);
+        if (DiscImage.IsDiscImage(ap.ArchiveFsPath)) return DiscImage.OpenFile(ap.ArchiveFsPath, ap.EntryPath);
 
         try
         {
             // Random-access path: find the entry directly and stream it, keeping the archive alive.
-            var archive = ArchiveFactory.OpenArchive(ap.ArchiveFsPath);
+            var archive = ArchiveFactory.OpenArchive(ap.ArchiveFsPath, ArchivePasswords.OptionsFor(ap.ArchiveFsPath));
             var entry = archive.Entries.FirstOrDefault(e =>
                 e.Key != null && !e.IsDirectory &&
                 string.Equals(NormalizeKey(e.Key), ap.EntryPath, StringComparison.Ordinal));
@@ -237,7 +245,7 @@ public sealed class ArchiveFileProvider : IFileProvider
         catch
         {
             // Streaming fallback for compression-wrapped tarballs: scan forward to the entry.
-            var reader = ReaderFactory.OpenReader(ap.ArchiveFsPath);
+            var reader = ReaderFactory.OpenReader(ap.ArchiveFsPath, ArchivePasswords.OptionsFor(ap.ArchiveFsPath));
             while (reader.MoveToNextEntry())
             {
                 var e = reader.Entry;

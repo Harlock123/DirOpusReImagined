@@ -32,6 +32,7 @@ namespace DirOpusReImagined
         /// <summary>Called after a panel shows a folder: moves the other panel to match when synced browsing is on.</summary>
         private void AfterPanelNavigated(bool isLeft)
         {
+            FollowInTree(isLeft);
             string now = (isLeft ? LPpath.Text : RPpath.Text) ?? "";
             string before = isLeft ? _lpLastPath : _rpLastPath;
             if (isLeft) _lpLastPath = now; else _rpLastPath = now;

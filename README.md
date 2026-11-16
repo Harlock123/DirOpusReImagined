@@ -28,12 +28,12 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Copy** files and folders between panels
 - **Move** files and folders between panels
 - **Delete** files and folders with a confirmation dialog — deletes go to the **OS trash / recycle bin** by default (recoverable), with a per-delete toggle for permanent deletion (local files only)
-- **Rename** files and folders with a pattern-based rename interface for batch operations
+- **Rename** files and folders with a pattern-based rename interface for batch operations. Besides `%NAME%` and `%ORD%`, names can be built from the file's details: `%EXT%`, `%FOLDER%` (the folder's name), `%DATE%` (when it last changed), `%TAKEN%` (when a photo was taken, from its EXIF details, or the file's date when it has none), and music and video tags — `%ARTIST%`, `%ALBUM%`, `%TITLE%`, `%TRACK%` (two digits), `%YEAR%`, `%GENRE%`. Dates take a format after a colon: `%TAKEN:yyyy-MM-dd_HHmm%`. Characters names can't hold (`AC/DC`, `12:30`) become `-` and `_`, and the preview shows every result before anything is renamed
 - Copies, moves and deletes run **in the background**, one at a time, in a **File Operations** window with progress, speed and time remaining:
   - **Pause** (⏸) and **resume** (▶) any operation, or **Pause all / Resume all**. A running copy stops within a second, partway through a file, and holds its place; cloud transfers stop after the current file. A paused operation that hasn't started yet lets the ones behind it go first. Speed and time remaining ignore paused time
   - **Retry** (↻) a failed or cancelled operation, or **Retry all**: it runs **only the items that didn't finish**, so a move that failed halfway completes instead of failing on the items it already moved, and a copy doesn't start again from scratch. The panels refresh afterwards, and a retried move can still be undone
   - **Large copies carry on where they stopped.** A file being copied on this computer is written as `name.dori-part` and only gets its real name once complete, so a half-copied file never sits under the real name (and an overwritten file keeps its old contents until the new copy is whole). If a copy is cancelled or fails after 4 MB, the part is kept, and **Retry** — or copying the same file to the same place again, even after a crash — continues from where it stopped, once it has checked the part still matches the start of the source
-- **Copy, cut and paste with other file managers.** **Ctrl/Cmd+C** (or right-click → **Copy**) puts the selected files on the system clipboard, **Ctrl/Cmd+X** cuts them, and **Ctrl/Cmd+V** pastes into the panel's folder, through the usual queue with its skip / overwrite / keep-both questions and undo. Files copied in Explorer, Finder or Files (Nautilus) paste into DORI, and files copied in DORI paste there; cut files are moved, and paste once. Full paths copied as text paste too. Files inside archives or in the cloud can't go on the clipboard (other programs can't open them); copy them to the other panel instead
+- **Copy, cut and paste with other file managers.** **Ctrl/Cmd+C** (or right-click → **Copy**) puts the selected files on the system clipboard, **Ctrl/Cmd+X** cuts them, and **Ctrl/Cmd+V** pastes into the panel's folder, through the usual queue with its skip / overwrite / keep-both questions and undo. Files copied in Explorer, Finder, Files (Nautilus), Dolphin and others paste into DORI, and files copied in DORI paste in Explorer, Finder and GNOME-style file managers (Files, Nemo, Thunar, Caja); cut files are moved, and paste once. On Linux, KDE apps such as Dolphin don't yet see files copied in DORI: the toolkit DORI uses (Avalonia 11.3) sends that file list empty or cut short, so DORI leaves it out rather than have only some files pasted. Full paths copied as text paste too. Files inside archives or in the cloud can't go on the clipboard (other programs can't open them); copy them to the other panel instead
 - **Speed limit and Start Later** (in the File Operations window): type a limit such as `10 MB` (a second) and copies keep under it — copies on this computer, and cloud transfers through rclone. **Start later…** holds the operations that haven't started until a time such as `02:00` (one already running carries on); **Start now** lets them go. The limit is remembered
 - **Verify copies** (under File operations in **Edit Buttons…**, off by default) reads each copied file back and compares it with the original (SHA-256), failing the copy if they differ. It covers copies on this computer and copies into and out of archives; cloud copies are checked by rclone itself, which compares hashes where the storage offers them
 - **Create folders** in either panel
@@ -42,8 +42,10 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
   - choose the compression (normal, smallest, fastest or none); the name is suggested from the selection
   - a progress bar shows the current file, and **Cancel** stops it without leaving a half-written archive behind
   - an existing file is never overwritten — the new archive is numbered instead (`photos_1.zip`)
+  - **protect a .zip with a password** (AES-256, the WinZip format 7-Zip, WinZip, Keka and The Unarchiver open; Windows Explorer's built-in zip support can't). The files' contents are encrypted; as in any zip, their names and sizes can still be seen
   - works from cloud folders and from inside other archives, and can save into a cloud folder; items that can't be read are listed at the end rather than stopping the whole archive
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
+- **Drag and drop with other programs**: drop files from a file manager, the desktop or an e-mail onto a panel (or a folder row) to copy them in — **Shift** moves — through the usual queue, conflict questions and undo. Files dragged out of a panel carry the system's file list too, so programs that accept dropped files can take them (files on this computer only; on Linux the toolkit may not pass a drag on to other programs)
 - **Double-click any file to open it with the system default application** — executables run, images open in the image viewer, media plays, documents open in their editor. Windows uses the shell, macOS Launch Services, Linux the desktop's MIME associations
 
 ### Symbolic Links
@@ -151,6 +153,11 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 ### Securely Delete
 - Right-click → **File Tools → Securely Delete…** overwrites the selected files with random data, written through to the disk, then renames, empties and deletes them, so a recovery tool can't bring them back. Folders are emptied the same way and removed; links are removed without touching what they point to. It runs in the File Operations window, and can't be undone
 - **It can't be relied on everywhere**: SSDs and flash drives move writes to fresh cells, copy-on-write file systems (Btrfs, ZFS, APFS) write new blocks, and snapshots, backups and cloud sync keep their own copies. On those, whole-disk encryption is the dependable answer
+
+### Saved Sync Jobs
+- Right-click → **File Tools → Saved Sync Jobs…** saves a sync under a name: two folders (on this computer or in the cloud) and how — **one way** (copy what's new, newer or changed), **mirror** (one way, and remove what the source doesn't have — to the trash, on this computer), or **two-way** (newer wins both ways, nothing removed), optionally comparing contents by checksum
+- **Run Now**, or run it from the **command palette** (each job is listed). A job set to **run every day at** a time runs by itself while DORI is open, and once when DORI next opens if that time was missed. Jobs run in the File Operations window like any copy; a job that runs by itself doesn't raise the window unless something fails
+- Kept in `SyncJobs.xml` beside `Configuration.xml`
 
 ### Synced Browsing
 - **⇄ Follow** (beside the button bank tabs, or right-click → **Synced Browsing**) links the two panels: going into a folder in one panel takes the other panel into the folder of the **same name**, and going up takes it **up the same number of levels**
@@ -310,6 +317,11 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `FolderRules` | Folder rules | — |
 | `Catalogues` | Disk catalogues | — |
 | `SecureDelete` | Securely delete (overwrite first) | — |
+| `GoToFolder` | Go to folder (bookmarks, recent, tabs…) | Ctrl+G |
+| `Bookmark1` … `Bookmark9` | Go to bookmark 1 … 9 | Ctrl+1 … Ctrl+9 |
+| `CommandLine` | Command line (run a command here) | Ctrl+Shift+L |
+| `FolderTree` | Folder tree on / off | Ctrl+Shift+T |
+| `SyncJobs` | Saved sync jobs | — |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -351,7 +363,8 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Photos taken with the camera on its side show upright** in the viewer, the preview window and the Thumbnails view: the EXIF orientation is applied, as photo apps do, and the size shown is the size as displayed
 
 ### File Viewer (Text / Hex)
-- Press **F3** (or right-click → **View**) to open a read-only viewer for the selected file
+- Press **F3** (or right-click → **View**) to open a viewer for the selected file
+- **Quick edit**: **Edit** turns a text file of up to 256 KB into an editor (with syntax colouring for source files); **Save** or **Ctrl/Cmd+S** writes it back through the file's provider — files on this computer, in the cloud, and inside .zip and .tar archives (one rewrite of the archive). The file's encoding (UTF-8, with or without a byte-order mark, or UTF-16) and its line endings are kept, and closing with changes not saved asks first
 - **Auto-detects** text vs binary and opens in the right mode; a **Text ⇄ Hex** toggle switches anytime (hex shows offset · bytes · ASCII)
 - Reads through the same provider layer as everything else, so it views **files inside archives** just as easily as normal files
 - Large files are capped (first 256 KB) with a truncation note so the viewer stays responsive
@@ -384,6 +397,8 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
   - each operation rewrites the archive **once**, however many items it touches, and the new archive only replaces the old one when it is complete — a failure or **Cancel** leaves the original untouched. Moves into archives can be undone (Ctrl/Cmd+Z), and failed operations retried
   - large archives take a moment: every change rewrites the whole file, and zip entries are recompressed
 - **Archives inside archives** open too: double-click a .zip (or .tar.gz, .7z…) shown inside another archive and DORI takes it out to a temporary copy and opens that. The path bar shows where it really is (`outer.zip › inner.zip`), going up from its top returns to the outer archive, and changes made inside it (copying files in, deleting, renaming) are offered back into the outer archive like any edited file
+- **Password-protected archives**: opening an encrypted .zip (WinZip AES or the older zip encryption) asks for its password, and asks again if it's wrong; encrypted .7z and .rar archives are asked for the same way, as far as the archive library (SharpCompress) can decrypt them. The password is kept in memory until DORI closes, never saved. Files can be browsed, viewed and copied out; an encrypted archive can't be changed
+- **Disk images**: double-click a **.iso** (CD and DVD images, ISO 9660 with long Joliet names, or UDF) to browse it like a folder and copy files out of it, without unpacking it first. Read-only
 - **7z and RAR archives are read-only** (nothing available can write them); writing to one says so, and a file edited from one is left in its temporary copy, whose path DORI shows
 - Powered by [SharpCompress](https://github.com/adamhathcock/sharpcompress) — pure-managed, so it works on every supported platform
 
@@ -395,6 +410,9 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Dedicated diagnostics dialog showing binary location, configured remotes, live daemon log, and recent API requests
 
 ### Navigation
+- **Go to Folder** (**Ctrl/Cmd+G**, or right-click → **Go to Folder…**): one list of your bookmarks, both panels' tabs, the other panel, recent folders, the home folder and the disk catalogues' drives. Type part of a name or path to narrow it, ↑ ↓ and Enter to go; a full path (or `~/Music`) typed in goes straight there. **Ctrl/Cmd+1…9** go to the first nine bookmarks
+- **Folder tree** (**Ctrl/Cmd+Shift+T**, the **Tree** button in a panel's tab bar, or right-click → **Folder Tree**): a tree of folders beside the panel, starting at the home folder and the drives (or `/`). It follows the panel, opening the way down to the folder shown, and picking a folder in it takes the panel there. Folders open only when expanded, linked folders (marked ↪) are never opened by following, and each panel remembers whether its tree is showing. Local folders
+- **Command line** under the panels (**Ctrl/Cmd+Shift+L** to get to it): type a command and press Enter to run it in the active panel's folder, through your shell (`$SHELL`, or `cmd.exe` on Windows). The button tokens work — `%AF%`, `%LF1%`, `%ASK:Message%` and the rest — and what it prints appears as it prints it in a **Command Output** window with **Stop**. **↑ ↓** go through earlier commands (the last 100 are remembered), and the panel refreshes when the command ends. Commands don't get keyboard input; for interactive programs use **Terminal Here**
 - Path text box with Enter key navigation
 - **Back and Forward** buttons per panel (per-tab history) — Back also goes up a level; **Alt+← / Alt+→** on the keyboard
 - **Recent folders** — the **◷** button beside Back/Forward (or **Alt+↓**) lists the folders either panel has shown lately, newest first, including cloud and archive folders; pick one to go there. The list holds 25, is shared by both panels, survives restarts (saved in `Configuration.xml`), skips folders that no longer exist, and can be cleared from the menu
@@ -439,7 +457,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.34.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.35.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1748,6 +1766,18 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.35.0 (2026-11-16) — Folder tree, command line, password zips, disk images and more
+- **Drag and drop with other programs**: drop files from other apps onto a panel to copy them in (Shift moves); files dragged out of a panel carry the system's file list for other programs.
+- **Folder tree** beside each panel (Ctrl/Cmd+Shift+T, or the Tree button), following the panel.
+- **Rename by file details**: `%TAKEN%` (photo date), `%DATE%`, `%EXT%`, `%FOLDER%` and music tags (`%ARTIST%`, `%TRACK%`…), with date formats.
+- **Password-protected archives**: encrypted .zip, .7z and .rar open after asking for the password, and the zip buttons can make AES-256 password zips.
+- **Quick edit** in the F3 viewer: change and save text files, including inside .zip and .tar archives and in the cloud.
+- **Command line** under the panels: run a command in the active panel's folder with the button tokens, output in a window.
+- **Saved sync jobs**: named one-way, mirror or two-way syncs, run by hand, from the command palette, or every day at a set time.
+- **Disk images**: browse .iso files (ISO 9660, Joliet, UDF) like folders and copy files out.
+- **Go to Folder** (Ctrl/Cmd+G) across bookmarks, tabs, recent folders and catalogues; Ctrl/Cmd+1…9 go to bookmarks.
+- **Clipboard on Linux**: files copied in DORI no longer offer KDE apps a file list that Avalonia 11.3 sends empty or cut short (which could have pasted only some of the files); GNOME-style file managers are unaffected.
 
 ### 0.1.34.0 (2026-11-16) — Clipboard, folder rules, catalogues, nested archives and more
 - **Copy, cut and paste files with other file managers** (Ctrl/Cmd+C, X, V, or right-click): files copied here paste in Explorer, Finder and Files, and the other way round, through the copy queue.

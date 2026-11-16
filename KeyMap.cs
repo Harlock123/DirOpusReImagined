@@ -19,6 +19,9 @@ namespace DirOpusReImagined
         CommandPalette,
         DiskUsage, EditLabels, ImageTools, SplitFile, JoinFiles, SyncBrowse,
         CopyToClipboard, CutToClipboard, PasteFromClipboard, FolderSizes, ExportListing, FolderRules, Catalogues, SecureDelete,
+        GoToFolder,
+        Bookmark1, Bookmark2, Bookmark3, Bookmark4, Bookmark5, Bookmark6, Bookmark7, Bookmark8, Bookmark9,
+        CommandLine, FolderTree, SyncJobs,
     }
 
     /// <summary>
@@ -161,6 +164,19 @@ namespace DirOpusReImagined
             new(ShortcutCommand.FolderRules, "Folder rules", ""),
             new(ShortcutCommand.Catalogues, "Disk catalogues", ""),
             new(ShortcutCommand.SecureDelete, "Securely delete (overwrite first)", ""),
+            new(ShortcutCommand.GoToFolder, "Go to folder (bookmarks, recent, tabs…)", "Ctrl+G"),
+            new(ShortcutCommand.Bookmark1, "Go to bookmark 1", "Ctrl+1"),
+            new(ShortcutCommand.Bookmark2, "Go to bookmark 2", "Ctrl+2"),
+            new(ShortcutCommand.Bookmark3, "Go to bookmark 3", "Ctrl+3"),
+            new(ShortcutCommand.Bookmark4, "Go to bookmark 4", "Ctrl+4"),
+            new(ShortcutCommand.Bookmark5, "Go to bookmark 5", "Ctrl+5"),
+            new(ShortcutCommand.Bookmark6, "Go to bookmark 6", "Ctrl+6"),
+            new(ShortcutCommand.Bookmark7, "Go to bookmark 7", "Ctrl+7"),
+            new(ShortcutCommand.Bookmark8, "Go to bookmark 8", "Ctrl+8"),
+            new(ShortcutCommand.Bookmark9, "Go to bookmark 9", "Ctrl+9"),
+            new(ShortcutCommand.CommandLine, "Command line (run a command here)", "Ctrl+Shift+L"),
+            new(ShortcutCommand.FolderTree, "Folder tree on / off", "Ctrl+Shift+T"),
+            new(ShortcutCommand.SyncJobs, "Saved sync jobs", ""),
         };
 
         public const string ElementName = "Shortcuts";

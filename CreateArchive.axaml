@@ -37,6 +37,16 @@
             </ComboBox>
         </Grid>
 
+        <StackPanel Name="PasswordPanel" Spacing="4">
+            <CheckBox Name="PasswordCheck" Content="Protect with a password (AES-256)" />
+            <Grid ColumnDefinitions="*,8,*" Name="PasswordFields" IsVisible="False">
+                <TextBox Grid.Column="0" Name="PasswordBox" PasswordChar="•" Watermark="Password" />
+                <TextBox Grid.Column="2" Name="PasswordAgainBox" PasswordChar="•" Watermark="Password again" />
+            </Grid>
+            <TextBlock Name="PasswordNote" IsVisible="False" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
+                       Text="The files' contents are encrypted; their names and sizes can still be seen, as in any zip. Opens in 7-Zip, WinZip, Keka, The Unarchiver and DORI (Windows Explorer's built-in zip support can't open it). Nothing can recover a forgotten password." />
+        </StackPanel>
+
         <StackPanel Name="ProgressPanel" Spacing="4" IsVisible="False">
             <ProgressBar Name="Bar" Minimum="0" Maximum="1" Height="18" />
             <TextBlock Name="ProgressText" Text="" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource MutedTextBrush}" />

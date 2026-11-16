@@ -113,6 +113,10 @@ namespace DirOpusReImagined
             InitLabels();
             InitSyncBrowse();
             InitFolderRules();
+            InitCommandLine();
+            InitFolderTree();
+            InitSyncJobs();
+            InitOutsideDragDrop();
             InitArchiveWriteBack();
             InitLayouts();
             InitSavedFilters();
@@ -2328,6 +2332,21 @@ namespace DirOpusReImagined
                 case GridVerb.SecureDelete:
                     SecureDeletePicked(left);
                     break;
+                case GridVerb.GoToFolder:
+                    OpenGoToFolder(left);
+                    break;
+                case >= GridVerb.Bookmark1 and <= GridVerb.Bookmark9:
+                    GoToBookmark(left, verb - GridVerb.Bookmark1 + 1);
+                    break;
+                case GridVerb.CommandLine:
+                    FocusCommandLine(left);
+                    break;
+                case GridVerb.FolderTree:
+                    ToggleFolderTree(left);
+                    break;
+                case GridVerb.SyncJobs:
+                    OpenSyncJobs(left);
+                    break;
             }
         }
 
@@ -2364,6 +2383,7 @@ namespace DirOpusReImagined
             if (string.IsNullOrEmpty(panelPath) || string.IsNullOrEmpty(fileName)) return;
             string fullPath = JoinChildPath(panelPath, fileName);
             var viewer = new FileViewer(fullPath, fileName);
+            viewer.Saved += _ => RefreshPanelsShowing(panelPath);
             viewer.Show(this);
         }
 
@@ -3596,8 +3616,10 @@ namespace DirOpusReImagined
             // wrapping StackPanel's 8px vertical margin, and the grid control's own 12px horizontal
             // scrollbar — otherwise the grid renders taller than its row and spills over the button
             // panel below. Subtract for those here so the grid fits within its row.
-            LPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 58);
-            RPgrid.SetGridSize((int)nwidth - 8, (int)nheight - 58 );
+            _lastPanelSize = (nwidth, nheight);
+            LPgrid.SetGridSize((int)(nwidth - 8 - TreeWidth(LPtree)), (int)nheight - 58);
+            RPgrid.SetGridSize((int)(nwidth - 8 - TreeWidth(RPtree)), (int)nheight - 58);
+            LPtree.Height = RPtree.Height = Math.Max(40, nheight - 58 + 12);
 
             // here we should also set the sizes for other elements of the UI
             // like the center buttons between the file grids
@@ -4770,6 +4792,12 @@ namespace DirOpusReImagined
         /// another archive is opened from a temporary copy (<see cref="EnterNestedArchive"/>). One in cloud
         /// storage isn't, so that returns false and falls through to the normal open behaviour.
         /// </summary>
+        private async Task EnterEncryptedArchiveAsync(bool isLeft, string fsPath)
+        {
+            if (await EnsureArchivePasswordAsync(fsPath))
+                NavigatePanelTo(isLeft ? "LP" : "RP", ArchivePath.RootUriFor(fsPath));
+        }
+
         private bool TryEnterArchive(TaiDataGrid grid, TextBox pathBox, Stack<string> history, AFileEntry it)
         {
             if (it == null || it.Typ) return false;
@@ -4785,6 +4813,12 @@ namespace DirOpusReImagined
             }
 
             string fsPath = JoinChildPath(current, it.Name);
+            if (ArchivePasswords.NeedsPassword(fsPath))
+            {
+                // Encrypted: ask for the password, then go in.
+                _ = EnterEncryptedArchiveAsync(ReferenceEquals(grid, LPgrid), fsPath);
+                return true;
+            }
             PushHistory(ReferenceEquals(grid, LPgrid), current);   // new nav → clears forward
             pathBox.Text = ArchivePath.RootUriFor(fsPath);
 

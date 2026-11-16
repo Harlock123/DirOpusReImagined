@@ -34,6 +34,7 @@ namespace DirOpusReImagined
             if (!PathsEqual(pathBox.Text ?? "", current)) return;   // the panel moved on meanwhile
 
             NestedArchives.Register(copy, entryUri);
+            if (!await EnsureArchivePasswordAsync(copy, name)) { UpdateStatusBar(); return; }
             // Opened again: keep comparing with what was taken out, so changes not yet put back are still offered.
             if (_writeBack.Find(copy) == null) TrackArchiveCopy(entryUri, copy);
             NavigatePanelTo(isLeft ? "LP" : "RP", ArchivePath.RootUriFor(copy));

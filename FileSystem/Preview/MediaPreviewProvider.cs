@@ -115,7 +115,7 @@ public sealed class MediaPreviewProvider : IPreviewProvider
 
                 // A video on this computer, with ffmpeg installed: show a frame, with the details
                 // in the bar under it.
-                if (VideoFrames.Available && r.Provider is LocalFileProvider && VideoFrames.IsVideoFile(r.DisplayName)
+                if (!r.DetailsOnly && VideoFrames.Available && r.Provider is LocalFileProvider && VideoFrames.IsVideoFile(r.DisplayName)
                     && VideoFrames.GrabPngAsync(r.Path, 0, ct).GetAwaiter().GetResult() is { } png)
                 {
                     var frame = new Avalonia.Media.Imaging.Bitmap(new MemoryStream(png));

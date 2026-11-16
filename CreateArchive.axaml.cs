@@ -47,6 +47,11 @@ public partial class CreateArchive : Window
         NameBox.Text = DefaultName(folder, selected) + ArchiveCreator.Extension(ArchiveFormat.Zip);
 
         FormatBox.SelectionChanged += (_, _) => OnFormatChanged();
+        PasswordCheck.IsCheckedChanged += (_, _) =>
+        {
+            PasswordFields.IsVisible = PasswordNote.IsVisible = PasswordCheck.IsChecked == true;
+            if (PasswordCheck.IsChecked == true) PasswordBox.Focus();
+        };
         OkButton.Click += (_, _) => Start();
         CancelButton.Click += (_, _) => CancelOrClose();
         Closing += (_, e) =>
@@ -90,6 +95,8 @@ public partial class CreateArchive : Window
     private void OnFormatChanged()
     {
         NameBox.Text = ArchiveCreator.WithExtension(NameBox.Text ?? "", SelectedFormat);
+        // Only zips can carry a password.
+        PasswordPanel.IsVisible = SelectedFormat == ArchiveFormat.Zip;
         // A plain tar isn't compressed, so there's no level to pick.
         LevelBox.IsEnabled = SelectedFormat != ArchiveFormat.Tar;
     }
@@ -119,6 +126,14 @@ public partial class CreateArchive : Window
         var format = ArchiveCreator.FormatFromName(name) ?? SelectedFormat;
         if (ArchiveCreator.FormatFromName(name) == null) name = ArchiveCreator.WithExtension(name, format);
 
+        string? password = null;
+        if (format == ArchiveFormat.Zip && PasswordCheck.IsChecked == true)
+        {
+            password = PasswordBox.Text ?? "";
+            if (password.Length == 0) { ShowError("Type the password, or untick the password box."); return; }
+            if (password != PasswordAgainBox.Text) { ShowError("The two passwords aren't the same."); return; }
+        }
+
         HideError();
         SetRunning(true);
         _cts = new CancellationTokenSource();
@@ -131,7 +146,7 @@ public partial class CreateArchive : Window
 
         try
         {
-            var result = await ArchiveCreator.CreateAsync(_folder, name, _sources, format, SelectedLevel, progress, _cts.Token);
+            var result = await ArchiveCreator.CreateAsync(_folder, name, _sources, format, SelectedLevel, progress, _cts.Token, password);
             CreatedPath = result.ArchivePath;
             SetRunning(false);
 

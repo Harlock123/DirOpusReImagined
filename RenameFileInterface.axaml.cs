@@ -111,7 +111,31 @@ public partial class RenameFileInterface : Window
         int.TryParse(s, out var v) ? v : fallback;
 
     private IReadOnlyList<RenamePlanRow> BuildCurrentPlan() =>
-        RenameEngine.BuildPlan(_selection, ReadOptions(), _existingOtherNames, CaseInsensitiveFs);
+        RenameEngine.BuildPlan(_selection, ReadOptions(), _existingOtherNames, CaseInsensitiveFs, FactsFor, FolderLeaf(thePath));
+
+    // Dates and tags are read once per file, the first time a token needs them.
+    private readonly Dictionary<string, FileFacts> _facts = new(StringComparer.Ordinal);
+
+    private FileFacts FactsFor(string name)
+    {
+        if (!_facts.TryGetValue(name, out var f))
+            _facts[name] = f = FileFacts.Read(FileUtility.JoinPanelPath(thePath, name));
+        return f;
+    }
+
+    /// <summary>The name of the folder the panel shows, for %FOLDER% (inside an archive, the archive's folder or the archive).</summary>
+    internal static string FolderLeaf(string panelPath)
+    {
+        string p = panelPath ?? "";
+        if (DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(p))
+        {
+            var ap = DirOpusReImagined.FileSystem.Archive.ArchivePath.Parse(p);
+            p = ap.IsRoot ? System.IO.Path.GetFileNameWithoutExtension(ap.ArchiveFsPath) : ap.EntryPath;
+        }
+        p = p.TrimEnd('/', '\\');
+        int cut = Math.Max(p.LastIndexOf('/'), p.LastIndexOf('\\'));
+        return cut >= 0 ? p[(cut + 1)..] : p.Replace("cloud:", "").Trim(':');
+    }
 
     private void RebuildPreview()
     {

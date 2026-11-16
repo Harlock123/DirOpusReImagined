@@ -69,7 +69,12 @@ namespace DirOpusReImagined
         ExportListing,
         FolderRules,
         Catalogues,
-        SecureDelete
+        SecureDelete,
+        GoToFolder,
+        Bookmark1, Bookmark2, Bookmark3, Bookmark4, Bookmark5, Bookmark6, Bookmark7, Bookmark8, Bookmark9,
+        CommandLine,
+        FolderTree,
+        SyncJobs
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -97,6 +102,14 @@ namespace DirOpusReImagined
         SelectByPattern,
         DeselectByPattern,
         Invert
+    }
+
+    /// <summary>Files dropped onto a panel from another program: their full paths, the folder row they landed on, and whether Shift (move) was held.</summary>
+    public sealed class OutsideFilesDroppedEventArgs : EventArgs
+    {
+        public List<string> Paths = new();
+        public string TargetSubfolder = "";
+        public bool Move;
     }
 
     /// <summary>Raised when files are dropped onto a panel. Carries the dragged entries, the source
@@ -542,6 +555,12 @@ namespace DirOpusReImagined
 
         /// <summary>Raised when a valid internal file drop completes on this panel.</summary>
         public event EventHandler<FilesDroppedEventArgs> FilesDropped;
+
+        /// <summary>Raised when files are dropped onto the panel from another program.</summary>
+        public event EventHandler<OutsideFilesDroppedEventArgs>? OutsideFilesDropped;
+
+        /// <summary>Set by the host: the system file items for rows being dragged out of the panel (none for archive or cloud rows).</summary>
+        public Func<IReadOnlyList<AFileEntry>, Task<List<Avalonia.Platform.Storage.IStorageItem>>>? OutsideDragItems { get; set; }
 
         #endregion
 
@@ -3770,6 +3789,15 @@ namespace DirOpusReImagined
                 var data = new DataObject();
                 data.Set(InternalDragFormat, payload);
 
+                // The system's file list too, so the files can be dropped into other programs (a file
+                // manager, an editor, a mail). Only files on this computer: others can't open archive
+                // or cloud paths.
+                if (OutsideDragItems != null && await OutsideDragItems(entries) is { Count: > 0 } items)
+                {
+                    data.Set(DataFormats.Files, items);
+                    data.Set(DataFormats.Text, string.Join(Environment.NewLine, items.Select(i => Avalonia.Platform.Storage.StorageProviderExtensions.TryGetLocalPath(i)).OfType<string>()));
+                }
+
                 await DragDrop.DoDragDrop(e, data, DragDropEffects.Copy | DragDropEffects.Move);
 #pragma warning restore CS0618
             }
@@ -3793,7 +3821,7 @@ namespace DirOpusReImagined
         private void OnDragOver(object sender, DragEventArgs e)
         {
 #pragma warning disable CS0618 // Object-carrying drag format; see InternalDragFormat remarks.
-            if (!e.Data.Contains(InternalDragFormat))
+            if (!e.Data.Contains(InternalDragFormat) && !e.Data.Contains(DataFormats.Files))
 #pragma warning restore CS0618
             {
                 e.DragEffects = DragDropEffects.None;
@@ -3846,9 +3874,22 @@ namespace DirOpusReImagined
 #pragma warning disable CS0618 // Object-carrying drag format; see InternalDragFormat remarks.
             if (!e.Data.Contains(InternalDragFormat) ||
                 e.Data.Get(InternalDragFormat) is not InternalDragPayload payload ||
-#pragma warning restore CS0618
                 payload.Entries == null || payload.Entries.Count == 0)
             {
+                // Files dragged in from another program.
+                var outside = e.Data.GetFiles()?.Select(i => Avalonia.Platform.Storage.StorageProviderExtensions.TryGetLocalPath(i)).OfType<string>().ToList();
+#pragma warning restore CS0618
+                if (outside is { Count: > 0 })
+                {
+                    object over = ResolveRowUnderDrag(e);
+                    OutsideFilesDropped?.Invoke(this, new OutsideFilesDroppedEventArgs
+                    {
+                        Paths = outside,
+                        TargetSubfolder = over is AFileEntry folder && folder.Typ ? folder.Name : "",
+                        Move = _lastDragOverMove || e.KeyModifiers.HasFlag(KeyModifiers.Shift),
+                    });
+                    e.Handled = true;
+                }
                 ReRender();
                 return;
             }
@@ -4150,6 +4191,9 @@ namespace DirOpusReImagined
         private void FolderRules_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderRules);
         private void Catalogues_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Catalogues);
         private void SecureDelete_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SecureDelete);
+        private void SyncJobs_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SyncJobs);
+        private void GoToFolder_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToFolder);
+        private void FolderTree_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderTree);
 
         /// <summary>Raised when a colour is picked under right-click → Label (None clears the colour).</summary>
         public event EventHandler<LabelColour>? LabelColourRequested;

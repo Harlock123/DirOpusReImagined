@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.34.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.35.0).
 
 ## Commands
 
@@ -85,11 +85,28 @@ Everything sits at the repository root; there is no `src/` folder.
   more is kept on cancel or failure and resumed by the next copy of the same file to the same place (`ResumablePrefix`).
   Verify Copies (`FileUtility.VerifyCopyIfEnabledAsync`, `VerifyArchiveAdds`) hashes through the providers, so archive legs
   are checked too.
-- `ClipboardFiles.cs` and `MainWindow.Clipboard.cs`: copy/cut/paste of files through the system clipboard. Writing uses
-  Avalonia's `DataTransfer` (a file item per path, plus `x-special/gnome-copied-files` on Linux and `Preferred DropEffect`
-  on Windows); reading takes the GNOME list, native file lists, `text/uri-list` or plain paths. Pastes go through
-  `RunPanelTransferAsync`. Avalonia 11.3's X11 clipboard advertises `text/uri-list` for our files but sends it empty, so
-  KDE apps don't see DORI's copies yet; GNOME-style file managers do.
+- `ClipboardFiles.cs` and `MainWindow.Clipboard.cs`: copy/cut/paste of files through the system clipboard, and drag and
+  drop with other programs (`InitOutsideDragDrop`; the grid raises `OutsideFilesDropped` and asks `OutsideDragItems`).
+  Writing uses Avalonia's `DataTransfer` (a file item per path, plus `x-special/gnome-copied-files` on Linux and
+  `Preferred DropEffect` on Windows); reading takes the GNOME list, native file lists, `text/uri-list` or plain paths.
+  Pastes and drops go through `TransferOutsidePathsAsync` → `RunPanelTransferAsync`. **On Linux no file items are put
+  on the clipboard**: Avalonia 11.3's `ClipboardUriListHelper.FileUriListToUtf8Bytes` never flushes its StreamWriter, so
+  `text/uri-list` loses up to its last 1,024 characters (empty for a few files, partial for many). Put them back once
+  Avalonia fixes that; `IStorageItem` can't be implemented by user code, so it can't be worked around here.
+- `RenameEngine.cs` tokens beyond `%NAME%`/`%ORD%` come from `FileFacts.cs` (date taken from EXIF, music tags through the
+  media preview with `PreviewRequest.DetailsOnly`), read only when a date or tag token is used.
+- `GoToFolder.cs` and `MainWindow.GoTo.cs`: Go to Folder (reuses `CommandPaletteWindow` with an extra-items callback) and
+  the bookmark keys. `FolderTreePaths.cs` and `MainWindow.FolderTree.cs`: the lazily-loaded tree beside each panel
+  (`LPtree`/`RPtree`); `MainWindowGridContainer_SizeChanged` takes its width out of the grid's.
+- `CommandLineHistory.cs`, `MainWindow.CommandLine.cs` and `CommandOutputWindow.axaml(.cs)`: the command line bar.
+- `SyncJobs.cs` (`SyncJob`, `SyncJobStore` in `SyncJobs.xml`), `SyncJobsWindow.axaml(.cs)` and `MainWindow.SyncJobs.cs`
+  (a one-minute timer runs due daily jobs; plans with `DirectoryComparer` like the Sync buttons).
+- `FileSystem/Archive/AesZipWriter.cs`: password zips (WinZip AE-2, AES-256), written directly since neither .NET nor
+  SharpCompress can encrypt. `ArchivePasswords.cs`: session-only passwords, `NeedsPassword`/`Try`; the provider opens
+  archives with `OptionsFor`, and encrypted archives are read-only (`ArchiveEditor.WhyReadOnly`).
+  `MainWindow.ArchivePasswords.cs` asks for them. `DiscImage.cs`: .iso images through DiscUtils (UDF, else ISO 9660),
+  read-only, inside `ArchiveFileProvider`.
+- `FileViewer` quick edit: `EditButton`/`SaveButton`, saving through the provider's `OpenWrite` (archives rewrite once).
 - `NaturalComparer.cs`: name order for listings (`FileUtility.NameComparer`), switched by `AppOptions.NaturalSort`.
 - `MainWindow.FolderSizes.cs`: measured folder sizes per panel (kept while the panel stays in that folder, put back on
   rows in `OnPanelPopulated`; `FolderSizeOrder` sorts folders by them). `AFileEntry.FolderBytes` is a field (−1 = unmeasured).

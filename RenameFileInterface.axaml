@@ -94,7 +94,7 @@
         <Grid Grid.Row="5" ColumnDefinitions="*,Auto" Margin="0,10,0,0">
             <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
                 <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                           Text="Tokens: %NAME% = original name (no extension), %ORD% = sequence number. Find/Replace edits the existing name; enable Regex for patterns and $1 capture groups."/>
+                           Text="Tokens: %NAME% name (no extension) · %ORD% number · %EXT% extension · %FOLDER% folder name · %DATE% date changed · %TAKEN% date a photo was taken · %ARTIST% %ALBUM% %TITLE% %TRACK% %YEAR% %GENRE% music and video tags. Dates take a format: %TAKEN:yyyy-MM-dd_HHmm%. Find/Replace edits the existing name; enable Regex for patterns and $1 capture groups."/>
                 <TextBlock x:Name="SummaryText" Margin="0,4,0,0" FontWeight="Bold"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">

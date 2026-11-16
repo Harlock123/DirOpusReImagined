@@ -12,6 +12,13 @@ namespace DirOpusReImagined
         /// <summary>When true, OK with an empty box gives "" (rather than null, which means cancelled).</summary>
         public bool AllowEmpty { get; set; }
 
+        /// <summary>Hides what is typed (for passwords).</summary>
+        public bool IsPassword
+        {
+            get => this.FindControl<TextBox>("InputBox")!.PasswordChar != default;
+            set => this.FindControl<TextBox>("InputBox")!.PasswordChar = value ? '•' : default;
+        }
+
         public TextPromptDialog()
         {
             AvaloniaXamlLoader.Load(this);

@@ -517,12 +517,24 @@
 					        ToolTip.Tip="New tab (clone current folder)" Click="LPnewTab_Click" />
 						<Button Name="LPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
 						        ToolTip.Tip="Switch between list and thumbnail view" Click="LPviewToggle_Click" />
+						<Button Name="LPtreeToggle" Content="Tree" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
+						        VerticalContentAlignment="Center"
+						        ToolTip.Tip="Folder tree beside this panel, following it (Ctrl/Cmd+Shift+T)" />
 						<ToggleButton Name="LPflatToggle" Content="Flat" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
 						              VerticalContentAlignment="Center"
 						              ToolTip.Tip="Flat view: every file in this folder and all the folders below it, in one list (Ctrl/Cmd+Shift+F)" />
 				</StackPanel>
 			</Border>
-			<cons:TaiDataGrid Name="LPgrid" VerticalAlignment="Top" />
+			<DockPanel>
+				<TreeView Name="LPtree" DockPanel.Dock="Left" Width="200" IsVisible="False" Margin="0,0,4,0"
+				          Background="{DynamicResource GridBackgroundBrush}"
+				          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+					<TreeView.Resources>
+						<x:Double x:Key="TreeViewItemIndent">10</x:Double>
+					</TreeView.Resources>
+				</TreeView>
+				<cons:TaiDataGrid Name="LPgrid" VerticalAlignment="Top" />
+			</DockPanel>
 		</StackPanel>
 
 		<StackPanel Grid.Column="2" Grid.Row="2" Margin="4,4,4,4" Orientation="Vertical">
@@ -537,15 +549,38 @@
 					        ToolTip.Tip="New tab (clone current folder)" Click="RPnewTab_Click" />
 						<Button Name="RPviewToggle" FontSize="13" Padding="8,0" Height="20" Margin="3,0"
 						        ToolTip.Tip="Switch between list and thumbnail view" Click="RPviewToggle_Click" />
+						<Button Name="RPtreeToggle" Content="Tree" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
+						        VerticalContentAlignment="Center"
+						        ToolTip.Tip="Folder tree beside this panel, following it (Ctrl/Cmd+Shift+T)" />
 						<ToggleButton Name="RPflatToggle" Content="Flat" FontSize="11" Padding="8,0" Height="20" Margin="0,0,3,0"
 						              VerticalContentAlignment="Center"
 						              ToolTip.Tip="Flat view: every file in this folder and all the folders below it, in one list (Ctrl/Cmd+Shift+F)" />
 				</StackPanel>
 			</Border>
-			<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />
+			<DockPanel>
+				<TreeView Name="RPtree" DockPanel.Dock="Left" Width="200" IsVisible="False" Margin="0,0,4,0"
+				          Background="{DynamicResource GridBackgroundBrush}"
+				          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+					<TreeView.Resources>
+						<x:Double x:Key="TreeViewItemIndent">10</x:Double>
+					</TreeView.Resources>
+				</TreeView>
+				<cons:TaiDataGrid Name="RPgrid" VerticalAlignment="Top" />
+			</DockPanel>
 		</StackPanel>
 
 		<DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Grid.RowSpan="2">
+		<!-- Command line: runs a command in the active panel's folder (Ctrl/Cmd+Shift+L). -->
+		<DockPanel Name="CommandBar" DockPanel.Dock="Top" Height="26" Margin="1,2,1,0">
+			<Button Name="CommandRunButton" DockPanel.Dock="Right" Content="Run" FontSize="11"
+			        Padding="10,0" Margin="4,0,0,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+			        Background="{DynamicResource PanelChromeBrush}"
+			        ToolTip.Tip="Run the command in the active panel's folder; its output shows in a window" />
+			<TextBlock Name="CommandPrompt" DockPanel.Dock="Left" Text="❯" FontWeight="Bold" VerticalAlignment="Center" Margin="4,0,6,0"
+			           Foreground="{DynamicResource GridCellTextBrush}" />
+			<TextBox Name="CommandLineBox" FontSize="12" MinHeight="0" Padding="6,2" VerticalContentAlignment="Center"
+			         Watermark="Command line — runs in the active panel's folder (Ctrl/Cmd+Shift+L). Button tokens such as %AF% work; ↑ ↓ for earlier commands" />
+		</DockPanel>
 		<!-- Banks of command buttons: one tab per bank. Alt+PageUp/PageDown or the mouse wheel over the buttons also switch. -->
 		<DockPanel Name="BankBar" DockPanel.Dock="Top" Height="24" Margin="1,2,1,0">
 			<Button Name="PaletteButton" DockPanel.Dock="Right" Content="Commands…" FontSize="11"

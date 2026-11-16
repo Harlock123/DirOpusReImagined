@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using DirOpusReImagined.FileSystem;
 using DirOpusReImagined.FileSystem.Preview;
 using SyntaxColorizer;
 
@@ -45,6 +46,116 @@ public partial class FileViewer : Window
     public FileViewer()
     {
         InitializeComponent();
+        ContentBox.TextChanged += (_, _) => MarkDirty();
+        SyntaxBox.PropertyChanged += (_, e) => { if (e.Property.Name == "Text") MarkDirty(); };
+        KeyDown += (_, e) =>
+        {
+            if (e.Key == Avalonia.Input.Key.S && (e.KeyModifiers.HasFlag(Avalonia.Input.KeyModifiers.Control) || e.KeyModifiers.HasFlag(Avalonia.Input.KeyModifiers.Meta)))
+            {
+                if (_editing) SaveButton_Click(null, new RoutedEventArgs());
+                e.Handled = true;
+            }
+        };
+        Closing += OnClosingWhileEdited;
+    }
+
+    // ---- Quick edit: small text files can be changed and saved back through their provider ----
+
+    private string _path = "";
+    private bool _editing, _dirty, _closingAfterAsk;
+    private System.Text.Encoding _encoding = new System.Text.UTF8Encoding(false);
+    private bool _crlf;
+
+    /// <summary>Raised after a save with the file's path, so panels showing its folder can refresh.</summary>
+    public event Action<string>? Saved;
+
+    /// <summary>Whole, small text files can be edited, unless they are in a 7z or RAR archive (which can't be written).</summary>
+    private bool CanEdit(PreviewResult r)
+    {
+        if (FollowSelection || r is not PreviewResult.Bytes { IsBinary: false, Truncated: false }) return false;
+        if (DirOpusReImagined.FileSystem.Archive.ArchivePath.IsArchiveUri(_path) &&
+            DirOpusReImagined.FileSystem.Archive.ArchiveEditor.WhyReadOnly(DirOpusReImagined.FileSystem.Archive.ArchivePath.Parse(_path).ArchiveFsPath) != null)
+            return false;
+        return true;
+    }
+
+    private void EditButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_result is not PreviewResult.Bytes b) return;
+        // Keep what the file had: its byte-order mark (if any) and its line endings.
+        var d = b.Data;
+        _encoding = d.Length >= 3 && d[0] == 0xEF && d[1] == 0xBB && d[2] == 0xBF ? new System.Text.UTF8Encoding(true)
+                  : d.Length >= 2 && d[0] == 0xFF && d[1] == 0xFE ? System.Text.Encoding.Unicode
+                  : d.Length >= 2 && d[0] == 0xFE && d[1] == 0xFF ? System.Text.Encoding.BigEndianUnicode
+                  : new System.Text.UTF8Encoding(false);
+        _crlf = PreviewText.DecodeText(d).Contains("\r\n");
+        _editing = true;
+        _dirty = false;
+        if (_hexMode) { _hexMode = false; Render(); }
+        ContentBox.IsReadOnly = false;
+        SyntaxBox.IsReadOnly = false;
+        ModeButton.IsEnabled = false;
+        EditButton.IsVisible = false;
+        SaveButton.IsVisible = true;
+        SaveButton.IsEnabled = false;
+        StatusText.Text = "editing · Ctrl/Cmd+S saves";
+        (SyntaxBox.IsVisible ? (Avalonia.Input.InputElement)SyntaxBox : ContentBox).Focus();
+    }
+
+    private void MarkDirty()
+    {
+        if (!_editing || _dirty) return;
+        _dirty = true;
+        SaveButton.IsEnabled = true;
+        Title = TitlePrefix + _displayName + " •";
+    }
+
+    private string EditedText()
+    {
+        string text = (SyntaxBox.IsVisible ? SyntaxBox.Text : ContentBox.Text) ?? "";
+        text = text.Replace("\r\n", "\n");
+        return _crlf ? text.Replace("\n", "\r\n") : text;
+    }
+
+    private async void SaveButton_Click(object? sender, RoutedEventArgs? e) => await SaveAsync();
+
+    private async Task<bool> SaveAsync()
+    {
+        if (!_editing) return true;
+        string path = _path;
+        byte[] bytes = _encoding.GetPreamble().Concat(_encoding.GetBytes(EditedText())).ToArray();
+        StatusText.Text = "saving…";
+        try
+        {
+            await Task.Run(() =>
+            {
+                using var stream = ProviderRegistry.For(path).OpenWrite(path);
+                stream.Write(bytes, 0, bytes.Length);
+            });
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "not saved";
+            await new MessageBox($"{_displayName} couldn't be saved: {ex.Message}", "Save").ShowDialog(this);
+            return false;
+        }
+        _dirty = false;
+        SaveButton.IsEnabled = false;
+        Title = TitlePrefix + _displayName;
+        StatusText.Text = $"saved {DateTime.Now:t} · {PreviewText.FormatSize(bytes.Length)}";
+        Saved?.Invoke(path);
+        return true;
+    }
+
+    /// <summary>Closing with changes not saved asks first.</summary>
+    private async void OnClosingWhileEdited(object? sender, WindowClosingEventArgs e)
+    {
+        if (!_dirty || _closingAfterAsk) return;
+        e.Cancel = true;
+        bool save = await new MessageBox($"Save the changes to {_displayName}?", true, "Save", "Don't Save", "Edited file").ShowDialog<bool>(this);
+        if (save && !await SaveAsync()) return;
+        _closingAfterAsk = true;
+        Close();
     }
 
     /// <param name="path">A provider path — a filesystem path, an archive:// URI, or a cloud path.</param>
@@ -60,6 +171,11 @@ public partial class FileViewer : Window
     /// </summary>
     public void LoadFrom(string path, string displayName)
     {
+        _path = path;
+        _editing = _dirty = false;
+        ContentBox.IsReadOnly = true;
+        SyntaxBox.IsReadOnly = true;
+        SaveButton.IsVisible = false;
         _displayName = displayName;
         Title = TitlePrefix + displayName;
         InfoText.Text = displayName;
@@ -122,6 +238,7 @@ public partial class FileViewer : Window
         // Hex only means something for a byte preview; start binary content in hex, text in text.
         _hexMode = result is PreviewResult.Bytes { IsBinary: true };
         ModeButton.IsEnabled = result is PreviewResult.Bytes;
+        EditButton.IsVisible = CanEdit(result);
 
         if (result is not PreviewResult.Image) PreviewImage.Source = null;
 

@@ -56,9 +56,12 @@
 							<MenuItem Name="ExportListingMenuItem" Header="Export Listing (CSV, text, HTML)…" Click="ExportListing_Click"/>
 							<MenuItem Name="FolderRulesMenuItem" Header="Folder Rules…" Click="FolderRules_Click"/>
 							<MenuItem Name="CataloguesMenuItem" Header="Disk Catalogues…" Click="Catalogues_Click"/>
+							<MenuItem Name="SyncJobsMenuItem" Header="Saved Sync Jobs…" Click="SyncJobs_Click"/>
 							<Separator/>
 							<MenuItem Name="SecureDeleteMenuItem" Header="Securely Delete (overwrite first)…" Click="SecureDelete_Click"/>
 						</MenuItem>
+						<MenuItem Name="GoToFolderMenuItem" Header="Go to Folder…" InputGesture="Ctrl+G" Click="GoToFolder_Click"/>
+						<MenuItem Name="FolderTreeMenuItem" Header="Folder Tree" InputGesture="Ctrl+Shift+T" Click="FolderTree_Click"/>
 						<MenuItem Name="SyncBrowseMenuItem" Header="Synced Browsing" Click="SyncBrowse_Click"/>
 						<MenuItem Name="GoToLinkTargetMenuItem" Header="Go to Link Target" Click="GoToLinkTarget_Click"/>
 						<MenuItem Name="MakeLinkMenuItem" Header="Make Link in Other Panel" Click="MakeLink_Click"/>

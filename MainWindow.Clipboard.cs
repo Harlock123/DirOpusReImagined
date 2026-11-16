@@ -53,14 +53,22 @@ namespace DirOpusReImagined
                 else if (OperatingSystem.IsWindows())
                     main.Set(DataFormat.CreateBytesPlatformFormat(ClipboardFiles.WindowsDropEffectFormat), BitConverter.GetBytes(cut ? 2 : 5));
                 transfer.Add(main);
+                var files = new List<IStorageItem>();
                 foreach (var p in paths)
                 {
                     var uri = new Uri(p);
                     IStorageItem? item = Directory.Exists(p)
                         ? await StorageProvider.TryGetFolderFromPathAsync(uri)
                         : await StorageProvider.TryGetFileFromPathAsync(uri);
-                    if (item != null) transfer.Add(DataTransferItem.CreateFile(item));
+                    if (item != null) files.Add(item);
                 }
+                // Not on Linux: Avalonia 11.3's X11 clipboard turns file items into text/uri-list through
+                // a StreamWriter it never flushes, so the list loses up to its last 1,024 characters —
+                // empty for a few files, and silently missing the last ones for many (a KDE app would
+                // paste only some). Better that those apps see no files than a partial set; GNOME-style
+                // file managers use the list above. (ClipboardUriListHelper.FileUriListToUtf8Bytes.)
+                if (!OperatingSystem.IsLinux() && !OperatingSystem.IsFreeBSD())
+                    foreach (var f in files) transfer.Add(DataTransferItem.CreateFile(f));
                 await Clipboard.SetDataAsync(transfer);
                 _cutPaths = cut ? new HashSet<string>(paths, ClipPathComparer) : null;
                 ShowClipboardNote(isLeft, $"{(cut ? "Cut" : "Copied")} {Describe(paths)} to the clipboard" +
@@ -89,14 +97,7 @@ namespace DirOpusReImagined
                 }
                 bool move = cut == true || (_cutPaths != null && paths.All(_cutPaths.Contains));
 
-                // One transfer per source folder (usually just one), through the normal copy path.
-                foreach (var group in paths.GroupBy(p => Path.GetDirectoryName(p.TrimEnd('/', '\\')) ?? "", ClipPathComparer))
-                {
-                    if (group.Key.Length == 0) continue;
-                    if (move && PathsEqual(group.Key, dest)) continue;   // moving into the same folder does nothing
-                    var rows = group.Select(p => (object)new AFileEntry(Path.GetFileName(p.TrimEnd('/', '\\')), 0, Directory.Exists(p))).ToList();
-                    await RunPanelTransferAsync(rows, group.Key, dest, move);
-                }
+                await TransferOutsidePathsAsync(paths, dest, move);
 
                 if (move)
                 {
@@ -116,6 +117,55 @@ namespace DirOpusReImagined
         // IAsyncDataTransfer. It still works on every platform and reads other apps' raw formats
         // (x-special/gnome-copied-files, Preferred DropEffect) by name, so it stays for now.
 #pragma warning disable CS0618
+        /// <summary>
+        /// Copies (or moves) files named by full path — from the clipboard, or dropped from another
+        /// program — into <paramref name="dest"/>, one transfer per source folder, through the normal
+        /// copy path with its conflict questions and undo.
+        /// </summary>
+        private async Task TransferOutsidePathsAsync(List<string> paths, string dest, bool move)
+        {
+            foreach (var group in paths.GroupBy(p => Path.GetDirectoryName(p.TrimEnd('/', '\\')) ?? "", ClipPathComparer))
+            {
+                if (group.Key.Length == 0) continue;
+                if (move && PathsEqual(group.Key, dest)) continue;   // moving into the same folder does nothing
+                var rows = group.Select(p => (object)new AFileEntry(Path.GetFileName(p.TrimEnd('/', '\\')), 0, Directory.Exists(p))).ToList();
+                await RunPanelTransferAsync(rows, group.Key, dest, move);
+            }
+        }
+
+        // ---- Drag and drop with other programs ----
+
+        private void InitOutsideDragDrop()
+        {
+            foreach (var grid in new[] { LPgrid, RPgrid })
+            {
+                var g = grid;
+                g.OutsideFilesDropped += async (_, e) =>
+                {
+                    string folder = (ReferenceEquals(g, LPgrid) ? LPpath.Text : RPpath.Text) ?? "";
+                    if (string.IsNullOrEmpty(folder)) return;
+                    string dest = e.TargetSubfolder.Length > 0 ? FileUtility.JoinPanelPath(folder, e.TargetSubfolder) : folder;
+                    var paths = await Task.Run(() => e.Paths.Where(p => File.Exists(p) || Directory.Exists(p)).ToList());
+                    if (paths.Count > 0) await TransferOutsidePathsAsync(paths, dest, e.Move);
+                };
+                g.OutsideDragItems = async entries =>
+                {
+                    var items = new List<IStorageItem>();
+                    string folder = (ReferenceEquals(g, LPgrid) ? LPpath.Text : RPpath.Text) ?? "";
+                    if (ProviderRegistry.For(folder) is not LocalFileProvider) return items;
+                    foreach (var en in entries)
+                    {
+                        string p = FileUtility.JoinPanelPath(folder, en.Name);
+                        var uri = new Uri(p);
+                        IStorageItem? item = en.Typ ? await StorageProvider.TryGetFolderFromPathAsync(uri)
+                                                    : await StorageProvider.TryGetFileFromPathAsync(uri);
+                        if (item != null) items.Add(item);
+                    }
+                    return items;
+                };
+            }
+        }
+
         /// <summary>The paths on the clipboard and whether they were cut (null when the clipboard doesn't say).</summary>
         private async Task<(List<string> Paths, bool? Cut)> ReadClipboardFilesAsync()
         {

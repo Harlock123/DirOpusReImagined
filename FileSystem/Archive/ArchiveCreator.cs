@@ -119,16 +119,18 @@ public static class ArchiveCreator
     public static Task<ArchiveResult> CreateAsync(
         string destFolder, string archiveName, IReadOnlyList<string> sourcePaths, ArchiveFormat format,
         CompressionLevel level = CompressionLevel.Optimal,
-        IProgress<ArchiveProgress>? progress = null, CancellationToken ct = default)
-        => Task.Run(() => Create(destFolder, archiveName, sourcePaths, format, level, progress, ct), ct);
+        IProgress<ArchiveProgress>? progress = null, CancellationToken ct = default, string? password = null)
+        => Task.Run(() => Create(destFolder, archiveName, sourcePaths, format, level, progress, ct, password), ct);
 
     private sealed record Item(IFileProvider Provider, string SourcePath, string EntryName, bool IsDir,
                                long Size, DateTime Modified);
 
     private static ArchiveResult Create(
         string destFolder, string archiveName, IReadOnlyList<string> sourcePaths, ArchiveFormat format,
-        CompressionLevel level, IProgress<ArchiveProgress>? progress, CancellationToken ct)
+        CompressionLevel level, IProgress<ArchiveProgress>? progress, CancellationToken ct, string? password = null)
     {
+        if (!string.IsNullOrEmpty(password) && format != ArchiveFormat.Zip)
+            throw new ArgumentException("Only .zip archives can have a password.", nameof(password));
         if (ValidateName(archiveName) is { } problem) throw new ArgumentException(problem, nameof(archiveName));
         if (sourcePaths.Count == 0) throw new ArgumentException("Nothing to archive.", nameof(sourcePaths));
 
@@ -160,6 +162,9 @@ public static class ArchiveCreator
             {
                 switch (format)
                 {
+                    case ArchiveFormat.Zip when !string.IsNullOrEmpty(password):
+                        WriteAesZip(fs, items, level, password!, counter, skipped, ct);
+                        break;
                     case ArchiveFormat.Zip:
                         WriteZip(fs, items, level, counter, skipped, ct);
                         break;
@@ -297,6 +302,34 @@ public static class ArchiveCreator
                 counter.EndFile();
             }
         }
+    }
+
+    /// <summary>A password-protected zip (WinZip AES-256), see <see cref="AesZipWriter"/>.</summary>
+    private static void WriteAesZip(Stream output, List<Item> items, CompressionLevel level, string password, Counter counter,
+                                    List<ArchiveSkip> skipped, CancellationToken ct)
+    {
+        using var zip = new AesZipWriter(output, password, level);
+        foreach (var item in items)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (item.IsDir) { zip.AddFolder(item.EntryName, item.Modified); continue; }
+
+            Stream src;
+            try { src = item.Provider.OpenRead(item.SourcePath); }
+            catch (Exception ex) { skipped.Add(new ArchiveSkip(item.SourcePath, ex.Message)); continue; }
+            using (src)
+            {
+                uint mode = 0;
+                if (item.Provider is LocalFileProvider && !OperatingSystem.IsWindows())
+                {
+                    try { mode = (uint)File.GetUnixFileMode(item.SourcePath); } catch { }
+                }
+                counter.StartFile(item.EntryName);
+                zip.AddFile(item.EntryName, src, item.Modified, mode, counter.Add, ct);
+                counter.EndFile();
+            }
+        }
+        zip.Finish();
     }
 
     private static void WriteTar(Stream output, List<Item> items, Counter counter,

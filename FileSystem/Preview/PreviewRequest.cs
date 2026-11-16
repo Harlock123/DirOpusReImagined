@@ -34,4 +34,7 @@ public sealed class PreviewRequest
 
     /// <summary>Upper bound on bytes a text/hex preview should read, so a huge file cannot hang the UI.</summary>
     public int MaxBytes { get; init; } = 256 * 1024;
+
+    /// <summary>Only the details are wanted (renaming by tags): no video frame, which takes ffmpeg a moment.</summary>
+    public bool DetailsOnly { get; init; }
 }

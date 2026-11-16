@@ -67,7 +67,8 @@ public static class RenameEngine
     /// the original name is returned unchanged so the caller can flag the row without crashing.
     /// </param>
     public static string ComputeNewName(
-        string originalName, bool isDirectory, int ordinal, RenameOptions o, out string? error)
+        string originalName, bool isDirectory, int ordinal, RenameOptions o, out string? error,
+        FileFacts? facts = null, string folderName = "")
     {
         error = null;
         if (string.IsNullOrEmpty(originalName)) return originalName;
@@ -95,9 +96,10 @@ public static class RenameEngine
 
         // 4. Resolve tokens inside each pattern field.
         string ordText = FormatOrdinal(ordinal, o);
-        string prefix = ResolveTokens(o.Prefix, ordText, workingStem);
-        string basename = ResolveTokens(o.Basename, ordText, workingStem);
-        string suffix = ResolveTokens(o.Suffix, ordText, workingStem);
+        var ctx = new TokenContext(ordText, workingStem, ext.TrimStart('.'), folderName, facts ?? FileFacts.None);
+        string prefix = ResolveTokens(o.Prefix, ctx);
+        string basename = ResolveTokens(o.Basename, ctx);
+        string suffix = ResolveTokens(o.Suffix, ctx);
 
         string result = prefix + basename + suffix;
 
@@ -157,12 +159,80 @@ public static class RenameEngine
         return digits.PadLeft(o.NumberWidth, '0');
     }
 
-    private static string ResolveTokens(string field, string ordText, string workingStem)
+    private sealed record TokenContext(string Ordinal, string Stem, string Ext, string Folder, FileFacts Facts);
+
+    private static readonly Regex TokenRx = new(@"%([A-Za-z]+)(?::([^%]*))?%", RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Every token, for the dialog's help line and the docs. Dates take a .NET format after a
+    /// colon (<c>%TAKEN:yyyy-MM-dd%</c>); without one they are yyyy-MM-dd.
+    /// </summary>
+    public static readonly (string Token, string Meaning)[] Tokens =
+    {
+        ("%NAME%", "the name (no extension), after find/replace and case"),
+        ("%ORD%", "the sequence number"),
+        ("%EXT%", "the extension, without the dot"),
+        ("%FOLDER%", "the name of the folder it is in"),
+        ("%DATE%", "the date it last changed (%DATE:yyyyMMdd-HHmm% for another form)"),
+        ("%TAKEN%", "the date a photo was taken, or the file's date when it has none"),
+        ("%ARTIST%", "music or video tag; also %ALBUM%, %TITLE%, %TRACK%, %YEAR%, %GENRE%"),
+    };
+
+    /// <summary>True when the fields use a token that needs the file read (dates and tags).</summary>
+    public static bool NeedsFacts(RenameOptions o)
+        => new[] { o.Prefix, o.Basename, o.Suffix }.Any(f => TokenRx.Matches(f ?? "").Any(m =>
+               m.Groups[1].Value.ToUpperInvariant() is "DATE" or "TAKEN" or "ARTIST" or "ALBUM" or "TITLE" or "TRACK" or "YEAR" or "GENRE"));
+
+    private static string ResolveTokens(string field, TokenContext c)
     {
         if (string.IsNullOrEmpty(field)) return field ?? "";
-        return field
-            .Replace(TokenOrdinal, ordText)
-            .Replace(TokenName, workingStem);
+        return TokenRx.Replace(field, m =>
+        {
+            string format = m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? m.Groups[2].Value : "yyyy-MM-dd";
+            string? value = m.Groups[1].Value.ToUpperInvariant() switch
+            {
+                "ORD" => c.Ordinal,
+                "NAME" => c.Stem,
+                "EXT" => c.Ext,
+                "FOLDER" => c.Folder,
+                "DATE" => FormatDate(c.Facts.Modified, format),
+                "TAKEN" => FormatDate(c.Facts.Taken ?? c.Facts.Modified, format),
+                "TRACK" => Track(Tag(c, "Track")),
+                "ARTIST" or "ALBUM" or "TITLE" or "YEAR" or "GENRE" => Tag(c, m.Groups[1].Value),
+                _ => null,
+            };
+            // An unknown token is left as typed, so a stray % in a name isn't lost.
+            return value == null ? m.Value : SafeForName(value);
+        });
+    }
+
+    private static string? FormatDate(DateTime? d, string format)
+    {
+        if (d == null) return "";
+        try { return d.Value.ToString(format, CultureInfo.InvariantCulture); }
+        catch (FormatException) { return d.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
+    }
+
+    private static string Tag(TokenContext c, string name)
+        => c.Facts.Tags.FirstOrDefault(kv => string.Equals(kv.Key, name, StringComparison.OrdinalIgnoreCase)).Value ?? "";
+
+    /// <summary>"3/12" → "03": the track number, two digits.</summary>
+    private static string Track(string t)
+    {
+        string n = t.Split('/')[0].Trim();
+        return int.TryParse(n, out int v) ? v.ToString("00", CultureInfo.InvariantCulture) : n;
+    }
+
+    /// <summary>Tags and dates may hold / or : (AC/DC, 12:30), which file names can't; they become - and _.</summary>
+    private static string SafeForName(string value)
+    {
+        var chars = value.ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
+        {
+            if (chars[i] is '/' or '\\') chars[i] = '-';
+            else if (Array.IndexOf(InvalidNameChars, chars[i]) >= 0 || chars[i] is ':' or '*' or '?' or '"' or '<' or '>' or '|') chars[i] = '_';
+        }
+        return new string(chars).Trim();
     }
 
     // ---------------- Planning (pure; drives both preview and apply) ----------------
@@ -186,8 +256,11 @@ public static class RenameEngine
         IReadOnlyList<(string Name, bool IsDir)> selection,
         RenameOptions options,
         IEnumerable<string> existingOtherNames,
-        bool caseInsensitiveFs)
+        bool caseInsensitiveFs,
+        Func<string, FileFacts>? facts = null,
+        string folderName = "")
     {
+        bool needFacts = facts != null && NeedsFacts(options);
         var cmp = caseInsensitiveFs ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         var others = new HashSet<string>(existingOtherNames ?? Enumerable.Empty<string>(), cmp);
 
@@ -195,7 +268,8 @@ public static class RenameEngine
         int ordinal = 1;
         foreach (var (name, isDir) in selection)
         {
-            string newName = ComputeNewName(name, isDir, ordinal, options, out var err);
+            string newName = ComputeNewName(name, isDir, ordinal, options, out var err,
+                                            needFacts ? facts!(name) : null, folderName);
             var row = new RenamePlanRow(name, newName, isDir);
 
             if (err != null) { row.Status = RenameStatus.RegexError; row.Message = err; }

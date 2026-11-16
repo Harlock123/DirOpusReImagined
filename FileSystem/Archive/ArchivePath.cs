@@ -80,7 +80,7 @@ public readonly record struct ArchivePath(string ArchiveFsPath, string EntryPath
 
     /// <summary>Archive file extensions the app treats as browsable (double-click enters them).</summary>
     private static readonly string[] Extensions =
-        { ".zip", ".7z", ".rar", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".gz" };
+        { ".zip", ".7z", ".rar", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".gz", ".iso" };
 
     /// <summary>True if <paramref name="fileName"/> looks like a supported archive by extension.</summary>
     public static bool IsArchiveFile(string fileName)
