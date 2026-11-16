@@ -2,7 +2,7 @@
   
   <div style="font-size:26px;font-weight:700;letter-spacing:-0.3px;margin:0 0 4px;">
     DirOpus Reimagined
-    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.33.0</span>
+    <span style="display:inline-block;background:#2563c9;color:#ffffff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;vertical-align:middle;">v0.1.34.0</span>
   </div>
   <div style="color:#5b6472;font-size:14px;margin:4px 0 14px;">A fast, cross-platform dual-panel file manager &mdash; inspired by the classic Amiga Directory Opus.</div>
 
@@ -11,10 +11,10 @@
   <div style="font-size:15px;font-weight:700;margin:16px 0 6px;padding-bottom:4px;border-bottom:2px solid #eef1f5;">What it does</div>
   <ul style="margin:6px 0;padding-left:20px;">
     <li style="margin:3px 0;"><b>Two folders side by side</b> &mdash; copy, move, and compare between them, with folder tabs on each side.</li>
-    <li style="margin:3px 0;"><b>All the file basics</b> &mdash; copy / move / rename / delete, drag-and-drop, delete-to-Trash (recoverable), and <b>undo</b> for renames, moves and deletes.</li>
+    <li style="margin:3px 0;"><b>All the file basics</b> &mdash; copy / move / rename / delete, drag-and-drop, copy and paste with other file managers, delete-to-Trash (recoverable), and <b>undo</b> for renames, moves and deletes.</li>
     <li style="margin:3px 0;"><b>Compare &amp; sync</b> two folders with a click, compare two files side by side, and find duplicates.</li>
     <li style="margin:3px 0;"><b>Cloud storage built in</b> &mdash; Google Drive, OneDrive, Dropbox, Amazon S3, and 50+ more, browsed like local folders.</li>
-    <li style="margin:3px 0;"><b>Archives like folders</b> &mdash; open .zip, .7z, .rar, and .tar, copy files into, rename and delete inside .zip and .tar archives, and save edits back into them.</li>
+    <li style="margin:3px 0;"><b>Archives like folders</b> &mdash; open .zip, .7z, .rar, and .tar, copy files into, rename and delete inside .zip and .tar archives, and save edits back into them &mdash; even archives inside archives.</li>
     <li style="margin:3px 0;"><b>Batch rename</b> &mdash; rename a whole selection with a live before&rarr;after preview, find&amp;replace (regex), and numbering.</li>
     <li style="margin:3px 0;"><b>Make it yours</b> &mdash; banks of 36 custom buttons to launch your own tools, plus bookmarks and a built-in file viewer.</li>
     <li style="margin:3px 0;"><b>Themes</b> &mdash; Light/Dark, Dracula, Nord, and Solarized.</li>
@@ -22,18 +22,19 @@
   </ul>
 
   <div style="background:#f3f8ff;border:1px solid #d6e6ff;border-radius:8px;padding:10px 14px;margin:12px 0 8px;">
-    <b>New in 0.1.33:</b>
+    <b>New in 0.1.34:</b>
     <ul style="margin:6px 0 2px;padding-left:20px;">
-      <li style="margin:3px 0;"><b>Disk usage</b> &mdash; see what takes the space under a folder, largest first with bars, and dig into any folder.</li>
-      <li style="margin:3px 0;"><b>Labels and tags</b> &mdash; colour files and folders, tag them, and filter a panel by tag.</li>
-      <li style="margin:3px 0;"><b>Git status</b> &mdash; a column showing which files are modified, new or ignored inside a git repository.</li>
-      <li style="margin:3px 0;"><b>Image tools</b> &mdash; shrink, convert (JPEG, PNG, WebP) and turn a batch of pictures, and stand sideways photos upright for good.</li>
-      <li style="margin:3px 0;"><b>Edits saved back into archives</b> &mdash; open a file from a .zip or .tar in another program, save it, and DORI offers to put it back.</li>
-      <li style="margin:3px 0;"><b>Synced browsing</b> &mdash; &ldquo;Follow&rdquo; takes the other panel into the folder of the same name as you browse.</li>
-      <li style="margin:3px 0;"><b>Copies that carry on</b> &mdash; a large copy that was cancelled or failed continues where it stopped, and Verify copies now checks archives too.</li>
-      <li style="margin:3px 0;"><b>Split and join files</b> &mdash; cut a big file into pieces of any size, and join them back with a checksum check.</li>
-      <li style="margin:3px 0;"><b>Buttons that ask</b> &mdash; a custom button can ask for a value (a commit message, a file name) before it runs.</li>
-      <li style="margin:3px 0;"><b>Earlier, in 0.1.28 to 0.1.32:</b> undo for deletes, renames and moves, comparing two files, flat view, finding duplicates, the command palette, saved layouts and filters, your own shortcuts, dates and permissions, photo details, writing into .zip and .tar archives, search inside files, banks of buttons and checksums.</li>
+      <li style="margin:3px 0;"><b>Copy and paste with other file managers</b> &mdash; Ctrl+C / Ctrl+V files between DORI and Explorer, Finder or Files, with cut-to-move too.</li>
+      <li style="margin:3px 0;"><b>Folder rules</b> &mdash; tidy a folder automatically: move, copy, trash, label or tag files by name and age, by hand or as they arrive.</li>
+      <li style="margin:3px 0;"><b>Disk catalogues</b> &mdash; keep a record of an external drive or cloud remote, browse and search it while it&rsquo;s unplugged, and see what changed.</li>
+      <li style="margin:3px 0;"><b>Archives inside archives</b> &mdash; open a .zip inside a .tar.gz (or any mix), and changes can be saved back into the outer archive.</li>
+      <li style="margin:3px 0;"><b>Speed limit and Start Later</b> &mdash; cap how fast copies run, and hold the queue until a time like 2am.</li>
+      <li style="margin:3px 0;"><b>Folder sizes that stay</b> &mdash; measure folders (Ctrl+Shift+S), sort them by size, and see them in the selection total.</li>
+      <li style="margin:3px 0;"><b>Natural sort</b> &mdash; file2 now comes before file10.</li>
+      <li style="margin:3px 0;"><b>Video thumbnails</b> &mdash; videos show a frame as their thumbnail and in the preview, when ffmpeg is installed.</li>
+      <li style="margin:3px 0;"><b>Export a listing</b> &mdash; save a panel&rsquo;s files as CSV, text or a web page.</li>
+      <li style="margin:3px 0;"><b>Securely delete</b> &mdash; overwrite files before deleting them, for sensitive files.</li>
+      <li style="margin:3px 0;"><b>Earlier, in 0.1.28 to 0.1.33:</b> disk usage, labels and tags, a git status column, image tools, saving edits back into archives, synced browsing, copies that carry on, splitting and joining files, undo for deletes, renames and moves, comparing two files, flat view, finding duplicates, the command palette, saved layouts and filters, your own shortcuts, dates and permissions, photo details, writing into .zip and .tar archives, search inside files, banks of buttons and checksums.</li>
     </ul>
   </div>
 
@@ -51,6 +52,6 @@
     <div style="font-size:12px;color:#5b6472;margin-top:3px;">Complete feature list, screenshots, and setup guide in the project README.</div>
   </div>
 
-  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.33.0 &middot; free &amp; open source &middot; built with .NET 10 + Avalonia. Feedback and bug reports welcome!</div>
+  <div style="margin-top:16px;padding-top:10px;border-top:1px solid #eef1f5;color:#7a8494;font-size:11px;">DirOpus Reimagined &middot; v0.1.34.0 &middot; free &amp; open source &middot; built with .NET 10 + Avalonia. Feedback and bug reports welcome!</div>
 
 </div>
