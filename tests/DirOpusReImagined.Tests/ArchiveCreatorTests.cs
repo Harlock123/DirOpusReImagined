@@ -26,7 +26,6 @@ public class ArchiveCreatorNamingTests
         => Assert.Equal(expected, ArchiveCreator.FormatFromName(name));
 
     [Theory]
-    [InlineData("a.7z")]
     [InlineData("a")]
     [InlineData("a.gz")]
     public void FormatFromName_is_null_for_other_names(string name)

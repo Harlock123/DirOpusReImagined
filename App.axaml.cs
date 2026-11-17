@@ -29,8 +29,13 @@ namespace DirOpusReImagined
             // window opens, and covers every window in the app via a single class handler.
             WindowSizing.Install();
 
+            // Menus, buttons and dialogs in the chosen language, translated as each window opens.
+            Localization.Install();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                // A settings import or move waits until everything has been saved on the way out.
+                desktop.Exit += (_, _) => SettingsTransfer.RunPending();
                 desktop.MainWindow = new MainWindow();
             }
 

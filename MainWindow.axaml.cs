@@ -130,6 +130,7 @@ namespace DirOpusReImagined
             Opened += (_, _) => LPgrid.Focus();
 
             InitOutsideRelease36();
+            InitAccessibility();
             Closing += (_, _) => RcloneService.Shutdown();
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
@@ -1213,6 +1214,14 @@ namespace DirOpusReImagined
             if (item.Bcontent.ToUpper().Trim() == "%RCLONECONFIG%")
             {
                 ShowRcloneConfig();
+                return;
+            }
+            if (item.Bcontent.ToUpper().Trim() == "%SCRIPT%")
+            {
+                // The arguments are the script itself (; between commands), or the path of a .dori file.
+                string text = (item.Bargs ?? "").Trim();
+                if (text.EndsWith(".dori", StringComparison.OrdinalIgnoreCase) && File.Exists(text)) text = await File.ReadAllTextAsync(text);
+                await RunScriptAsync(text, "on a button");
                 return;
             }
             // %ASK% and %ASK:Question% are asked for first; cancelling one runs nothing.
@@ -2378,6 +2387,20 @@ namespace DirOpusReImagined
                 case GridVerb.SystemTags:
                     ToggleSystemTags();
                     break;
+                case GridVerb.RunScript: OpenRunScript(); break;
+                case GridVerb.PreviousVersions: OpenPreviousVersions(left); break;
+                case GridVerb.SimilarPhotos: OpenSimilarPhotos(left); break;
+                case GridVerb.PhotoPrivacy: OpenPhotoPrivacy(left); break;
+                case GridVerb.PdfTools: OpenPdfTools(left); break;
+                case GridVerb.ExtractHere: ExtractArchiveHere(left); break;
+                case GridVerb.TestArchive: TestArchive(left); break;
+                case GridVerb.AdminDelete: RunAsAdministrator(left, ElevatedAction.Delete); break;
+                case GridVerb.AdminCopy: RunAsAdministrator(left, ElevatedAction.Copy); break;
+                case GridVerb.AdminMove: RunAsAdministrator(left, ElevatedAction.Move); break;
+                case GridVerb.AdminRename: RunAsAdministrator(left, ElevatedAction.Rename); break;
+                case GridVerb.AdminNewFolder: RunAsAdministrator(left, ElevatedAction.NewFolder); break;
+                case GridVerb.CopyShareLink: CopyShareLink(left); break;
+                case GridVerb.Settings: OpenSettings(); break;
             }
         }
 
@@ -3944,6 +3967,7 @@ namespace DirOpusReImagined
                 items.Add(mi);
             }
 
+            items.AddRange(await MountMenuItemsAsync(side, remotes));
             var flyout = new MenuFlyout { ItemsSource = items };
             flyout.ShowAt(anchor);
         }
@@ -4052,6 +4076,7 @@ namespace DirOpusReImagined
             UpdateStatusBar();
             UpdateBreadcrumbs(LPpath.Text, LPbreadcrumbs, "LP");
             AfterPanelNavigated(isLeft: true);
+            UpdateAccessibleNames();
         }
 
         private void RefreshRPGridPostActions()
@@ -4061,6 +4086,7 @@ namespace DirOpusReImagined
             UpdateStatusBar();
             UpdateBreadcrumbs(RPpath.Text, RPbreadcrumbs, "RP");
             AfterPanelNavigated(isLeft: false);
+            UpdateAccessibleNames();
         }
 
         // In-flight thumbnail generation per panel; cancelled when the panel re-lists or navigates away.

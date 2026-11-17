@@ -167,6 +167,9 @@ public partial class FileViewer : Window
     private System.Text.Encoding _encoding = new System.Text.UTF8Encoding(false);
     private bool _crlf;
 
+    /// <summary>Saves with administrator rights when the file can't be written otherwise; true when it was saved.</summary>
+    public Func<Window, string, byte[], Task<bool>>? ElevatedSave { get; set; }
+
     /// <summary>Raised after a save with the file's path, so panels showing its folder can refresh.</summary>
     public event Action<string>? Saved;
 
@@ -233,6 +236,11 @@ public partial class FileViewer : Window
                 using var stream = ProviderRegistry.For(path).OpenWrite(path);
                 stream.Write(bytes, 0, bytes.Length);
             });
+        }
+        catch (UnauthorizedAccessException) when (ElevatedSave != null)
+        {
+            // Not allowed to write it: offer to save it with administrator rights instead.
+            if (!await ElevatedSave(this, path, bytes)) { StatusText.Text = "not saved"; return false; }
         }
         catch (Exception ex)
         {

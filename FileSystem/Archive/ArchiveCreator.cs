@@ -15,6 +15,12 @@ public enum ArchiveFormat
     Zip,
     TarGz,
     Tar,
+    /// <summary>A tar compressed with Zstandard: fast, and smaller than gzip.</summary>
+    TarZst,
+    /// <summary>A tar compressed with xz (made by the <c>xz</c> program, when installed): the smallest of the tars.</summary>
+    TarXz,
+    /// <summary>A 7-Zip archive, made by the <c>7z</c> program when installed; it can have a password.</summary>
+    SevenZip,
 }
 
 /// <summary>Progress while an archive is written. Bytes are uncompressed source bytes.</summary>
@@ -46,6 +52,9 @@ public static class ArchiveCreator
         ArchiveFormat.Zip => ".zip",
         ArchiveFormat.TarGz => ".tar.gz",
         ArchiveFormat.Tar => ".tar",
+        ArchiveFormat.TarZst => ".tar.zst",
+        ArchiveFormat.TarXz => ".tar.xz",
+        ArchiveFormat.SevenZip => ".7z",
         _ => throw new ArgumentOutOfRangeException(nameof(format)),
     };
 
@@ -54,6 +63,9 @@ public static class ArchiveCreator
     {
         var n = name.Trim().ToLowerInvariant();
         if (n.EndsWith(".tar.gz") || n.EndsWith(".tgz")) return ArchiveFormat.TarGz;
+        if (n.EndsWith(".tar.zst") || n.EndsWith(".tzst")) return ArchiveFormat.TarZst;
+        if (n.EndsWith(".tar.xz") || n.EndsWith(".txz")) return ArchiveFormat.TarXz;
+        if (n.EndsWith(".7z")) return ArchiveFormat.SevenZip;
         if (n.EndsWith(".tar")) return ArchiveFormat.Tar;
         if (n.EndsWith(".zip")) return ArchiveFormat.Zip;
         return null;
@@ -67,7 +79,7 @@ public static class ArchiveCreator
     public static string WithExtension(string name, ArchiveFormat format)
     {
         var n = name.Trim();
-        foreach (var ext in new[] { ".tar.gz", ".tgz", ".tar", ".zip" })
+        foreach (var ext in new[] { ".tar.gz", ".tgz", ".tar.zst", ".tzst", ".tar.xz", ".txz", ".tar", ".zip", ".7z" })
         {
             if (n.Length > ext.Length && n.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
             {
@@ -86,9 +98,8 @@ public static class ArchiveCreator
     {
         if (!exists(fileName)) return fileName;
 
-        string ext = fileName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase)
-            ? fileName[^7..]
-            : Path.GetExtension(fileName);
+        string ext = new[] { ".tar.gz", ".tar.zst", ".tar.xz" }.FirstOrDefault(e => fileName.EndsWith(e, StringComparison.OrdinalIgnoreCase))
+                     is { } two ? fileName[^two.Length..] : Path.GetExtension(fileName);
         string stem = fileName[..^ext.Length];
 
         for (int i = 1; ; i++)
@@ -129,8 +140,12 @@ public static class ArchiveCreator
         string destFolder, string archiveName, IReadOnlyList<string> sourcePaths, ArchiveFormat format,
         CompressionLevel level, IProgress<ArchiveProgress>? progress, CancellationToken ct, string? password = null)
     {
-        if (!string.IsNullOrEmpty(password) && format != ArchiveFormat.Zip)
-            throw new ArgumentException("Only .zip archives can have a password.", nameof(password));
+        if (!string.IsNullOrEmpty(password) && format is not (ArchiveFormat.Zip or ArchiveFormat.SevenZip))
+            throw new ArgumentException("Only .zip and .7z archives can have a password.", nameof(password));
+        if (format == ArchiveFormat.SevenZip && SevenZipTool.Path == null)
+            throw new InvalidOperationException("Making .7z archives needs 7-Zip's command-line program (7z, 7zz or 7za), which isn't installed.");
+        if (format == ArchiveFormat.TarXz && ExternalCompressor.Xz == null)
+            throw new InvalidOperationException("Making .tar.xz archives needs the xz program, which isn't installed.");
         if (ValidateName(archiveName) is { } problem) throw new ArgumentException(problem, nameof(archiveName));
         if (sourcePaths.Count == 0) throw new ArgumentException("Nothing to archive.", nameof(sourcePaths));
 
@@ -175,6 +190,27 @@ public static class ArchiveCreator
                     case ArchiveFormat.Tar:
                         WriteTar(fs, items, counter, skipped, ct);
                         break;
+                    case ArchiveFormat.TarZst:
+                        using (var zst = new SharpCompress.Providers.Default.ZStandardCompressionProvider().CreateCompressStream(fs, ZstdLevel(level)))
+                            WriteTar(zst, items, counter, skipped, ct);
+                        break;
+                    case ArchiveFormat.TarXz:
+                    {
+                        string plain = temp + ".tar";
+                        try
+                        {
+                            using (var tarFile = new FileStream(plain, FileMode.CreateNew, FileAccess.Write, FileShare.None, BufferSize))
+                                WriteTar(tarFile, items, counter, skipped, ct);
+                            ExternalCompressor.XzInto(plain, fs, XzLevel(level), ct);
+                        }
+                        finally { try { File.Delete(plain); } catch { } }
+                        break;
+                    }
+                    case ArchiveFormat.SevenZip:
+                        fs.Dispose();
+                        File.Delete(temp);
+                        SevenZipTool.Create(temp, items.Select(i => (i.Provider, i.SourcePath, i.EntryName, i.IsDir)).ToList(), level, password, counter, skipped, ct);
+                        break;
                 }
             }
 
@@ -188,6 +224,22 @@ public static class ArchiveCreator
             try { if (File.Exists(temp)) File.Delete(temp); } catch { /* best effort */ }
         }
     }
+
+    internal static int ZstdLevel(CompressionLevel level) => level switch
+    {
+        CompressionLevel.SmallestSize => 19,
+        CompressionLevel.Fastest => 1,
+        CompressionLevel.NoCompression => 1,
+        _ => 6,
+    };
+
+    internal static int XzLevel(CompressionLevel level) => level switch
+    {
+        CompressionLevel.SmallestSize => 9,
+        CompressionLevel.Fastest => 1,
+        CompressionLevel.NoCompression => 0,
+        _ => 6,
+    };
 
     private static bool SafeExists(IFileProvider p, string path)
     {
@@ -429,7 +481,7 @@ public static class ArchiveCreator
     }
 
     /// <summary>Counts bytes and files and reports progress at a modest rate.</summary>
-    private sealed class Counter(IProgress<ArchiveProgress>? progress, long total, int filesTotal)
+    internal sealed class Counter(IProgress<ArchiveProgress>? progress, long total, int filesTotal)
     {
         private string _current = "";
         private long _sinceReport;

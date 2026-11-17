@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.36.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.37.0).
 
 ## Commands
 
@@ -149,6 +149,26 @@ Everything sits at the repository root; there is no `src/` folder.
 - `SystemTags.cs`: labels on the files (`user.xdg.tags` on Linux, Finder's `_kMDItemUserTags` binary plist on macOS).
   `LabelStore.SystemReader` makes `Get` prefer the file's own label; `LabelStore.LabelsSet` tells `MainWindow` which paths to
   write. `GetStored` is DORI's own copy.
+- `DoriScript.cs` (parser and runner; `IScriptHost`, which `MainWindow.Release37.cs` implements) and `RunScriptWindow`. Scripts
+  arrive through the single-instance pipe as `cmd:`+base64 lines (`SingleInstance.EncodeScript`), from `--cmd`/`--script`, or the
+  `%SCRIPT%` button action. `MainWindow` now has a `Button(string)` method (the script host), which hides the `Button` type inside
+  `MainWindow`'s own files: write `Avalonia.Controls.Button` there.
+- `Snapshots.cs` and `PreviousVersionsWindow`: older copies found by walking up from the path (`.snapshots/N/snapshot`, `.zfs/snapshot`,
+  Timeshift), plus `tmutil` and `vssadmin`.
+- `SimilarPhotos.cs` (64-bit difference hash via SkiaSharp, union-find grouping) and `SimilarPhotosWindow`.
+- `PhotoPrivacy.cs` (JPEG/PNG/WebP detail stripping; image data copied untouched; GPS blanked in place) and `PhotoPrivacyWindow`.
+- `PdfTools.cs` and `PdfToolsWindow`: PDFsharp **6.2.x only** — 6.3 and later are AGPL-3.0, which this MIT project can't take; its
+  vulnerable Pkcs dependency is overridden by a direct `System.Security.Cryptography.Pkcs` reference in the csproj.
+- `FileSystem/Archive/ArchiveTools.cs`: `SevenZipTool` (the 7z CLI), `ExternalCompressor` (xz), `ArchiveTester`, `ExtractHere`.
+  SharpCompress writes .tar.zst itself but not xz; it opens .tar.xz/.tar.zst only through `ReaderFactory`, which the provider's
+  streaming fallback already uses.
+- `Elevation.cs`: one action as administrator (pkexec + bash with the paths as arguments, osascript, PowerShell with `runas`).
+- `FileSystem/Rclone/CloudExtras.cs`: `operations/publiclink` and `mount/mount` through the rclone daemon.
+- `SettingsTransfer.cs` and `SettingsWindow`: export/import/move of the settings files. Moves and imports run in `App`'s `Exit`
+  handler (`SettingsTransfer.AfterExit` / `RunPending`), after the window has saved its settings, then DORI starts again.
+- `Localization.cs` and `Translations.cs`: exact-match translation of each window's text as it loads (a class handler on
+  `Window.Loaded`). Add a phrase for every new menu header (a test checks the right-click menu is covered).
+- `TaiDataGrid.Automation.cs`: the grid's automation peer (a List named after the panel and the cursor row).
 - `ConfigFile.cs` also has `ConfigSettings` (`Load`/`Save` of one top-level setting).
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,

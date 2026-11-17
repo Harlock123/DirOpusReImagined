@@ -27,6 +27,9 @@
                 <ComboBoxItem Content="ZIP (.zip) — opens anywhere" />
                 <ComboBoxItem Content="Gzipped tar (.tar.gz) — keeps Unix permissions" />
                 <ComboBoxItem Content="Tar (.tar) — no compression" />
+                <ComboBoxItem Content="Zstandard tar (.tar.zst) — fast and smaller than .tar.gz" />
+                <ComboBoxItem Name="XzItem" Content="xz tar (.tar.xz) — smallest tar (needs xz)" />
+                <ComboBoxItem Name="SevenZipItem" Content="7-Zip (.7z) — small, with an optional password (needs 7-Zip)" />
             </ComboBox>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Compression" VerticalAlignment="Center" Margin="0,0,12,0" />
             <ComboBox Grid.Row="1" Grid.Column="1" Name="LevelBox" HorizontalAlignment="Stretch" SelectedIndex="0">

@@ -6,7 +6,7 @@ namespace DirOpusReImagined.Tests;
 public class ExifReaderTests
 {
     /// <summary>Builds a TIFF/EXIF block: IFD0 with pointers to an Exif IFD and a GPS IFD.</summary>
-    private sealed class ExifBuilder
+    internal sealed class ExifBuilder
     {
         public readonly List<(ushort Tag, ushort Type, object Value)> Ifd0 = new(), Exif = new(), Gps = new();
         private readonly bool _le;
@@ -84,7 +84,7 @@ public class ExifReaderTests
         }
     }
 
-    private static ExifBuilder Camera(bool le)
+    internal static ExifBuilder Camera(bool le)
     {
         var b = new ExifBuilder(le);
         b.Ifd0.Add((0x010F, 2, "Canon"));
@@ -105,7 +105,7 @@ public class ExifReaderTests
         return b;
     }
 
-    private static byte[] Jpeg(byte[] tiff)
+    internal static byte[] Jpeg(byte[] tiff)
     {
         var app1 = "Exif\0\0"u8.ToArray().Concat(tiff).ToArray();
         int len = app1.Length + 2;

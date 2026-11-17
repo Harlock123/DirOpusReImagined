@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using System;
+using System.Linq;
 
 namespace DirOpusReImagined
 {
@@ -16,10 +17,14 @@ namespace DirOpusReImagined
             DisplayScaling.Bootstrap(args);
 
             // Folders named on the command line go to the DORI already running, if there is one.
+            // So do scripts given with --cmd or --script.
             var paths = SingleInstance.PathsFrom(args);
-            if (paths.Count > 0 && Array.IndexOf(args, SingleInstance.NewWindowSwitch) < 0 && SingleInstance.TrySend(paths))
+            var scripts = SingleInstance.ScriptsFrom(args);
+            var message = paths.Concat(scripts.Select(SingleInstance.EncodeScript)).ToList();
+            if (message.Count > 0 && Array.IndexOf(args, SingleInstance.NewWindowSwitch) < 0 && SingleInstance.TrySend(message))
                 return;
             SingleInstance.StartupPaths = paths;
+            SingleInstance.StartupScripts = scripts;
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

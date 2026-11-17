@@ -17,7 +17,9 @@ public enum ThemeChoice
     Dracula,
     Nord,
     SolarizedLight,
-    SolarizedDark
+    SolarizedDark,
+    /// <summary>White and yellow on black, with strong outlines, for low vision.</summary>
+    HighContrast
 }
 
 /// <summary>
@@ -39,6 +41,7 @@ public static class ThemeManager
     public static readonly ThemeVariant NordVariant           = new("Nord", ThemeVariant.Dark);
     public static readonly ThemeVariant SolarizedLightVariant = new("SolarizedLight", ThemeVariant.Light);
     public static readonly ThemeVariant SolarizedDarkVariant  = new("SolarizedDark", ThemeVariant.Dark);
+    public static readonly ThemeVariant HighContrastVariant   = new("HighContrast", ThemeVariant.Dark);
 
     /// <summary>
     /// Registers the named-theme palettes into the application's theme dictionaries. Call once at
@@ -52,6 +55,7 @@ public static class ThemeManager
         res.ThemeDictionaries[NordVariant]           = Build(Nord);
         res.ThemeDictionaries[SolarizedLightVariant] = Build(SolarizedLight);
         res.ThemeDictionaries[SolarizedDarkVariant]  = Build(SolarizedDark);
+        res.ThemeDictionaries[HighContrastVariant]   = Build(HighContrast);
     }
 
     public static void Apply(ThemeChoice choice)
@@ -70,6 +74,7 @@ public static class ThemeManager
             ThemeChoice.Nord           => NordVariant,
             ThemeChoice.SolarizedLight => SolarizedLightVariant,
             ThemeChoice.SolarizedDark  => SolarizedDarkVariant,
+            ThemeChoice.HighContrast   => HighContrastVariant,
             _                          => ThemeVariant.Light
         };
     }
@@ -98,6 +103,23 @@ public static class ThemeManager
         ("DropTargetBrush", "#FFB86C"), ("ActivePanelFrameBrush", "#FF79C6"),
         ("CompareUniqueBrush", "#2E5A3D"), ("CompareNewerBrush", "#24506E"), ("CompareOlderBrush", "#44475A"),
         ("CompareDifferentBrush", "#5C531F"), ("CompareInaccessibleBrush", "#6E2B2B"),
+    };
+
+    // Black, white and yellow, the usual high-contrast colours: text is white on black (21:1),
+    // the cursor and active frame yellow, the selection a strong blue with white text.
+    private static readonly (string, string)[] HighContrast =
+    {
+        ("WindowBackgroundBrush", "#000000"), ("SurfaceBackgroundBrush", "#000000"),
+        ("PanelChromeBrush", "#002A80"), ("BorderSubtleBrush", "#FFFFFF"), ("MutedTextBrush", "#E0E0E0"),
+        ("StatusBarBackgroundBrush", "#000000"), ("StatusBarTextBrush", "#FFFFFF"),
+        ("ScrollBarBackgroundBrush", "#1A1A1A"),
+        ("GridBackgroundBrush", "#000000"), ("GridCellBrush", "#000000"), ("GridCellTextBrush", "#FFFFFF"),
+        ("GridCellOutlineBrush", "#808080"), ("GridHeaderBackgroundBrush", "#000000"),
+        ("GridHeaderTextBrush", "#FFFF00"), ("GridTitleBackgroundBrush", "#000000"), ("GridTitleTextBrush", "#FFFF00"),
+        ("RowSelectedBrush", "#1A3FFF"), ("RowHoverBrush", "#333333"), ("RowCursorBrush", "#FFFF00"),
+        ("DropTargetBrush", "#00FFFF"), ("ActivePanelFrameBrush", "#FFFF00"),
+        ("CompareUniqueBrush", "#006400"), ("CompareNewerBrush", "#00008B"), ("CompareOlderBrush", "#404040"),
+        ("CompareDifferentBrush", "#806000"), ("CompareInaccessibleBrush", "#8B0000"),
     };
 
     private static readonly (string, string)[] Nord =

@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyVersion>0.1.36.0</AssemblyVersion>
-    <FileVersion>0.1.36.0</FileVersion>
+    <AssemblyVersion>0.1.37.0</AssemblyVersion>
+    <FileVersion>0.1.37.0</FileVersion>
     <NoWarn>$(NoWarn);CS0414;CS8602;CS8600;CS8601;CS8629;CS8604;CS8622;CS8618;CS8625;CS0219</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -27,8 +27,12 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.17" />
     <PackageReference Include="DiscUtils.Iso9660" Version="0.16.13" />
     <PackageReference Include="DiscUtils.Udf" Version="0.16.13" />
+    <!-- PDF tools. Stay on 6.2.x: it is MIT; later PDFsharp releases are AGPL-3.0, which DORI's MIT licence can't take. -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="SharpCompress" Version="0.50.0" />
     <PackageReference Include="SyntaxColorizer" Version="1.0.2" />
+    <!-- PDFsharp 6.2.4 asks for Pkcs 8.0.1, which has known vulnerabilities; this patched one is used instead. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <PackageReference Include="Tomlyn" Version="0.17.0" />
     <PackageReference Include="YamlDotNet" Version="13.1.0" />
   </ItemGroup>

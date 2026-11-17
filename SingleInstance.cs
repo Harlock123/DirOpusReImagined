@@ -22,7 +22,7 @@ namespace DirOpusReImagined
         public const string NewWindowSwitch = "--new-window";
 
         /// <summary>Switches DORI reads that take a value, so the value isn't mistaken for a folder.</summary>
-        private static readonly HashSet<string> SwitchesWithValue = new(StringComparer.OrdinalIgnoreCase) { "--scale", "/scale" };
+        private static readonly HashSet<string> SwitchesWithValue = new(StringComparer.OrdinalIgnoreCase) { "--scale", "/scale", "--cmd", "--script" };
 
         /// <summary>Folders and files named on the command line, made absolute ("file://" URIs are accepted too).</summary>
         public static List<string> PathsFrom(string[] args, string? currentDir = null)
@@ -42,6 +42,36 @@ namespace DirOpusReImagined
                 paths.Add(p);
             }
             return paths;
+        }
+
+        /// <summary>Scripts given with --cmd TEXT or --script FILE (read now, so a relative file name means this folder).</summary>
+        public static List<string> ScriptsFrom(string[] args, string? currentDir = null)
+        {
+            var scripts = new List<string>();
+            currentDir ??= Environment.CurrentDirectory;
+            for (int i = 0; i + 1 < args.Length; i++)
+            {
+                if (args[i].Equals("--cmd", StringComparison.OrdinalIgnoreCase)) scripts.Add(args[++i]);
+                else if (args[i].Equals("--script", StringComparison.OrdinalIgnoreCase))
+                {
+                    string file = Path.GetFullPath(args[++i], currentDir);
+                    try { scripts.Add(File.ReadAllText(file)); }
+                    catch (Exception ex) { scripts.Add($"message \"The script {file.Replace("\"", "'")} couldn't be read: {ex.Message.Replace("\"", "'")}\""); }
+                }
+            }
+            return scripts;
+        }
+
+        public const string ScriptPrefix = "cmd:";
+
+        /// <summary>A script as one line of the pipe's protocol (paths are sent as they are; they're always absolute, so never start with "cmd:").</summary>
+        public static string EncodeScript(string script) => ScriptPrefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(script));
+
+        public static string? DecodeScript(string line)
+        {
+            if (!line.StartsWith(ScriptPrefix, StringComparison.Ordinal)) return null;
+            try { return Encoding.UTF8.GetString(Convert.FromBase64String(line[ScriptPrefix.Length..])); }
+            catch { return null; }
         }
 
         /// <summary>The pipe's name: the same for every DORI this user runs, different for other users.</summary>
@@ -111,11 +141,11 @@ namespace DirOpusReImagined
                         await server.WaitForConnectionAsync(ct).ConfigureAwait(false);
                         using var reader = new StreamReader(server, Encoding.UTF8, false, 4096, leaveOpen: true);
                         var paths = new List<string>();
-                        while (paths.Count < 100)
+                        while (paths.Count < 200)
                         {
                             string? line = await reader.ReadLineAsync(ct).AsTask().WaitAsync(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
                             if (string.IsNullOrEmpty(line)) break;
-                            if (line.Length < 4096) paths.Add(line);
+                            if (line.Length < 1 << 20) paths.Add(line);
                         }
                         using (var writer = new StreamWriter(server, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true })
                             await writer.WriteLineAsync("ok").ConfigureAwait(false);
@@ -151,5 +181,8 @@ namespace DirOpusReImagined
 
         /// <summary>Paths given when this copy started (or none), for the main window to open once it is up.</summary>
         public static List<string> StartupPaths { get; set; } = new();
+
+        /// <summary>Scripts given when this copy started, run once the main window is up.</summary>
+        public static List<string> StartupScripts { get; set; } = new();
     }
 }

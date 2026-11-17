@@ -45,6 +45,8 @@ public partial class CreateArchive : Window
         int files = selected.Count - dirs;
         SummaryText.Text = "Archive " + Describe(files, dirs) + " into this folder.";
         NameBox.Text = DefaultName(folder, selected) + ArchiveCreator.Extension(ArchiveFormat.Zip);
+        if (ExternalCompressor.Xz == null) ToolTip.SetTip(XzItem, "The xz program isn't installed");
+        if (SevenZipTool.Path == null) ToolTip.SetTip(SevenZipItem, "7-Zip's command-line program (7z, 7zz or 7za) isn't installed");
 
         FormatBox.SelectionChanged += (_, _) => OnFormatChanged();
         PasswordCheck.IsCheckedChanged += (_, _) =>
@@ -81,6 +83,9 @@ public partial class CreateArchive : Window
     {
         1 => ArchiveFormat.TarGz,
         2 => ArchiveFormat.Tar,
+        3 => ArchiveFormat.TarZst,
+        4 => ArchiveFormat.TarXz,
+        5 => ArchiveFormat.SevenZip,
         _ => ArchiveFormat.Zip,
     };
 
@@ -96,7 +101,7 @@ public partial class CreateArchive : Window
     {
         NameBox.Text = ArchiveCreator.WithExtension(NameBox.Text ?? "", SelectedFormat);
         // Only zips can carry a password.
-        PasswordPanel.IsVisible = SelectedFormat == ArchiveFormat.Zip;
+        PasswordPanel.IsVisible = SelectedFormat is ArchiveFormat.Zip or ArchiveFormat.SevenZip;
         // A plain tar isn't compressed, so there's no level to pick.
         LevelBox.IsEnabled = SelectedFormat != ArchiveFormat.Tar;
     }
@@ -127,7 +132,9 @@ public partial class CreateArchive : Window
         if (ArchiveCreator.FormatFromName(name) == null) name = ArchiveCreator.WithExtension(name, format);
 
         string? password = null;
-        if (format == ArchiveFormat.Zip && PasswordCheck.IsChecked == true)
+        if (format is ArchiveFormat.SevenZip && SevenZipTool.Path == null) { ShowError("Making .7z archives needs 7-Zip's command-line program (7z, 7zz or 7za). Install 7-Zip, or pick another format."); return; }
+        if (format is ArchiveFormat.TarXz && ExternalCompressor.Xz == null) { ShowError("Making .tar.xz archives needs the xz program. Install it, or pick .tar.zst."); return; }
+        if (format is ArchiveFormat.Zip or ArchiveFormat.SevenZip && PasswordCheck.IsChecked == true)
         {
             password = PasswordBox.Text ?? "";
             if (password.Length == 0) { ShowError("Type the password, or untick the password box."); return; }

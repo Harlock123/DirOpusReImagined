@@ -84,7 +84,21 @@ namespace DirOpusReImagined
         ConnectServer,
         DesktopIntegration,
         CheckUpdates,
-        SystemTags
+        SystemTags,
+        RunScript,
+        PreviousVersions,
+        SimilarPhotos,
+        PhotoPrivacy,
+        PdfTools,
+        ExtractHere,
+        TestArchive,
+        AdminDelete,
+        AdminCopy,
+        AdminMove,
+        AdminRename,
+        AdminNewFolder,
+        CopyShareLink,
+        Settings
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -1536,6 +1550,7 @@ namespace DirOpusReImagined
 
         public void ReRender()
         {
+            AnnounceCursorIfChanged();
             try
             {
                 if (TheCanvas != null && !_suspendRendering)
@@ -4214,6 +4229,20 @@ namespace DirOpusReImagined
         private void DesktopIntegration_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.DesktopIntegration);
         private void CheckUpdates_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CheckUpdates);
         private void SystemTags_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SystemTags);
+        private void RunScript_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.RunScript);
+        private void PreviousVersions_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.PreviousVersions);
+        private void SimilarPhotos_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SimilarPhotos);
+        private void PhotoPrivacy_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.PhotoPrivacy);
+        private void PdfTools_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.PdfTools);
+        private void ExtractHere_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.ExtractHere);
+        private void TestArchive_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.TestArchive);
+        private void AdminDelete_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.AdminDelete);
+        private void AdminCopy_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.AdminCopy);
+        private void AdminMove_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.AdminMove);
+        private void AdminRename_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.AdminRename);
+        private void AdminNewFolder_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.AdminNewFolder);
+        private void CopyShareLink_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CopyShareLink);
+        private void Settings_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Settings);
         private void GoToFolder_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToFolder);
         private void FolderTree_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderTree);
 

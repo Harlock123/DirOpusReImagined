@@ -81,6 +81,7 @@
 				<ComboBoxItem Tag="Nord">Nord</ComboBoxItem>
 				<ComboBoxItem Tag="SolarizedLight">Solarized Light</ComboBoxItem>
 				<ComboBoxItem Tag="SolarizedDark">Solarized Dark</ComboBoxItem>
+				<ComboBoxItem Tag="HighContrast">High Contrast</ComboBoxItem>
 			</ComboBox>
 			<Label Name="LpLabel1" Content="Sel Mgmt" HorizontalAlignment="Center" FontSize="9" FontWeight="Bold" Padding="0" Margin="0,1" />
 

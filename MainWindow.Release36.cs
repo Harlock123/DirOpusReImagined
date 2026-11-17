@@ -88,6 +88,7 @@ namespace DirOpusReImagined
         private void WireViewer(FileViewer viewer, string panelPath)
         {
             viewer.IsPicture = FileExtensionIsImage;
+            viewer.ElevatedSave = SaveAsAdministratorAsync;
             viewer.Siblings = PanelFiles(panelPath);
             viewer.SlideshowRequested += (v, path) => StartSlideshow(v.Siblings, path, v);
             viewer.HexEditorRequested += (_, path) => OpenHexEditor(path, panelPath);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -20,7 +21,13 @@ namespace DirOpusReImagined
 
         private void InitOutsideRelease36()
         {
-            SingleInstance.StartServer(paths => Dispatcher.UIThread.Post(() => OpenOutsidePaths(paths, bringToFront: true)));
+            SingleInstance.StartServer(lines => Dispatcher.UIThread.Post(() =>
+            {
+                var scripts = lines.Select(SingleInstance.DecodeScript).Where(x => x != null).Cast<string>().ToList();
+                var paths = lines.Where(l => SingleInstance.DecodeScript(l) == null).ToList();
+                if (paths.Count > 0) OpenOutsidePaths(paths, bringToFront: true);
+                foreach (var script in scripts) _ = RunScriptAsync(script, "sent from another program");
+            }));
             Closing += (_, _) => SingleInstance.StopServer();
 
             _driveWatcher = new DriveWatcher(TimeSpan.FromSeconds(3));
@@ -32,6 +39,8 @@ namespace DirOpusReImagined
                 // After the saved tabs are back, so the folders asked for open as new tabs beside them.
                 if (SingleInstance.StartupPaths.Count > 0)
                     Dispatcher.UIThread.Post(() => OpenOutsidePaths(SingleInstance.StartupPaths, bringToFront: false), DispatcherPriority.Background);
+                foreach (var script in SingleInstance.StartupScripts)
+                    Dispatcher.UIThread.Post(() => _ = RunScriptAsync(script, "given when DORI started"), DispatcherPriority.Background);
                 _ = CheckForUpdatesQuietlyAsync();
             };
         }

@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.RunScriptWindow"
+        Width="760" Height="560" MinWidth="480" MinHeight="320"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Run Script">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <Grid Margin="12" RowDefinitions="Auto,*,Auto,120,Auto" RowSpacing="8">
+        <TextBlock TextWrapping="Wrap" Opacity="0.8"
+                   Text="One command per line (or separated by ;). left / right · go PATH · tab PATH · select *.jpg · select all · deselect · invert · filter TEXT · copy · move · delete · command NAME · button LABEL · run PROGRAM · refresh · wait · message TEXT · if exists PATH … else … end. %PANEL%, %OTHER%, %LEFT%, %RIGHT% and ~ work in paths. From a terminal: DORI --cmd &quot;go ~/Pictures; select *.jpg&quot; or DORI --script file.dori." />
+        <TextBox x:Name="ScriptBox" Grid.Row="1" AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap"
+                 FontFamily="Cascadia Mono,Consolas,Menlo,monospace" />
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+            <Button x:Name="RunButton" Content="Run" FontWeight="Bold" ToolTip.Tip="Ctrl/Cmd+Enter" />
+            <Button x:Name="StopButton" Content="Stop" IsEnabled="False" />
+            <Button x:Name="OpenButton" Content="Open…" />
+            <Button x:Name="SaveButton" Content="Save…" />
+        </StackPanel>
+        <TextBox x:Name="LogBox" Grid.Row="3" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                 FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="12" />
+        <Button x:Name="CloseButton" Grid.Row="4" Content="Close" HorizontalAlignment="Right" IsCancel="True" />
+    </Grid>
+</Window>

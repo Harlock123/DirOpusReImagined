@@ -23,6 +23,7 @@ namespace DirOpusReImagined
         Bookmark1, Bookmark2, Bookmark3, Bookmark4, Bookmark5, Bookmark6, Bookmark7, Bookmark8, Bookmark9,
         CommandLine, FolderTree, SyncJobs,
         ReplaceInFiles, Trash, Slideshow, HexEditor, MediaTools, Devices, ConnectServer, DesktopIntegration, CheckUpdates, SystemTags,
+        RunScript, PreviousVersions, SimilarPhotos, PhotoPrivacy, PdfTools, ExtractHere, TestArchive, AdminDelete, AdminCopy, AdminMove, AdminRename, AdminNewFolder, CopyShareLink, Settings,
     }
 
     /// <summary>
@@ -188,6 +189,20 @@ namespace DirOpusReImagined
             new(ShortcutCommand.DesktopIntegration, "Open folders in DORI from other programs", ""),
             new(ShortcutCommand.CheckUpdates, "Check for updates", ""),
             new(ShortcutCommand.SystemTags, "Keep labels on the files too (on / off)", ""),
+            new(ShortcutCommand.RunScript, "Run a DORI script", ""),
+            new(ShortcutCommand.PreviousVersions, "Previous versions (snapshots)", ""),
+            new(ShortcutCommand.SimilarPhotos, "Find similar photos", ""),
+            new(ShortcutCommand.PhotoPrivacy, "Remove photo details (location, camera)", ""),
+            new(ShortcutCommand.PdfTools, "PDF tools (merge, split, turn, pages)", ""),
+            new(ShortcutCommand.ExtractHere, "Extract the archive here", ""),
+            new(ShortcutCommand.TestArchive, "Test an archive", ""),
+            new(ShortcutCommand.AdminDelete, "Delete as administrator", ""),
+            new(ShortcutCommand.AdminCopy, "Copy to the other panel as administrator", ""),
+            new(ShortcutCommand.AdminMove, "Move to the other panel as administrator", ""),
+            new(ShortcutCommand.AdminRename, "Rename as administrator", ""),
+            new(ShortcutCommand.AdminNewFolder, "New folder as administrator", ""),
+            new(ShortcutCommand.CopyShareLink, "Copy a cloud share link", ""),
+            new(ShortcutCommand.Settings, "Settings (export, import, portable, language)", ""),
         };
 
         public const string ElementName = "Shortcuts";

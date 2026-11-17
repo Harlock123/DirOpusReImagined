@@ -57,18 +57,35 @@
 							<MenuItem Name="ReplaceInFilesMenuItem" Header="Find and Replace in Files…" InputGesture="Ctrl+Shift+H" Click="ReplaceInFiles_Click"/>
 							<MenuItem Name="HexEditorMenuItem" Header="Hex Editor" InputGesture="Shift+F3" Click="HexEditor_Click"/>
 							<MenuItem Name="SlideshowMenuItem" Header="Slideshow (pictures here)" Click="Slideshow_Click"/>
+							<MenuItem Name="SimilarPhotosMenuItem" Header="Find Similar Photos…" Click="SimilarPhotos_Click"/>
+							<MenuItem Name="PhotoPrivacyMenuItem" Header="Remove Photo Details (location, camera)…" Click="PhotoPrivacy_Click"/>
+							<MenuItem Name="PdfToolsMenuItem" Header="PDF Tools (merge, split, turn, pages)…" Click="PdfTools_Click"/>
+							<Separator/>
+							<MenuItem Name="ExtractHereMenuItem" Header="Extract Here" Click="ExtractHere_Click"/>
+							<MenuItem Name="TestArchiveMenuItem" Header="Test Archive" Click="TestArchive_Click"/>
 							<Separator/>
 							<MenuItem Name="ExportListingMenuItem" Header="Export Listing (CSV, text, HTML)…" Click="ExportListing_Click"/>
 							<MenuItem Name="FolderRulesMenuItem" Header="Folder Rules…" Click="FolderRules_Click"/>
 							<MenuItem Name="CataloguesMenuItem" Header="Disk Catalogues…" Click="Catalogues_Click"/>
 							<MenuItem Name="SyncJobsMenuItem" Header="Saved Sync Jobs…" Click="SyncJobs_Click"/>
+							<MenuItem Name="PreviousVersionsMenuItem" Header="Previous Versions…" Click="PreviousVersions_Click"/>
 							<Separator/>
 							<MenuItem Name="TrashMenuItem" Header="Trash (put back, empty)…" Click="Trash_Click"/>
 							<MenuItem Name="DevicesMenuItem" Header="Drives and Devices…" Click="Devices_Click"/>
 							<MenuItem Name="ConnectServerMenuItem" Header="Connect to Server (SFTP, SMB, FTP, WebDAV)…" Click="ConnectServer_Click"/>
+							<MenuItem Name="CopyShareLinkMenuItem" Header="Copy Share Link (cloud)" Click="CopyShareLink_Click"/>
 							<Separator/>
 							<MenuItem Name="SecureDeleteMenuItem" Header="Securely Delete (overwrite first)…" Click="SecureDelete_Click"/>
+							<MenuItem Name="AdminMenuItem" Header="As Administrator">
+								<MenuItem Header="Delete…" Click="AdminDelete_Click"/>
+								<MenuItem Header="Copy to Other Panel" Click="AdminCopy_Click"/>
+								<MenuItem Header="Move to Other Panel" Click="AdminMove_Click"/>
+								<MenuItem Header="Rename…" Click="AdminRename_Click"/>
+								<MenuItem Header="New Folder…" Click="AdminNewFolder_Click"/>
+							</MenuItem>
 							<Separator/>
+							<MenuItem Name="RunScriptMenuItem" Header="Run Script…" Click="RunScript_Click"/>
+							<MenuItem Name="SettingsMenuItem" Header="Settings (export, import, portable)…" Click="Settings_Click"/>
 							<MenuItem Name="DesktopIntegrationMenuItem" Header="Open Folders in DORI from Other Programs…" Click="DesktopIntegration_Click"/>
 							<MenuItem Name="CheckUpdatesMenuItem" Header="Check for Updates…" Click="CheckUpdates_Click"/>
 						</MenuItem>

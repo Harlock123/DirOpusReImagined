@@ -37,12 +37,13 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - **Speed limit and Start Later** (in the File Operations window): type a limit such as `10 MB` (a second) and copies keep under it — copies on this computer, and cloud transfers through rclone. **Start later…** holds the operations that haven't started until a time such as `02:00` (one already running carries on); **Start now** lets them go. The limit is remembered
 - **Verify copies** (under File operations in **Edit Buttons…**, off by default) reads each copied file back and compares it with the original (SHA-256), failing the copy if they differ. It covers copies on this computer and copies into and out of archives; cloud copies are checked by rclone itself, which compares hashes where the storage offers them
 - **Create folders** in either panel
-- **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz** or **.tar**:
+- **Create archives** from the selection with the **zip** buttons, as **.zip**, **.tar.gz**, **.tar**, **.tar.zst** (Zstandard: fast, and smaller than gzip), **.tar.xz** (smallest; made by the `xz` program, when installed) or **.7z** (made by 7-Zip's command-line program `7z`/`7zz`/`7za`, when installed):
   - folders go in with everything inside them, including hidden files and empty folders; Unix permissions such as the execute bit are kept
   - choose the compression (normal, smallest, fastest or none); the name is suggested from the selection
   - a progress bar shows the current file, and **Cancel** stops it without leaving a half-written archive behind
   - an existing file is never overwritten — the new archive is numbered instead (`photos_1.zip`)
   - **protect a .zip with a password** (AES-256, the WinZip format 7-Zip, WinZip, Keka and The Unarchiver open; Windows Explorer's built-in zip support can't). The files' contents are encrypted; as in any zip, their names and sizes can still be seen
+  - **protect a .7z with a password**, which also hides the file names. The password is handed to 7-Zip on its command line, so other programs running as you could see it while the archive is made
   - works from cloud folders and from inside other archives, and can save into a cloud folder; items that can't be read are listed at the end rather than stopping the whole archive
 - **Drag and drop** selected items between panels (or onto a folder row); Copy by default, hold **Shift** to Move
 - **Drag and drop with other programs**: drop files from a file manager, the desktop or an e-mail onto a panel (or a folder row) to copy them in — **Shift** moves — through the usual queue, conflict questions and undo. Files dragged out of a panel carry the system's file list too, so programs that accept dropped files can take them (files on this computer only; on Linux the toolkit may not pass a drag on to other programs)
@@ -193,6 +194,51 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 ### Check for Updates
 - Right-click → **File Tools → Check for Updates…** asks GitHub for the latest release and says whether it's newer, with its notes and a link to the release page
 - Tick **Check once a day when DORI starts** to be told about new versions; it's off until you turn it on, and nothing about you is sent
+
+### Scripts and Remote Control
+- Like the ARexx port of the Amiga original, DORI takes commands from scripts and other programs. One command per line, or several separated by `;`:
+  - `left` / `right` choose the panel the commands after them act on
+  - `go PATH`, `tab PATH` go to a folder, or open it in a new tab
+  - `select *.jpg *.png` (`select +…` adds to the selection), `select all`, `deselect`, `invert`, `filter TEXT`
+  - `copy`, `move`, `delete` act on the selection, to the other panel, asking as usual
+  - `command NAME` runs any panel command (`FlatView`, `ExportListing`, `NewTab`… — the names in the shortcuts table), `button LABEL` runs a button
+  - `run PROGRAM ARGS` runs a program in the panel's folder; `refresh`; `wait` waits for copies and moves to finish (`wait 5` waits five seconds); `message TEXT`
+  - `if exists PATH`, `if not exists PATH`, `if selected` … `else` … `end`
+  - `%PANEL%`, `%OTHER%`, `%LEFT%`, `%RIGHT%` and `~` work in paths
+- **From a terminal or another program**: `DORI --cmd "go ~/Pictures; select *.jpg"` or `DORI --script tidy.dori` sends the script to the DORI already running (or runs it when DORI starts)
+- **On a button**: give a button the action `%SCRIPT%` and the script (or the path of a `.dori` file) as its arguments
+- **Right-click → File Tools → Run Script…** to write, open, save and run scripts, with what each line did and where a mistake is
+
+### Previous Versions
+- Right-click → **File Tools → Previous Versions…** lists the older copies of a file or folder that the system's snapshots keep: **Btrfs** snapshots made by **snapper** or **Timeshift**, **ZFS** snapshots, **Time Machine** backups on macOS (while the backup disk is connected), and Windows **shadow copies** (DORI has to run as administrator to see those)
+- **View** or **Compare with Now** an old version, **Show in Panel** to browse the snapshot, **Restore a Copy** beside the current one (`report (2026-11-10 0800).txt`), or **Restore…** it in place — the current file goes to the trash first, so Ctrl/Cmd+Z brings it back. Versions the same as the next newer one are listed once
+
+### Find Similar Photos
+- Right-click → **File Tools → Find Similar Photos…** finds pictures that look alike — a resized copy, a re-saved JPEG, burst shots — which Find Duplicates (identical files only) misses, in the selection or the whole folder (and below)
+- **How alike**: nearly identical, look alike, or roughly alike. Each group shows a thumbnail, the size in pixels and on disk, with the best (most pixels, then the largest file) first; **Mark All but the Best**, then **Move Marked to Trash…** (undo with Ctrl/Cmd+Z)
+
+### Remove Photo Details
+- Right-click → **File Tools → Remove Photo Details…** shows what each selected photo gives away (where it was taken, the camera, the date, the software) and takes it out before you share them: **only the location**, or **every detail** (EXIF, XMP, IPTC, comments; the way the photo is turned and its colour profile are kept)
+- The picture itself is copied byte for byte, so nothing is lost in quality. Save **copies beside them** (`photo_clean.jpg`), **into the other panel's folder**, or **in place of the originals**. JPEG, PNG and WebP; PNG and WebP lose all their details either way
+
+### PDF Tools
+- Right-click → **File Tools → PDF Tools…** on selected PDFs: **merge** them into one (in the order you set), **split** one into parts of so many pages, **take out pages** (`1-3, 5, 8-`) into a new PDF, or **turn pages** 90°, 180° or 270°
+- Pages are copied as they are, without losing quality; new files go beside the originals or into the other panel's folder, and the originals are never changed. Password-protected PDFs can't be opened. Uses [PDFsharp](https://www.pdfsharp.com/) 6.2 (MIT)
+
+### As Administrator
+- Right-click → **File Tools → As Administrator** deletes, copies or moves to the other panel, renames, or makes a folder where you don't have permission (system settings, another user's folder), after the system asks for your password: **pkexec** (polkit) on Linux, the administrator prompt on macOS, the UAC prompt on Windows
+- Only that one action runs with administrator rights, never DORI itself. Copies and moves never replace something already there; a delete as administrator is permanent (it doesn't go to the trash)
+- **Saving in the viewer**: when quick edit can't save a file because of its permissions, it offers to save it as administrator, keeping the file's owner and permissions
+
+### Settings, Portable Mode and Language
+- Right-click → **File Tools → Settings…**:
+  - **Export…** saves all of DORI's settings in one .zip — buttons and banks, shortcuts, layouts, filters, columns, the theme, bookmarks, labels, folder rules and sync jobs (and, if you like, the disk catalogues) — to move to another computer or share. **Import…** puts a .zip's settings in place (the current ones are backed up first) and starts DORI again
+  - **Portable**: keep the settings **with the program** (a copy of DORI on a USB stick then carries its own) or **in your user folder** (`~/.config/dori`, `%APPDATA%\dori`, `~/Library/Application Support/dori`). DORI moves them as it closes and starts again
+  - **Language**: English, **Deutsch**, **Français** or **Español** for the menus, buttons and dialogs (messages and the help pages stay in English)
+
+### Accessibility
+- Screen readers (Narrator, VoiceOver, Orca) hear each panel as a list named after its side and folder, and the row under the cursor as it moves ("photo.jpg, file, 2.3 MB, 3 of 40, selected"); the buttons that show only a symbol (◀ ▶ ◷ ☁, the drive button, Tree, Flat) have names
+- A **High Contrast** theme: white and yellow on black, with a bright cursor and selection. **Fonts Larger** (right-click) and the `--scale` / `<UiScale>` setting make text bigger
 
 ### Synced Browsing
 - **⇄ Follow** (beside the button bank tabs, or right-click → **Synced Browsing**) links the two panels: going into a folder in one panel takes the other panel into the folder of the **same name**, and going up takes it **up the same number of levels**
@@ -367,6 +413,16 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `DesktopIntegration` | Open folders in DORI from other programs | — |
 | `CheckUpdates` | Check for updates | — |
 | `SystemTags` | Keep labels on the files too (on / off) | — |
+| `RunScript` | Run a DORI script | — |
+| `PreviousVersions` | Previous versions (snapshots) | — |
+| `SimilarPhotos` | Find similar photos | — |
+| `PhotoPrivacy` | Remove photo details (location, camera) | — |
+| `PdfTools` | PDF tools (merge, split, turn, pages) | — |
+| `ExtractHere` | Extract the archive here | — |
+| `TestArchive` | Test an archive | — |
+| `AdminDelete`, `AdminCopy`, `AdminMove`, `AdminRename`, `AdminNewFolder` | The same, as administrator | — |
+| `CopyShareLink` | Copy a cloud share link | — |
+| `Settings` | Settings (export, import, portable, language) | — |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -439,7 +495,9 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Reads through the provider layer, so images and text inside **archives** preview exactly like local files
 
 ### Browse Into Archives
-- Double-click a **.zip, .7z, .rar, .tar, or .tar.gz/.tgz** to open it like a folder and browse its contents (nested folders included)
+- Double-click a **.zip, .7z, .rar, .tar, .tar.gz/.tgz, .tar.bz2, .tar.xz or .tar.zst** to open it like a folder and browse its contents (nested folders included)
+- **Extract Here** (right-click → File Tools) unpacks the archive under the cursor beside it: straight into the folder when everything in it is in one top folder (or it holds one file), otherwise into a new folder named after the archive (`photos (2)` if `photos` is taken)
+- **Test Archive** reads every file in an archive to the end and checks it against the checksum the archive records (zip, 7z and rar keep one), listing anything damaged
 - **Extract** by copying or dragging files/folders out to a normal folder — reuses the standard transfer progress and overwrite prompts
 - **View** files inside archives with F3, and **open them in external tools** (double-click, or custom command buttons) — the file is extracted to a temporary copy that the tool receives
 - **Edits are saved back into the archive.** When the other program saves that copy, DORI asks whether to **put the changed file back into the archive** (a .zip, .tar, .tar.gz or .tgz), replacing the entry in one rewrite. **Not Now** asks again after the next save
@@ -458,6 +516,8 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via [rclone](https://rclone.org/)
 - Access any configured remote with `cloud://<remote-name>/<path>` in the panel path box
 - **Connect to Server…** at the top of the ☁ menu opens SFTP, SMB, FTP and WebDAV servers from an address and login (see [Connect to Server](#connect-to-server))
+- **Copy Share Link** (right-click → File Tools, on a cloud file or folder) puts a link anyone can open on the clipboard, for the clouds that offer them (Google Drive, OneDrive, Dropbox, Box, pCloud, Mega and others)
+- **Mount as Drive** (☁ menu) makes a remote a folder other programs can open — `~/DORI Mounts/NAME`, or a free drive letter on Windows — until it's unmounted (☁ → Unmount) or DORI closes. Needs FUSE: fuse3 on Linux, macFUSE or FUSE-T on macOS, WinFsp on Windows
 - Automatic rclone download on first use, with live progress UI
 - Lazy daemon startup — no overhead until you actually use cloud storage
 - Dedicated diagnostics dialog showing binary location, configured remotes, live daemon log, and recent API requests
@@ -486,7 +546,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - When the columns are wider than the panel, scroll sideways with the scrollbar under the panel, **Shift** or **Ctrl + mouse wheel**, or a sideways touchpad swipe; the scrollbar's thumb shows how much is visible, and it is disabled when everything fits. **Alt + mouse wheel** changes the font size
 
 ### Theming
-- A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, **System** (follow the OS), and the named palettes **Dracula**, **Nord**, **Solarized Light**, and **Solarized Dark**
+- A **Theme** selector in the center panel switches the whole app between **Light**, **Dark**, **System** (follow the OS), and the named palettes **Dracula**, **Nord**, **Solarized Light**, **Solarized Dark** and **High Contrast**
 - The choice is saved to `Configuration.xml` and restored on next launch; System mode tracks OS appearance changes live
 - Themes the entire application — window chrome, every dialog, and both file grids — from a central set of semantic color tokens
 - File-row text color is chosen per row for legibility (WCAG luminance) so selection, hover, and compare colors stay readable in both themes
@@ -506,11 +566,12 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 
 ## Tech Stack
 
-- **Framework**: Avalonia 11.0.0 (cross-platform UI)
+- **Framework**: Avalonia 11.3 (cross-platform UI)
+- **Libraries**: SharpCompress (archives), DiscUtils (disk images), PDFsharp 6.2 (PDF tools; MIT — later PDFsharp versions are AGPL and aren't used), SkiaSharp (images, through Avalonia)
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.36.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.37.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1819,6 +1880,18 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.37.0 (2026-11-17) — Scripts, previous versions, similar photos, PDF tools and more
+- **Scripts and remote control**: a small command language (go, select, copy, if exists…) for buttons (`%SCRIPT%`), the Run Script window, and other programs (`DORI --cmd "…"`, `DORI --script file.dori`) talking to the running DORI.
+- **Previous versions** from Btrfs (snapper, Timeshift), ZFS, Time Machine and Windows shadow copies: view, compare, browse, restore a copy or restore in place.
+- **Find similar photos**: resized copies, re-saved JPEGs and burst shots, grouped with the best first, the rest marked and trashed in one go.
+- **Remove photo details**: take out the location, or everything, from JPEG, PNG and WebP photos before sharing, without touching the picture.
+- **PDF tools**: merge, split, take out pages and turn pages, into new files (PDFsharp 6.2, MIT).
+- **Archives**: create .tar.zst, .tar.xz (with xz) and .7z (with 7-Zip, optionally with a password); browse .tar.xz and .tar.zst; **Extract Here** and **Test Archive**.
+- **As administrator**: delete, copy, move, rename and make folders where you lack permission, and save from the viewer, after the system's password prompt.
+- **Cloud**: copy a share link to a cloud file; mount a remote as a drive other programs can open.
+- **Settings**: export and import everything as one .zip; keep settings with the program (portable) or in your user folder.
+- **Translations and accessibility**: menus, buttons and dialogs in German, French and Spanish; screen readers hear the panels and the row under the cursor; a High Contrast theme.
 
 ### 0.1.36.0 (2026-11-17) — Find and replace, trash, slideshow, hex editor, servers and more
 - **Find and replace in files** (Ctrl/Cmd+Shift+H): plain text, whole words or regular expressions across a selection or folder, with a preview of every changed line, only ticked files changed, and undo.
