@@ -12,17 +12,27 @@
 
         <!-- Top bar: file name, mode toggle, wrap toggle -->
         <Border DockPanel.Dock="Top" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="10,6">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
                 <TextBlock Name="InfoText" Grid.Column="0" VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" FontWeight="Bold" />
-                <Button Name="EditButton" Grid.Column="3" Content="Edit" MinWidth="70" Margin="0,0,8,0" IsVisible="False"
-                        ToolTip.Tip="Change this text file here (Ctrl/Cmd+S saves)" Click="EditButton_Click" />
-                <Button Name="SaveButton" Grid.Column="4" Content="Save" MinWidth="70" Margin="0,0,8,0" IsVisible="False"
-                        FontWeight="Bold" Click="SaveButton_Click" />
-                <CheckBox Name="WrapCheck" Grid.Column="1" Content="Wrap" VerticalAlignment="Center"
+                <Button Name="PrevButton" Grid.Column="1" Content="&#x25C0;" MinWidth="34" Margin="8,0,2,0" IsVisible="False"
+                        ToolTip.Tip="Previous file in the panel (Left, or Alt+Left)" Click="PrevButton_Click" />
+                <TextBlock Name="PositionText" Grid.Column="2" VerticalAlignment="Center" Margin="4,0" IsVisible="False"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <Button Name="NextButton" Grid.Column="3" Content="&#x25B6;" MinWidth="34" Margin="2,0,8,0" IsVisible="False"
+                        ToolTip.Tip="Next file in the panel (Right, or Alt+Right)" Click="NextButton_Click" />
+                <Button Name="SlideshowButton" Grid.Column="4" Content="Slideshow" Margin="0,0,8,0" IsVisible="False"
+                        ToolTip.Tip="The panel's pictures full screen, one after another (F5)" Click="SlideshowButton_Click" />
+                <CheckBox Name="WrapCheck" Grid.Column="5" Content="Wrap" VerticalAlignment="Center"
                           Margin="8,0" IsChecked="False" IsCheckedChanged="WrapCheck_Changed" />
-                <Button Name="ModeButton" Grid.Column="2" Content="Hex" MinWidth="70"
+                <Button Name="ModeButton" Grid.Column="6" Content="Hex" MinWidth="70"
                         FontWeight="Bold" Click="ModeButton_Click" />
+                <Button Name="HexEditorButton" Grid.Column="7" Content="Hex Editor" Margin="8,0,0,0" IsVisible="False"
+                        ToolTip.Tip="Open the whole file in the hex editor (go to, find bytes, change bytes)" Click="HexEditorButton_Click" />
+                <Button Name="EditButton" Grid.Column="8" Content="Edit" MinWidth="70" Margin="8,0,0,0" IsVisible="False"
+                        ToolTip.Tip="Change this text file here (Ctrl/Cmd+S saves)" Click="EditButton_Click" />
+                <Button Name="SaveButton" Grid.Column="9" Content="Save" MinWidth="70" Margin="8,0,0,0" IsVisible="False"
+                        FontWeight="Bold" Click="SaveButton_Click" />
             </Grid>
         </Border>
 

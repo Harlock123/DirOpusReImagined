@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.MediaToolsWindow"
+        Width="580" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Convert Audio and Video">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <StackPanel Margin="16" Spacing="10">
+        <TextBlock x:Name="ScopeText" FontWeight="Bold" TextWrapping="Wrap" />
+        <Grid ColumnDefinitions="130,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+            <TextBlock Grid.Row="0" Text="Make" />
+            <ComboBox x:Name="PresetBox" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" />
+
+            <TextBlock Grid.Row="1" Text="Keep only" />
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="from" />
+                <TextBox x:Name="StartBox" Width="90" Watermark="start" ToolTip.Tip="For example 1:30 or 0:01:30.5; empty for the start" />
+                <TextBlock Text="to" />
+                <TextBox x:Name="EndBox" Width="90" Watermark="end" ToolTip.Tip="For example 2:45; empty for the end" />
+                <TextBlock Text="(minutes:seconds)" Opacity="0.75" />
+            </StackPanel>
+
+            <TextBlock x:Name="SizeLabel" Grid.Row="2" Text="Picture height" />
+            <ComboBox x:Name="HeightBox" Grid.Row="2" Grid.Column="1" Width="180" SelectedIndex="0">
+                <ComboBoxItem Content="Keep the size" />
+                <ComboBoxItem Content="1080 (Full HD)" Tag="1080" />
+                <ComboBoxItem Content="720 (HD)" Tag="720" />
+                <ComboBoxItem Content="480" Tag="480" />
+                <ComboBoxItem Content="360" Tag="360" />
+            </ComboBox>
+
+            <TextBlock Grid.Row="3" Text="Save into" />
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                <RadioButton x:Name="SameFolderRadio" GroupName="Where" Content="The same folder" IsChecked="True" />
+                <RadioButton x:Name="OtherPanelRadio" GroupName="Where" Content="The other panel's folder" />
+            </StackPanel>
+        </Grid>
+        <TextBlock x:Name="ExampleText" TextWrapping="Wrap" Opacity="0.75" />
+        <TextBlock Text="New files are made with ffmpeg in the operations queue; the originals are never changed." TextWrapping="Wrap" Opacity="0.75" />
+        <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="StartButton" Content="Convert" IsDefault="True" />
+            <Button x:Name="CloseButton" Content="Cancel" IsCancel="True" />
+        </StackPanel>
+    </StackPanel>
+</Window>

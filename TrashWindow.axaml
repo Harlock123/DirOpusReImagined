@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.TrashWindow"
+        Width="900" Height="560" MinWidth="520" MinHeight="320"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Trash">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="4,1" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="12" RowDefinitions="Auto,Auto,*,Auto,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <TextBlock x:Name="SummaryText" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <TextBox x:Name="FilterBox" Grid.Column="1" Width="220" Watermark="Filter by name or folder" />
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="2*,3*,150,90" Margin="8,10,8,4" Opacity="0.75">
+            <TextBlock Grid.Column="0" Text="Name" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="Came from" FontWeight="Bold" />
+            <TextBlock Grid.Column="2" Text="Deleted" FontWeight="Bold" />
+            <TextBlock Grid.Column="3" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+        </Grid>
+
+        <ListBox x:Name="ItemsList" Grid.Row="2" SelectionMode="Multiple,Toggle" Background="{DynamicResource GridBackgroundBrush}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="2*,3*,150,90" ToolTip.Tip="{Binding Tip}">
+                        <TextBlock Grid.Column="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding From}" TextTrimming="PathSegmentEllipsis" Opacity="0.8" Margin="8,0" />
+                        <TextBlock Grid.Column="2" Text="{Binding When}" Opacity="0.8" />
+                        <TextBlock Grid.Column="3" Text="{Binding SizeText}" HorizontalAlignment="Right" Opacity="0.8" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,8,0,0" TextWrapping="Wrap" />
+
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto" Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="RestoreButton" Content="Put Back" IsEnabled="False"
+                        ToolTip.Tip="Moves the selected items back where they came from (never over something already there)" />
+                <Button x:Name="ShowButton" Content="Show Original Folder" IsEnabled="False" />
+                <Button x:Name="DeleteButton" Content="Delete for Good…" IsEnabled="False" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="EmptyButton" Content="Empty Trash…" />
+                <Button x:Name="RefreshButton" Content="Refresh" />
+                <Button x:Name="CloseButton" Content="Close" IsCancel="True" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

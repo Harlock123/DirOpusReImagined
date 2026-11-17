@@ -22,6 +22,7 @@ namespace DirOpusReImagined
         GoToFolder,
         Bookmark1, Bookmark2, Bookmark3, Bookmark4, Bookmark5, Bookmark6, Bookmark7, Bookmark8, Bookmark9,
         CommandLine, FolderTree, SyncJobs,
+        ReplaceInFiles, Trash, Slideshow, HexEditor, MediaTools, Devices, ConnectServer, DesktopIntegration, CheckUpdates, SystemTags,
     }
 
     /// <summary>
@@ -177,6 +178,16 @@ namespace DirOpusReImagined
             new(ShortcutCommand.CommandLine, "Command line (run a command here)", "Ctrl+Shift+L"),
             new(ShortcutCommand.FolderTree, "Folder tree on / off", "Ctrl+Shift+T"),
             new(ShortcutCommand.SyncJobs, "Saved sync jobs", ""),
+            new(ShortcutCommand.ReplaceInFiles, "Find and replace in files", "Ctrl+Shift+H"),
+            new(ShortcutCommand.Trash, "Trash (put back, empty)", ""),
+            new(ShortcutCommand.Slideshow, "Slideshow of the pictures here", ""),
+            new(ShortcutCommand.HexEditor, "Hex editor", "Shift+F3"),
+            new(ShortcutCommand.MediaTools, "Convert audio and video (ffmpeg)", ""),
+            new(ShortcutCommand.Devices, "Drives and devices (space, eject)", ""),
+            new(ShortcutCommand.ConnectServer, "Connect to server (SFTP, SMB, FTP, WebDAV)", ""),
+            new(ShortcutCommand.DesktopIntegration, "Open folders in DORI from other programs", ""),
+            new(ShortcutCommand.CheckUpdates, "Check for updates", ""),
+            new(ShortcutCommand.SystemTags, "Keep labels on the files too (on / off)", ""),
         };
 
         public const string ElementName = "Shortcuts";

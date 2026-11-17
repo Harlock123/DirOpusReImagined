@@ -121,7 +121,30 @@ namespace DirOpusReImagined
             return p.Length == 0 ? path : p;
         }
 
-        public FileLabel Get(string path) => _labels.TryGetValue(Normalise(path), out var l) ? l : FileLabel.Empty;
+        /// <summary>
+        /// The label of <paramref name="path"/>: the one kept on the file itself when
+        /// <see cref="SystemReader"/> finds one (so changes made in other programs show), else DORI's own.
+        /// </summary>
+        public FileLabel Get(string path)
+        {
+            if (SystemReader?.Invoke(path) is { } onFile) return onFile;
+            return GetStored(path);
+        }
+
+        /// <summary>The label in DORI's own store only.</summary>
+        public FileLabel GetStored(string path) => _labels.TryGetValue(Normalise(path), out var l) ? l : FileLabel.Empty;
+
+        /// <summary>Reads the label kept on a file by the system (<see cref="SystemTags.Read"/>), or null for none. Null when not used.</summary>
+        public Func<string, FileLabel?>? SystemReader { get; set; }
+
+        /// <summary>Whether labels can come from anywhere: the store has some, or they are read from the files.</summary>
+        public bool AnyLabels => _labels.Count > 0 || SystemReader != null;
+
+        /// <summary>Raised with the paths whose labels DORI just set, so they can be written onto the files too.</summary>
+        public event Action<IReadOnlyCollection<string>>? LabelsSet;
+
+        /// <summary>The paths DORI's own store has labels for.</summary>
+        public List<string> StoredPaths() => _labels.Keys.ToList();
 
         /// <summary>Every tag in use, sorted, for menus.</summary>
         public List<string> AllTags()
@@ -136,7 +159,9 @@ namespace DirOpusReImagined
 
         public void SetColour(IEnumerable<string> paths, LabelColour colour)
         {
-            foreach (var p in paths) Put(p, Get(p) with { Colour = colour });
+            var list = paths.ToList();
+            foreach (var p in list) Put(p, Get(p) with { Colour = colour });
+            LabelsSet?.Invoke(list);
             Changed?.Invoke();
         }
 
@@ -144,7 +169,9 @@ namespace DirOpusReImagined
         public void SetTags(IEnumerable<string> paths, IEnumerable<string> tags)
         {
             var list = tags.ToList();
-            foreach (var p in paths) Put(p, Get(p) with { Tags = list });
+            var targets = paths.ToList();
+            foreach (var p in targets) Put(p, Get(p) with { Tags = list });
+            LabelsSet?.Invoke(targets);
             Changed?.Invoke();
         }
 
@@ -158,12 +185,15 @@ namespace DirOpusReImagined
                 if (!allHave) tags.Add(tag);
                 Put(p, Get(p) with { Tags = tags });
             }
+            LabelsSet?.Invoke(paths);
             Changed?.Invoke();
         }
 
         public void Clear(IEnumerable<string> paths)
         {
-            foreach (var p in paths) _labels.Remove(Normalise(p));
+            var list = paths.ToList();
+            foreach (var p in list) _labels.Remove(Normalise(p));
+            LabelsSet?.Invoke(list);
             Changed?.Invoke();
         }
 

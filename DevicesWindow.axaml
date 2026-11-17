@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.DevicesWindow"
+        Width="760" Height="460" MinWidth="480" MinHeight="260"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Drives and Devices">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="6,4" />
+        </Style>
+    </Window.Styles>
+    <Grid Margin="12" RowDefinitions="*,Auto,Auto,Auto" RowSpacing="8">
+        <ListBox x:Name="DeviceList" Background="{DynamicResource GridBackgroundBrush}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="*,220" RowDefinitions="Auto,Auto" ToolTip.Tip="{Binding Tip}">
+                        <TextBlock Text="{Binding Title}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Row="1" Text="{Binding Detail}" Opacity="0.75" TextTrimming="CharacterEllipsis" />
+                        <ProgressBar Grid.Column="1" Grid.RowSpan="2" Minimum="0" Maximum="1" Value="{Binding UsedFraction}"
+                                     Height="10" MinHeight="10" VerticalAlignment="Center" Margin="12,0,0,0" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock x:Name="StatusText" Grid.Row="1" TextWrapping="Wrap" />
+        <CheckBox x:Name="AskBox" Grid.Row="2" Content="When a USB drive or card is plugged in, offer to open it" />
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="LeftButton" Content="Open in Left" IsEnabled="False" />
+                <Button x:Name="RightButton" Content="Open in Right" IsEnabled="False" />
+                <Button x:Name="EjectButton" Content="Eject" IsEnabled="False" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="RefreshButton" Content="Refresh" />
+                <Button x:Name="CloseButton" Content="Close" IsCancel="True" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

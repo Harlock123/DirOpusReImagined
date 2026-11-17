@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.UpdateWindow"
+        Width="560" Height="420" MinHeight="260"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Check for Updates">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <Grid Margin="16" RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
+        <TextBlock x:Name="HeadText" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" />
+        <TextBlock x:Name="DetailText" Grid.Row="1" TextWrapping="Wrap" />
+        <TextBox x:Name="NotesBox" Grid.Row="2" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" IsVisible="False" />
+        <CheckBox x:Name="AutoBox" Grid.Row="3" Content="Check once a day when DORI starts (asks GitHub; nothing about you is sent)" />
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="OpenButton" Content="Open the Release Page" IsVisible="False" IsDefault="True" />
+            <Button x:Name="AgainButton" Content="Check Again" />
+            <Button x:Name="CloseButton" Content="Close" IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

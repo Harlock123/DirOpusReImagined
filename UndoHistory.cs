@@ -30,6 +30,11 @@ namespace DirOpusReImagined
         : UndoEntry(RenameUndo.Describe("delete", Items.Count,
                                         Items.Count == 1 ? ConflictResolver.LeafOf(Items[0].OriginalPath) : null), When);
 
+    /// <summary>A find and replace across files: each file's original copy, put back by undo if the file hasn't changed since.</summary>
+    public sealed record ReplaceUndo(string Folder, IReadOnlyList<ReplacedFile> Items, DateTime When)
+        : UndoEntry(RenameUndo.Describe("replace in", Items.Count, Items.Count == 1 ? System.IO.Path.GetFileName(Items[0].Path) : null)
+                        .Replace(" of ", " ").Replace("items", "files"), When);
+
     /// <summary>
     /// The most recent renames, moves and deletes to the trash, newest last. Only the newest can be undone, so undoing
     /// several steps replays them in reverse order.

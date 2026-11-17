@@ -47,18 +47,30 @@
 							<MenuItem Header="No Colour" Tag="None" Click="LabelColour_Click"/>
 							<Separator/>
 							<MenuItem Header="Tags…" Click="EditLabels_Click"/>
+							<MenuItem Name="SystemTagsMenuItem" Header="Keep Labels on the Files Too (Finder / Dolphin tags)" ToggleType="CheckBox" Click="SystemTags_Click"/>
 						</MenuItem>
 						<MenuItem Name="FileToolsMenuItem" Header="File Tools">
 							<MenuItem Name="ImageToolsMenuItem" Header="Image Tools (resize, convert, turn)…" Click="ImageTools_Click"/>
 							<MenuItem Name="SplitFileMenuItem" Header="Split File…" Click="SplitFile_Click"/>
 							<MenuItem Name="JoinFilesMenuItem" Header="Join Pieces (.001)" Click="JoinFiles_Click"/>
+							<MenuItem Name="MediaToolsMenuItem" Header="Convert Audio and Video (ffmpeg)…" Click="MediaTools_Click"/>
+							<MenuItem Name="ReplaceInFilesMenuItem" Header="Find and Replace in Files…" InputGesture="Ctrl+Shift+H" Click="ReplaceInFiles_Click"/>
+							<MenuItem Name="HexEditorMenuItem" Header="Hex Editor" InputGesture="Shift+F3" Click="HexEditor_Click"/>
+							<MenuItem Name="SlideshowMenuItem" Header="Slideshow (pictures here)" Click="Slideshow_Click"/>
 							<Separator/>
 							<MenuItem Name="ExportListingMenuItem" Header="Export Listing (CSV, text, HTML)…" Click="ExportListing_Click"/>
 							<MenuItem Name="FolderRulesMenuItem" Header="Folder Rules…" Click="FolderRules_Click"/>
 							<MenuItem Name="CataloguesMenuItem" Header="Disk Catalogues…" Click="Catalogues_Click"/>
 							<MenuItem Name="SyncJobsMenuItem" Header="Saved Sync Jobs…" Click="SyncJobs_Click"/>
 							<Separator/>
+							<MenuItem Name="TrashMenuItem" Header="Trash (put back, empty)…" Click="Trash_Click"/>
+							<MenuItem Name="DevicesMenuItem" Header="Drives and Devices…" Click="Devices_Click"/>
+							<MenuItem Name="ConnectServerMenuItem" Header="Connect to Server (SFTP, SMB, FTP, WebDAV)…" Click="ConnectServer_Click"/>
+							<Separator/>
 							<MenuItem Name="SecureDeleteMenuItem" Header="Securely Delete (overwrite first)…" Click="SecureDelete_Click"/>
+							<Separator/>
+							<MenuItem Name="DesktopIntegrationMenuItem" Header="Open Folders in DORI from Other Programs…" Click="DesktopIntegration_Click"/>
+							<MenuItem Name="CheckUpdatesMenuItem" Header="Check for Updates…" Click="CheckUpdates_Click"/>
 						</MenuItem>
 						<MenuItem Name="GoToFolderMenuItem" Header="Go to Folder…" InputGesture="Ctrl+G" Click="GoToFolder_Click"/>
 						<MenuItem Name="FolderTreeMenuItem" Header="Folder Tree" InputGesture="Ctrl+Shift+T" Click="FolderTree_Click"/>

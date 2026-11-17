@@ -57,6 +57,107 @@ public partial class FileViewer : Window
             }
         };
         Closing += OnClosingWhileEdited;
+        // Tunnel, so the arrows step through files even while the text box has the focus.
+        AddHandler(KeyDownEvent, OnNavigationKey, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+    }
+
+    // ---- Stepping through the panel's files, the slideshow and the hex editor ----
+
+    private System.Collections.Generic.IReadOnlyList<string> _siblings = Array.Empty<string>();
+    private int _index = -1;
+
+    /// <summary>Raised to show the panel's pictures as a slideshow, starting at the given file.</summary>
+    public event Action<FileViewer, string>? SlideshowRequested;
+
+    /// <summary>Raised to open the shown file in the hex editor.</summary>
+    public event Action<FileViewer, string>? HexEditorRequested;
+
+    /// <summary>Says whether a file (by name) is a picture, for offering the slideshow.</summary>
+    public Func<string, bool>? IsPicture { get; set; }
+
+    /// <summary>The panel's files in the order shown, so ◀ ▶ and the arrow keys can step through them.</summary>
+    public System.Collections.Generic.IReadOnlyList<string> Siblings
+    {
+        get => _siblings;
+        set
+        {
+            _siblings = value ?? Array.Empty<string>();
+            _index = IndexOf(_path);
+            UpdateNavigation();
+        }
+    }
+
+    private int IndexOf(string path)
+    {
+        for (int i = 0; i < _siblings.Count; i++)
+            if (string.Equals(_siblings[i], path, OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
+                return i;
+        return -1;
+    }
+
+    private void UpdateNavigation()
+    {
+        bool nav = !FollowSelection && _siblings.Count > 1 && _index >= 0;
+        PrevButton.IsVisible = NextButton.IsVisible = PositionText.IsVisible = nav;
+        if (nav)
+        {
+            PrevButton.IsEnabled = _index > 0;
+            NextButton.IsEnabled = _index < _siblings.Count - 1;
+            PositionText.Text = $"{_index + 1} / {_siblings.Count}";
+        }
+        SlideshowButton.IsVisible = !FollowSelection && IsPicture != null && _siblings.Any(p => IsPicture(LeafName(p)));
+        HexEditorButton.IsVisible = !FollowSelection && _path.Length > 0;
+    }
+
+    internal static string LeafName(string path)
+    {
+        string p = path.TrimEnd('/', '\\');
+        int cut = Math.Max(p.LastIndexOf('/'), p.LastIndexOf('\\'));
+        return cut >= 0 ? p[(cut + 1)..] : p;
+    }
+
+    /// <summary>Shows the file <paramref name="delta"/> places on (or back). False at either end, or while an edit isn't saved.</summary>
+    public bool Step(int delta)
+    {
+        if (_siblings.Count < 2 || _index < 0) return false;
+        int next = _index + delta;
+        if (next < 0 || next >= _siblings.Count) return false;
+        if (_dirty)
+        {
+            StatusText.Text = "Save or undo the changes first (Ctrl/Cmd+S saves).";
+            return false;
+        }
+        _index = next;
+        LoadFrom(_siblings[next], LeafName(_siblings[next]));
+        UpdateNavigation();
+        return true;
+    }
+
+    private void PrevButton_Click(object? sender, RoutedEventArgs e) => Step(-1);
+    private void NextButton_Click(object? sender, RoutedEventArgs e) => Step(+1);
+    private void SlideshowButton_Click(object? sender, RoutedEventArgs e) => SlideshowRequested?.Invoke(this, _path);
+    private void HexEditorButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_dirty) { StatusText.Text = "Save the changes first."; return; }
+        HexEditorRequested?.Invoke(this, _path);
+    }
+
+    private void OnNavigationKey(object? sender, Avalonia.Input.KeyEventArgs e)
+    {
+        if (FollowSelection) return;
+        var mods = e.KeyModifiers;
+        bool alt = mods == Avalonia.Input.KeyModifiers.Alt;
+        // Plain arrows step only where they wouldn't move a caret: a picture, or details with nothing to edit.
+        bool plain = mods == Avalonia.Input.KeyModifiers.None && !_editing && PreviewImage.IsVisible;
+        switch (e.Key)
+        {
+            case Avalonia.Input.Key.Left when alt || plain:
+                Step(-1); e.Handled = true; break;
+            case Avalonia.Input.Key.Right when alt || plain:
+                Step(+1); e.Handled = true; break;
+            case Avalonia.Input.Key.F5 when SlideshowButton.IsVisible:
+                SlideshowRequested?.Invoke(this, _path); e.Handled = true; break;
+        }
     }
 
     // ---- Quick edit: small text files can be changed and saved back through their provider ----
@@ -180,6 +281,8 @@ public partial class FileViewer : Window
         Title = TitlePrefix + displayName;
         InfoText.Text = displayName;
         StatusText.Text = "reading…";
+        if (_siblings.Count > 0) _index = IndexOf(path);
+        UpdateNavigation();
 
         _loadCts?.Cancel();
         _loadCts = new CancellationTokenSource();

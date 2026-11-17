@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DirOpusReImagined"
+        x:Class="DirOpusReImagined.HexEditorWindow"
+        Width="860" Height="640" MinWidth="640" MinHeight="320"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Hex Editor">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="CheckBox, ToggleButton">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <DockPanel>
+        <Border DockPanel.Dock="Top" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="10,6">
+            <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                    <TextBlock x:Name="FileText" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                    <ToggleButton x:Name="EditToggle" Grid.Column="1" Content="Edit" Margin="8,0,0,0"
+                                  ToolTip.Tip="Typing hex digits (or characters in the text column) changes bytes; nothing is inserted or removed" />
+                    <Button x:Name="UndoButton" Grid.Column="2" Content="Undo" Margin="8,0,0,0" IsEnabled="False" ToolTip.Tip="Ctrl/Cmd+Z" />
+                    <Button x:Name="SaveButton" Grid.Column="3" Content="Save" Margin="8,0,0,0" IsEnabled="False" FontWeight="Bold" ToolTip.Tip="Ctrl/Cmd+S" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="Go to" />
+                    <TextBox x:Name="GoToBox" Width="130" Watermark="0x1F40, 8000, 50%" />
+                    <Button x:Name="GoButton" Content="Go" />
+                    <TextBlock Text="Find" Margin="16,0,0,0" />
+                    <TextBox x:Name="FindBox" Width="200" Watermark="text, or hex: DE AD BE EF" />
+                    <CheckBox x:Name="HexFindBox" Content="Hex" />
+                    <Button x:Name="FindNextButton" Content="Next" ToolTip.Tip="F3" />
+                    <Button x:Name="FindPrevButton" Content="Previous" ToolTip.Tip="Shift+F3" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="10,6">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock x:Name="PositionText" />
+                    <TextBlock x:Name="ValueText" Opacity="0.75" FontSize="12" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Button x:Name="CloseButton" Grid.Column="1" Content="Close" MinWidth="90" />
+            </Grid>
+        </Border>
+        <Grid ColumnDefinitions="*,Auto">
+            <local:HexView x:Name="View" Margin="8,4,0,4" />
+            <ScrollBar x:Name="VScroll" Grid.Column="1" Orientation="Vertical" AllowAutoHide="False" Minimum="0" />
+        </Grid>
+    </DockPanel>
+</Window>

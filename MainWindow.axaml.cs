@@ -129,6 +129,7 @@ namespace DirOpusReImagined
             // paints the active-panel frame, so the active side is visible from the first frame.
             Opened += (_, _) => LPgrid.Focus();
 
+            InitOutsideRelease36();
             Closing += (_, _) => RcloneService.Shutdown();
             Closing += (_, _) => CleanupToolTemp();
             Closing += (_, _) => SaveTabsToConfig();   // persist open tabs + active (incl. navigation)
@@ -2347,6 +2348,36 @@ namespace DirOpusReImagined
                 case GridVerb.SyncJobs:
                     OpenSyncJobs(left);
                     break;
+                case GridVerb.ReplaceInFiles:
+                    OpenReplaceInFiles(left);
+                    break;
+                case GridVerb.Trash:
+                    OpenTrash(left);
+                    break;
+                case GridVerb.Slideshow:
+                    StartSlideshowFromPanel(left);
+                    break;
+                case GridVerb.HexEditor:
+                    OpenHexEditorForPanel(left);
+                    break;
+                case GridVerb.MediaTools:
+                    OpenMediaTools(left);
+                    break;
+                case GridVerb.Devices:
+                    OpenDevices();
+                    break;
+                case GridVerb.ConnectServer:
+                    OpenConnectServer(left);
+                    break;
+                case GridVerb.DesktopIntegration:
+                    new DesktopIntegrationWindow().ShowDialog(this);
+                    break;
+                case GridVerb.CheckUpdates:
+                    new UpdateWindow().ShowDialog(this);
+                    break;
+                case GridVerb.SystemTags:
+                    ToggleSystemTags();
+                    break;
             }
         }
 
@@ -2384,6 +2415,7 @@ namespace DirOpusReImagined
             string fullPath = JoinChildPath(panelPath, fileName);
             var viewer = new FileViewer(fullPath, fileName);
             viewer.Saved += _ => RefreshPanelsShowing(panelPath);
+            WireViewer(viewer, panelPath);
             viewer.Show(this);
         }
 
@@ -3897,16 +3929,13 @@ namespace DirOpusReImagined
                 return;
             }
 
+            var items = new List<object>();
+            var connect = new MenuItem { Header = "Connect to Server (SFTP, SMB, FTP, WebDAV)…" };
+            connect.Click += (_, _) => OpenConnectServer(side == "LP");
+            items.Add(connect);
+            items.Add(new Separator());
             if (remotes.Count == 0)
-            {
-                await new MessageBox(
-                    "No cloud remotes are configured yet. Use the %RCLONECONFIG% button to add one.",
-                    "No Cloud Remotes")
-                    .ShowDialog(this);
-                return;
-            }
-
-            var items = new List<MenuItem>();
+                items.Add(new MenuItem { Header = "No cloud remotes yet: the %RCLONECONFIG% button adds one", IsEnabled = false });
             foreach (var name in remotes)
             {
                 var remote = name; // capture per-iteration for the closure
@@ -3983,66 +4012,37 @@ namespace DirOpusReImagined
         /// </summary>
         private void ShowDrives(Button anchor, string side)
         {
-            var items = new List<MenuItem>();
-            try
+            var items = new List<object>();
+            var devices = Devices.List();
+            foreach (var d in devices)
             {
-                foreach (var d in DriveInfo.GetDrives())
+                string root = d.Root;
+                string label = root + (string.IsNullOrEmpty(d.Label) || d.Label == root ? "" : $"   ({d.Label})") +
+                               (d.Total > 0 ? $"   · {ProgressFormat.Bytes(d.Free)} free" : "");
+                var mi = new MenuItem { Header = label };
+                mi.Click += (_, _) => NavigatePanelTo(side, root);
+                items.Add(mi);
+            }
+            var ejectable = devices.Where(d => d.CanEject).ToList();
+            if (items.Count > 0) items.Add(new Separator());
+            foreach (var d in ejectable)
+            {
+                var device = d;
+                var eject = new MenuItem { Header = $"⏏ Eject {device.Display}" };
+                eject.Click += async (_, _) =>
                 {
-                    try
-                    {
-                        if (!IsUserDrive(d)) continue;
-
-                        string root = d.Name;
-                        string label = root;
-                        try
-                        {
-                            if (!string.IsNullOrEmpty(d.VolumeLabel)) label += $"   ({d.VolumeLabel})";
-                        }
-                        catch { }
-
-                        var mi = new MenuItem { Header = label };
-                        mi.Click += (_, _) => NavigatePanelTo(side, root);
-                        items.Add(mi);
-                    }
-                    catch { /* skip a drive that errors while being inspected */ }
-                }
+                    string? problem = await EjectDeviceAsync(device);
+                    await new MessageBox(problem == null ? $"{device.Display} was ejected. It's safe to take out." : $"{device.Display} wasn't ejected: {problem}",
+                                         "Eject").ShowDialog(this);
+                };
+                items.Add(eject);
             }
-            catch { }
-
-            if (items.Count == 0)
-            {
-                _ = new MessageBox("No ready drives or volumes were found.", "Drives").ShowDialog(this);
-                return;
-            }
+            var all = new MenuItem { Header = "Drives and Devices…" };
+            all.Click += (_, _) => OpenDevices();
+            items.Add(all);
 
             var flyout = new MenuFlyout { ItemsSource = items };
             flyout.ShowAt(anchor);
-        }
-
-        /// <summary>
-        /// Whether a drive is worth offering in the picker. On Windows that's any ready fixed,
-        /// removable, network, or optical drive. On Unix it's the root plus genuine user mounts
-        /// (under /Volumes, /media, /mnt) and network shares — hiding synthetic system volumes
-        /// like /dev and /System/Volumes/* that DriveInfo otherwise enumerates.
-        /// </summary>
-        private static bool IsUserDrive(DriveInfo d)
-        {
-            if (!d.IsReady) return false;
-
-            if (OperatingSystem.IsWindows())
-            {
-                return d.DriveType is DriveType.Fixed or DriveType.Removable
-                                   or DriveType.Network or DriveType.CDRom;
-            }
-
-            string name = d.Name;
-            if (name == "/") return true;
-            if (d.DriveType == DriveType.Network) return true;
-
-            foreach (var prefix in new[] { "/Volumes/", "/media/", "/mnt/", "/run/media/" })
-                if (name.StartsWith(prefix, StringComparison.Ordinal)) return true;
-
-            return false;
         }
 
         private void RefreshLPGridPostActions()

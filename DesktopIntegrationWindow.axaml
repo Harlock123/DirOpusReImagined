@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.DesktopIntegrationWindow"
+        Width="560" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Open Folders in DORI">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <StackPanel Margin="16" Spacing="10">
+        <TextBlock x:Name="ExplainText" TextWrapping="Wrap" />
+        <CheckBox x:Name="DefaultBox" Content="Also make DORI the default program for opening folders" />
+        <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontWeight="Bold" />
+        <TextBlock TextWrapping="Wrap" Opacity="0.75"
+                   Text="Either way, a folder opened in DORI from another program, or with 'DORI /some/folder' in a terminal, goes to the DORI already running as a new tab. Start DORI with --new-window for a separate copy." />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="AddButton" Content="Add" IsDefault="True" />
+            <Button x:Name="RemoveButton" Content="Remove" />
+            <Button x:Name="CloseButton" Content="Close" IsCancel="True" />
+        </StackPanel>
+    </StackPanel>
+</Window>

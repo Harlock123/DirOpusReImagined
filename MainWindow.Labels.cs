@@ -21,6 +21,8 @@ namespace DirOpusReImagined
             LPgrid.LabelColourRequested += (_, c) => SetLabelColour(isLeft: true, c);
             RPgrid.LabelColourRequested += (_, c) => SetLabelColour(isLeft: false, c);
             LabelStore.Current.Changed += OnLabelsChanged;
+            ApplySystemTagsSetting();
+            LabelStore.Current.LabelsSet += WriteSystemTags;
             Closing += (_, _) => SaveLabels();
         }
 
@@ -51,6 +53,20 @@ namespace DirOpusReImagined
                 return null;
             }
             return entries.Select(e => FileUtility.JoinPanelPath(folder, e.Name)).ToList();
+        }
+
+        /// <summary>Reads labels from the files themselves (and writes them there) while the System Tags setting is on.</summary>
+        private static void ApplySystemTagsSetting()
+            => LabelStore.Current.SystemReader = SystemTags.Enabled ? SystemTags.Read : null;
+
+        /// <summary>Copies the labels DORI just set onto the files, so Finder, Dolphin and the like show them.</summary>
+        private static void WriteSystemTags(IReadOnlyCollection<string> paths)
+        {
+            if (!SystemTags.Enabled) return;
+            var store = LabelStore.Current;
+            foreach (var p in paths)
+                if (ProviderRegistry.For(p) is LocalFileProvider)
+                    SystemTags.Write(p, store.GetStored(p));
         }
 
         private void SetLabelColour(bool isLeft, LabelColour colour)
@@ -107,7 +123,7 @@ namespace DirOpusReImagined
             var store = LabelStore.Current;
             foreach (var row in rows)
             {
-                var label = local && store.Count > 0 && row.Name != ".." ? store.Get(FileUtility.JoinPanelPath(folder, row.Name)) : FileLabel.Empty;
+                var label = local && store.AnyLabels && row.Name != ".." ? store.Get(FileUtility.JoinPanelPath(folder, row.Name)) : FileLabel.Empty;
                 row.Label = label;
                 row.LabelColour = label.Colour;
                 row.Tags = label.Display;

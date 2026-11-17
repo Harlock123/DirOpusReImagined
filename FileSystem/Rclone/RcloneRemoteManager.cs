@@ -92,7 +92,8 @@ public static class RcloneRemoteManager
     public static bool IsOAuthProvider(ProviderInfo p)
         => p.Options.Any(o => o.Name == "token" && (o.Hide & 1) != 0);
 
-    public static async Task CreateAsync(string name, string type, Dictionary<string, string> parameters)
+    /// <param name="plainPasswords">The parameters hold passwords as typed, for rclone to obscure before saving.</param>
+    public static async Task CreateAsync(string name, string type, Dictionary<string, string> parameters, bool plainPasswords = false)
     {
         var client = await RcloneService.GetClientAsync().ConfigureAwait(false);
         var body = new Dictionary<string, object>
@@ -101,6 +102,8 @@ public static class RcloneRemoteManager
             ["type"]       = type,
             ["parameters"] = parameters,
         };
+        if (plainPasswords)
+            body["opt"] = new Dictionary<string, object> { ["obscure"] = true, ["nonInteractive"] = true };
         using var _ = await client.PostAsync("config/create", body).ConfigureAwait(false);
     }
 

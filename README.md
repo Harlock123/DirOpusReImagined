@@ -115,6 +115,7 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - A **Tags** column shows the colour and tags (`Green · work`). Like the Git column, it only appears while something in the folder has a label, and can be hidden from the header's right-click menu
 - **Filter by label**: type `tag:work` (or `tag:red`) in a panel's filter box, alone or with other patterns (`tag:work;*.pdf`), and save it as a saved filter like any other
 - Labels follow their files when DORI renames or moves them, and back again when that is undone. They're kept in `Labels.xml` beside `Configuration.xml`, for files and folders on this computer
+- **Labels on the files themselves** (Linux and macOS): labels are also written onto the files, so other programs see them and DORI sees theirs — **Finder tags** on macOS (DORI's colours are Finder's colours), and the `user.xdg.tags` attribute on Linux that **Dolphin** uses (a colour is written as a tag of its name). Tags set in those programs show in DORI. **Label → Keep Labels on the Files Too** turns it off or on, and offers to copy the labels DORI already has onto their files. Drives that keep no such attributes (FAT USB sticks, some network shares) keep their labels in DORI only. Windows has no tags for every kind of file, so labels stay in DORI there
 
 ### Git Status Column
 - Inside a **git work tree**, a **Git** column shows each file's state: **Modified**, **Staged**, **Added**, **Renamed**, **Untracked**, **Ignored** or **Conflict**. A folder shows the most important state of anything inside it, so a folder holding a change says Modified
@@ -158,6 +159,40 @@ It's a **dual-panel file manager** built with .NET 10 and Avalonia that runs on 
 - Right-click → **File Tools → Saved Sync Jobs…** saves a sync under a name: two folders (on this computer or in the cloud) and how — **one way** (copy what's new, newer or changed), **mirror** (one way, and remove what the source doesn't have — to the trash, on this computer), or **two-way** (newer wins both ways, nothing removed), optionally comparing contents by checksum
 - **Run Now**, or run it from the **command palette** (each job is listed). A job set to **run every day at** a time runs by itself while DORI is open, and once when DORI next opens if that time was missed. Jobs run in the File Operations window like any copy; a job that runs by itself doesn't raise the window unless something fails
 - Kept in `SyncJobs.xml` beside `Configuration.xml`
+
+### Find and Replace in Files
+- Right-click → **File Tools → Find and Replace in Files…** (**Ctrl/Cmd+Shift+H**) looks in the selected files and folders, or the whole panel folder when nothing is selected, with or without subfolders, in files whose names match (`*.txt;*.md`, empty for all)
+- Plain text (the replacement is used exactly as typed), **whole words**, **match case**, or a **regular expression** with `$1` groups in the replacement. Matches never span lines
+- **Preview** lists every changed line, before and after, under each file; untick a file to leave it alone. Nothing is written until **Replace in Ticked Files**
+- Files keep their encoding (UTF-8 with or without a byte-order mark, UTF-16, or bytes that aren't UTF-8, which are kept exactly) and their line endings; binary files are left alone. **Ctrl/Cmd+Z** in a panel puts the files back as they were, unless one has changed since. Hidden folders (`.git`) and linked folders are skipped. Files on this computer only
+
+### Trash
+- Right-click → **File Tools → Trash…** lists what is in the system trash — the name, the folder it came from, when it was deleted and its size — with a filter box
+- **Put Back** moves the selected items back where they came from (never over something already there), **Show Original Folder** goes there in the panel, **Delete for Good…** removes them, and **Empty Trash…** empties it, each asking first
+- Linux: the home trash and the trash folders of other drives (the freedesktop.org trash that file managers share). Windows: the Recycle Bin of each drive. macOS: the Trash, though macOS keeps where items came from in Finder's own records, so Put Back is done in Finder
+
+### Convert Audio and Video
+- Right-click → **File Tools → Convert Audio and Video…** turns the selected files into **MP3**, **AAC (.m4a)**, **Opus**, **FLAC** or **WAV** audio, **MP4 (H.264)** video (smaller, or high quality), **WebM (VP9)** or an **animated GIF**, or **only cuts** a part out without re-encoding
+- **Keep only** a part (from `1:30` to `2:45`), and make videos smaller with a **picture height** (1080, 720, 480 or 360)
+- Each file is converted by [ffmpeg](https://ffmpeg.org/) (when installed) in the File Operations window, with progress, pause and cancel. New files go beside the originals or into the other panel's folder; nothing is ever replaced (`clip (2).mp3`), and a cancelled or failed conversion leaves no half-made file
+
+### Drives and Devices
+- The **drive button** beside each path shows each drive's **free space**, an **⏏ Eject** entry for each USB stick, card or disc, and **Drives and Devices…**, a window with every drive's size, free space and a bar, to open one in either panel or eject it
+- **Eject** moves any panel showing the drive away from it first, then unmounts it and powers it off so it's safe to take out (`udisksctl` on Linux, `diskutil` on macOS, Explorer's Eject on Windows)
+- **Plugging in** a USB drive or memory card offers to open it in the left or right panel; tick **Don't ask** (or untick it in Drives and Devices) to stop that
+
+### Connect to Server
+- **☁ → Connect to Server…** (or right-click → File Tools) opens an **SFTP**, **SMB (Windows share)**, **FTP/FTPS** or **WebDAV** server from its address and login, without setting up rclone by hand. Paste a whole address (`sftp://me@host:2222/var/www`, `smb://nas/photos`, `\\nas\photos`, `https://cloud.example.com/dav`) and the boxes fill themselves
+- SFTP without a password uses your SSH key file or SSH agent. The server is checked before the panel opens, so a wrong password or address is said there and then
+- The server is saved as an rclone remote, so it is listed under ☁ next time. rclone keeps the password in its own config file, obscured (not encrypted). Needs rclone, which DORI can download for you
+
+### Open Folders in DORI from Other Programs
+- A folder opened in DORI from another program — or with `DORI /some/folder` in a terminal — goes to the DORI that's already running, as a **new tab**; a file opens its folder with the cursor on it. `--new-window` starts a separate copy
+- Right-click → **File Tools → Open Folders in DORI from Other Programs…** adds DORI to the system: on **Linux** an application entry for folders (so **Open With → DORI** appears in other apps), and optionally DORI as the **default for opening folders** (the previous default comes back when it's removed); on **Windows** an **Open in DORI** item on Explorer's right-click menu for folders, folder backgrounds and drives (for you only; no administrator rights needed)
+
+### Check for Updates
+- Right-click → **File Tools → Check for Updates…** asks GitHub for the latest release and says whether it's newer, with its notes and a link to the release page
+- Tick **Check once a day when DORI starts** to be told about new versions; it's off until you turn it on, and nothing about you is sent
 
 ### Synced Browsing
 - **⇄ Follow** (beside the button bank tabs, or right-click → **Synced Browsing**) links the two panels: going into a folder in one panel takes the other panel into the folder of the **same name**, and going up takes it **up the same number of levels**
@@ -322,6 +357,16 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 | `CommandLine` | Command line (run a command here) | Ctrl+Shift+L |
 | `FolderTree` | Folder tree on / off | Ctrl+Shift+T |
 | `SyncJobs` | Saved sync jobs | — |
+| `ReplaceInFiles` | Find and replace in files | Ctrl+Shift+H |
+| `Trash` | Trash (put back, empty) | — |
+| `Slideshow` | Slideshow of the pictures here | — |
+| `HexEditor` | Hex editor | Shift+F3 |
+| `MediaTools` | Convert audio and video (ffmpeg) | — |
+| `Devices` | Drives and devices (space, eject) | — |
+| `ConnectServer` | Connect to server (SFTP, SMB, FTP, WebDAV) | — |
+| `DesktopIntegration` | Open folders in DORI from other programs | — |
+| `CheckUpdates` | Check for updates | — |
+| `SystemTags` | Keep labels on the files too (on / off) | — |
 
 ### Banks of Customizable Action Buttons
 - A grid of 36 user-configurable command buttons below the panels
@@ -368,6 +413,13 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Auto-detects** text vs binary and opens in the right mode; a **Text ⇄ Hex** toggle switches anytime (hex shows offset · bytes · ASCII)
 - Reads through the same provider layer as everything else, so it views **files inside archives** just as easily as normal files
 - Large files are capped (first 256 KB) with a truncation note so the viewer stays responsive
+- **◀ ▶** step through the other files in the panel, in its order (**Left/Right** on a picture, **Alt+Left/Right** anywhere)
+- **Slideshow** (or **F5** in the viewer, or right-click → File Tools → Slideshow) shows the folder's pictures full screen, one every few seconds: **Space** pauses, **← →** go back and on, **+ −** change the speed, **1–7** give a colour label (red … grey) and **0** removes it, **Delete** sends the picture to the trash (Ctrl/Cmd+Z in a panel brings it back), **R** turns the view, **I** hides the details, **Esc** ends it
+
+### Hex Editor
+- **Shift+F3** (or **Hex Editor** in the viewer, or right-click → File Tools) opens the whole file in hex and text, however large — only the rows on screen are read
+- **Go to** an offset (`0x1F40`, `1F40h`, `8000`, `50%`), **Find** text or hex bytes (`DE AD BE EF`) forwards and backwards (F3 / Shift+F3), and see the byte, 16-, 32- and 64-bit values at the cursor
+- **Edit** to change bytes: type hex digits, or characters after **Tab** moves to the text column. Changes are shown in red until **Save** (Ctrl/Cmd+S); **Undo** (Ctrl/Cmd+Z) takes them back one by one. Bytes are overwritten, never inserted or removed. A file on this computer has only its changed bytes written; files in archives and the cloud (up to 256 MB) are written back whole. Closing with changes not saved asks first
 
 ### Live Preview Window
 - Press **F9** for a preview window that **follows the keyboard cursor** — move through a panel and it re-points itself at each file, instead of opening one file at a time
@@ -405,6 +457,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 ### Cloud Storage Access
 - Browse Google Drive, OneDrive, Dropbox, S3, Box, and 40+ other providers via [rclone](https://rclone.org/)
 - Access any configured remote with `cloud://<remote-name>/<path>` in the panel path box
+- **Connect to Server…** at the top of the ☁ menu opens SFTP, SMB, FTP and WebDAV servers from an address and login (see [Connect to Server](#connect-to-server))
 - Automatic rclone download on first use, with live progress UI
 - Lazy daemon startup — no overhead until you actually use cloud storage
 - Dedicated diagnostics dialog showing binary location, configured remotes, live daemon log, and recent API requests
@@ -457,7 +510,7 @@ Any of the commands below can be given different keys, or none, in a `<Shortcuts
 - **Runtime**: .NET 10.0 / C#
 - **XML-based configuration** for buttons and settings
 
-The project is currently at version 0.1.35.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
+The project is currently at version 0.1.36.0 and under active development. It's designed for power users, developers, and system administrators who need efficient file management with extensive customization options.
 
 ## Detailed Overview
 
@@ -1766,6 +1819,18 @@ The `Assets` folder (containing button icons) must also be present alongside the
 ## Changelog
 
 Notable changes, most recent first. Dates reflect when the work was implemented.
+
+### 0.1.36.0 (2026-11-17) — Find and replace, trash, slideshow, hex editor, servers and more
+- **Find and replace in files** (Ctrl/Cmd+Shift+H): plain text, whole words or regular expressions across a selection or folder, with a preview of every changed line, only ticked files changed, and undo.
+- **Trash**: see what's in the system trash, put items back where they came from, delete them for good, or empty it.
+- **Viewer and slideshow**: ◀ ▶ (and the arrow keys) step through the panel's files in the F3 viewer; a full-screen slideshow of a folder's pictures with keys to label (1–7), delete to the trash and turn them.
+- **Folders from other programs**: `DORI /folder` and other programs' "open" go to the running DORI as a new tab; Linux gets an "Open With → DORI" entry (optionally the default for folders), Windows an "Open in DORI" Explorer menu item.
+- **Connect to Server**: SFTP, SMB, FTP and WebDAV servers from an address and login, saved as rclone remotes.
+- **Drives and devices**: free space in the drive menu, a Drives and Devices window, eject for USB sticks, cards and discs, and an offer to open a drive when it's plugged in. System mounts such as `/proc/sys/fs/binfmt_misc` no longer appear as drives.
+- **Check for updates** from GitHub, by hand or once a day (off until turned on).
+- **Labels on the files**: on Linux and macOS, colour labels and tags are kept on the files too (Dolphin's tags, Finder tags), so other programs see them and DORI sees theirs.
+- **Convert audio and video** with ffmpeg: MP3, AAC, Opus, FLAC, WAV, MP4, WebM or GIF, a part cut out, a smaller picture size; run in the operations queue.
+- **Hex editor** (Shift+F3): whole files of any size, go to, find text or bytes, change bytes in place with undo.
 
 ### 0.1.35.0 (2026-11-16) — Folder tree, command line, password zips, disk images and more
 - **Drag and drop with other programs**: drop files from other apps onto a panel to copy them in (Shift moves); files dragged out of a panel carry the system's file list for other programs.

@@ -74,7 +74,17 @@ namespace DirOpusReImagined
         Bookmark1, Bookmark2, Bookmark3, Bookmark4, Bookmark5, Bookmark6, Bookmark7, Bookmark8, Bookmark9,
         CommandLine,
         FolderTree,
-        SyncJobs
+        SyncJobs,
+        ReplaceInFiles,
+        Trash,
+        Slideshow,
+        HexEditor,
+        MediaTools,
+        Devices,
+        ConnectServer,
+        DesktopIntegration,
+        CheckUpdates,
+        SystemTags
     }
 
     /// <summary>How a panel lays out its entries: a detail list (columns) or a grid of thumbnails.</summary>
@@ -714,6 +724,8 @@ namespace DirOpusReImagined
             GridContextMenu.Opening += (_, ev) =>
             {
                 if (_suppressRowContextMenu) { ev.Cancel = true; _suppressRowContextMenu = false; }
+                SystemTagsMenuItem.IsChecked = SystemTags.Enabled;
+                SystemTagsMenuItem.IsVisible = SystemTags.Supported;
             };
 
             _doubleClickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
@@ -4192,6 +4204,16 @@ namespace DirOpusReImagined
         private void Catalogues_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Catalogues);
         private void SecureDelete_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SecureDelete);
         private void SyncJobs_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SyncJobs);
+        private void ReplaceInFiles_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.ReplaceInFiles);
+        private void Trash_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Trash);
+        private void Slideshow_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Slideshow);
+        private void HexEditor_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.HexEditor);
+        private void MediaTools_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.MediaTools);
+        private void Devices_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.Devices);
+        private void ConnectServer_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.ConnectServer);
+        private void DesktopIntegration_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.DesktopIntegration);
+        private void CheckUpdates_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.CheckUpdates);
+        private void SystemTags_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.SystemTags);
         private void GoToFolder_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.GoToFolder);
         private void FolderTree_Click(object sender, RoutedEventArgs e) => RaiseVerb(GridVerb.FolderTree);
 

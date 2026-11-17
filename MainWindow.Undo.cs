@@ -75,6 +75,9 @@ namespace DirOpusReImagined
                     case TrashUndo trash:
                         await UndoTrashAsync(trash);
                         break;
+                    case ReplaceUndo replace:
+                        await UndoReplaceAsync(replace);
+                        break;
                 }
             }
             catch (Exception ex)

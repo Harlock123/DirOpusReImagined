@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.SlideshowWindow"
+        Width="1024" Height="720" WindowStartupLocation="CenterOwner"
+        WindowState="FullScreen" Background="Black"
+        Title="Slideshow">
+    <Grid>
+        <Image x:Name="Picture" Stretch="Uniform" StretchDirection="DownOnly" Margin="0"
+               RenderTransformOrigin="0.5,0.5" />
+        <TextBlock x:Name="LoadingText" Text="" Foreground="#AAAAAA" FontSize="16"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Border x:Name="InfoBar" VerticalAlignment="Bottom" Background="#B0000000" Padding="16,8">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock x:Name="InfoText" Foreground="White" FontSize="14" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <TextBlock x:Name="StateText" Grid.Column="1" Foreground="#CCCCCC" FontSize="13" Margin="16,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+        <Border x:Name="HelpBar" VerticalAlignment="Top" HorizontalAlignment="Center" Background="#B0000000" Padding="16,8" Margin="0,16,0,0"
+                CornerRadius="6">
+            <TextBlock Foreground="White" FontSize="13" TextWrapping="Wrap" MaxWidth="900"
+                       Text="Space pause/play · ← → previous/next · + − speed · 1–7 colour label, 0 clears · Delete to trash · R turn · I details · H this help · Esc close" />
+        </Border>
+    </Grid>
+</Window>

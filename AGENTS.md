@@ -9,7 +9,7 @@ it safely.
 DirOpusReImagined ("DORI"), a two-panel file manager inspired by Directory Opus 4 on the Amiga, in C# on .NET 10
 (`net10.0`) and Avalonia 11.3. It runs on Windows, macOS and Linux. It browses local folders, archives (through
 `SharpCompress`) and cloud storage (through rclone), and previews files with the author's `SyntaxColorizer`
-control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.35.0).
+control. The version is set in `DirOpusReImagined.csproj` (`AssemblyVersion`, currently 0.1.36.0).
 
 ## Commands
 
@@ -124,6 +124,31 @@ Everything sits at the repository root; there is no `src/` folder.
 - `FileSystem/VideoFrames.cs`: frames from ffmpeg (when installed) for video thumbnails (`ThumbnailCache.CanThumbnail`)
   and the media preview.
 - `SecureEraser.cs` and `MainWindow.SecureDelete.cs`: overwrite-then-delete, run as a `FileOperation`; never follows links.
+- `ReplaceInFiles.cs` and `ReplaceWindow.axaml(.cs)`: find and replace across files, a line at a time, keeping each file's
+  encoding (`Decode`/`Encode`; non-UTF-8 bytes go through Latin-1 so they're kept exactly). Originals are copied to a temp
+  folder first; `ReplaceUndo` puts them back only if the file is still as the replace left it (`ReplaceInFiles.Unchanged`).
+- `TrashBrowser.cs` and `TrashWindow.axaml(.cs)`: listing the system trash (freedesktop.org trash dirs, each drive's
+  `$Recycle.Bin`, ~/.Trash), deleting for good and emptying; putting back uses `TrashService.Restore`.
+- `FileViewer` steps through `Siblings` (set by `MainWindow.WireViewer` from the panel's rows) and raises
+  `SlideshowRequested`/`HexEditorRequested`. `SlideshowWindow.axaml(.cs)`: full-screen pictures; Delete and the label keys
+  go back through `MainWindow` callbacks so the trash is undoable.
+- `HexDocument.cs` (paged reads of local files, whole-file reads up to 256 MB otherwise; edits kept aside and written as runs),
+  `HexView.cs` (a custom control that draws only the rows on screen) and `HexEditorWindow.axaml(.cs)`.
+- `FileSystem/MediaConvert.cs` and `MediaToolsWindow.axaml(.cs)`: ffmpeg presets run through `RunFileTool`; ffmpeg writes to
+  a hidden `.name.dori-part.ext` with `-n`, renamed when done.
+- `SingleInstance.cs`: a per-user named pipe (`PipeOptions.CurrentUserOnly`). `Program.Main` hands folder arguments to a running
+  DORI (`TrySend`); `MainWindow.Outside.cs` listens and opens them as tabs. On Unix a new listener would take the name from an
+  old one, so `StartServer` first checks `AnotherIsListening`. `DesktopIntegration.cs` and `DesktopIntegrationWindow`: the
+  Linux `.desktop` entry / `xdg-mime` default and the Windows Explorer verbs (HKCU only).
+- `Devices.cs` (`Devices.List`, `Eject`, `DriveWatcher`, which polls cheaply for removable drives) and `DevicesWindow.axaml(.cs)`;
+  the drive button menu is built from `Devices.List`. Network shares get no size query (a dead share can hang one).
+- `FileSystem/Rclone/QuickConnect.cs` and `ConnectServerWindow.axaml(.cs)`: server address → rclone remote
+  (`RcloneRemoteManager.CreateAsync(..., plainPasswords: true)` lets rclone obscure passwords); an SFTP folder given from the top
+  gets an `alias` remote.
+- `UpdateCheck.cs` and `UpdateWindow.axaml(.cs)`: GitHub's latest release; the daily check is off unless `<CheckForUpdates>` is true.
+- `SystemTags.cs`: labels on the files (`user.xdg.tags` on Linux, Finder's `_kMDItemUserTags` binary plist on macOS).
+  `LabelStore.SystemReader` makes `Get` prefer the file's own label; `LabelStore.LabelsSet` tells `MainWindow` which paths to
+  write. `GetStored` is DORI's own copy.
 - `ConfigFile.cs` also has `ConfigSettings` (`Load`/`Save` of one top-level setting).
 - `MainWindow.Columns.cs`: choosing a panel's columns (header right-click), saved under `<Columns>`. The grid makes a
   column for each public property of `AFileEntry`; code refers to columns by property name (`SortColumnName`,

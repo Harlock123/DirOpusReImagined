@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DirOpusReImagined.ConnectServerWindow"
+        Width="560" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Title="Connect to Server">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GridCellTextBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+    <StackPanel Margin="16" Spacing="10">
+        <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+            <TextBlock Grid.Row="0" Text="Kind" />
+            <ComboBox x:Name="KindBox" Grid.Row="0" Grid.Column="1" Width="220" SelectedIndex="0">
+                <ComboBoxItem Content="SFTP (SSH)" />
+                <ComboBoxItem Content="SMB (Windows share)" />
+                <ComboBoxItem Content="FTP" />
+                <ComboBoxItem Content="WebDAV" />
+            </ComboBox>
+
+            <TextBlock Grid.Row="1" Text="Server" />
+            <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto,70">
+                <TextBox x:Name="HostBox" Watermark="name or address, or paste sftp://me@host/folder" />
+                <TextBlock Grid.Column="1" Text="Port" Margin="8,0,6,0" />
+                <TextBox x:Name="PortBox" Grid.Column="2" Text="22" />
+            </Grid>
+
+            <TextBlock Grid.Row="2" Text="User name" />
+            <TextBox x:Name="UserBox" Grid.Row="2" Grid.Column="1" />
+
+            <TextBlock Grid.Row="3" Text="Password" />
+            <TextBox x:Name="PasswordBox" Grid.Row="3" Grid.Column="1" PasswordChar="•" Watermark="(none: SFTP uses your SSH key or agent)" />
+
+            <TextBlock x:Name="KeyLabel" Grid.Row="4" Text="SSH key file" />
+            <TextBox x:Name="KeyBox" Grid.Row="4" Grid.Column="1" Watermark="optional, for example ~/.ssh/id_ed25519" />
+
+            <TextBlock x:Name="DomainLabel" Grid.Row="5" Text="Domain" IsVisible="False" />
+            <TextBox x:Name="DomainBox" Grid.Row="5" Grid.Column="1" IsVisible="False" Watermark="optional (WORKGROUP)" />
+
+            <TextBlock x:Name="FolderLabel" Grid.Row="6" Text="Folder" />
+            <TextBox x:Name="FolderBox" Grid.Row="6" Grid.Column="1" />
+
+            <TextBlock Grid.Row="7" Text="Save as" />
+            <TextBox x:Name="NameBox" Grid.Row="7" Grid.Column="1" Watermark="a name for this server (made up for you if empty)" />
+        </Grid>
+        <CheckBox x:Name="TlsBox" Content="Use TLS (FTPS / HTTPS)" IsVisible="False" Foreground="{DynamicResource GridCellTextBrush}" />
+        <TextBlock x:Name="NoteText" TextWrapping="Wrap" Opacity="0.75"
+                   Text="The server is saved as an rclone remote, so it is listed under ☁ next time. rclone keeps the password in its own config file, obscured (not encrypted)." />
+        <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="ConnectButton" Content="Connect" IsDefault="True" />
+            <Button x:Name="CancelButton" Content="Cancel" IsCancel="True" />
+        </StackPanel>
+    </StackPanel>
+</Window>
